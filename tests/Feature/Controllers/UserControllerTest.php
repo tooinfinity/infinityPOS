@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 
 it('renders registration page', function (): void {
-    $response = $this->fromRoute('home')
+    $response = $this->from('/')
         ->get(route('register'));
 
     $response->assertOk()
@@ -139,7 +139,7 @@ it('may delete user account', function (): void {
             'password' => 'password',
         ]);
 
-    $response->assertRedirectToRoute('home');
+    $response->assertRedirectToRoute('login');
 
     expect($user->fresh())->toBeNull();
 

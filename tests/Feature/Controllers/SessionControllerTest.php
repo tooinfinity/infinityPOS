@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 
 it('renders login page', function (): void {
-    $response = $this->fromRoute('home')
+    $response = $this->from('/')
         ->get(route('login'));
 
     $response->assertOk()
@@ -19,7 +19,7 @@ it('renders login page', function (): void {
 });
 
 it('may create a session', function (): void {
-    $user = User::factory()->withoutTwoFactor()->create([
+    $user = User::factory()->create([
         'email' => 'test@example.com',
         'password' => Hash::make('password'),
     ]);
@@ -36,7 +36,7 @@ it('may create a session', function (): void {
 });
 
 it('may create a session with remember me', function (): void {
-    $user = User::factory()->withoutTwoFactor()->create([
+    $user = User::factory()->create([
         'email' => 'test@example.com',
         'password' => Hash::make('password'),
     ]);
@@ -51,26 +51,6 @@ it('may create a session with remember me', function (): void {
     $response->assertRedirectToRoute('dashboard');
 
     $this->assertAuthenticatedAs($user);
-});
-
-it('redirects to two-factor challenge when enabled', function (): void {
-    $user = User::factory()->create([
-        'email' => 'test@example.com',
-        'password' => Hash::make('password'),
-        'two_factor_secret' => encrypt('secret'),
-        'two_factor_recovery_codes' => encrypt(json_encode(['code1', 'code2'])),
-        'two_factor_confirmed_at' => now(),
-    ]);
-
-    $response = $this->fromRoute('login')
-        ->post(route('login.store'), [
-            'email' => 'test@example.com',
-            'password' => 'password',
-        ]);
-
-    $response->assertRedirectToRoute('two-factor.login');
-
-    $this->assertGuest();
 });
 
 it('fails with invalid credentials', function (): void {
@@ -163,7 +143,7 @@ it('throttles login attempts after too many failures', function (): void {
 });
 
 it('clears rate limit after successful login', function (): void {
-    $user = User::factory()->withoutTwoFactor()->create([
+    $user = User::factory()->create([
         'email' => 'test@example.com',
         'password' => Hash::make('password'),
     ]);

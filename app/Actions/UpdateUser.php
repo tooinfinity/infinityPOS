@@ -13,11 +13,10 @@ final readonly class UpdateUser
      */
     public function handle(User $user, array $attributes): void
     {
-        $email = $attributes['email'] ?? null;
+        // $email = $attributes['email'] ?? null;
 
         $user->update([
             ...$attributes,
-            ...$user->email === $email ? [] : ['email_verified_at' => null],
         ]);
     }
 }

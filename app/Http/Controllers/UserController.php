@@ -48,6 +48,6 @@ final readonly class UserController
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return to_route('home');
+        return to_route('login');
     }
 }

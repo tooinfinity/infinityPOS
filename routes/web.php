@@ -4,18 +4,14 @@ declare(strict_types=1);
 
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\UserEmailResetNotification;
-use App\Http\Controllers\UserEmailVerification;
-use App\Http\Controllers\UserEmailVerificationNotificationController;
 use App\Http\Controllers\UserPasswordController;
 use App\Http\Controllers\UserProfileController;
-use App\Http\Controllers\UserTwoFactorAuthenticationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', fn () => Inertia::render('welcome'))->name('home');
+Route::get('/', fn (): Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse => redirect('login'));
 
-Route::middleware(['auth', 'verified'])->group(function (): void {
+Route::middleware(['auth'])->group(function (): void {
     Route::get('dashboard', fn () => Inertia::render('dashboard'))->name('dashboard');
 });
 
@@ -37,9 +33,6 @@ Route::middleware('auth')->group(function (): void {
     // Appearance...
     Route::get('settings/appearance', fn () => Inertia::render('appearance/update'))->name('appearance.edit');
 
-    // User Two-Factor Authentication...
-    Route::get('settings/two-factor', [UserTwoFactorAuthenticationController::class, 'show'])
-        ->name('two-factor.show');
 });
 
 Route::middleware('guest')->group(function (): void {
@@ -55,12 +48,6 @@ Route::middleware('guest')->group(function (): void {
     Route::post('reset-password', [UserPasswordController::class, 'store'])
         ->name('password.store');
 
-    // User Email Reset Notification...
-    Route::get('forgot-password', [UserEmailResetNotification::class, 'create'])
-        ->name('password.request');
-    Route::post('forgot-password', [UserEmailResetNotification::class, 'store'])
-        ->name('password.email');
-
     // Session...
     Route::get('login', [SessionController::class, 'create'])
         ->name('login');
@@ -69,18 +56,6 @@ Route::middleware('guest')->group(function (): void {
 });
 
 Route::middleware('auth')->group(function (): void {
-    // User Email Verification...
-    Route::get('verify-email', [UserEmailVerificationNotificationController::class, 'create'])
-        ->name('verification.notice');
-    Route::post('email/verification-notification', [UserEmailVerificationNotificationController::class, 'store'])
-        ->middleware('throttle:6,1')
-        ->name('verification.send');
-
-    // User Email Verification...
-    Route::get('verify-email/{id}/{hash}', [UserEmailVerification::class, 'update'])
-        ->middleware(['signed', 'throttle:6,1'])
-        ->name('verification.verify');
-
     // Session...
     Route::post('logout', [SessionController::class, 'destroy'])
         ->name('logout');

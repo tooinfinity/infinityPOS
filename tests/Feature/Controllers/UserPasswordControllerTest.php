@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 
 it('renders reset password page', function (): void {
-    $response = $this->fromRoute('home')
+    $response = $this->from('/')
         ->get(route('password.reset', ['token' => 'fake-token']));
 
     $response->assertOk()
