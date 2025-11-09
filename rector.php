@@ -38,13 +38,15 @@ return RectorConfig::configure()
     ])
     ->withSkip([
         AddOverrideAttributeToOverriddenMethodsRector::class,
+        Rector\CodingStyle\Rector\Use_\SeparateMultiUseImportsRector::class,
+        Rector\CodingStyle\Rector\ClassMethod\MakeInheritedMethodVisibilitySameAsParentRector::class,
     ])
     ->withPreparedSets(
         deadCode: true,
         codeQuality: true,
+        codingStyle: true,
         typeDeclarations: true,
         privatization: true,
         earlyReturn: true,
-        strictBooleans: true,
     )
     ->withPhpSets();

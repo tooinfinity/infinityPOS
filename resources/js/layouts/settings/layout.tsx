@@ -4,7 +4,6 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit as editPassword } from '@/routes/password';
-import { show } from '@/routes/two-factor';
 import { edit } from '@/routes/user-profile';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
@@ -19,11 +18,6 @@ const sidebarNavItems: NavItem[] = [
     {
         title: 'Password',
         href: editPassword(),
-        icon: null,
-    },
-    {
-        title: 'Two-Factor Auth',
-        href: show(),
         icon: null,
     },
     {

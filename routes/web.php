@@ -6,10 +6,12 @@ use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserPasswordController;
 use App\Http\Controllers\UserProfileController;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', fn (): Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse => redirect('login'));
+/* @phpstan-ignore-next-line */
+Route::get('/', fn (): Redirector|\Illuminate\Http\RedirectResponse => redirect('login'));
 
 Route::middleware(['auth'])->group(function (): void {
     Route::get('dashboard', fn () => Inertia::render('dashboard'))->name('dashboard');
