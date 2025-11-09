@@ -1,22 +1,24 @@
 import UserController from '@/actions/App/Http/Controllers/UserController';
-import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 
 import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/auth-layout';
+import AppLayout from '@/layouts/app-layout';
+import { BreadcrumbItem } from '@/types';
 
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Account Users settings',
+        href: UserController.create().url,
+    },
+];
 export default function Register() {
     return (
-        <AuthLayout
-            title="Create an account"
-            description="Enter your details below to create your account"
-        >
-            <Head title="Register" />
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Create new account" />
             <Form
                 {...UserController.store.form()}
                 resetOnSuccess={['password', 'password_confirmation']}
@@ -102,16 +104,9 @@ export default function Register() {
                                 Create account
                             </Button>
                         </div>
-
-                        <div className="text-center text-sm text-muted-foreground">
-                            Already have an account?{' '}
-                            <TextLink href={login()} tabIndex={6}>
-                                Log in
-                            </TextLink>
-                        </div>
                     </>
                 )}
             </Form>
-        </AuthLayout>
+        </AppLayout>
     );
 }

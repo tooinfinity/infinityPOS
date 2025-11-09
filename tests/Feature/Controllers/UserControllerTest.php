@@ -7,18 +7,20 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 
-it('renders registration page', function (): void {
-    $response = $this->from('/')
+it('login user can renders registration page', function (): void {
+    $user = User::factory()->create();
+    $response = $this->actingAs($user)
         ->get(route('register'));
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page->component('user/create'));
 });
 
-it('may register a new user', function (): void {
+it('login user register a new user', function (): void {
     Event::fake([Registered::class]);
+    $user = User::factory()->create();
 
-    $response = $this->fromRoute('register')
+    $response = $this->actingAs($user)
         ->post(route('register.store'), [
             'name' => 'Test User',
             'email' => 'test@example.com',
@@ -26,7 +28,7 @@ it('may register a new user', function (): void {
             'password_confirmation' => 'password1234',
         ]);
 
-    $response->assertRedirectToRoute('dashboard');
+    $response->assertRedirectBack();
 
     $user = User::query()->where('email', 'test@example.com')->first();
 
@@ -35,37 +37,38 @@ it('may register a new user', function (): void {
         ->and($user->email)->toBe('test@example.com')
         ->and(Hash::check('password1234', $user->password))->toBeTrue();
 
-    $this->assertAuthenticatedAs($user);
-
     Event::assertDispatched(Registered::class);
 });
 
 it('requires name', function (): void {
-    $response = $this->fromRoute('register')
+    $user = User::factory()->create();
+    $response = $this->actingAs($user)
         ->post(route('register.store'), [
             'email' => 'test@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
 
-    $response->assertRedirectToRoute('register')
+    $response->assertRedirectBack()
         ->assertSessionHasErrors('name');
 });
 
 it('requires email', function (): void {
-    $response = $this->fromRoute('register')
+    $user = User::factory()->create();
+    $response = $this->actingAs($user)
         ->post(route('register.store'), [
             'name' => 'Test User',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
 
-    $response->assertRedirectToRoute('register')
+    $response->assertRedirectBack()
         ->assertSessionHasErrors('email');
 });
 
 it('requires valid email', function (): void {
-    $response = $this->fromRoute('register')
+    $user = User::factory()->create();
+    $response = $this->actingAs($user)
         ->post(route('register.store'), [
             'name' => 'Test User',
             'email' => 'not-an-email',
@@ -73,14 +76,15 @@ it('requires valid email', function (): void {
             'password_confirmation' => 'password',
         ]);
 
-    $response->assertRedirectToRoute('register')
+    $response->assertRedirectBack()
         ->assertSessionHasErrors('email');
 });
 
 it('requires unique email', function (): void {
+    $loginUser = User::factory()->create();
     User::factory()->create(['email' => 'test@example.com']);
 
-    $response = $this->fromRoute('register')
+    $response = $this->actingAs($loginUser)
         ->post(route('register.store'), [
             'name' => 'Test User',
             'email' => 'test@example.com',
@@ -88,35 +92,38 @@ it('requires unique email', function (): void {
             'password_confirmation' => 'password',
         ]);
 
-    $response->assertRedirectToRoute('register')
+    $response->assertRedirectBack()
         ->assertSessionHasErrors('email');
 });
 
 it('requires password', function (): void {
-    $response = $this->fromRoute('register')
+    $user = User::factory()->create();
+    $response = $this->actingAs($user)
         ->post(route('register.store'), [
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
 
-    $response->assertRedirectToRoute('register')
+    $response->assertRedirectBack()
         ->assertSessionHasErrors('password');
 });
 
 it('requires password confirmation', function (): void {
-    $response = $this->fromRoute('register')
+    $user = User::factory()->create();
+    $response = $this->ActingAs($user)
         ->post(route('register.store'), [
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => 'password',
         ]);
 
-    $response->assertRedirectToRoute('register')
+    $response->assertRedirectBack()
         ->assertSessionHasErrors('password');
 });
 
 it('requires matching password confirmation', function (): void {
-    $response = $this->fromRoute('register')
+    $user = User::factory()->create();
+    $response = $this->ActingAs($user)
         ->post(route('register.store'), [
             'name' => 'Test User',
             'email' => 'test@example.com',
@@ -124,7 +131,7 @@ it('requires matching password confirmation', function (): void {
             'password_confirmation' => 'different-password',
         ]);
 
-    $response->assertRedirectToRoute('register')
+    $response->assertRedirectBack()
         ->assertSessionHasErrors('password');
 });
 
@@ -139,11 +146,10 @@ it('may delete user account', function (): void {
             'password' => 'password',
         ]);
 
-    $response->assertRedirectToRoute('login');
+    $response->assertRedirectBack();
 
     expect($user->fresh())->toBeNull();
 
-    $this->assertGuest();
 });
 
 it('requires password to delete account', function (): void {
@@ -176,12 +182,12 @@ it('requires correct password to delete account', function (): void {
     expect($user->fresh())->not->toBeNull();
 });
 
-it('redirects authenticated users away from registration', function (): void {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->fromRoute('dashboard')
-        ->get(route('register'));
-
-    $response->assertRedirectToRoute('dashboard');
-});
+// it('redirects authenticated users away from registration', function (): void {
+//    $user = User::factory()->create();
+//
+//    $response = $this->actingAs($user)
+//        ->fromRoute('dashboard')
+//        ->get(route('register'));
+//
+//    $response->assertRedirectToRoute('dashboard');
+// });

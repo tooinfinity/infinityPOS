@@ -18,6 +18,12 @@ Route::middleware(['auth'])->group(function (): void {
 });
 
 Route::middleware('auth')->group(function (): void {
+    // User Management...
+    Route::get('register', [UserController::class, 'create'])
+        ->name('register');
+    Route::post('register', [UserController::class, 'store'])
+        ->name('register.store');
+
     // User...
     Route::delete('user', [UserController::class, 'destroy'])->name('user.destroy');
 
@@ -38,11 +44,6 @@ Route::middleware('auth')->group(function (): void {
 });
 
 Route::middleware('guest')->group(function (): void {
-    // User...
-    Route::get('register', [UserController::class, 'create'])
-        ->name('register');
-    Route::post('register', [UserController::class, 'store'])
-        ->name('register.store');
 
     // User Password...
     Route::get('reset-password/{token}', [UserPasswordController::class, 'create'])

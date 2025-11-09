@@ -16,6 +16,11 @@ const sidebarNavItems: NavItem[] = [
         icon: null,
     },
     {
+        title: 'Users',
+        href: '/register',
+        icon: null,
+    },
+    {
         title: 'Password',
         href: editPassword(),
         icon: null,
