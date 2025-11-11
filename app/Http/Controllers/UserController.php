@@ -18,7 +18,9 @@ final readonly class UserController
 {
     public function create(): Response
     {
-        return Inertia::render('user/create');
+        return Inertia::render('user/create', [
+            'users' => User::query()->latest()->paginate(10),
+        ]);
     }
 
     public function store(CreateUserRequest $request, CreateUser $action): RedirectResponse
