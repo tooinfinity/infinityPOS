@@ -7,10 +7,10 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { UserInfo } from '@/components/user-info';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { BreadcrumbItem, User } from '@/types';
-import { UserInfo } from '@/components/user-info';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -30,7 +30,7 @@ export default function Register({ users }: UsersProps) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create new account" />
             <SettingsLayout wide={true}>
-                <div className="flex flex-col xl:flex-row gap-8">
+                <div className="flex flex-col gap-8 xl:flex-row">
                     <div className="flex-1 space-y-6">
                         <HeadingSmall
                             title="Create new account"
@@ -38,7 +38,12 @@ export default function Register({ users }: UsersProps) {
                         />
                         <Form
                             {...UserController.store.form()}
-                            resetOnSuccess={['name', 'email', 'password', 'password_confirmation']}
+                            resetOnSuccess={[
+                                'name',
+                                'email',
+                                'password',
+                                'password_confirmation',
+                            ]}
                             disableWhileProcessing
                             className="flex flex-col gap-6"
                         >
@@ -47,7 +52,9 @@ export default function Register({ users }: UsersProps) {
                                     <div className="grid gap-6">
                                         <div className="grid gap-6 md:grid-cols-2">
                                             <div className="grid gap-2">
-                                                <Label htmlFor="name">Name</Label>
+                                                <Label htmlFor="name">
+                                                    Name
+                                                </Label>
                                                 <Input
                                                     id="name"
                                                     type="text"
@@ -96,7 +103,9 @@ export default function Register({ users }: UsersProps) {
                                                 name="password"
                                                 placeholder="Password"
                                             />
-                                            <InputError message={errors.password} />
+                                            <InputError
+                                                message={errors.password}
+                                            />
                                         </div>
 
                                         <div className="grid gap-2">
@@ -142,11 +151,20 @@ export default function Register({ users }: UsersProps) {
                         />
                         <div className="rounded-lg">
                             {users && users.data.length > 0 ? (
-                                users.data.map((u : User,idx) => (
-                                    <div key={idx} className="flex items-center gap-4 p-4">
+                                users.data.map((u: User, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="flex items-center gap-4 p-4"
+                                    >
                                         <UserInfo user={u} showEmail={true} />
-                                        <button className="ml-auto text-sm text-muted-foreground hover:text-muted-foreground/80">Role</button>
-                                        <Edit className={"h-4 w-4 text-muted-foreground"} />
+                                        <button className="ml-auto text-sm text-muted-foreground hover:text-muted-foreground/80">
+                                            Role
+                                        </button>
+                                        <Edit
+                                            className={
+                                                'h-4 w-4 text-muted-foreground'
+                                            }
+                                        />
                                         <Trash className="h-4 w-4 text-destructive hover:text-destructive/80" />
                                     </div>
                                 ))
