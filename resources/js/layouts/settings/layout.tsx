@@ -17,7 +17,7 @@ const sidebarNavItems: NavItem[] = [
     },
     {
         title: 'Users',
-        href: '/register',
+        href: '/users',
         icon: null,
     },
     {

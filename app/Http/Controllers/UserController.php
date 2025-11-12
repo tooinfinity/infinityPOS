@@ -6,8 +6,10 @@ namespace App\Http\Controllers;
 
 use App\Actions\CreateUser;
 use App\Actions\DeleteUser;
+use App\Actions\UpdateUser;
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\DeleteUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
@@ -16,9 +18,9 @@ use Inertia\Response;
 
 final readonly class UserController
 {
-    public function create(): Response
+    public function index(): Response
     {
-        return Inertia::render('user/create', [
+        return Inertia::render('user/index', [
             'users' => User::query()->latest()->paginate(10),
         ]);
     }
@@ -31,6 +33,16 @@ final readonly class UserController
         $action->handle(
             $attributes,
             $request->string('password')->value(),
+        );
+
+        return back();
+    }
+
+    public function update(UpdateUserRequest $request, User $user, UpdateUser $action): RedirectResponse
+    {
+        $action->handle(
+            $user,
+            $request->validated(),
         );
 
         return back();

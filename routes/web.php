@@ -19,10 +19,12 @@ Route::middleware(['auth'])->group(function (): void {
 
 Route::middleware('auth')->group(function (): void {
     // User Management...
-    Route::get('register', [UserController::class, 'create'])
-        ->name('register');
-    Route::post('register', [UserController::class, 'store'])
-        ->name('register.store');
+    Route::get('users', [UserController::class, 'index'])
+        ->name('users.index');
+    Route::post('users', [UserController::class, 'store'])
+        ->name('users.store');
+    Route::patch('users/{user}', [UserController::class, 'update'])
+        ->name('users.update');
 
     // User...
     Route::delete('user', [UserController::class, 'destroy'])->name('user.destroy');

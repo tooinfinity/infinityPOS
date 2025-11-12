@@ -10,10 +10,10 @@ use Illuminate\Support\Facades\Hash;
 it('login user can renders registration page', function (): void {
     $user = User::factory()->create();
     $response = $this->actingAs($user)
-        ->get(route('register'));
+        ->get(route('users.index'));
 
     $response->assertOk()
-        ->assertInertia(fn ($page) => $page->component('user/create'));
+        ->assertInertia(fn ($page) => $page->component('user/index'));
 });
 
 it('login user register a new user', function (): void {
@@ -21,7 +21,7 @@ it('login user register a new user', function (): void {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)
-        ->post(route('register.store'), [
+        ->post(route('users.store'), [
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => 'password1234',
@@ -43,7 +43,7 @@ it('login user register a new user', function (): void {
 it('requires name', function (): void {
     $user = User::factory()->create();
     $response = $this->actingAs($user)
-        ->post(route('register.store'), [
+        ->post(route('users.store'), [
             'email' => 'test@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
@@ -56,7 +56,7 @@ it('requires name', function (): void {
 it('requires email', function (): void {
     $user = User::factory()->create();
     $response = $this->actingAs($user)
-        ->post(route('register.store'), [
+        ->post(route('users.store'), [
             'name' => 'Test User',
             'password' => 'password',
             'password_confirmation' => 'password',
@@ -69,7 +69,7 @@ it('requires email', function (): void {
 it('requires valid email', function (): void {
     $user = User::factory()->create();
     $response = $this->actingAs($user)
-        ->post(route('register.store'), [
+        ->post(route('users.store'), [
             'name' => 'Test User',
             'email' => 'not-an-email',
             'password' => 'password',
@@ -85,7 +85,7 @@ it('requires unique email', function (): void {
     User::factory()->create(['email' => 'test@example.com']);
 
     $response = $this->actingAs($loginUser)
-        ->post(route('register.store'), [
+        ->post(route('users.store'), [
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => 'password',
@@ -99,7 +99,7 @@ it('requires unique email', function (): void {
 it('requires password', function (): void {
     $user = User::factory()->create();
     $response = $this->actingAs($user)
-        ->post(route('register.store'), [
+        ->post(route('users.store'), [
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
@@ -111,7 +111,7 @@ it('requires password', function (): void {
 it('requires password confirmation', function (): void {
     $user = User::factory()->create();
     $response = $this->ActingAs($user)
-        ->post(route('register.store'), [
+        ->post(route('users.store'), [
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => 'password',
@@ -124,7 +124,7 @@ it('requires password confirmation', function (): void {
 it('requires matching password confirmation', function (): void {
     $user = User::factory()->create();
     $response = $this->ActingAs($user)
-        ->post(route('register.store'), [
+        ->post(route('users.store'), [
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => 'password',
@@ -180,6 +180,22 @@ it('requires correct password to delete account', function (): void {
         ->assertSessionHasErrors('password');
 
     expect($user->fresh())->not->toBeNull();
+});
+
+it('update user', function (): void {
+    $authUser = User::factory()->create();
+    $user = User::factory()->create([
+        'name' => 'Old Name',
+        'email' => 'old@example.com',
+    ]);
+
+    $response = $this->actingAs($authUser)
+        ->patch(route('users.update', $user), [
+            'name' => 'New Name',
+            'email' => 'new@eample.com',
+        ]);
+
+    $response->assertRedirectBack();
 });
 
 // it('redirects authenticated users away from registration', function (): void {

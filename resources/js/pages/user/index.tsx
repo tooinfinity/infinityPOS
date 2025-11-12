@@ -15,7 +15,7 @@ import { BreadcrumbItem, User } from '@/types';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Account Users settings',
-        href: UserController.create().url,
+        href: UserController.index().url,
     },
 ];
 
@@ -24,8 +24,7 @@ interface UsersProps {
         data: User[];
     };
 }
-export default function Register({ users }: UsersProps) {
-    console.log(users);
+export default function Index({ users }: UsersProps) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create new account" />
