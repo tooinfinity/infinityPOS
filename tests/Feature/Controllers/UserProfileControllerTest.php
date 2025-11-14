@@ -107,3 +107,20 @@ it('allows keeping same email', function (): void {
     $response->assertRedirectToRoute('user-profile.edit')
         ->assertSessionDoesntHaveErrors();
 });
+
+it('deletes user account', function (): void {
+    $user = User::factory()->create([
+        'password' => Illuminate\Support\Facades\Hash::make('password'),
+    ]);
+
+    $response = $this->actingAs($user)
+        ->fromRoute('user-profile.edit')
+        ->delete(route('user-profile.destroy'), [
+            'password' => 'password',
+        ]);
+    $response->assertRedirect(route('login'));
+
+    expect($user->fresh())->toBeNull();
+
+    $this->assertGuest();
+});

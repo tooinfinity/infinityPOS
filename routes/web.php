@@ -25,14 +25,14 @@ Route::middleware('auth')->group(function (): void {
         ->name('users.store');
     Route::patch('users/{user}', [UserController::class, 'update'])
         ->name('users.update');
-
-    // User...
-    Route::delete('user', [UserController::class, 'destroy'])->name('user.destroy');
+    Route::delete('users/{user}', [UserController::class, 'destroy'])
+        ->name('users.destroy');
 
     // User Profile...
     Route::redirect('settings', '/settings/profile');
     Route::get('settings/profile', [UserProfileController::class, 'edit'])->name('user-profile.edit');
     Route::patch('settings/profile', [UserProfileController::class, 'update'])->name('user-profile.update');
+    Route::delete('settings/profile', [UserProfileController::class, 'destroy'])->name('user-profile.destroy');
 
     // User Password...
     Route::get('settings/password', [UserPasswordController::class, 'edit'])->name('password.edit');

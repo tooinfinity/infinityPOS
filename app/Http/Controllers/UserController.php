@@ -8,10 +8,8 @@ use App\Actions\CreateUser;
 use App\Actions\DeleteUser;
 use App\Actions\UpdateUser;
 use App\Http\Requests\CreateUserRequest;
-use App\Http\Requests\DeleteUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
-use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -48,7 +46,7 @@ final readonly class UserController
         return back();
     }
 
-    public function destroy(DeleteUserRequest $request, #[CurrentUser] User $user, DeleteUser $action): RedirectResponse
+    public function destroy(User $user, DeleteUser $action): RedirectResponse
     {
         $action->handle($user);
 

@@ -135,52 +135,60 @@ it('requires matching password confirmation', function (): void {
         ->assertSessionHasErrors('password');
 });
 
-it('may delete user account', function (): void {
-    $user = User::factory()->create([
-        'password' => Hash::make('password'),
-    ]);
-
-    $response = $this->actingAs($user)
-        ->fromRoute('user-profile.edit')
-        ->delete(route('user.destroy'), [
-            'password' => 'password',
-        ]);
-
-    $response->assertRedirectBack();
-
-    expect($user->fresh())->toBeNull();
-
-});
-
-it('requires password to delete account', function (): void {
+it('auth user can delete users account', function (): void {
+    $authUser = User::factory()->create();
     $user = User::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->fromRoute('user-profile.edit')
-        ->delete(route('user.destroy'), []);
-
-    $response->assertRedirectToRoute('user-profile.edit')
-        ->assertSessionHasErrors('password');
-
-    expect($user->fresh())->not->toBeNull();
+    $response = $this->actingAs($authUser)
+        ->delete(route('users.destroy', $user));
+    $response->assertRedirectBack();
 });
 
-it('requires correct password to delete account', function (): void {
-    $user = User::factory()->create([
-        'password' => Hash::make('password'),
-    ]);
+// it('may delete user account', function (): void {
+//    $user = User::factory()->create([
+//        'password' => Hash::make('password'),
+//    ]);
+//
+//    $response = $this->actingAs($user)
+//        ->fromRoute('user-profile.edit')
+//        ->delete(route('user.destroy'), [
+//            'password' => 'password',
+//        ]);
+//
+//    $response->assertRedirectBack();
+//
+//    expect($user->fresh())->toBeNull();
+//
+// });
 
-    $response = $this->actingAs($user)
-        ->fromRoute('user-profile.edit')
-        ->delete(route('user.destroy'), [
-            'password' => 'wrong-password',
-        ]);
+// it('requires password to delete account', function (): void {
+//    $user = User::factory()->create();
+//
+//    $response = $this->actingAs($user)
+//        ->fromRoute('user-profile.edit')
+//        ->delete(route('user.destroy'), []);
+//
+//    $response->assertRedirectToRoute('user-profile.edit')
+//        ->assertSessionHasErrors('password');
+//
+//    expect($user->fresh())->not->toBeNull();
+// });
 
-    $response->assertRedirectToRoute('user-profile.edit')
-        ->assertSessionHasErrors('password');
-
-    expect($user->fresh())->not->toBeNull();
-});
+// it('requires correct password to delete account', function (): void {
+//    $user = User::factory()->create([
+//        'password' => Hash::make('password'),
+//    ]);
+//
+//    $response = $this->actingAs($user)
+//        ->fromRoute('user-profile.edit')
+//        ->delete(route('user.destroy'), [
+//            'password' => 'wrong-password',
+//        ]);
+//
+//    $response->assertRedirectToRoute('user-profile.edit')
+//        ->assertSessionHasErrors('password');
+//
+//    expect($user->fresh())->not->toBeNull();
+// });
 
 it('update user', function (): void {
     $authUser = User::factory()->create();

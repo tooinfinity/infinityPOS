@@ -1,16 +1,34 @@
 import UserController from '@/actions/App/Http/Controllers/UserController';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, router } from '@inertiajs/react';
 import { Edit, LoaderCircle, Trash } from 'lucide-react';
 
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UserInfo } from '@/components/user-info';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { BreadcrumbItem, User } from '@/types';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -25,6 +43,26 @@ interface UsersProps {
     };
 }
 export default function Index({ users }: UsersProps) {
+    const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [deletingUser, setDeletingUser] = useState<User | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDelete = () => {
+        if (!deletingUser) return;
+
+        setIsDeleting(true);
+
+        router.delete(UserController.destroy.url({ user: deletingUser.id }), {
+            preserveScroll: true,
+            onSuccess: () => {
+                setDeletingUser(null);
+            },
+            onFinish: () => {
+                setIsDeleting(false);
+            },
+        });
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create new account" />
@@ -159,12 +197,22 @@ export default function Index({ users }: UsersProps) {
                                         <button className="ml-auto text-sm text-muted-foreground hover:text-muted-foreground/80">
                                             Role
                                         </button>
-                                        <Edit
-                                            className={
-                                                'h-4 w-4 text-muted-foreground'
-                                            }
-                                        />
-                                        <Trash className="h-4 w-4 text-destructive hover:text-destructive/80" />
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setEditingUser(u)}
+                                            className="h-8 w-8"
+                                        >
+                                            <Edit className="h-4 w-4 text-muted-foreground" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setDeletingUser(u)}
+                                            className="h-8 w-8"
+                                        >
+                                            <Trash className="h-4 w-4 text-destructive hover:text-destructive/80" />
+                                        </Button>
                                     </div>
                                 ))
                             ) : (
@@ -175,6 +223,165 @@ export default function Index({ users }: UsersProps) {
                         </div>
                     </div>
                 </div>
+
+                {/* Edit User Dialog */}
+                <Dialog
+                    open={!!editingUser}
+                    onOpenChange={() => setEditingUser(null)}
+                >
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Edit User</DialogTitle>
+                            <DialogDescription>
+                                Update user information below
+                            </DialogDescription>
+                        </DialogHeader>
+                        {editingUser && (
+                            <Form
+                                {...UserController.update.form({
+                                    user: editingUser.id,
+                                })}
+                                onSuccess={() => setEditingUser(null)}
+                                disableWhileProcessing
+                                className="flex flex-col gap-6"
+                            >
+                                {({ processing, errors }) => (
+                                    <div className="grid gap-4">
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="edit-name">
+                                                Name
+                                            </Label>
+                                            <Input
+                                                id="edit-name"
+                                                type="text"
+                                                required
+                                                autoFocus
+                                                autoComplete="name"
+                                                name="name"
+                                                defaultValue={editingUser.name}
+                                                placeholder="Full name"
+                                            />
+                                            <InputError message={errors.name} />
+                                        </div>
+
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="edit-email">
+                                                Email address
+                                            </Label>
+                                            <Input
+                                                id="edit-email"
+                                                type="email"
+                                                required
+                                                autoComplete="email"
+                                                name="email"
+                                                defaultValue={editingUser.email}
+                                                placeholder="email@example.com"
+                                            />
+                                            <InputError
+                                                message={errors.email}
+                                            />
+                                        </div>
+
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="edit-password">
+                                                Password
+                                                <span className="ml-2 text-xs text-muted-foreground">
+                                                    (leave blank to keep
+                                                    current)
+                                                </span>
+                                            </Label>
+                                            <Input
+                                                id="edit-password"
+                                                type="password"
+                                                autoComplete="new-password"
+                                                name="password"
+                                                placeholder="New password"
+                                            />
+                                            <InputError
+                                                message={errors.password}
+                                            />
+                                        </div>
+
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="edit-password-confirmation">
+                                                Confirm password
+                                            </Label>
+                                            <Input
+                                                id="edit-password-confirmation"
+                                                type="password"
+                                                autoComplete="new-password"
+                                                name="password_confirmation"
+                                                placeholder="Confirm new password"
+                                            />
+                                            <InputError
+                                                message={
+                                                    errors.password_confirmation
+                                                }
+                                            />
+                                        </div>
+
+                                        <div className="flex gap-2 pt-4">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                className="flex-1"
+                                                onClick={() =>
+                                                    setEditingUser(null)
+                                                }
+                                                disabled={processing}
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button
+                                                type="submit"
+                                                className="flex flex-1 items-center justify-center gap-2"
+                                                disabled={processing}
+                                            >
+                                                {processing && (
+                                                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                                                )}
+                                                Update User
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+                            </Form>
+                        )}
+                    </DialogContent>
+                </Dialog>
+
+                {/* Delete Confirmation Dialog */}
+                <AlertDialog
+                    open={!!deletingUser}
+                    onOpenChange={() => setDeletingUser(null)}
+                >
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Delete User</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Are you sure you want to delete{' '}
+                                <strong>{deletingUser?.name}</strong>? This
+                                action cannot be undone and will permanently
+                                remove the user from the system.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel disabled={isDeleting}>
+                                Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                                className="bg-destructive hover:bg-destructive/90"
+                            >
+                                {isDeleting && (
+                                    <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                                )}
+                                Delete User
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </SettingsLayout>
         </AppLayout>
     );
