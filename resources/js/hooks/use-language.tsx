@@ -11,7 +11,11 @@ interface PageProps {
 export function useLanguage() {
     const { locale: pageLocale, language } = usePage<{ props: PageProps }>()
         .props;
-    const [locale, setLocale] = useState<Language>(pageLocale as Language);
+    const validLocales: Language[] = ['en', 'fr', 'ar'];
+    const initialLocale = validLocales.includes(pageLocale as Language)
+        ? (pageLocale as Language)
+        : 'en';
+    const [locale, setLocale] = useState<Language>(initialLocale);
 
     const updateLanguage = (newLocale: Language) => {
         if (newLocale === locale) return;
@@ -20,7 +24,7 @@ export function useLanguage() {
 
         router.post(
             '/locale',
-            { language: newLocale },
+            { locale: newLocale },
             {
                 preserveState: true,
                 preserveScroll: true,

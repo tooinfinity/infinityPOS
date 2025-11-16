@@ -7,13 +7,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { useLanguage } from '@/hooks/use-language';
+import { useLanguage, type Language } from '@/hooks/use-language';
 
 export default function LanguageSwitcher() {
     const { locale, updateLanguage } = useLanguage();
 
     return (
-        <Select defaultValue={locale as string} onValueChange={updateLanguage}>
+        <Select
+            defaultValue={locale}
+            onValueChange={(value) => updateLanguage(value as Language)}
+        >
             <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select a language" />
             </SelectTrigger>
