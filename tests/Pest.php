@@ -17,6 +17,7 @@ pest()->extend(TestCase::class)
         Http::preventStrayRequests();
         Process::preventStrayProcesses();
         Sleep::fake();
+        Http::fake();
 
         $this->freezeTime();
     })
