@@ -5,14 +5,21 @@ declare(strict_types=1);
 return [
     // Dashboard Page
     'Dashboard' => 'لوحة التحكم',
-    //
+
+    // Settings Layout
+    'Settings' => 'الإعدادات',
+    'Manage your profile and account settings' => 'إدارة الملف الشخصي وإعدادات الحساب',
     'Profile' => 'الملف الشخصي',
+    'Users' => 'المستخدمون',
+    'Appearance' => 'المظهر',
+
+    //
+
     'Update your account\'s profile information and email address.' => 'تحديث معلومات حسابك وعنوان البريد الإلكتروني.',
     'Delete your account and all of its resources' => 'حذف حسابك وجميع موارده',
     'Warning' => 'تحذير',
     'Please proceed with caution, this cannot be undone.' => 'يرجى التقدم بحذر، لا يمكن التراجع عن هذا.',
     'Delete account' => 'حذف الحساب',
-    'Appearance' => 'المظهر',
     'Appearance settings' => 'إعدادات المظهر',
     'Update your account appearance settings' => 'تحديث إعدادات مظهر حسابك',
     'Light' => 'فاتح',
@@ -26,9 +33,6 @@ return [
     'English' => 'الإنجليزية',
     'French' => 'الفرنسية',
     'Arabic' => 'العربية',
-
-    'Settings' => 'الإعدادات',
-    'Manage your profile and account settings' => 'إدارة إعدادات ملفك الشخصي وحسابك',
 
     'Are you sure you want to delete your account?' => 'هل أنت متأكد أنك تريد حذف حسابك؟',
     'Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.' => 'بمجرد حذف حسابك، سيتم حذف جميع موارده وبياناته أيضًا بشكل دائم. يرجى إدخال كلمة المرور الخاصة بك لتأكيد رغبتك في حذف حسابك بشكل دائم.',

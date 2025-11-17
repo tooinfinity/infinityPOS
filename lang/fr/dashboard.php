@@ -5,14 +5,21 @@ declare(strict_types=1);
 return [
     // Dashboard Page
     'Dashboard' => 'Tableau de bord',
-    //
+
+    // Settings Layout
+    'Settings' => 'Paramètres',
+    'Manage your profile and account settings' => 'Gérez votre profil et les paramètres de votre compte',
     'Profile' => 'Profil',
+    'Users' => 'Utilisateurs',
+    'Appearance' => 'Apparence',
+
+    //
+
     'Update your account\'s profile information and email address.' => 'Mettez à jour les informations de votre profil et votre adresse e-mail.',
     'Delete your account and all of its resources' => 'Supprimez votre compte et toutes ses ressources',
     'Warning' => 'Avertissement',
     'Please proceed with caution, this cannot be undone.' => 'Veuillez procéder avec prudence, cette action est irréversible.',
     'Delete account' => 'Supprimer le compte',
-    'Appearance' => 'Apparence',
     'Appearance settings' => 'Paramètres d\'apparence',
     'Update your account appearance settings' => 'Mettez à jour les paramètres d\'apparence de votre compte',
     'Light' => 'Clair',
@@ -26,9 +33,6 @@ return [
     'English' => 'Anglais',
     'French' => 'Français',
     'Arabic' => 'Arabe',
-
-    'Settings' => 'Paramètres',
-    'Manage your profile and account settings' => 'Gérez les paramètres de votre profil et de votre compte',
 
     'Are you sure you want to delete your account?' => 'Êtes-vous sûr de vouloir supprimer votre compte ?',
     'Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.' => 'Une fois votre compte supprimé, toutes ses ressources et données seront également supprimées de manière permanente. Veuillez saisir votre mot de passe pour confirmer que vous souhaitez supprimer définitivement votre compte.',
