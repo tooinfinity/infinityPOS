@@ -134,7 +134,4 @@ it('shares the current locale translations', function (): void {
         ->toHaveKey('goodbye', 'Goodbye');
 
     Illuminate\Support\Facades\File::delete($langPath.'/test.php');
-    if (Illuminate\Support\Facades\File::exists($langPath)) {
-        Illuminate\Support\Facades\File::deleteDirectory($langPath);
-    }
 });
