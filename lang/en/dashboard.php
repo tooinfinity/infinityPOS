@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 return [
+    // Dashboard Page
     'Dashboard' => 'Dashboard',
+    //
     'Profile' => 'Profile',
     'Update your account\'s profile information and email address.' => 'Update your account\'s profile information and email address.',
     'Delete your account and all of its resources' => 'Delete your account and all of its resources',

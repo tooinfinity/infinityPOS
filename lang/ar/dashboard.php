@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 return [
+    // Dashboard Page
     'Dashboard' => 'لوحة التحكم',
+    //
     'Profile' => 'الملف الشخصي',
     'Update your account\'s profile information and email address.' => 'تحديث معلومات حسابك وعنوان البريد الإلكتروني.',
     'Delete your account and all of its resources' => 'حذف حسابك وجميع موارده',

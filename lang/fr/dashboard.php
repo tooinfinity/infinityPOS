@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 return [
+    // Dashboard Page
     'Dashboard' => 'Tableau de bord',
+    //
     'Profile' => 'Profil',
     'Update your account\'s profile information and email address.' => 'Mettez à jour les informations de votre profil et votre adresse e-mail.',
     'Delete your account and all of its resources' => 'Supprimez votre compte et toutes ses ressources',
