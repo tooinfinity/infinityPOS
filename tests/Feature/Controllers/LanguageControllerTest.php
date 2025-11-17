@@ -6,7 +6,7 @@ use App\Models\User;
 
 it('can store a language', function (): void {
     $user = User::factory()->create();
-    $response = $this->actingAs($user)->post(route('locale.store'), ['language' => 'en']);
+    $response = $this->actingAs($user)->post(route('locale.store'), ['locale' => 'en']);
     $response->assertRedirect();
 });
 
@@ -64,7 +64,7 @@ it('redirects to previous page', function (): void {
     $previousUrl = url('/previous-page');
 
     $response = $this->actingAs($user)->from($previousUrl)->post(route('locale.store'), [
-        'locale' => 'es',
+        'locale' => 'en',
     ]);
 
     $response->assertRedirect($previousUrl);

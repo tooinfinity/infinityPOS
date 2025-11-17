@@ -1,5 +1,4 @@
 import { router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
 
 export type Language = 'en' | 'fr' | 'ar';
 
@@ -12,16 +11,12 @@ export function useLanguage() {
     const { locale: pageLocale, language } = usePage<{ props: PageProps }>()
         .props;
     const validLocales: Language[] = ['en', 'fr', 'ar'];
-    const initialLocale = validLocales.includes(pageLocale as Language)
+    const locale = validLocales.includes(pageLocale as Language)
         ? (pageLocale as Language)
         : 'en';
-    const [locale, setLocale] = useState<Language>(initialLocale);
 
     const updateLanguage = (newLocale: Language) => {
         if (newLocale === locale) return;
-
-        setLocale(newLocale);
-
         router.post(
             '/locale',
             { locale: newLocale },

@@ -9,15 +9,16 @@ import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { edit as editAppearance } from '@/routes/appearance';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Appearance settings',
-        href: editAppearance().url,
-    },
-];
-
 export default function Update() {
     const { __ } = useLanguage();
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: __('Appearance settings'),
+            href: editAppearance().url,
+        },
+    ];
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={__('Appearance settings')} />
@@ -27,7 +28,7 @@ export default function Update() {
                     <HeadingSmall
                         title={__('Appearance settings')}
                         description={__(
-                            "Update your account's appearance settings",
+                            'Update your account appearance settings',
                         )}
                     />
                     <AppearanceTabs />

@@ -17,7 +17,9 @@ final class SetLocaleMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $locale = session('locale', config('app.locale'));
+        $locale = $request->cookie('locale')
+            ?? session('locale')
+            ?? config('app.locale');
 
         if (is_string($locale)) {
             app()->setLocale($locale);
