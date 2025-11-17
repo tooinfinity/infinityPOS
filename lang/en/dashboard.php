@@ -13,11 +13,6 @@ return [
     'Warning' => 'Warning',
     'Please proceed with caution, this cannot be undone.' => 'Please proceed with caution, this cannot be undone.',
     'Delete account' => 'Delete account',
-    'Password settings' => 'Password settings',
-    'Update password' => 'Update password',
-    'Ensure your account is using a long, random password to stay secure' => 'Ensure your account is using a long, random password to stay secure',
-    'Current password' => 'Current Password',
-    'Save password' => 'Save Password',
     'Appearance' => 'Appearance',
     'Appearance settings' => 'Appearance settings',
     'Update your account appearance settings' => 'Update your account appearance settings',
@@ -74,4 +69,16 @@ return [
     'Are you sure you want to delete' => 'Are you sure you want to delete',
     'This action cannot be undone and will permanently remove the user from the system.' => 'This action cannot be undone and will permanently remove the user from the system.',
 
+    // Reset Password Page
+    'Reset password' => 'Reset password',
+    'Please enter your new password below' => 'Please enter your new password below',
+    'Email' => 'Email',
+
+    // Password Settings Page
+    'Password settings' => 'Password settings',
+    'Update password' => 'Update password',
+    'Ensure your account is using a long, random password to stay secure' => 'Ensure your account is using a long, random password to stay secure',
+    'Current password' => 'Current password',
+    'Save password' => 'Save password',
+    'Saved' => 'Saved',
 ];

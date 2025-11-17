@@ -13,11 +13,6 @@ return [
     'Warning' => 'تحذير',
     'Please proceed with caution, this cannot be undone.' => 'يرجى التقدم بحذر، لا يمكن التراجع عن هذا.',
     'Delete account' => 'حذف الحساب',
-    'Password settings' => 'إعدادات كلمة المرور',
-    'Update password' => 'تحديث كلمة المرور',
-    'Ensure your account is using a long, random password to stay secure' => 'تأكد من استخدام حسابك لكلمة مرور طويلة وعشوائية للبقاء آمنًا',
-    'Current password' => 'كلمة المرور الحالية',
-    'Save password' => 'حفظ كلمة المرور',
     'Appearance' => 'المظهر',
     'Appearance settings' => 'إعدادات المظهر',
     'Update your account appearance settings' => 'تحديث إعدادات مظهر حسابك',
@@ -73,4 +68,17 @@ return [
     'Delete User' => 'حذف المستخدم',
     'Are you sure you want to delete' => 'هل أنت متأكد أنك تريد حذف',
     'This action cannot be undone and will permanently remove the user from the system.' => 'لا يمكن التراجع عن هذا الإجراء وسيؤدي إلى إزالة المستخدم نهائيًا من النظام.',
+
+    // Reset Password Page
+    'Reset password' => 'إعادة تعيين كلمة المرور',
+    'Please enter your new password below' => 'الرجاء إدخال كلمة المرور الجديدة أدناه',
+    'Email' => 'البريد الإلكتروني',
+
+    // Password Settings Page
+    'Password settings' => 'إعدادات كلمة المرور',
+    'Update password' => 'تحديث كلمة المرور',
+    'Ensure your account is using a long, random password to stay secure' => 'تأكد من أن حسابك يستخدم كلمة مرور طويلة وعشوائية للبقاء آمنًا',
+    'Current password' => 'كلمة المرور الحالية',
+    'Save password' => 'حفظ كلمة المرور',
+    'Saved' => 'تم الحفظ',
 ];

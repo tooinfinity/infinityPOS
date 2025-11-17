@@ -13,11 +13,6 @@ return [
     'Warning' => 'Avertissement',
     'Please proceed with caution, this cannot be undone.' => 'Veuillez procéder avec prudence, cette action est irréversible.',
     'Delete account' => 'Supprimer le compte',
-    'Password settings' => 'Paramètres du mot de passe',
-    'Update password' => 'Mettre à jour le mot de passe',
-    'Ensure your account is using a long, random password to stay secure' => 'Assurez-vous que votre compte utilise un mot de passe long et aléatoire pour rester sécurisé',
-    'Current password' => 'Mot de passe actuel',
-    'Save password' => 'Enregistrer le mot de passe',
     'Appearance' => 'Apparence',
     'Appearance settings' => 'Paramètres d\'apparence',
     'Update your account appearance settings' => 'Mettez à jour les paramètres d\'apparence de votre compte',
@@ -73,4 +68,17 @@ return [
     'Delete User' => 'Supprimer l\'utilisateur',
     'Are you sure you want to delete' => 'Êtes-vous sûr de vouloir supprimer',
     'This action cannot be undone and will permanently remove the user from the system.' => 'Cette action ne peut pas être annulée et supprimera définitivement l\'utilisateur du système.',
+
+    // Reset Password Page
+    'Reset password' => 'Réinitialiser le mot de passe',
+    'Please enter your new password below' => 'Veuillez entrer votre nouveau mot de passe ci-dessous',
+    'Email' => 'E-mail',
+
+    // Password Settings Page
+    'Password settings' => 'Paramètres du mot de passe',
+    'Update password' => 'Mettre à jour le mot de passe',
+    'Ensure your account is using a long, random password to stay secure' => 'Assurez-vous que votre compte utilise un mot de passe long et aléatoire pour rester sécurisé',
+    'Current password' => 'Mot de passe actuel',
+    'Save password' => 'Enregistrer le mot de passe',
+    'Saved' => 'Enregistré',
 ];
