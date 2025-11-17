@@ -81,4 +81,8 @@ return [
     'Current password' => 'كلمة المرور الحالية',
     'Save password' => 'حفظ كلمة المرور',
     'Saved' => 'تم الحفظ',
+
+    // Confirm Password Page
+    'Confirm your password' => 'تأكيد كلمة المرور',
+    'This is a secure area of the application. Please confirm your password before continuing.' => 'هذه منطقة آمنة من التطبيق. يرجى تأكيد كلمة المرور الخاصة بك قبل المتابعة.',
 ];

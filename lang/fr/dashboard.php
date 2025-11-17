@@ -81,4 +81,8 @@ return [
     'Current password' => 'Mot de passe actuel',
     'Save password' => 'Enregistrer le mot de passe',
     'Saved' => 'Enregistré',
+
+    // Confirm Password Page
+    'Confirm your password' => 'Confirmez votre mot de passe',
+    'This is a secure area of the application. Please confirm your password before continuing.' => 'Il s\'agit d\'une zone sécurisée de l\'application. Veuillez confirmer votre mot de passe avant de continuer.',
 ];

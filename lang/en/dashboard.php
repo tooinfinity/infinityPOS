@@ -81,4 +81,8 @@ return [
     'Current password' => 'Current password',
     'Save password' => 'Save password',
     'Saved' => 'Saved',
+
+    // Confirm Password Page
+    'Confirm your password' => 'Confirm your password',
+    'This is a secure area of the application. Please confirm your password before continuing.' => 'This is a secure area of the application. Please confirm your password before continuing.',
 ];
