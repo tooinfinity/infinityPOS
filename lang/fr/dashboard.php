@@ -5,10 +5,7 @@ declare(strict_types=1);
 return [
     'Dashboard' => 'Tableau de bord',
     'Profile' => 'Profil',
-    'Profile settings' => 'Paramètres du profil',
-    'Profile information' => 'Informations du profil',
     'Update your account\'s profile information and email address.' => 'Mettez à jour les informations de votre profil et votre adresse e-mail.',
-    'Save' => 'Enregistrer',
     'Delete your account and all of its resources' => 'Supprimez votre compte et toutes ses ressources',
     'Warning' => 'Avertissement',
     'Please proceed with caution, this cannot be undone.' => 'Veuillez procéder avec prudence, cette action est irréversible.',
@@ -85,4 +82,10 @@ return [
     // Confirm Password Page
     'Confirm your password' => 'Confirmez votre mot de passe',
     'This is a secure area of the application. Please confirm your password before continuing.' => 'Il s\'agit d\'une zone sécurisée de l\'application. Veuillez confirmer votre mot de passe avant de continuer.',
+
+    // Profile Settings Page
+    'Profile settings' => 'Paramètres du profil',
+    'Profile information' => 'Informations du profil',
+    'Update your name and email address' => 'Mettez à jour votre nom et votre adresse e-mail',
+    'Save' => 'Enregistrer',
 ];

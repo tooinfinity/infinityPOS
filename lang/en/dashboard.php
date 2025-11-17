@@ -5,10 +5,7 @@ declare(strict_types=1);
 return [
     'Dashboard' => 'Dashboard',
     'Profile' => 'Profile',
-    'Profile settings' => 'Profile settings',
-    'Profile information' => 'Profile Information',
     'Update your account\'s profile information and email address.' => 'Update your account\'s profile information and email address.',
-    'Save' => 'Save',
     'Delete your account and all of its resources' => 'Delete your account and all of its resources',
     'Warning' => 'Warning',
     'Please proceed with caution, this cannot be undone.' => 'Please proceed with caution, this cannot be undone.',
@@ -85,4 +82,10 @@ return [
     // Confirm Password Page
     'Confirm your password' => 'Confirm your password',
     'This is a secure area of the application. Please confirm your password before continuing.' => 'This is a secure area of the application. Please confirm your password before continuing.',
+
+    // Profile Settings Page
+    'Profile settings' => 'Profile settings',
+    'Profile information' => 'Profile information',
+    'Update your name and email address' => 'Update your name and email address',
+    'Save' => 'Save',
 ];

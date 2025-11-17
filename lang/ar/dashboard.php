@@ -5,10 +5,7 @@ declare(strict_types=1);
 return [
     'Dashboard' => 'لوحة التحكم',
     'Profile' => 'الملف الشخصي',
-    'Profile settings' => 'إعدادات الملف الشخصي',
-    'Profile information' => 'معلومات الملف الشخصي',
     'Update your account\'s profile information and email address.' => 'تحديث معلومات حسابك وعنوان البريد الإلكتروني.',
-    'Save' => 'حفظ',
     'Delete your account and all of its resources' => 'حذف حسابك وجميع موارده',
     'Warning' => 'تحذير',
     'Please proceed with caution, this cannot be undone.' => 'يرجى التقدم بحذر، لا يمكن التراجع عن هذا.',
@@ -85,4 +82,10 @@ return [
     // Confirm Password Page
     'Confirm your password' => 'تأكيد كلمة المرور',
     'This is a secure area of the application. Please confirm your password before continuing.' => 'هذه منطقة آمنة من التطبيق. يرجى تأكيد كلمة المرور الخاصة بك قبل المتابعة.',
+
+    // Profile Settings Page
+    'Profile settings' => 'إعدادات الملف الشخصي',
+    'Profile information' => 'معلومات الملف الشخصي',
+    'Update your name and email address' => 'قم بتحديث اسمك وعنوان بريدك الإلكتروني',
+    'Save' => 'حفظ',
 ];
