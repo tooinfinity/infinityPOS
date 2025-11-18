@@ -10,7 +10,7 @@ import {
 import { useLanguage, type Language } from '@/hooks/use-language';
 
 export default function LanguageSwitcher() {
-    const { locale, updateLanguage } = useLanguage();
+    const { __, locale, updateLanguage } = useLanguage();
 
     return (
         <Select
@@ -18,19 +18,19 @@ export default function LanguageSwitcher() {
             onValueChange={(value) => updateLanguage(value as Language)}
         >
             <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select a language" />
+                <SelectValue placeholder={__('Select a language')} />
             </SelectTrigger>
             <SelectContent>
                 <SelectGroup>
-                    <SelectLabel>Languages</SelectLabel>
+                    <SelectLabel>{__('Languages')}</SelectLabel>
                     <SelectItem value="en">
-                        <span>English</span>
+                        <span>{__('English')}</span>
                     </SelectItem>
                     <SelectItem value="fr">
-                        <span>Français</span>
+                        <span>{__('Français')}</span>
                     </SelectItem>
                     <SelectItem value="ar">
-                        <span>العربية</span>
+                        <span>{__('العربية')}</span>
                     </SelectItem>
                 </SelectGroup>
             </SelectContent>

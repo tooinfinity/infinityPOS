@@ -13,32 +13,6 @@ return [
     'Users' => 'Users',
     'Appearance' => 'Appearance',
 
-    //
-
-    'Update your account\'s profile information and email address.' => 'Update your account\'s profile information and email address.',
-    'Delete your account and all of its resources' => 'Delete your account and all of its resources',
-    'Warning' => 'Warning',
-    'Please proceed with caution, this cannot be undone.' => 'Please proceed with caution, this cannot be undone.',
-    'Delete account' => 'Delete account',
-    'Appearance settings' => 'Appearance settings',
-    'Update your account appearance settings' => 'Update your account appearance settings',
-    'Light' => 'Light',
-    'Dark' => 'Dark',
-    'System' => 'System',
-    'Language' => 'Language',
-    'Language settings' => 'Language settings',
-    'Language preferences' => 'Language preferences',
-    'Choose your preferred language for the application interface' => 'Choose your preferred language for the application interface',
-    'Select Language' => 'Select Language',
-    'English' => 'English',
-    'French' => 'French',
-    'Arabic' => 'Arabic',
-
-    'Are you sure you want to delete your account?' => 'Are you sure you want to delete your account?',
-    'Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.' => 'Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.',
-
-    'Log out' => 'Log out',
-
     // Login Page
     'Log in to your account' => 'Log in to your account',
     'Enter your email and password below to log in' => 'Enter your email and password below to log in',
@@ -94,4 +68,40 @@ return [
     'Profile information' => 'Profile information',
     'Update your name and email address' => 'Update your name and email address',
     'Save' => 'Save',
+
+    // App Header Navigation
+    'Repository' => 'Repository',
+    'Documentation' => 'Documentation',
+    'Navigation Menu' => 'Navigation Menu',
+
+    // Appearance Toggle
+    'Toggle theme' => 'Toggle theme',
+    'Light' => 'Light',
+    'Dark' => 'Dark',
+    'System' => 'System',
+
+    // Delete Account
+    'Delete account' => 'Delete account',
+    'Delete your account and all of its resources' => 'Delete your account and all of its resources',
+    'Warning' => 'Warning',
+    'Please proceed with caution, this cannot be undone.' => 'Please proceed with caution, this cannot be undone.',
+    'Are you sure you want to delete your account?' => 'Are you sure you want to delete your account?',
+    'Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.' => 'Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.',
+
+    // Language Switcher
+    'Select a language' => 'Select a language',
+    'Languages' => 'Languages',
+    'English' => 'English',
+    'Français' => 'Français',
+    'العربية' => 'العربية',
+
+    // User Menu
+    'Log out' => 'Log out',
+
+    // Navigation
+    'Platform' => 'Platform',
+
+    // Appearance Settings Page
+    'Appearance settings' => 'Appearance settings',
+    'Update your account appearance settings' => 'Update your account appearance settings',
 ];

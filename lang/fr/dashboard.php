@@ -13,32 +13,6 @@ return [
     'Users' => 'Utilisateurs',
     'Appearance' => 'Apparence',
 
-    //
-
-    'Update your account\'s profile information and email address.' => 'Mettez à jour les informations de votre profil et votre adresse e-mail.',
-    'Delete your account and all of its resources' => 'Supprimez votre compte et toutes ses ressources',
-    'Warning' => 'Avertissement',
-    'Please proceed with caution, this cannot be undone.' => 'Veuillez procéder avec prudence, cette action est irréversible.',
-    'Delete account' => 'Supprimer le compte',
-    'Appearance settings' => 'Paramètres d\'apparence',
-    'Update your account appearance settings' => 'Mettez à jour les paramètres d\'apparence de votre compte',
-    'Light' => 'Clair',
-    'Dark' => 'Sombre',
-    'System' => 'Système',
-    'Language' => 'Langue',
-    'Language settings' => 'Paramètres de langue',
-    'Language preferences' => 'Préférences de langue',
-    'Choose your preferred language for the application interface' => 'Choisissez votre langue préférée pour l\'interface de l\'application',
-    'Select Language' => 'Sélectionner la langue',
-    'English' => 'Anglais',
-    'French' => 'Français',
-    'Arabic' => 'Arabe',
-
-    'Are you sure you want to delete your account?' => 'Êtes-vous sûr de vouloir supprimer votre compte ?',
-    'Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.' => 'Une fois votre compte supprimé, toutes ses ressources et données seront également supprimées de manière permanente. Veuillez saisir votre mot de passe pour confirmer que vous souhaitez supprimer définitivement votre compte.',
-
-    'Log out' => 'Se déconnecter',
-
     // Login Page
     'Log in to your account' => 'Connectez-vous à votre compte',
     'Enter your email and password below to log in' => 'Entrez votre email et mot de passe ci-dessous pour vous connecter',
@@ -94,4 +68,40 @@ return [
     'Profile information' => 'Informations du profil',
     'Update your name and email address' => 'Mettez à jour votre nom et votre adresse e-mail',
     'Save' => 'Enregistrer',
+
+    // App Header Navigation
+    'Repository' => 'Dépôt',
+    'Documentation' => 'Documentation',
+    'Navigation Menu' => 'Menu de navigation',
+
+    // Appearance Toggle
+    'Toggle theme' => 'Basculer le thème',
+    'Light' => 'Clair',
+    'Dark' => 'Sombre',
+    'System' => 'Système',
+
+    // Delete Account
+    'Delete account' => 'Supprimer le compte',
+    'Delete your account and all of its resources' => 'Supprimez votre compte et toutes ses ressources',
+    'Warning' => 'Attention',
+    'Please proceed with caution, this cannot be undone.' => 'Veuillez procéder avec prudence, cette action est irréversible.',
+    'Are you sure you want to delete your account?' => 'Êtes-vous sûr de vouloir supprimer votre compte ?',
+    'Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.' => 'Une fois votre compte supprimé, toutes ses ressources et données seront également supprimées de manière permanente. Veuillez saisir votre mot de passe pour confirmer que vous souhaitez supprimer définitivement votre compte.',
+
+    // Language Switcher
+    'Select a language' => 'Sélectionnez une langue',
+    'Languages' => 'Langues',
+    'English' => 'Anglais',
+    'Français' => 'Français',
+    'العربية' => 'Arabe',
+
+    // User Menu
+    'Log out' => 'Se déconnecter',
+
+    // Navigation
+    'Platform' => 'Plateforme',
+
+    // Appearance Settings Page
+    'Appearance settings' => 'Paramètres d\'apparence',
+    'Update your account appearance settings' => 'Mettez à jour les paramètres d\'apparence de votre compte',
 ];

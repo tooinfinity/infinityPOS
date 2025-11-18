@@ -13,32 +13,6 @@ return [
     'Users' => 'المستخدمون',
     'Appearance' => 'المظهر',
 
-    //
-
-    'Update your account\'s profile information and email address.' => 'تحديث معلومات حسابك وعنوان البريد الإلكتروني.',
-    'Delete your account and all of its resources' => 'حذف حسابك وجميع موارده',
-    'Warning' => 'تحذير',
-    'Please proceed with caution, this cannot be undone.' => 'يرجى التقدم بحذر، لا يمكن التراجع عن هذا.',
-    'Delete account' => 'حذف الحساب',
-    'Appearance settings' => 'إعدادات المظهر',
-    'Update your account appearance settings' => 'تحديث إعدادات مظهر حسابك',
-    'Light' => 'فاتح',
-    'Dark' => 'داكن',
-    'System' => 'النظام',
-    'Language' => 'اللغة',
-    'Language settings' => 'إعدادات اللغة',
-    'Language preferences' => 'تفضيلات اللغة',
-    'Choose your preferred language for the application interface' => 'اختر لغتك المفضلة لواجهة التطبيق',
-    'Select Language' => 'اختر اللغة',
-    'English' => 'الإنجليزية',
-    'French' => 'الفرنسية',
-    'Arabic' => 'العربية',
-
-    'Are you sure you want to delete your account?' => 'هل أنت متأكد أنك تريد حذف حسابك؟',
-    'Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.' => 'بمجرد حذف حسابك، سيتم حذف جميع موارده وبياناته أيضًا بشكل دائم. يرجى إدخال كلمة المرور الخاصة بك لتأكيد رغبتك في حذف حسابك بشكل دائم.',
-
-    'Log out' => 'تسجيل الخروج',
-
     // Login Page
     'Log in to your account' => 'تسجيل الدخول إلى حسابك',
     'Enter your email and password below to log in' => 'أدخل بريدك الإلكتروني وكلمة المرور أدناه لتسجيل الدخول',
@@ -94,4 +68,40 @@ return [
     'Profile information' => 'معلومات الملف الشخصي',
     'Update your name and email address' => 'قم بتحديث اسمك وعنوان بريدك الإلكتروني',
     'Save' => 'حفظ',
+
+    // App Header Navigation
+    'Repository' => 'المستودع',
+    'Documentation' => 'التوثيق',
+    'Navigation Menu' => 'قائمة التنقل',
+
+    // Appearance Toggle
+    'Toggle theme' => 'تبديل المظهر',
+    'Light' => 'فاتح',
+    'Dark' => 'داكن',
+    'System' => 'النظام',
+
+    // Delete Account
+    'Delete account' => 'حذف الحساب',
+    'Delete your account and all of its resources' => 'حذف حسابك وجميع موارده',
+    'Warning' => 'تحذير',
+    'Please proceed with caution, this cannot be undone.' => 'يرجى المتابعة بحذر، لا يمكن التراجع عن هذا الإجراء.',
+    'Are you sure you want to delete your account?' => 'هل أنت متأكد أنك تريد حذف حسابك؟',
+    'Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.' => 'بمجرد حذف حسابك، سيتم أيضًا حذف جميع موارده وبياناته بشكل دائم. يرجى إدخال كلمة المرور الخاصة بك لتأكيد رغبتك في حذف حسابك بشكل دائم.',
+
+    // Language Switcher
+    'Select a language' => 'اختر لغة',
+    'Languages' => 'اللغات',
+    'English' => 'الإنجليزية',
+    'Français' => 'الفرنسية',
+    'العربية' => 'العربية',
+
+    // User Menu
+    'Log out' => 'تسجيل الخروج',
+
+    // Navigation
+    'Platform' => 'المنصة',
+
+    // Appearance Settings Page
+    'Appearance settings' => 'إعدادات المظهر',
+    'Update your account appearance settings' => 'قم بتحديث إعدادات مظهر حسابك',
 ];
