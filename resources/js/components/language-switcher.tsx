@@ -17,7 +17,6 @@ export default function LanguageSwitcher() {
         ar: __('العربية'),
     };
 
-
     return (
         <Select
             value={locale}
@@ -29,7 +28,7 @@ export default function LanguageSwitcher() {
             <SelectContent>
                 <SelectGroup>
                     <SelectLabel>{__('Languages')}</SelectLabel>
-                    {validLocales.map(locale => (
+                    {validLocales.map((locale) => (
                         <SelectItem key={locale} value={locale}>
                             <span>{localeLabels[locale]}</span>
                         </SelectItem>
