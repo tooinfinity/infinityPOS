@@ -9,29 +9,31 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useLanguage } from '@/hooks/use-language';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import userProfile from '@/routes/user-profile';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Profile settings',
-        href: userProfile.edit().url,
-    },
-];
-
 export default function Edit() {
+    const { __ } = useLanguage();
     const { auth } = usePage<SharedData>().props;
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: __('Profile settings'),
+            href: userProfile.edit().url,
+        },
+    ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Profile settings" />
+            <Head title={__('Profile settings')} />
 
             <SettingsLayout>
                 <div className="space-y-6">
                     <HeadingSmall
-                        title="Profile information"
-                        description="Update your name and email address"
+                        title={__('Profile information')}
+                        description={__('Update your name and email address')}
                     />
 
                     <Form
@@ -44,7 +46,7 @@ export default function Edit() {
                         {({ processing, recentlySuccessful, errors }) => (
                             <>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="name">Name</Label>
+                                    <Label htmlFor="name">{__('Name')}</Label>
 
                                     <Input
                                         id="name"
@@ -53,7 +55,7 @@ export default function Edit() {
                                         name="name"
                                         required
                                         autoComplete="name"
-                                        placeholder="Full name"
+                                        placeholder={__('Full name')}
                                     />
 
                                     <InputError
@@ -63,7 +65,9 @@ export default function Edit() {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="email">Email address</Label>
+                                    <Label htmlFor="email">
+                                        {__('Email address')}
+                                    </Label>
 
                                     <Input
                                         id="email"
@@ -73,7 +77,7 @@ export default function Edit() {
                                         name="email"
                                         required
                                         autoComplete="username"
-                                        placeholder="Email address"
+                                        placeholder={__('Email address')}
                                     />
 
                                     <InputError
@@ -87,7 +91,7 @@ export default function Edit() {
                                         disabled={processing}
                                         data-test="update-profile-button"
                                     >
-                                        Save
+                                        {__('Save')}
                                     </Button>
 
                                     <Transition
@@ -98,7 +102,7 @@ export default function Edit() {
                                         leaveTo="opacity-0"
                                     >
                                         <p className="text-sm text-neutral-600">
-                                            Saved
+                                            {__('Saved')}
                                         </p>
                                     </Transition>
                                 </div>

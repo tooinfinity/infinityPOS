@@ -25,17 +25,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UserInfo } from '@/components/user-info';
+import { useLanguage } from '@/hooks/use-language';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { BreadcrumbItem, User } from '@/types';
 import { useState } from 'react';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Account Users settings',
-        href: UserController.index().url,
-    },
-];
 
 interface UsersProps {
     users: {
@@ -43,6 +37,13 @@ interface UsersProps {
     };
 }
 export default function Index({ users }: UsersProps) {
+    const { __ } = useLanguage();
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: __('Account Users settings'),
+            href: UserController.index().url,
+        },
+    ];
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [deletingUser, setDeletingUser] = useState<User | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -65,13 +66,15 @@ export default function Index({ users }: UsersProps) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Create new account" />
+            <Head title={__('Create new account')} />
             <SettingsLayout wide={true}>
                 <div className="flex flex-col gap-8 xl:flex-row">
                     <div className="flex-1 space-y-6">
                         <HeadingSmall
-                            title="Create new account"
-                            description="Create a new user account for accessing the application"
+                            title={__('Create new account')}
+                            description={__(
+                                'Create a new user account for accessing the application',
+                            )}
                         />
                         <Form
                             {...UserController.store.form()}
@@ -90,7 +93,7 @@ export default function Index({ users }: UsersProps) {
                                         <div className="grid gap-6 md:grid-cols-2">
                                             <div className="grid gap-2">
                                                 <Label htmlFor="name">
-                                                    Name
+                                                    {__('Name')}
                                                 </Label>
                                                 <Input
                                                     id="name"
@@ -100,7 +103,9 @@ export default function Index({ users }: UsersProps) {
                                                     tabIndex={1}
                                                     autoComplete="name"
                                                     name="name"
-                                                    placeholder="Full name"
+                                                    placeholder={__(
+                                                        'Full name',
+                                                    )}
                                                 />
                                                 <InputError
                                                     message={errors.name}
@@ -110,7 +115,7 @@ export default function Index({ users }: UsersProps) {
 
                                             <div className="grid gap-2">
                                                 <Label htmlFor="email">
-                                                    Email address
+                                                    {__('Email address')}
                                                 </Label>
                                                 <Input
                                                     id="email"
@@ -119,7 +124,9 @@ export default function Index({ users }: UsersProps) {
                                                     tabIndex={2}
                                                     autoComplete="email"
                                                     name="email"
-                                                    placeholder="email@example.com"
+                                                    placeholder={__(
+                                                        'email@example.com',
+                                                    )}
                                                 />
                                                 <InputError
                                                     message={errors.email}
@@ -129,7 +136,7 @@ export default function Index({ users }: UsersProps) {
 
                                         <div className="grid gap-2">
                                             <Label htmlFor="password">
-                                                Password
+                                                {__('Password')}
                                             </Label>
                                             <Input
                                                 id="password"
@@ -138,7 +145,7 @@ export default function Index({ users }: UsersProps) {
                                                 tabIndex={3}
                                                 autoComplete="new-password"
                                                 name="password"
-                                                placeholder="Password"
+                                                placeholder={__('Password')}
                                             />
                                             <InputError
                                                 message={errors.password}
@@ -147,7 +154,7 @@ export default function Index({ users }: UsersProps) {
 
                                         <div className="grid gap-2">
                                             <Label htmlFor="password_confirmation">
-                                                Confirm password
+                                                {__('Confirm password')}
                                             </Label>
                                             <Input
                                                 id="password_confirmation"
@@ -156,7 +163,9 @@ export default function Index({ users }: UsersProps) {
                                                 tabIndex={4}
                                                 autoComplete="new-password"
                                                 name="password_confirmation"
-                                                placeholder="Confirm password"
+                                                placeholder={__(
+                                                    'Confirm password',
+                                                )}
                                             />
                                             <InputError
                                                 message={
@@ -174,7 +183,7 @@ export default function Index({ users }: UsersProps) {
                                             {processing && (
                                                 <LoaderCircle className="h-4 w-4 animate-spin" />
                                             )}
-                                            Create account
+                                            {__('Create account')}
                                         </Button>
                                     </div>
                                 </>
@@ -183,8 +192,10 @@ export default function Index({ users }: UsersProps) {
                     </div>
                     <div className="flex-1 space-y-6">
                         <HeadingSmall
-                            title="List of users"
-                            description="Below is the list of all users with access to the application"
+                            title={__('List of users')}
+                            description={__(
+                                'Below is the list of all users with access to the application',
+                            )}
                         />
                         <div className="rounded-lg">
                             {users && users.data.length > 0 ? (
@@ -195,7 +206,7 @@ export default function Index({ users }: UsersProps) {
                                     >
                                         <UserInfo user={u} showEmail={true} />
                                         <button className="ml-auto text-sm text-muted-foreground hover:text-muted-foreground/80">
-                                            Role
+                                            {__('Role')}
                                         </button>
                                         <Button
                                             variant="ghost"
@@ -217,7 +228,7 @@ export default function Index({ users }: UsersProps) {
                                 ))
                             ) : (
                                 <span className="text-sm text-muted-foreground">
-                                    No users yet
+                                    {__('No users yet')}
                                 </span>
                             )}
                         </div>
@@ -231,9 +242,9 @@ export default function Index({ users }: UsersProps) {
                 >
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Edit User</DialogTitle>
+                            <DialogTitle>{__('Edit User')}</DialogTitle>
                             <DialogDescription>
-                                Update user information below
+                                {__('Update user information below')}
                             </DialogDescription>
                         </DialogHeader>
                         {editingUser && (
@@ -249,7 +260,7 @@ export default function Index({ users }: UsersProps) {
                                     <div className="grid gap-4">
                                         <div className="grid gap-2">
                                             <Label htmlFor="edit-name">
-                                                Name
+                                                {__('Name')}
                                             </Label>
                                             <Input
                                                 id="edit-name"
@@ -259,14 +270,14 @@ export default function Index({ users }: UsersProps) {
                                                 autoComplete="name"
                                                 name="name"
                                                 defaultValue={editingUser.name}
-                                                placeholder="Full name"
+                                                placeholder={__('Full name')}
                                             />
                                             <InputError message={errors.name} />
                                         </div>
 
                                         <div className="grid gap-2">
                                             <Label htmlFor="edit-email">
-                                                Email address
+                                                {__('Email address')}
                                             </Label>
                                             <Input
                                                 id="edit-email"
@@ -275,7 +286,9 @@ export default function Index({ users }: UsersProps) {
                                                 autoComplete="email"
                                                 name="email"
                                                 defaultValue={editingUser.email}
-                                                placeholder="email@example.com"
+                                                placeholder={__(
+                                                    'email@example.com',
+                                                )}
                                             />
                                             <InputError
                                                 message={errors.email}
@@ -284,10 +297,11 @@ export default function Index({ users }: UsersProps) {
 
                                         <div className="grid gap-2">
                                             <Label htmlFor="edit-password">
-                                                Password
+                                                {__('Password')}
                                                 <span className="ml-2 text-xs text-muted-foreground">
-                                                    (leave blank to keep
-                                                    current)
+                                                    {__(
+                                                        '(leave blank to keep current)',
+                                                    )}
                                                 </span>
                                             </Label>
                                             <Input
@@ -295,7 +309,7 @@ export default function Index({ users }: UsersProps) {
                                                 type="password"
                                                 autoComplete="new-password"
                                                 name="password"
-                                                placeholder="New password"
+                                                placeholder={__('New password')}
                                             />
                                             <InputError
                                                 message={errors.password}
@@ -304,14 +318,16 @@ export default function Index({ users }: UsersProps) {
 
                                         <div className="grid gap-2">
                                             <Label htmlFor="edit-password-confirmation">
-                                                Confirm password
+                                                {__('Confirm password')}
                                             </Label>
                                             <Input
                                                 id="edit-password-confirmation"
                                                 type="password"
                                                 autoComplete="new-password"
                                                 name="password_confirmation"
-                                                placeholder="Confirm new password"
+                                                placeholder={__(
+                                                    'Confirm new password',
+                                                )}
                                             />
                                             <InputError
                                                 message={
@@ -330,7 +346,7 @@ export default function Index({ users }: UsersProps) {
                                                 }
                                                 disabled={processing}
                                             >
-                                                Cancel
+                                                {__('Cancel')}
                                             </Button>
                                             <Button
                                                 type="submit"
@@ -340,7 +356,7 @@ export default function Index({ users }: UsersProps) {
                                                 {processing && (
                                                     <LoaderCircle className="h-4 w-4 animate-spin" />
                                                 )}
-                                                Update User
+                                                {__('Update User')}
                                             </Button>
                                         </div>
                                     </div>
@@ -357,17 +373,20 @@ export default function Index({ users }: UsersProps) {
                 >
                     <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle>Delete User</AlertDialogTitle>
+                            <AlertDialogTitle>
+                                {__('Delete User')}
+                            </AlertDialogTitle>
                             <AlertDialogDescription>
-                                Are you sure you want to delete{' '}
-                                <strong>{deletingUser?.name}</strong>? This
-                                action cannot be undone and will permanently
-                                remove the user from the system.
+                                {__('Are you sure you want to delete')}{' '}
+                                <strong>{deletingUser?.name}</strong>?{' '}
+                                {__(
+                                    'This action cannot be undone and will permanently remove the user from the system.',
+                                )}
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                             <AlertDialogCancel disabled={isDeleting}>
-                                Cancel
+                                {__('Cancel')}
                             </AlertDialogCancel>
                             <AlertDialogAction
                                 onClick={handleDelete}
@@ -377,7 +396,7 @@ export default function Index({ users }: UsersProps) {
                                 {isDeleting && (
                                     <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
                                 )}
-                                Delete User
+                                {__('Delete User')}
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>

@@ -44,7 +44,26 @@ final class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'locale' => app()->getLocale(),
+            'language' => $this->loadTranslations(),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
+    }
+
+    /**
+     * Load and merge all translation files into one flat array.
+     *
+     * @return array<string, string>
+     */
+    private function loadTranslations(): array
+    {
+        $locale = app()->getLocale();
+        $path = base_path('lang/'.$locale);
+
+        /** @var array<string, string> */
+        return collect(glob($path.'/*.php') ?: [])
+            ->flatMap(fn (string $file): array => (array) require $file)
+            ->filter(fn (mixed $value): bool => is_string($value))
+            ->all();
     }
 }

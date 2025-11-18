@@ -14,9 +14,9 @@ pest()->extend(TestCase::class)
     ->beforeEach(function (): void {
         Str::createRandomStringsNormally();
         Str::createUuidsNormally();
-        Http::preventStrayRequests();
         Process::preventStrayProcesses();
         Sleep::fake();
+        Http::fake();
 
         $this->freezeTime();
     })

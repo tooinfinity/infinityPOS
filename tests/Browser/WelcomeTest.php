@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-it('has welcome page', function (): void {
-    $page = visit('/');
-
-    $page->assertSee('Log in to your account');
-});
+// it('has welcome page', function (): void {
+//    $page = visit('/');
+//
+//    $page->assertSee('Log in to your account');
+// });

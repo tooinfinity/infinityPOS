@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserPasswordController;
@@ -18,6 +19,9 @@ Route::middleware(['auth'])->group(function (): void {
 });
 
 Route::middleware('auth')->group(function (): void {
+    // Languages
+    Route::post('/locale', [LanguageController::class, 'store'])
+        ->name('locale.store');
     // User Management...
     Route::get('users', [UserController::class, 'index'])
         ->name('users.index');

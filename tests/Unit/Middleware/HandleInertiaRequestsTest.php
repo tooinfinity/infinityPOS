@@ -104,3 +104,34 @@ it('includes parent shared data', function (): void {
     // Parent Inertia middleware shares 'errors' by default
     expect($shared)->toHaveKey('errors');
 });
+
+it('shares the current locale translations', function (): void {
+    $locale = 'en';
+    app()->setLocale($locale);
+    $langPath = base_path('lang/'.$locale);
+
+    if (! Illuminate\Support\Facades\File::exists($langPath)) {
+        Illuminate\Support\Facades\File::makeDirectory($langPath, 0755, true);
+    }
+
+    Illuminate\Support\Facades\File::put($langPath.'/test.php', <<<'PHP'
+    <?php
+    return [
+        'welcome' => 'Welcome',
+        'goodbye' => 'Goodbye',
+    ];
+    PHP);
+
+    $middleware = new HandleInertiaRequests();
+    $request = Request::create('/', 'GET');
+    $shared = $middleware->share($request);
+
+    expect($shared)
+        ->toHaveKey('language')
+        ->and($shared['language'])
+        ->toBeArray()
+        ->toHaveKey('welcome', 'Welcome')
+        ->toHaveKey('goodbye', 'Goodbye');
+
+    Illuminate\Support\Facades\File::delete($langPath.'/test.php');
+});
