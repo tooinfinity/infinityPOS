@@ -33,7 +33,7 @@ export function useLanguage() {
         let translation = translations[key] || key;
 
         Object.entries(replace).forEach(([key, value]) => {
-            translation = translation.replace(`:${key}`, String(value));
+            translation = translation.replaceAll(`:${key}`, String(value));
         });
 
         return translation;
