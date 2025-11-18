@@ -7,10 +7,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { useLanguage, type Language } from '@/hooks/use-language';
+import { useLanguage, validLocales, type Language } from '@/hooks/use-language';
 
 export default function LanguageSwitcher() {
     const { __, locale, updateLanguage } = useLanguage();
+    const localeLabels: Record<Language, string> = {
+        en: __('English'),
+        fr: __('Français'),
+        ar: __('العربية'),
+    };
+
 
     return (
         <Select
@@ -23,15 +29,11 @@ export default function LanguageSwitcher() {
             <SelectContent>
                 <SelectGroup>
                     <SelectLabel>{__('Languages')}</SelectLabel>
-                    <SelectItem value="en">
-                        <span>{__('English')}</span>
-                    </SelectItem>
-                    <SelectItem value="fr">
-                        <span>{__('Français')}</span>
-                    </SelectItem>
-                    <SelectItem value="ar">
-                        <span>{__('العربية')}</span>
-                    </SelectItem>
+                    {validLocales.map(locale => (
+                        <SelectItem key={locale} value={locale}>
+                            <span>{localeLabels[locale]}</span>
+                        </SelectItem>
+                    ))}
                 </SelectGroup>
             </SelectContent>
         </Select>

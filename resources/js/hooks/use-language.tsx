@@ -1,6 +1,7 @@
 import { router, usePage } from '@inertiajs/react';
 
 export type Language = 'en' | 'fr' | 'ar';
+export const validLocales: Language[] = ['en', 'fr', 'ar'];
 
 interface PageProps {
     language: Record<string, string>;
@@ -10,7 +11,7 @@ interface PageProps {
 export function useLanguage() {
     const { locale: pageLocale, language } = usePage<{ props: PageProps }>()
         .props;
-    const validLocales: Language[] = ['en', 'fr', 'ar'];
+
     const locale = validLocales.includes(pageLocale as Language)
         ? (pageLocale as Language)
         : 'en';
