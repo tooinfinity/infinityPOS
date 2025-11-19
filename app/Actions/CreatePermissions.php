@@ -10,24 +10,20 @@ use Spatie\Permission\Models\Permission;
 final readonly class CreatePermissions
 {
     /**
-     * @return array<int, Permission>
+     * @return array<string, Permission>
      */
     public function handle(string $guardName = 'web'): array
     {
+        /** @var array<string, Permission> $createdPermissions */
         $createdPermissions = [];
 
         foreach (PermissionEnum::cases() as $permission) {
-            $createdPermissions[] = Permission::query()->firstOrCreate(
+            $createdPermissions[$permission->value] = Permission::query()->firstOrCreate(
                 ['name' => $permission->value],
                 ['guard_name' => $guardName]
             );
         }
 
         return $createdPermissions;
-    }
-
-    public function count(): int
-    {
-        return count(PermissionEnum::cases());
     }
 }

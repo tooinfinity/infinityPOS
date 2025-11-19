@@ -1,14 +1,5 @@
+import { Auth } from '@/types';
 import { usePage } from '@inertiajs/react';
-
-interface Auth {
-    user: {
-        id: number;
-        name: string;
-        email: string;
-        roles: string[];
-        permissions: string[];
-    } | null;
-}
 
 export function usePermissions() {
     const { auth } = usePage<{ auth: Auth }>().props;

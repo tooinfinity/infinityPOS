@@ -16,9 +16,7 @@ final readonly class AssignRoleToUser
             ->where('name', $role->value)
             ->firstOrFail();
 
-        if (! $user->hasRole($role->value)) {
-            $user->assignRole($roleModel);
-        }
+        $user->assignRole($roleModel);
 
         return $user;
     }

@@ -25,9 +25,4 @@ final readonly class CreateRoles
 
         return $createdRoles;
     }
-
-    public function count(): int
-    {
-        return count(RoleEnum::cases());
-    }
 }

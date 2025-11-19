@@ -19,7 +19,7 @@ enum PermissionGroupEnum: string
     public function label(): string
     {
         return match ($this) {
-            self::USERS => 'users',
+            self::USERS => 'Users',
             // add more groups here
         };
     }
@@ -32,8 +32,7 @@ enum PermissionGroupEnum: string
         $name = $this->name;
 
         return collect(PermissionEnum::cases())
-            ->filter(fn (PermissionEnum $permission): bool =>
-                $permission->group()->name === $name
+            ->filter(fn (PermissionEnum $permission): bool => $permission->group()->name === $name
             )
             ->values()
             ->all();
