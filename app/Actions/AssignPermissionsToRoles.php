@@ -4,40 +4,34 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Enums\PermissionEnum;
 use App\Enums\RoleEnum;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
+use Throwable;
 
 final readonly class AssignPermissionsToRoles
 {
     /**
-     * @param  array<string, Role>  $roles
-     * @return array<string, array{role: Role, permissions_count: int}>
+     * @throws Throwable
      */
-    public function handle(array $roles): array
+    public function handle(): void
     {
-        /** @var array<string, array{role: Role, permissions_count: int}> $result */
-        $result = [];
+        DB::transaction(function (): void {
+            foreach (RoleEnum::cases() as $roleEnum) {
+                $role = Role::query()->firstOrCreate(['name' => $roleEnum->value]);
 
-        foreach (RoleEnum::cases() as $roleEnum) {
-            if (! isset($roles[$roleEnum->value])) {
-                continue;
+                $permissions = PermissionEnum::forRole($roleEnum);
+
+                $role->syncPermissions($permissions);
+
+                Log::info('Assigned permissions to role: '.$roleEnum->value, [
+                    'permissions_count' => count($permissions),
+                ]);
             }
 
-            $role = $roles[$roleEnum->value];
-
-            /** @var array<int, string> $permissions */
-            $permissions = collect($roleEnum->permissions())
-                ->map(fn ($permission): string => $permission->value)
-                ->all();
-
-            $role->syncPermissions($permissions);
-
-            $result[$roleEnum->value] = [
-                'role' => $role,
-                'permissions_count' => count($permissions),
-            ];
-        }
-
-        return $result;
+            Log::info('Successfully assigned all permissions to roles');
+        });
     }
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Enums\RoleEnum;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -12,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 use SensitiveParameter;
 use Throwable;
 
-final readonly class CreateAdminUser
+final readonly class CreateDefaultAdminUser
 {
     /**
      * @throws Throwable
@@ -21,7 +20,6 @@ final readonly class CreateAdminUser
         string $name,
         string $email,
         #[SensitiveParameter] string $password,
-        AssignRoleToUser $action
     ): User {
         $this->validate([
             'name' => $name,
@@ -29,18 +27,13 @@ final readonly class CreateAdminUser
             'password' => $password,
         ]);
 
-        $user = User::query()->firstOrCreate(
+        return User::query()->firstOrCreate(
             ['email' => $email],
             [
                 'name' => $name,
                 'password' => Hash::make($password),
-                'email_verified_at' => now(),
             ]
         );
-
-        $action->handle($user, RoleEnum::ADMIN);
-
-        return $user;
     }
 
     /**

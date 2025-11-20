@@ -42,7 +42,16 @@ final class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'quote' => ['message' => mb_trim((string) $message), 'author' => mb_trim((string) $author)],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user() ? [
+                    'id' => $request->user()->id,
+                    'name' => $request->user()->name,
+                    'email' => $request->user()->email,
+                    'roles' => $request->user()->getRoleNames(),
+                    'permissions' => $request->user()->getAllPermissions()->pluck('name'),
+                    'is_admin' => $request->user()->isAdmin(),
+                    'is_manager' => $request->user()->isManager(),
+                    'is_cashier' => $request->user()->isCashier(),
+                ] : null,
             ],
             'locale' => app()->getLocale(),
             'language' => $this->loadTranslations(),

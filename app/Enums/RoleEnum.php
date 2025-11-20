@@ -11,13 +11,18 @@ enum RoleEnum: string
     case CASHIER = 'cashier';
 
     /**
-     * @return array<string, string>
+     * @return array<int, array{value: string, label: string, description: string}>
      */
-    public static function toSelectArray(): array
+    public static function toArray(): array
     {
-        return collect(self::cases())
-            ->mapWithKeys(fn (self $role): array => [$role->value => $role->label()])
-            ->all();
+        return array_map(
+            fn (RoleEnum $case): array => [
+                'value' => $case->value,
+                'label' => $case->label(),
+                'description' => $case->description(),
+            ],
+            self::cases()
+        );
     }
 
     public function label(): string
@@ -32,27 +37,9 @@ enum RoleEnum: string
     public function description(): string
     {
         return match ($this) {
-            self::ADMIN => 'Administrator - Full system access',
-            self::MANAGER => 'Manager - Manage operations and reports',
-            self::CASHIER => 'Cashier - POS operations only',
-        };
-    }
-
-    /**
-     * @return array<int, PermissionEnum>
-     */
-    public function permissions(): array
-    {
-        return match ($this) {
-            self::ADMIN => PermissionEnum::cases(),
-            self::MANAGER => [
-                PermissionEnum::VIEW_USER,
-                PermissionEnum::CREATE_USER,
-                PermissionEnum::UPDATE_USER,
-            ],
-            self::CASHIER => [
-                PermissionEnum::VIEW_USER,
-            ],
+            self::ADMIN => 'Full system access with all permissions',
+            self::MANAGER => 'Manage inventory, sales, and operations',
+            self::CASHIER => 'Access POS and process sales only',
         };
     }
 }
