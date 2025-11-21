@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Actions\CreateRoles;
+use App\Enums\RoleEnum;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 
 it('shares app name from config', function (): void {
     $middleware = new HandleInertiaRequests();
@@ -44,7 +45,9 @@ it('shares null user when guest', function (): void {
 });
 
 it('shares authenticated user data', function (): void {
-    (new CreateRoles)->handle();
+    foreach (RoleEnum::cases() as $roleEnum) {
+        Role::create(['name' => $roleEnum->value]);
+    }
 
     $user = User::factory()->admin()->create([
         'name' => 'Test User',
@@ -64,7 +67,7 @@ it('shares authenticated user data', function (): void {
         ->and($shared['auth']['user']['name'])->toBe('Test User')
         ->and($shared['auth']['user']['email'])->toBe('test@example.com')
         ->and($shared['auth']['user']['roles'])->toBeArray()
-        ->and($shared['auth']['user']['roles'])->toContain(App\Enums\RoleEnum::ADMIN->value)
+        ->and($shared['auth']['user']['roles'])->toContain(RoleEnum::ADMIN->value)
         ->and($shared['auth']['user']['permissions'])->toBeArray()
         ->and($shared['auth']['user']['is_admin'])->toBeTrue()
         ->and($shared['auth']['user']['is_manager'])->toBeFalse()

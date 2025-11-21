@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Actions\AssignPermissionsToRoles;
-use App\Actions\CreateDefaultAdminUser;
+use App\Actions\CreateUser;
 use App\Actions\SyncPermissions;
 use App\Enums\RoleEnum;
+use App\Http\Requests\CreateUserRequest;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Throwable;
@@ -25,9 +27,9 @@ final class AppSetupCommand extends Command
     protected $signature = 'app:setup
                             {--fresh : Delete all existing roles and permissions before setup}
                             {--skip-user : Skip user creation step}
+                            {--admin-name= : Name for admin user}
                             {--admin-email= : Email for admin user}
-                            {--admin-password= : Password for admin user}
-                            {--admin-name= : Name for admin user}';
+                            {--admin-password= : Password for admin user}';
 
     /**
      * The console command description.
@@ -42,12 +44,13 @@ final class AppSetupCommand extends Command
     public function handle(
         SyncPermissions $syncPermissions,
         AssignPermissionsToRoles $assignPermissions,
-        CreateDefaultAdminUser $createAdmin
+        CreateUser $createUser
     ): int {
         $this->info('🚀 Starting APP Permission Setup...');
         $this->newLine();
 
         if ($this->option('fresh')) {
+            $this->warn('⚠️ ⚠️ ⚠️  DoNot run this command in production ⚠️ ⚠️ ⚠️ ');
             if ($this->confirm('⚠️  This will delete all existing roles and permissions. Continue?', false)) {
                 $this->cleanupExisting();
             } else {
@@ -80,12 +83,12 @@ final class AppSetupCommand extends Command
         // Step 4: Create User
         if (! $this->option('skip-user')) {
             $this->info('👤 Step 4: Creating admin user...');
-            $this->createUser($createAdmin);
-            $this->newLine();
+            $this->createAdminUser($createUser);
         } else {
             $this->warn('⏭️  Step 4: User creation skipped');
-            $this->newLine();
         }
+
+        $this->newLine();
 
         // Step 5: Clear Cache
         $this->info('🧹 Step 5: Clearing permission cache...');
@@ -100,7 +103,7 @@ final class AppSetupCommand extends Command
         return self::SUCCESS;
     }
 
-    private function createUser(CreateDefaultAdminUser $createAdmin): void
+    private function createAdminUser(CreateUser $createUser): void
     {
         if ($this->option('admin-email') && $this->option('admin-password') && $this->option('admin-name')) {
             /** @var string $name */
@@ -109,6 +112,7 @@ final class AppSetupCommand extends Command
             $email = $this->option('admin-email');
             /** @var string $password */
             $password = $this->option('admin-password');
+            $passwordConfirmation = $password;
         } else {
             // Interactive mode
             $this->line('   Please provide admin user details:');
@@ -122,23 +126,35 @@ final class AppSetupCommand extends Command
             $password = $this->secret('   Password');
             /** @var string $passwordConfirmation */
             $passwordConfirmation = $this->secret('   Confirm Password');
+        }
 
-            if ($password !== $passwordConfirmation) {
-                $this->error('   ❌ Passwords do not match.');
+        $validator = Validator::make([
+            'name' => $name,
+            'email' => $email,
+            'password' => $password,
+            'password_confirmation' => $passwordConfirmation,
+        ], (new CreateUserRequest)->rules());
 
-                if ($this->confirm('   Would you like to try again?', true)) {
-                    $this->createUser($createAdmin);
-
-                    return;
-                }
-
-                $this->warn('   Using default password: "password"');
-                $password = 'password';
+        if ($validator->fails()) {
+            $this->error('   ❌ Validation failed:');
+            foreach ($validator->errors()->all() as $error) {
+                $this->line('      - '.$error);
             }
+
+            if ($this->confirm('   Would you like to try again?', true)) {
+                $this->createAdminUser($createUser);
+            }
+
+            return;
         }
 
         try {
-            $admin = $createAdmin->handle($name, $email, $password);
+            $admin = $createUser->handle(
+                ['name' => $name, 'email' => $email],
+                $password
+            );
+
+            $admin->assignRole(RoleEnum::ADMIN->value);
 
             $this->newLine();
             $this->info('   ✅ Admin user created successfully!');
@@ -148,10 +164,6 @@ final class AppSetupCommand extends Command
             $this->line('   ✓ Role: '.RoleEnum::ADMIN->value);
         } catch (Throwable $throwable) {
             $this->error('   ❌ Failed to create admin user: '.$throwable->getMessage());
-
-            if ($this->confirm('   Would you like to try again?', true)) {
-                $this->createUser($createAdmin);
-            }
         }
     }
 

@@ -2,15 +2,17 @@
 
 declare(strict_types=1);
 
-use App\Actions\CreateRoles;
 use App\Enums\RoleEnum;
 use App\Http\Middleware\CheckRole;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 
 beforeEach(function (): void {
-    (new CreateRoles)->handle();
+    foreach (RoleEnum::cases() as $roleEnum) {
+        Role::create(['name' => $roleEnum->value]);
+    }
 });
 
 it('allows access when user has required role', function (): void {

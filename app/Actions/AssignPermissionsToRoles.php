@@ -7,7 +7,6 @@ namespace App\Actions;
 use App\Enums\PermissionEnum;
 use App\Enums\RoleEnum;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 use Throwable;
 
@@ -25,13 +24,7 @@ final readonly class AssignPermissionsToRoles
                 $permissions = PermissionEnum::forRole($roleEnum);
 
                 $role->syncPermissions($permissions);
-
-                Log::info('Assigned permissions to role: '.$roleEnum->value, [
-                    'permissions_count' => count($permissions),
-                ]);
             }
-
-            Log::info('Successfully assigned all permissions to roles');
         });
     }
 }

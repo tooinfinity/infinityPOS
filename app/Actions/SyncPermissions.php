@@ -6,7 +6,6 @@ namespace App\Actions;
 
 use App\Enums\PermissionEnum;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 use Throwable;
@@ -50,12 +49,6 @@ final readonly class SyncPermissions
                 ->delete();
 
             app()->make(PermissionRegistrar::class)->forgetCachedPermissions();
-
-            Log::info('Permissions synced successfully', [
-                'created' => count($created),
-                'existing' => count($existing),
-                'deleted' => $deletedCount,
-            ]);
 
             return [
                 'created' => $created,

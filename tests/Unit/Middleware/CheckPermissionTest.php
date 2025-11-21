@@ -3,17 +3,24 @@
 declare(strict_types=1);
 
 use App\Actions\AssignPermissionsToRoles;
-use App\Actions\CreatePermissions;
-use App\Actions\CreateRoles;
 use App\Enums\PermissionEnum;
+use App\Enums\RoleEnum;
 use App\Http\Middleware\CheckPermission;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response;
 
 beforeEach(function (): void {
-    (new CreateRoles)->handle();
-    (new CreatePermissions)->handle();
+    foreach (RoleEnum::cases() as $roleEnum) {
+        Role::create(['name' => $roleEnum->value]);
+    }
+
+    foreach (PermissionEnum::cases() as $permissionEnum) {
+        Permission::create(['name' => $permissionEnum->value]);
+    }
+
     (new AssignPermissionsToRoles)->handle();
 });
 

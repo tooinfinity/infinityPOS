@@ -20,7 +20,7 @@ it('creates admin user when not skipping', function (): void {
     $this->artisan('app:setup', [
         '--admin-name' => 'Test Admin',
         '--admin-email' => 'admin@test.com',
-        '--admin-password' => 'password123',
+        '--admin-password' => 'P@ssword123!',
     ])->assertSuccessful();
 
     $user = User::query()->where('email', 'admin@test.com')->first();
@@ -35,8 +35,8 @@ it('creates admin user with interactive prompts', function (): void {
         ->expectsOutput('   Please provide admin user details:')
         ->expectsQuestion('   Name', 'Test Admin')
         ->expectsQuestion('   Email', 'admin@example.com')
-        ->expectsQuestion('   Password', 'password123')
-        ->expectsQuestion('   Confirm Password', 'password123')
+        ->expectsQuestion('   Password', 'P@ssword123!')
+        ->expectsQuestion('   Confirm Password', 'P@ssword123!')
         ->assertSuccessful();
 
     $user = User::query()->where('email', 'admin@example.com')->first();
@@ -51,15 +51,15 @@ it('handles password mismatch with retry in interactive mode', function (): void
         ->expectsOutput('   Please provide admin user details:')
         ->expectsQuestion('   Name', 'Test Admin')
         ->expectsQuestion('   Email', 'retry@example.com')
-        ->expectsQuestion('   Password', 'password123')
+        ->expectsQuestion('   Password', 'P@ssword123!')
         ->expectsQuestion('   Confirm Password', 'different')
-        ->expectsOutput('   ❌ Passwords do not match.')
+        ->expectsOutput('   ❌ Validation failed:')
         ->expectsConfirmation('   Would you like to try again?', 'yes')
         ->expectsOutput('   Please provide admin user details:')
         ->expectsQuestion('   Name', 'Test Admin')
         ->expectsQuestion('   Email', 'retry@example.com')
-        ->expectsQuestion('   Password', 'password123')
-        ->expectsQuestion('   Confirm Password', 'password123')
+        ->expectsQuestion('   Password', 'P@ssword123!')
+        ->expectsQuestion('   Confirm Password', 'P@ssword123!')
         ->assertSuccessful();
 
     $user = User::query()->where('email', 'retry@example.com')->first();
@@ -68,23 +68,20 @@ it('handles password mismatch with retry in interactive mode', function (): void
         ->and($user->hasRole(RoleEnum::ADMIN->value))->toBeTrue();
 });
 
-it('handles password mismatch without retry uses default password', function (): void {
+it('handles password mismatch without retry', function (): void {
     $this->artisan('app:setup')
         ->expectsOutput('   Please provide admin user details:')
         ->expectsQuestion('   Name', 'Default Admin')
         ->expectsQuestion('   Email', 'default@example.com')
-        ->expectsQuestion('   Password', 'password123')
+        ->expectsQuestion('   Password', 'P@ssword123!')
         ->expectsQuestion('   Confirm Password', 'different')
-        ->expectsOutput('   ❌ Passwords do not match.')
+        ->expectsOutput('   ❌ Validation failed:')
         ->expectsConfirmation('   Would you like to try again?', 'no')
-        ->expectsOutput('   Using default password: "password"')
         ->assertSuccessful();
 
     $user = User::query()->where('email', 'default@example.com')->first();
 
-    expect($user)->not->toBeNull()
-        ->and($user->name)->toBe('Default Admin')
-        ->and($user->hasRole(RoleEnum::ADMIN->value))->toBeTrue();
+    expect($user)->toBeNull();
 });
 
 it('skips user creation when skip-user option is provided', function (): void {
@@ -163,7 +160,7 @@ it('handles command with all options', function (): void {
         '--fresh' => true,
         '--admin-name' => 'Full Admin',
         '--admin-email' => 'fulladmin@test.com',
-        '--admin-password' => 'securepassword123',
+        '--admin-password' => 'P@ssword123!',
     ])
         ->expectsConfirmation('⚠️  This will delete all existing roles and permissions. Continue?', 'yes')
         ->assertSuccessful();
@@ -175,20 +172,19 @@ it('handles command with all options', function (): void {
 });
 
 it('handles user creation failure with retry', function (): void {
-    // First attempt with invalid password (too short) to trigger validation error
     $this->artisan('app:setup')
         ->expectsOutput('   Please provide admin user details:')
         ->expectsQuestion('   Name', 'Error Admin')
         ->expectsQuestion('   Email', 'error@example.com')
         ->expectsQuestion('   Password', 'short')
         ->expectsQuestion('   Confirm Password', 'short')
-        ->expectsOutputToContain('   ❌ Failed to create admin user:')
+        ->expectsOutput('   ❌ Validation failed:')
         ->expectsConfirmation('   Would you like to try again?', 'yes')
         ->expectsOutput('   Please provide admin user details:')
         ->expectsQuestion('   Name', 'Error Admin')
         ->expectsQuestion('   Email', 'error@example.com')
-        ->expectsQuestion('   Password', 'validpassword123')
-        ->expectsQuestion('   Confirm Password', 'validpassword123')
+        ->expectsQuestion('   Password', 'P@ssword123!')
+        ->expectsQuestion('   Confirm Password', 'P@ssword123!')
         ->assertSuccessful();
 
     $user = User::query()->where('email', 'error@example.com')->first();
@@ -198,18 +194,33 @@ it('handles user creation failure with retry', function (): void {
 });
 
 it('handles user creation failure without retry', function (): void {
-    // Test that command completes even if user creation fails and user doesn't retry
     $this->artisan('app:setup')
         ->expectsOutput('   Please provide admin user details:')
         ->expectsQuestion('   Name', 'No Retry Admin')
         ->expectsQuestion('   Email', 'noretry@example.com')
         ->expectsQuestion('   Password', 'short')
         ->expectsQuestion('   Confirm Password', 'short')
-        ->expectsOutputToContain('   ❌ Failed to create admin user:')
+        ->expectsOutput('   ❌ Validation failed:')
         ->expectsConfirmation('   Would you like to try again?', 'no')
         ->assertSuccessful();
 
-    // User should not be created
     $user = User::query()->where('email', 'noretry@example.com')->first();
     expect($user)->toBeNull();
+});
+
+it('failed to create admin user with throwable exception that can try', function (): void {
+    User::creating(function (): void {
+        throw new RuntimeException('Simulated database error');
+    });
+
+    $this->artisan('app:setup')
+        ->expectsOutput('   Please provide admin user details:')
+        ->expectsQuestion('   Name', 'Fail Admin')
+        ->expectsQuestion('   Email', 'fail@example.com')
+        ->expectsQuestion('   Password', 'P@ssword123!')
+        ->expectsQuestion('   Confirm Password', 'P@ssword123!')
+        ->expectsOutput('   ❌ Failed to create admin user: Simulated database error')
+        ->assertSuccessful();
+
+    expect(User::query()->where('email', 'fail@example.com')->first())->toBeNull();
 });

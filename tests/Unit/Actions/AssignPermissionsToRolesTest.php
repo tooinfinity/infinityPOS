@@ -3,18 +3,18 @@
 declare(strict_types=1);
 
 use App\Actions\AssignPermissionsToRoles;
-use App\Actions\CreatePermissions;
-use App\Actions\CreateRoles;
+use App\Actions\SyncPermissions;
 use App\Enums\PermissionEnum;
 use App\Enums\RoleEnum;
-use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 
 it('assigns permissions to all roles', function (): void {
-    Log::spy();
 
-    (new CreateRoles)->handle();
-    (new CreatePermissions)->handle();
+    foreach (RoleEnum::cases() as $roleEnum) {
+        Role::create(['name' => $roleEnum->value]);
+    }
+
+    (new SyncPermissions)->handle();
 
     $action = new AssignPermissionsToRoles;
     $action->handle();
@@ -36,8 +36,11 @@ it('assigns permissions to all roles', function (): void {
 });
 
 it('runs within a database transaction', function (): void {
-    (new CreateRoles)->handle();
-    (new CreatePermissions)->handle();
+    foreach (RoleEnum::cases() as $roleEnum) {
+        Role::create(['name' => $roleEnum->value]);
+    }
+
+    (new SyncPermissions)->handle();
 
     $action = new AssignPermissionsToRoles;
 

@@ -26,7 +26,9 @@ it('creates missing permissions', function (): void {
 });
 
 it('reports existing permissions', function (): void {
-    (new App\Actions\CreatePermissions)->handle();
+    foreach (PermissionEnum::cases() as $permissionEnum) {
+        Permission::create(['name' => $permissionEnum->value]);
+    }
 
     $action = new SyncPermissions;
 
