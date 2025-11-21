@@ -100,60 +100,68 @@ final class AppSetupCommand extends Command
         return self::SUCCESS;
     }
 
-    private function createUser(CreateDefaultAdminUser $createAdmin): void
+    private function createUser(CreateDefaultAdminUser $createAdmin, int $maxAttempts = 3): void
     {
-        // Check if options are provided
-        if ($this->option('admin-email') && $this->option('admin-password') && $this->option('admin-name')) {
-            /** @var string $name */
-            $name = $this->option('admin-name');
-            /** @var string $email */
-            $email = $this->option('admin-email');
-            /** @var string $password */
-            $password = $this->option('admin-password');
-        } else {
-            // Interactive mode
-            $this->line('   Please provide admin user details:');
-            $this->newLine();
+        $attempt = 0;
+        while ($attempt < $maxAttempts) {
+            $attempt++;
+            if ($this->option('admin-email') && $this->option('admin-password') && $this->option('admin-name')) {
+                /** @var string $name */
+                $name = $this->option('admin-name');
+                /** @var string $email */
+                $email = $this->option('admin-email');
+                /** @var string $password */
+                $password = $this->option('admin-password');
+            } else {
+                // Interactive mode
+                $this->line('   Please provide admin user details:');
+                $this->newLine();
 
-            /** @var string $name */
-            $name = $this->ask('   Name', 'System Administrator');
-            /** @var string $email */
-            $email = $this->ask('   Email', 'admin@example.com');
-            /** @var string $password */
-            $password = $this->secret('   Password');
-            /** @var string $passwordConfirmation */
-            $passwordConfirmation = $this->secret('   Confirm Password');
+                /** @var string $name */
+                $name = $this->ask('   Name', 'System Administrator');
+                /** @var string $email */
+                $email = $this->ask('   Email', 'admin@example.com');
+                /** @var string $password */
+                $password = $this->secret('   Password');
+                /** @var string $passwordConfirmation */
+                $passwordConfirmation = $this->secret('   Confirm Password');
 
-            if ($password !== $passwordConfirmation) {
-                $this->error('   ❌ Passwords do not match.');
+                if ($password !== $passwordConfirmation) {
+                    $this->error('   ❌ Passwords do not match.');
 
-                if ($this->confirm('   Would you like to try again?', true)) {
-                    $this->createUser($createAdmin);
+                    if ($attempt < $maxAttempts && $this->confirm('   Would you like to try again?', true)) {
+                        continue;
+                    }
 
-                    return;
+                    if ($attempt >= $maxAttempts) {
+                        $this->error('   Maximum attempts reached. Aborting user creation.');
+
+                        return;
+                    }
                 }
+            }
 
-                $this->warn('   Using default password: "password"');
-                $password = 'password';
+            try {
+                $admin = $createAdmin->handle($name, $email, $password);
+
+                $this->newLine();
+                $this->info('   ✅ Admin user created successfully!');
+                $this->line('   ✓ Name: '.$admin->name);
+                $this->line('   ✓ Email: '.$admin->email);
+                $this->line('   ✓ Password: '.str_repeat('•', 8));
+                $this->line('   ✓ Role: '.RoleEnum::ADMIN->value);
+
+                return;
+            } catch (Throwable $throwable) {
+                $this->error('   ❌ Failed to create admin user: '.$throwable->getMessage());
+
+                if ($attempt < $maxAttempts && $this->confirm('   Would you like to try again?', true)) {
+                    continue;
+                }
             }
         }
 
-        try {
-            $admin = $createAdmin->handle($name, $email, $password);
-
-            $this->newLine();
-            $this->info('   ✅ Admin user created successfully!');
-            $this->line('   ✓ Name: '.$admin->name);
-            $this->line('   ✓ Email: '.$admin->email);
-            $this->line('   ✓ Password: '.str_repeat('•', 8));
-            $this->line('   ✓ Role: '.RoleEnum::ADMIN->value);
-        } catch (Throwable $throwable) {
-            $this->error('   ❌ Failed to create admin user: '.$throwable->getMessage());
-
-            if ($this->confirm('   Would you like to try again?', true)) {
-                $this->createUser($createAdmin);
-            }
-        }
+        $this->error('   Failed to create admin user after '.$maxAttempts.' attempts.');
     }
 
     private function cleanupExisting(): void

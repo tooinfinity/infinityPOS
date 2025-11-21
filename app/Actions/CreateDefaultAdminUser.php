@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Enums\RoleEnum;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -33,7 +34,7 @@ final readonly class CreateDefaultAdminUser
                 'name' => $name,
                 'password' => Hash::make($password),
             ]
-        );
+        )->assignRole(RoleEnum::ADMIN->value);
     }
 
     /**

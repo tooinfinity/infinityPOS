@@ -43,15 +43,15 @@ export function usePermissions(): UsePermissionsReturn {
     };
 
     const isAdmin = (): boolean => {
-        return <boolean>auth.user?.is_admin ?? false;
+        return (auth.user?.is_admin as boolean) ?? false;
     };
 
     const isManager = (): boolean => {
-        return <boolean>auth.user?.is_manager ?? false;
+        return (auth.user?.is_manager as boolean) ?? false;
     };
 
     const isCashier = (): boolean => {
-        return <boolean>auth.user?.is_cashier ?? false;
+        return (auth.user?.is_cashier as boolean) ?? false;
     };
 
     return {

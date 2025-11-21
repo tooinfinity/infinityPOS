@@ -1,6 +1,6 @@
 import { usePermissions } from '@/hooks/use-permissions';
 import { router } from '@inertiajs/react';
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 
 interface CanProps {
     permission?: string;
@@ -115,8 +115,10 @@ export function ProtectedPage({
         hasAccess = hasAnyRole(...roles);
     }
 
+    const hasRedirected = useRef(false);
     useEffect(() => {
-        if (!hasAccess) {
+        if (!hasAccess && !hasRedirected.current) {
+            hasRedirected.current = true;
             router.visit(redirectTo);
         }
     }, [hasAccess, redirectTo]);

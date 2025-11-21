@@ -154,7 +154,7 @@ enum PermissionEnum: string
         return array_values(
             array_diff(
                 self::allPermissions(),
-                array_column($excluded, 'value')
+                array_map(fn (PermissionEnum $case) => $case->value, $excluded)
             )
         );
     }
