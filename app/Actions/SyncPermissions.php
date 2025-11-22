@@ -26,10 +26,10 @@ final readonly class SyncPermissions
             $existing = [];
 
             foreach (PermissionEnum::cases() as $permissionEnum) {
-                $permission = Permission::query()->firstOrCreate(
-                    ['name' => $permissionEnum->value],
-                    ['guard_name' => $guardName]
-                );
+                $permission = Permission::query()->firstOrCreate([
+                    'name' => $permissionEnum->value,
+                    'guard_name' => $guardName,
+                ]);
 
                 if ($permission->wasRecentlyCreated) {
                     $created[] = $permissionEnum->value;
@@ -45,6 +45,7 @@ final readonly class SyncPermissions
             );
             /** @var int $deletedCount */
             $deletedCount = Permission::query()
+                ->where('guard_name', $guardName)
                 ->whereNotIn('name', $enumPermissions)
                 ->delete();
 

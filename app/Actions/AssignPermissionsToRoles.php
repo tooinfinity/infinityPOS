@@ -19,7 +19,10 @@ final readonly class AssignPermissionsToRoles
     {
         DB::transaction(function (): void {
             foreach (RoleEnum::cases() as $roleEnum) {
-                $role = Role::query()->firstOrCreate(['name' => $roleEnum->value]);
+                $role = Role::query()->firstOrCreate([
+                    'name' => $roleEnum->value,
+                    'guard_name' => 'web',
+                ]);
 
                 $permissions = PermissionEnum::forRole($roleEnum);
 

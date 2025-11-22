@@ -181,10 +181,10 @@ final class AppSetupCommand extends Command
     private function createRoles(): void
     {
         foreach (RoleEnum::cases() as $roleEnum) {
-            $role = Role::query()->firstOrCreate(
-                ['name' => $roleEnum->value],
-                ['guard_name' => 'web']
-            );
+            $role = Role::query()->firstOrCreate([
+                'name' => $roleEnum->value,
+                'guard_name' => 'web',
+            ]);
 
             $status = $role->wasRecentlyCreated ? 'Created' : 'Exists';
             $this->line(sprintf('   ✓ %s: %s (%s)', $status, $roleEnum->label(), $roleEnum->description()));
