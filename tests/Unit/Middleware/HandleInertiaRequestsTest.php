@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Enums\RoleEnum;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 
 it('shares app name from config', function (): void {
     $middleware = new HandleInertiaRequests();
@@ -43,7 +45,11 @@ it('shares null user when guest', function (): void {
 });
 
 it('shares authenticated user data', function (): void {
-    $user = User::factory()->create([
+    foreach (RoleEnum::cases() as $roleEnum) {
+        Role::create(['name' => $roleEnum->value]);
+    }
+
+    $user = User::factory()->admin()->create([
         'name' => 'Test User',
         'email' => 'test@example.com',
     ]);
@@ -56,9 +62,13 @@ it('shares authenticated user data', function (): void {
     $shared = $middleware->share($request);
 
     expect($shared['auth']['user'])->not->toBeNull()
-        ->and($shared['auth']['user']->id)->toBe($user->id)
-        ->and($shared['auth']['user']->name)->toBe('Test User')
-        ->and($shared['auth']['user']->email)->toBe('test@example.com');
+        ->and($shared['auth']['user'])->toBeArray()
+        ->and($shared['auth']['user']['id'])->toBe($user->id)
+        ->and($shared['auth']['user']['name'])->toBe('Test User')
+        ->and($shared['auth']['user']['email'])->toBe('test@example.com')
+        ->and($shared['auth']['user']['roles'])->toBeArray()
+        ->and($shared['auth']['user']['roles'])->toContain(RoleEnum::ADMIN->value)
+        ->and($shared['auth']['user']['permissions'])->toBeArray();
 });
 
 it('defaults sidebarOpen to true when no cookie', function (): void {
