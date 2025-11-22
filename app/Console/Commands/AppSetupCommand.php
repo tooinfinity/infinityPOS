@@ -214,6 +214,7 @@ final class AppSetupCommand extends Command
             'email' => $email,
             'password' => $password,
             'password_confirmation' => $passwordConfirmation,
+            'role' => RoleEnum::ADMIN->value,
         ], (new CreateUserRequest)->rules());
 
         if ($validator->fails()) {
@@ -232,6 +233,7 @@ final class AppSetupCommand extends Command
             );
 
             $admin->assignRole(RoleEnum::ADMIN->value);
+            $admin->givePermissionTo(Permission::all());
 
             $this->newLine();
             $this->info('   ✅ Admin user created successfully!');

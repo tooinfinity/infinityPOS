@@ -68,10 +68,7 @@ it('shares authenticated user data', function (): void {
         ->and($shared['auth']['user']['email'])->toBe('test@example.com')
         ->and($shared['auth']['user']['roles'])->toBeArray()
         ->and($shared['auth']['user']['roles'])->toContain(RoleEnum::ADMIN->value)
-        ->and($shared['auth']['user']['permissions'])->toBeArray()
-        ->and($shared['auth']['user']['is_admin'])->toBeTrue()
-        ->and($shared['auth']['user']['is_manager'])->toBeFalse()
-        ->and($shared['auth']['user']['is_cashier'])->toBeFalse();
+        ->and($shared['auth']['user']['permissions'])->toBeArray();
 });
 
 it('defaults sidebarOpen to true when no cookie', function (): void {

@@ -63,11 +63,8 @@ final class HandleInertiaRequests extends Middleware
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
-            'permissions' => $user->getPermissionNames()->toArray(),
-            'roles' => $user->getRoleNames()->toArray(),
-            'is_admin' => $user->isAdmin(),
-            'is_manager' => $user->isManager(),
-            'is_cashier' => $user->isCashier(),
+            'permissions' => $user->getAllPermissions()->pluck('name')->values()->toArray(),
+            'roles' => $user->getRoleNames()->values()->toArray(),
         ];
     }
 

@@ -2,13 +2,34 @@
 
 declare(strict_types=1);
 
+use App\Enums\PermissionEnum;
+use App\Enums\RoleEnum;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+
+beforeEach(function (): void {
+    // Ensure roles and permissions exist for testing
+    foreach (RoleEnum::cases() as $roleEnum) {
+        $role = Role::query()->firstOrCreate(['name' => $roleEnum->value]);
+        // Assign all permissions to admin role for simplicity in these tests
+        if ($roleEnum === RoleEnum::ADMIN) {
+            foreach (PermissionEnum::cases() as $permission) {
+                Permission::query()->firstOrCreate(['name' => $permission->value]);
+            }
+
+            $role->syncPermissions(PermissionEnum::cases());
+        }
+    }
+});
 
 it('login user can renders registration page', function (): void {
     $user = User::factory()->create();
+    $user->assignRole(RoleEnum::ADMIN->value);
+
     $response = $this->actingAs($user)
         ->get(route('users.index'));
 
@@ -19,6 +40,7 @@ it('login user can renders registration page', function (): void {
 it('login user register a new user', function (): void {
     Event::fake([Registered::class]);
     $user = User::factory()->create();
+    $user->assignRole(RoleEnum::ADMIN->value);
 
     $response = $this->actingAs($user)
         ->post(route('users.store'), [
@@ -26,6 +48,7 @@ it('login user register a new user', function (): void {
             'email' => 'test@example.com',
             'password' => 'password1234',
             'password_confirmation' => 'password1234',
+            'role' => RoleEnum::CASHIER->value,
         ]);
 
     $response->assertRedirectBack();
@@ -35,18 +58,22 @@ it('login user register a new user', function (): void {
     expect($user)->not->toBeNull()
         ->and($user->name)->toBe('Test User')
         ->and($user->email)->toBe('test@example.com')
-        ->and(Hash::check('password1234', $user->password))->toBeTrue();
+        ->and(Hash::check('password1234', $user->password))->toBeTrue()
+        ->and($user->hasRole(RoleEnum::CASHIER->value))->toBeTrue();
 
     Event::assertDispatched(Registered::class);
 });
 
 it('requires name', function (): void {
     $user = User::factory()->create();
+    $user->assignRole(RoleEnum::ADMIN->value);
+
     $response = $this->actingAs($user)
         ->post(route('users.store'), [
             'email' => 'test@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'role' => RoleEnum::CASHIER->value,
         ]);
 
     $response->assertRedirectBack()
@@ -55,11 +82,14 @@ it('requires name', function (): void {
 
 it('requires email', function (): void {
     $user = User::factory()->create();
+    $user->assignRole(RoleEnum::ADMIN->value);
+
     $response = $this->actingAs($user)
         ->post(route('users.store'), [
             'name' => 'Test User',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'role' => RoleEnum::CASHIER->value,
         ]);
 
     $response->assertRedirectBack()
@@ -68,12 +98,15 @@ it('requires email', function (): void {
 
 it('requires valid email', function (): void {
     $user = User::factory()->create();
+    $user->assignRole(RoleEnum::ADMIN->value);
+
     $response = $this->actingAs($user)
         ->post(route('users.store'), [
             'name' => 'Test User',
             'email' => 'not-an-email',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'role' => RoleEnum::CASHIER->value,
         ]);
 
     $response->assertRedirectBack()
@@ -82,6 +115,7 @@ it('requires valid email', function (): void {
 
 it('requires unique email', function (): void {
     $loginUser = User::factory()->create();
+    $loginUser->assignRole(RoleEnum::ADMIN->value);
     User::factory()->create(['email' => 'test@example.com']);
 
     $response = $this->actingAs($loginUser)
@@ -90,6 +124,7 @@ it('requires unique email', function (): void {
             'email' => 'test@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'role' => RoleEnum::CASHIER->value,
         ]);
 
     $response->assertRedirectBack()
@@ -98,10 +133,13 @@ it('requires unique email', function (): void {
 
 it('requires password', function (): void {
     $user = User::factory()->create();
+    $user->assignRole(RoleEnum::ADMIN->value);
+
     $response = $this->actingAs($user)
         ->post(route('users.store'), [
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'role' => RoleEnum::CASHIER->value,
         ]);
 
     $response->assertRedirectBack()
@@ -110,11 +148,14 @@ it('requires password', function (): void {
 
 it('requires password confirmation', function (): void {
     $user = User::factory()->create();
+    $user->assignRole(RoleEnum::ADMIN->value);
+
     $response = $this->ActingAs($user)
         ->post(route('users.store'), [
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => 'password',
+            'role' => RoleEnum::CASHIER->value,
         ]);
 
     $response->assertRedirectBack()
@@ -123,75 +164,51 @@ it('requires password confirmation', function (): void {
 
 it('requires matching password confirmation', function (): void {
     $user = User::factory()->create();
+    $user->assignRole(RoleEnum::ADMIN->value);
+
     $response = $this->ActingAs($user)
         ->post(route('users.store'), [
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => 'password',
             'password_confirmation' => 'different-password',
+            'role' => RoleEnum::CASHIER->value,
         ]);
 
     $response->assertRedirectBack()
         ->assertSessionHasErrors('password');
 });
 
+it('requires role', function (): void {
+    $user = User::factory()->create();
+    $user->assignRole(RoleEnum::ADMIN->value);
+
+    $response = $this->actingAs($user)
+        ->post(route('users.store'), [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+    $response->assertRedirectBack()
+        ->assertSessionHasErrors('role');
+});
+
 it('auth user can delete users account', function (): void {
     $authUser = User::factory()->create();
+    $authUser->assignRole(RoleEnum::ADMIN->value);
+
     $user = User::factory()->create();
     $response = $this->actingAs($authUser)
         ->delete(route('users.destroy', $user));
     $response->assertRedirectBack();
 });
 
-// it('may delete user account', function (): void {
-//    $user = User::factory()->create([
-//        'password' => Hash::make('password'),
-//    ]);
-//
-//    $response = $this->actingAs($user)
-//        ->fromRoute('user-profile.edit')
-//        ->delete(route('user.destroy'), [
-//            'password' => 'password',
-//        ]);
-//
-//    $response->assertRedirectBack();
-//
-//    expect($user->fresh())->toBeNull();
-//
-// });
-
-// it('requires password to delete account', function (): void {
-//    $user = User::factory()->create();
-//
-//    $response = $this->actingAs($user)
-//        ->fromRoute('user-profile.edit')
-//        ->delete(route('user.destroy'), []);
-//
-//    $response->assertRedirectToRoute('user-profile.edit')
-//        ->assertSessionHasErrors('password');
-//
-//    expect($user->fresh())->not->toBeNull();
-// });
-
-// it('requires correct password to delete account', function (): void {
-//    $user = User::factory()->create([
-//        'password' => Hash::make('password'),
-//    ]);
-//
-//    $response = $this->actingAs($user)
-//        ->fromRoute('user-profile.edit')
-//        ->delete(route('user.destroy'), [
-//            'password' => 'wrong-password',
-//        ]);
-//
-//    $response->assertRedirectToRoute('user-profile.edit')
-//        ->assertSessionHasErrors('password');
-//
-//    expect($user->fresh())->not->toBeNull();
-// });
-
 it('update user', function (): void {
     $authUser = User::factory()->create();
+    $authUser->assignRole(RoleEnum::ADMIN->value);
+
     $user = User::factory()->create([
         'name' => 'Old Name',
         'email' => 'old@example.com',
@@ -201,17 +218,49 @@ it('update user', function (): void {
         ->patch(route('users.update', $user), [
             'name' => 'New Name',
             'email' => 'new@eample.com',
+            'role' => RoleEnum::MANAGER->value,
         ]);
 
     $response->assertRedirectBack();
+
+    $user->refresh();
+    expect($user->name)->toBe('New Name')
+        ->and($user->email)->toBe('new@eample.com')
+        ->and($user->hasRole(RoleEnum::MANAGER->value))->toBeTrue();
 });
 
-// it('redirects authenticated users away from registration', function (): void {
-//    $user = User::factory()->create();
-//
-//    $response = $this->actingAs($user)
-//        ->fromRoute('dashboard')
-//        ->get(route('register'));
-//
-//    $response->assertRedirectToRoute('dashboard');
-// });
+it('shows all users except auth user', function (): void {
+    $authUser = User::factory()->create();
+    $authUser->assignRole(RoleEnum::ADMIN->value);
+
+    $otherUser = User::factory()->create([
+        'name' => 'Test User',
+        'email' => 'test@gmail.com',
+        'password' => Hash::make('password'),
+    ]);
+    $otherUser->assignRole(RoleEnum::ADMIN->value);
+
+    $response = $this->actingAs($authUser)
+        ->get(route('users.index'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('user/index')
+            ->has('users.data', 1)
+            ->where('users.data.0.email', 'test@gmail.com')
+        );
+});
+
+it('auth user can not delete himself', function (): void {
+    $authUser = User::factory()->create();
+    $authUser->assignRole(RoleEnum::ADMIN->value);
+
+    $response = $this->actingAs($authUser)
+        ->delete(route('users.destroy', $authUser));
+
+    $response->assertRedirectBack();
+    $response->assertSessionHasErrors(['message' => 'You cannot delete your own account.']);
+
+    $authUser->refresh();
+    expect($authUser->exists)->toBeTrue();
+});

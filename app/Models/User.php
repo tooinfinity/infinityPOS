@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\RoleEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -53,20 +52,5 @@ final class User extends Authenticatable
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    public function isCashier(): bool
-    {
-        return $this->hasRole(RoleEnum::CASHIER->value);
-    }
-
-    public function isManager(): bool
-    {
-        return $this->hasRole(RoleEnum::MANAGER->value);
-    }
-
-    public function isAdmin(): bool
-    {
-        return $this->hasRole(RoleEnum::ADMIN->value);
     }
 }
