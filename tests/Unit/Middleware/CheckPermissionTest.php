@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Actions\AssignPermissionsToRoles;
 use App\Enums\PermissionEnum;
 use App\Enums\RoleEnum;
 use App\Http\Middleware\CheckPermission;
@@ -14,14 +13,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 beforeEach(function (): void {
     foreach (RoleEnum::cases() as $roleEnum) {
-        Role::create(['name' => $roleEnum->value]);
+        $role = Role::create(['name' => $roleEnum->value]);
     }
 
     foreach (PermissionEnum::cases() as $permissionEnum) {
         Permission::create(['name' => $permissionEnum->value]);
     }
 
-    (new AssignPermissionsToRoles)->handle();
+    // Manually assign permissions to roles since the action was deleted
+    foreach (RoleEnum::cases() as $roleEnum) {
+        $role = Role::findByName($roleEnum->value);
+        $role->syncPermissions(PermissionEnum::forRole($roleEnum));
+    }
 });
 
 it('allows access when user has required permission', function (): void {

@@ -220,6 +220,7 @@ it('failed to create admin user with throwable exception that can try', function
         ->expectsQuestion('   Password', 'P@ssword123!')
         ->expectsQuestion('   Confirm Password', 'P@ssword123!')
         ->expectsOutput('   ❌ Failed to create admin user: Simulated database error')
+        ->expectsConfirmation('   Would you like to try again?', 'no')
         ->assertSuccessful();
 
     expect(User::query()->where('email', 'fail@example.com')->first())->toBeNull();

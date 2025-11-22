@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Actions\AssignPermissionsToRoles;
 use App\Actions\CreateUser;
-use App\Actions\SyncPermissions;
+use App\Enums\PermissionEnum;
 use App\Enums\RoleEnum;
 use App\Http\Requests\CreateUserRequest;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -42,8 +42,6 @@ final class AppSetupCommand extends Command
      * @throws Throwable
      */
     public function handle(
-        SyncPermissions $syncPermissions,
-        AssignPermissionsToRoles $assignPermissions,
         CreateUser $createUser
     ): int {
         $this->info('🚀 Starting APP Permission Setup...');
@@ -62,7 +60,7 @@ final class AppSetupCommand extends Command
 
         // Step 1: Sync Permissions
         $this->info('📝 Step 1: Syncing permissions...');
-        $permissionResults = $syncPermissions->handle();
+        $permissionResults = $this->syncPermissions();
 
         $this->line('   ✓ Created: '.count($permissionResults['created']));
         $this->line('   ✓ Existing: '.count($permissionResults['existing']));
@@ -76,7 +74,7 @@ final class AppSetupCommand extends Command
 
         // Step 3: Assign Permissions to Roles
         $this->info('🔐 Step 3: Assigning permissions to roles...');
-        $assignPermissions->handle();
+        $this->assignPermissionsToRoles();
         $this->displayRolePermissions();
         $this->newLine();
 
@@ -103,18 +101,85 @@ final class AppSetupCommand extends Command
         return self::SUCCESS;
     }
 
+    /**
+     * @return array{'created': list<string>, 'existing': list<string>, 'deleted': int}
+     *
+     * @throws Throwable
+     */
+    private function syncPermissions(string $guardName = 'web'): array
+    {
+        return DB::transaction(function () use ($guardName): array {
+            $created = [];
+            $existing = [];
+
+            foreach (PermissionEnum::cases() as $permissionEnum) {
+                $permission = Permission::query()->firstOrCreate([
+                    'name' => $permissionEnum->value,
+                    'guard_name' => $guardName,
+                ]);
+
+                if ($permission->wasRecentlyCreated) {
+                    $created[] = $permissionEnum->value;
+                } else {
+                    $existing[] = $permissionEnum->value;
+                }
+            }
+
+            // Clean up permissions that no longer exist in enum
+            $enumPermissions = array_map(
+                fn (PermissionEnum $case) => $case->value,
+                PermissionEnum::cases()
+            );
+            /** @var int $deletedCount */
+            $deletedCount = Permission::query()
+                ->where('guard_name', $guardName)
+                ->whereNotIn('name', $enumPermissions)
+                ->delete();
+
+            return [
+                'created' => $created,
+                'existing' => $existing,
+                'deleted' => $deletedCount,
+            ];
+        });
+    }
+
+    /**
+     * @throws Throwable
+     */
+    private function assignPermissionsToRoles(): void
+    {
+        DB::transaction(function (): void {
+            foreach (RoleEnum::cases() as $roleEnum) {
+                $role = Role::query()->firstOrCreate([
+                    'name' => $roleEnum->value,
+                    'guard_name' => 'web',
+                ]);
+
+                $permissions = PermissionEnum::forRole($roleEnum);
+
+                $role->syncPermissions($permissions);
+            }
+        });
+    }
+
     private function createAdminUser(CreateUser $createUser): void
     {
+        // CLI Mode: Try once with provided options
         if ($this->option('admin-email') && $this->option('admin-password') && $this->option('admin-name')) {
-            /** @var string $name */
-            $name = $this->option('admin-name');
-            /** @var string $email */
-            $email = $this->option('admin-email');
-            /** @var string $password */
-            $password = $this->option('admin-password');
-            $passwordConfirmation = $password;
-        } else {
-            // Interactive mode
+            $this->processUserCreation(
+                $createUser,
+                (string) $this->option('admin-name'),
+                (string) $this->option('admin-email'),
+                (string) $this->option('admin-password'),
+                (string) $this->option('admin-password')
+            );
+
+            return;
+        }
+
+        // Interactive Mode: Loop until success or user cancellation
+        do {
             $this->line('   Please provide admin user details:');
             $this->newLine();
 
@@ -126,8 +191,24 @@ final class AppSetupCommand extends Command
             $password = $this->secret('   Password');
             /** @var string $passwordConfirmation */
             $passwordConfirmation = $this->secret('   Confirm Password');
-        }
 
+            if ($this->processUserCreation($createUser, $name, $email, $password, $passwordConfirmation)) {
+                break;
+            }
+
+            if (! $this->confirm('   Would you like to try again?', true)) {
+                break;
+            }
+        } while (true);
+    }
+
+    private function processUserCreation(
+        CreateUser $createUser,
+        string $name,
+        string $email,
+        string $password,
+        string $passwordConfirmation
+    ): bool {
         $validator = Validator::make([
             'name' => $name,
             'email' => $email,
@@ -141,11 +222,7 @@ final class AppSetupCommand extends Command
                 $this->line('      - '.$error);
             }
 
-            if ($this->confirm('   Would you like to try again?', true)) {
-                $this->createAdminUser($createUser);
-            }
-
-            return;
+            return false;
         }
 
         try {
@@ -162,8 +239,12 @@ final class AppSetupCommand extends Command
             $this->line('   ✓ Email: '.$admin->email);
             $this->line('   ✓ Password: '.str_repeat('•', 8));
             $this->line('   ✓ Role: '.RoleEnum::ADMIN->value);
+
+            return true;
         } catch (Throwable $throwable) {
             $this->error('   ❌ Failed to create admin user: '.$throwable->getMessage());
+
+            return false;
         }
     }
 
