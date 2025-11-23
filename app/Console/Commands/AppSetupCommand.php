@@ -25,7 +25,7 @@ final class AppSetupCommand extends Command
      * @var string
      */
     protected $signature = 'app:setup
-                            {--fresh : Delete all existing roles and permissions before setup}
+                            {--fresh : Delete all existing roles and permissions before setup this run on development environments only}
                             {--skip-user : Skip user creation step}
                             {--admin-name= : Name for admin user}
                             {--admin-email= : Email for admin user}
@@ -47,19 +47,25 @@ final class AppSetupCommand extends Command
         $this->info('🚀 Starting APP Permission Setup...');
         $this->newLine();
 
-        if ($this->option('fresh')) {
-            $this->warn('⚠️ ⚠️ ⚠️  WARNING: Do not run this command in production ⚠️ ⚠️ ⚠️ ');
-            $roleCount = Role::count();
-            $permCount = Permission::count();
-            $this->line("   This will delete {$roleCount} roles and {$permCount} permissions.");
+        if (! app()->environment('production')) {
+            if ($this->option('fresh')) {
+                $roleCount = Role::query()->count();
+                $permCount = Permission::query()->count();
+                $usersCount = User::query()->count();
+                $this->line(sprintf('   This will delete %s roles, %s permissions and %s users.', $roleCount, $permCount, $usersCount));
 
-            if ($this->confirm('⚠️  This will delete all existing roles and permissions. Continue?', false)) {
-                $this->cleanupExisting();
-            } else {
-                $this->warn('Setup cancelled.');
+                if ($this->confirm('⚠️  This will delete all existing roles and permissions. Continue?', false)) {
+                    $this->cleanupExisting();
+                } else {
+                    $this->warn('Setup cancelled.');
 
-                return self::FAILURE;
+                    return self::FAILURE;
+                }
             }
+        } else {
+            $this->warn('⚠️ ⚠️ ⚠️  ERROR:you can not run this command in production ⚠️ ⚠️ ⚠️ ');
+
+            return self::FAILURE;
         }
 
         // Step 1: Sync Permissions
@@ -141,7 +147,7 @@ final class AppSetupCommand extends Command
                 ->delete();
 
             if ($deletedCount > 0) {
-                $this->warn("   ⚠️  Deleted {$deletedCount} permission(s) not defined in PermissionEnum");
+                $this->warn(sprintf('   ⚠️  Deleted %d permission(s) not defined in PermissionEnum', $deletedCount));
             }
 
             return [
@@ -261,8 +267,12 @@ final class AppSetupCommand extends Command
     {
         $this->warn('🗑️  Cleaning up existing roles and permissions...');
 
+        DB::table('model_has_roles')->delete();
+        DB::table('model_has_permissions')->delete();
+
         Role::query()->delete();
         Permission::query()->delete();
+        User::query()->delete();
 
         $this->info('   ✓ Cleanup completed');
         $this->newLine();

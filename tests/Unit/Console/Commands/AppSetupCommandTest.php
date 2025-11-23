@@ -132,6 +132,19 @@ it('syncs permissions during setup', function (): void {
     expect(Permission::query()->count())->toBe($permissionCount);
 });
 
+it('removes permissions not defined in enum and shows warning', function (): void {
+
+    Permission::create(['name' => 'old_obsolete_permission', 'guard_name' => 'web']);
+
+    $this->artisan('app:setup', [
+        '--skip-user' => true,
+    ])
+        ->expectsOutput('   ⚠️  Deleted 1 permission(s) not defined in PermissionEnum')
+        ->assertSuccessful();
+
+    expect(Permission::query()->where('name', 'old_obsolete_permission')->exists())->toBeFalse();
+});
+
 it('creates all roles during setup', function (): void {
     $this->artisan('app:setup', [
         '--skip-user' => true,
@@ -224,4 +237,15 @@ it('failed to create admin user with throwable exception that can try', function
         ->assertSuccessful();
 
     expect(User::query()->where('email', 'fail@example.com')->first())->toBeNull();
+});
+
+it('prevents running fresh command in production', function (): void {
+    $this->app['env'] = 'production';
+
+    $this->artisan('app:setup', [
+        '--fresh' => true,
+        '--skip-user' => true,
+    ])
+        ->expectsOutput('⚠️ ⚠️ ⚠️  ERROR:you can not run this command in production ⚠️ ⚠️ ⚠️ ')
+        ->assertFailed();
 });
