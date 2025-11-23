@@ -12,6 +12,9 @@ export function UserInfo({
     showRole?: boolean;
 }) {
     const getInitials = useInitials();
+    const rolesText = Array.isArray(user.roles)
+        ? user.roles.join(', ')
+        : user.roles;
 
     return (
         <>
@@ -32,7 +35,7 @@ export function UserInfo({
             <div className="grid flex-1 text-center leading-tight">
                 {showRole && (
                     <span className="truncate text-xs text-muted-foreground">
-                        {user.roles}
+                        {rolesText}
                     </span>
                 )}
             </div>

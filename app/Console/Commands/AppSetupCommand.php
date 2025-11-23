@@ -19,267 +19,165 @@ use Throwable;
 
 final class AppSetupCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'app:setup
-                            {--fresh : Delete all existing roles and permissions before setup this run on development environments only}
-                            {--skip-user : Skip user creation step}
-                            {--admin-name= : Name for admin user}
-                            {--admin-email= : Email for admin user}
-                            {--admin-password= : Password for admin user}';
+                            {--fresh : Delete all existing roles and permissions (development only)}
+                            {--skip-user : Skip admin user creation}
+                            {--admin-name= : Admin user name}
+                            {--admin-email= : Admin user email}
+                            {--admin-password= : Admin user password}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Create initial admin user, roles, and permissions';
+    protected $description = 'Setup roles, permissions, and create initial admin user';
 
-    /**
-     * @throws Throwable
-     */
-    public function handle(
-        CreateUser $createUser
-    ): int {
-        $this->info('🚀 Starting APP Permission Setup...');
-        $this->newLine();
+    public function handle(CreateUser $createUser): int
+    {
+        $this->showHeader();
 
-        if ($this->option('fresh')) {
-            if (app()->environment('production')) {
-                $this->warn('⚠️ ⚠️ ⚠️  ERROR: You cannot run this command in production ⚠️ ⚠️ ⚠️');
-
-                return self::FAILURE;
-            }
-
-            $roleCount = Role::query()->count();
-            $permCount = Permission::query()->count();
-            $usersCount = User::query()->count();
-            $this->line(sprintf('   This will delete %s roles, %s permissions and %s users.', $roleCount, $permCount, $usersCount));
-
-            if ($this->confirm('⚠️  This will delete all existing roles and permissions. Continue?', false)) {
-                $this->cleanupExisting();
-            } else {
-                $this->warn('Setup cancelled.');
-
-                return self::FAILURE;
-            }
+        if ($this->shouldRunFresh() && ! $this->handleFreshSetup()) {
+            return self::FAILURE;
         }
 
-        // Step 1: Sync Permissions
-        $this->info('📝 Step 1: Syncing permissions...');
-        $permissionResults = $this->syncPermissions();
-
-        $this->line('   ✓ Created: '.count($permissionResults['created']));
-        $this->line('   ✓ Existing: '.count($permissionResults['existing']));
-        $this->line('   ✓ Deleted: '.$permissionResults['deleted']);
-        $this->newLine();
-
-        // Step 2: Create Roles
-        $this->info('👥 Step 2: Creating roles...');
+        $this->syncPermissions();
         $this->createRoles();
-        $this->newLine();
-
-        // Step 3: Assign Permissions to Roles
-        $this->info('🔐 Step 3: Assigning permissions to roles...');
         $this->assignPermissionsToRoles();
-        $this->displayRolePermissions();
-        $this->newLine();
 
-        // Step 4: Create User
         if (! $this->option('skip-user')) {
-            $this->info('👤 Step 4: Creating admin user...');
             $this->createAdminUser($createUser);
         } else {
             $this->warn('⏭️  Step 4: User creation skipped');
         }
 
-        $this->newLine();
-
-        // Step 5: Clear Cache
-        $this->info('🧹 Step 5: Clearing permission cache...');
-        $this->call('permission:cache-reset');
-        $this->newLine();
-
-        $this->info('✅ Permission setup completed successfully!');
-        $this->newLine();
-
-        $this->displaySummary();
+        $this->clearPermissionCache();
+        $this->showSummary();
 
         return self::SUCCESS;
     }
 
-    /**
-     * @return array{'created': list<string>, 'existing': list<string>, 'deleted': int}
-     *
-     * @throws Throwable
-     */
-    private function syncPermissions(string $guardName = 'web'): array
+    private function showHeader(): void
     {
-        return DB::transaction(function () use ($guardName): array {
-            $created = [];
-            $existing = [];
-
-            foreach (PermissionEnum::cases() as $permissionEnum) {
-                $permission = Permission::query()->firstOrCreate([
-                    'name' => $permissionEnum->value,
-                    'guard_name' => $guardName,
-                ]);
-
-                if ($permission->wasRecentlyCreated) {
-                    $created[] = $permissionEnum->value;
-                } else {
-                    $existing[] = $permissionEnum->value;
-                }
-            }
-
-            // Clean up permissions that no longer exist in enum
-            $enumPermissions = array_map(
-                fn (PermissionEnum $case) => $case->value,
-                PermissionEnum::cases()
-            );
-            /** @var int $deletedCount */
-            $deletedCount = Permission::query()
-                ->where('guard_name', $guardName)
-                ->whereNotIn('name', $enumPermissions)
-                ->delete();
-
-            if ($deletedCount > 0) {
-                $this->warn(sprintf('   ⚠️  Deleted %d permission(s) not defined in PermissionEnum', $deletedCount));
-            }
-
-            return [
-                'created' => $created,
-                'existing' => $existing,
-                'deleted' => $deletedCount,
-            ];
-        });
+        $this->info('🚀 Starting APP Permission Setup...');
+        $this->newLine();
     }
 
-    /**
-     * @throws Throwable
-     */
-    private function assignPermissionsToRoles(): void
+    private function shouldRunFresh(): bool
     {
-        DB::transaction(function (): void {
-            foreach (RoleEnum::cases() as $roleEnum) {
-                $role = Role::query()->firstOrCreate([
-                    'name' => $roleEnum->value,
-                    'guard_name' => 'web',
-                ]);
-
-                $permissions = PermissionEnum::forRole($roleEnum);
-
-                $role->syncPermissions($permissions);
-            }
-        });
+        return (bool) $this->option('fresh');
     }
 
-    private function createAdminUser(CreateUser $createUser): void
+    private function handleFreshSetup(): bool
     {
-        // CLI Mode: Try once with provided options
-        if ($this->option('admin-email') && $this->option('admin-password') && $this->option('admin-name')) {
-            $this->processUserCreation(
-                $createUser,
-                (string) $this->option('admin-name'),
-                (string) $this->option('admin-email'),
-                (string) $this->option('admin-password'),
-                (string) $this->option('admin-password')
-            );
-
-            return;
-        }
-
-        // Interactive Mode: Loop until success or user cancellation
-        do {
-            $this->line('   Please provide admin user details:');
-            $this->newLine();
-
-            /** @var string $name */
-            $name = $this->ask('   Name', 'System Administrator');
-            /** @var string $email */
-            $email = $this->ask('   Email', 'admin@example.com');
-            /** @var string $password */
-            $password = $this->secret('   Password');
-            /** @var string $passwordConfirmation */
-            $passwordConfirmation = $this->secret('   Confirm Password');
-
-            if ($this->processUserCreation($createUser, $name, $email, $password, $passwordConfirmation)) {
-                break;
-            }
-
-            if (! $this->confirm('   Would you like to try again?', true)) {
-                break;
-            }
-        } while (true);
-    }
-
-    private function processUserCreation(
-        CreateUser $createUser,
-        string $name,
-        string $email,
-        string $password,
-        string $passwordConfirmation
-    ): bool {
-        $validator = Validator::make([
-            'name' => $name,
-            'email' => $email,
-            'password' => $password,
-            'password_confirmation' => $passwordConfirmation,
-            'role' => RoleEnum::ADMIN->value,
-        ], (new CreateUserRequest)->rules());
-
-        if ($validator->fails()) {
-            $this->error('   ❌ Validation failed:');
-            foreach ($validator->errors()->all() as $error) {
-                $this->line('      - '.$error);
-            }
+        if (app()->environment('production')) {
+            $this->warn('⚠️ ⚠️ ⚠️  ERROR: Cannot run fresh setup in production ⚠️ ⚠️ ⚠️');
 
             return false;
         }
 
-        try {
-            $admin = $createUser->handle(
-                ['name' => $name, 'email' => $email],
-                $password
-            );
+        $this->showCleanupStats();
 
-            $admin->assignRole(RoleEnum::ADMIN->value);
-
-            $this->newLine();
-            $this->info('   ✅ Admin user created successfully!');
-            $this->line('   ✓ Name: '.$admin->name);
-            $this->line('   ✓ Email: '.$admin->email);
-            $this->line('   ✓ Password: '.str_repeat('•', 8));
-            $this->line('   ✓ Role: '.RoleEnum::ADMIN->value);
-
-            return true;
-        } catch (Throwable $throwable) {
-            $this->error('   ❌ Failed to create admin user: '.$throwable->getMessage());
+        if (! $this->confirm('⚠️  This will delete all existing roles, permissions and users. Continue?', false)) {
+            $this->warn('Setup cancelled.');
 
             return false;
         }
+
+        $this->cleanupExisting();
+
+        return true;
+    }
+
+    private function showCleanupStats(): void
+    {
+        $roleCount = Role::query()->count();
+        $permissionCount = Permission::query()->count();
+        $userCount = User::query()->count();
+
+        $this->line(sprintf(
+            '   This will delete %d roles, %d permissions and %d users.',
+            $roleCount,
+            $permissionCount,
+            $userCount
+        ));
     }
 
     private function cleanupExisting(): void
     {
-        $this->warn('🗑️  Cleaning up existing roles and permissions...');
+        $this->warn('🗑️  Cleaning up existing data...');
 
-        DB::table('model_has_roles')->delete();
-        DB::table('model_has_permissions')->delete();
-
-        Role::query()->delete();
-        Permission::query()->delete();
-        User::query()->delete();
+        DB::transaction(function (): void {
+            DB::table('model_has_roles')->delete();
+            DB::table('model_has_permissions')->delete();
+            Role::query()->delete();
+            Permission::query()->delete();
+            User::query()->delete();
+        });
 
         $this->info('   ✓ Cleanup completed');
         $this->newLine();
     }
 
+    private function syncPermissions(): void
+    {
+        $this->info('📝 Step 1: Syncing permissions...');
+
+        $results = DB::transaction(function (): array {
+            $created = [];
+            $existing = [];
+
+            foreach (PermissionEnum::cases() as $permission) {
+                $model = Permission::query()->firstOrCreate([
+                    'name' => $permission->value,
+                    'guard_name' => 'web',
+                ]);
+
+                $model->wasRecentlyCreated ? $created[] = $permission->value : $existing[] = $permission->value;
+            }
+
+            $deleted = $this->deleteObsoletePermissions();
+
+            return [
+                'created' => $created,
+                'existing' => $existing,
+                'deleted' => $deleted,
+            ];
+        });
+
+        $this->showPermissionStats($results);
+    }
+
+    private function deleteObsoletePermissions(): int
+    {
+        $validPermissions = array_map(
+            fn (PermissionEnum $case): string => $case->value,
+            PermissionEnum::cases()
+        );
+
+        /** @var int $deleted */
+        $deleted = Permission::query()
+            ->where('guard_name', 'web')
+            ->whereNotIn('name', $validPermissions)
+            ->delete();
+
+        if ($deleted > 0) {
+            $this->warn(sprintf('   ⚠️  Deleted %d obsolete permission(s)', $deleted));
+        }
+
+        return $deleted;
+    }
+
+    /**
+     * @param  array{created: list<string>, existing: list<string>, deleted: int}  $results
+     */
+    private function showPermissionStats(array $results): void
+    {
+        $this->line('   ✓ Created: '.count($results['created']));
+        $this->line('   ✓ Existing: '.count($results['existing']));
+        $this->line('   ✓ Deleted: '.$results['deleted']);
+        $this->newLine();
+    }
+
     private function createRoles(): void
     {
+        $this->info('👥 Step 2: Creating roles...');
+
         foreach (RoleEnum::cases() as $roleEnum) {
             $role = Role::query()->firstOrCreate([
                 'name' => $roleEnum->value,
@@ -289,44 +187,214 @@ final class AppSetupCommand extends Command
             $status = $role->wasRecentlyCreated ? 'Created' : 'Exists';
             $this->line(sprintf('   ✓ %s: %s (%s)', $status, $roleEnum->label(), $roleEnum->description()));
         }
+
+        $this->newLine();
     }
 
-    private function displayRolePermissions(): void
+    private function assignPermissionsToRoles(): void
     {
-        foreach (RoleEnum::cases() as $roleEnum) {
-            $role = Role::findByName($roleEnum->value);
-            $permissionsCount = $role->permissions()->count();
+        $this->info('🔐 Step 3: Assigning permissions to roles...');
 
-            $this->line(sprintf('   ✓ %s: %d permissions', $roleEnum->value, $permissionsCount));
+        DB::transaction(function (): void {
+            foreach (RoleEnum::cases() as $roleEnum) {
+                $role = Role::findByName($roleEnum->value);
+                $permissions = PermissionEnum::forRole($roleEnum);
+                $role->syncPermissions($permissions);
+
+                $this->line(sprintf('   ✓ %s: %d permissions', $roleEnum->value, count($permissions)));
+            }
+        });
+
+        $this->newLine();
+    }
+
+    private function createAdminUser(CreateUser $createUser): void
+    {
+        $this->info('👤 Step 4: Creating admin user...');
+
+        if ($this->hasAllAdminOptions()) {
+            $this->createAdminFromOptions($createUser);
+
+            return;
+        }
+
+        $this->createAdminInteractively($createUser);
+    }
+
+    private function hasAllAdminOptions(): bool
+    {
+        return $this->option('admin-name')
+            && $this->option('admin-email')
+            && $this->option('admin-password');
+    }
+
+    private function createAdminFromOptions(CreateUser $createUser): void
+    {
+        $name = $this->option('admin-name');
+        $email = $this->option('admin-email');
+        $password = $this->option('admin-password');
+
+        assert(is_string($name));
+        assert(is_string($email));
+        assert(is_string($password));
+
+        $this->processUserCreation($createUser, $name, $email, $password, $password);
+    }
+
+    private function createAdminInteractively(CreateUser $createUser): void
+    {
+        do {
+            [$name, $email, $password, $confirmation] = $this->promptForCredentials();
+
+            if ($this->processUserCreation($createUser, $name, $email, $password, $confirmation)) {
+                break;
+            }
+
+            if (! $this->confirm('   Would you like to try again?', true)) {
+                break;
+            }
+        } while (true);
+    }
+
+    /**
+     * @return array{0: string, 1: string, 2: string, 3: string}
+     */
+    private function promptForCredentials(): array
+    {
+        $this->line('   Please provide admin user details:');
+        $this->newLine();
+
+        $name = $this->ask('   Name', 'System Administrator');
+        $email = $this->ask('   Email', 'admin@example.com');
+        $password = $this->secret('   Password');
+        $confirmation = $this->secret('   Confirm Password');
+
+        assert(is_string($name));
+        assert(is_string($email));
+        assert(is_string($password));
+        assert(is_string($confirmation));
+
+        return [$name, $email, $password, $confirmation];
+    }
+
+    private function processUserCreation(
+        CreateUser $createUser,
+        string $name,
+        string $email,
+        string $password,
+        string $passwordConfirmation
+    ): bool {
+        $validator = $this->validateCredentials($name, $email, $password, $passwordConfirmation);
+
+        if ($validator->fails()) {
+            $this->showValidationErrors(array_values($validator->errors()->all()));
+
+            return false;
+        }
+
+        try {
+            $admin = $this->createAndAssignRole($createUser, $name, $email, $password);
+            $this->showUserCreatedSuccess($admin);
+
+            return true;
+        } catch (Throwable $throwable) {
+            $this->error('   ❌ Failed to create admin user: '.$throwable->getMessage());
+
+            return false;
         }
     }
 
-    private function displaySummary(): void
+    private function validateCredentials(string $name, string $email, string $password, string $confirmation): \Illuminate\Validation\Validator
+    {
+        return Validator::make([
+            'name' => $name,
+            'email' => $email,
+            'password' => $password,
+            'password_confirmation' => $confirmation,
+            'role' => RoleEnum::ADMIN->value,
+        ], (new CreateUserRequest)->rules());
+    }
+
+    /**
+     * @param  list<string>  $errors
+     */
+    private function showValidationErrors(array $errors): void
+    {
+        $this->error('   ❌ Validation failed:');
+        foreach ($errors as $error) {
+            $this->line('      - '.$error);
+        }
+    }
+
+    private function createAndAssignRole(CreateUser $createUser, string $name, string $email, string $password): User
+    {
+        $admin = $createUser->handle(['name' => $name, 'email' => $email], $password);
+        $admin->assignRole(RoleEnum::ADMIN->value);
+
+        return $admin;
+    }
+
+    private function showUserCreatedSuccess(User $admin): void
+    {
+        $this->newLine();
+        $this->info('   ✅ Admin user created successfully!');
+        $this->line('   ✓ Name: '.$admin->name);
+        $this->line('   ✓ Email: '.$admin->email);
+        $this->line('   ✓ Password: '.str_repeat('•', 8));
+        $this->line('   ✓ Role: '.RoleEnum::ADMIN->value);
+    }
+
+    private function clearPermissionCache(): void
+    {
+        $this->newLine();
+        $this->info('🧹 Step 5: Clearing permission cache...');
+        $this->call('permission:cache-reset');
+        $this->newLine();
+    }
+
+    private function showSummary(): void
+    {
+        $this->info('✅ Permission setup completed successfully!');
+        $this->newLine();
+
+        $this->showRoleSummaryTable();
+        $this->showNextSteps();
+        $this->showAdminCount();
+    }
+
+    private function showRoleSummaryTable(): void
     {
         $this->info('📊 Setup Summary:');
-        $this->table(
-            ['Role', 'Permissions', 'Description'],
-            collect(RoleEnum::cases())->map(function (RoleEnum $roleEnum): array {
-                $role = Role::findByName($roleEnum->value);
 
-                return [
-                    $roleEnum->value,
-                    $role->permissions()->count(),
-                    $roleEnum->description(),
-                ];
-            })->all()
-        );
+        $data = collect(RoleEnum::cases())->map(function (RoleEnum $roleEnum): array {
+            $role = Role::findByName($roleEnum->value);
 
+            return [
+                $roleEnum->value,
+                $role->permissions()->count(),
+                $roleEnum->description(),
+            ];
+        });
+
+        $this->table(['Role', 'Permissions', 'Description'], $data->all());
         $this->newLine();
+    }
+
+    private function showNextSteps(): void
+    {
         $this->info('💡 Next Steps:');
         $this->line('   • Login with the admin credentials');
         $this->line('   • Update the admin password if using default');
         $this->line('   • Create additional users via the admin panel');
         $this->newLine();
+    }
 
-        $adminCount = User::query()->whereHas('roles', function (Builder $query): void {
-            $query->where('name', RoleEnum::ADMIN->value);
-        })->count();
-        $this->line('   Total admin users: '.$adminCount);
+    private function showAdminCount(): void
+    {
+        $count = User::query()
+            ->whereHas('roles', fn (Builder $q): Builder => $q->where('name', RoleEnum::ADMIN->value))
+            ->count();
+
+        $this->line('   Total admin users: '.$count);
     }
 }
