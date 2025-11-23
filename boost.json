@@ -1,13 +1,18 @@
 {
     "agents": [
         "claude_code",
+        "copilot",
         "cursor",
+        "gemini",
         "phpstorm"
     ],
     "editors": [
         "claude_code",
         "cursor",
-        "phpstorm"
+        "phpstorm",
+        "vscode"
     ],
-    "guidelines": []
+    "guidelines": [
+        "laravel/fortify"
+    ]
 }
