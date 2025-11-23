@@ -94,6 +94,9 @@ enum PermissionEnum: string
     // Settings (Admin only)
     case VIEW_SETTINGS = 'view_settings';
     case EDIT_SETTINGS = 'edit_settings';
+    case EDIT_PROFILE = 'edit_profile';
+    case EDIT_PASSWORD = 'edit_password';
+    case EDIT_APPEARANCE = 'edit_appearance';
 
     // Users Management (Admin only)
     case VIEW_USERS = 'view_users';
@@ -149,6 +152,9 @@ enum PermissionEnum: string
             self::CREATE_ROLES,
             self::EDIT_ROLES,
             self::DELETE_ROLES,
+            self::EDIT_PROFILE,
+            self::EDIT_PASSWORD,
+            self::EDIT_APPEARANCE,
         ];
 
         return array_values(
@@ -175,87 +181,6 @@ enum PermissionEnum: string
             self::VIEW_PRODUCTS->value,
             self::VIEW_CONTACTS->value,
         ];
-    }
-
-    /**
-     * Group permissions by module.
-     *
-     * @return array<string, array{label: string, permissions: array<array{value: string, label: string}>}>
-     */
-    public static function groupedByModule(): array
-    {
-        $grouped = [];
-
-        foreach (self::cases() as $permission) {
-            $module = $permission->module()->value;
-
-            if (! isset($grouped[$module])) {
-                $grouped[$module] = [
-                    'label' => $permission->module()->label(),
-                    'permissions' => [],
-                ];
-            }
-
-            $grouped[$module]['permissions'][] = [
-                'value' => $permission->value,
-                'label' => $permission->label(),
-            ];
-        }
-
-        return $grouped;
-    }
-
-    public function module(): ModuleEnum
-    {
-        return match ($this) {
-            self::VIEW_DASHBOARD => ModuleEnum::DASHBOARD,
-
-            self::VIEW_PRODUCTS, self::CREATE_PRODUCTS, self::EDIT_PRODUCTS,
-            self::DELETE_PRODUCTS, self::IMPORT_PRODUCTS, self::EXPORT_PRODUCTS => ModuleEnum::PRODUCTS,
-
-            self::VIEW_CATEGORIES, self::CREATE_CATEGORIES, self::EDIT_CATEGORIES,
-            self::DELETE_CATEGORIES => ModuleEnum::CATEGORIES,
-
-            self::VIEW_BRANDS, self::CREATE_BRANDS, self::EDIT_BRANDS,
-            self::DELETE_BRANDS => ModuleEnum::BRANDS,
-
-            self::VIEW_UNITS, self::CREATE_UNITS, self::EDIT_UNITS,
-            self::DELETE_UNITS => ModuleEnum::UNITS,
-
-            self::VIEW_TAXES, self::CREATE_TAXES, self::EDIT_TAXES,
-            self::DELETE_TAXES => ModuleEnum::TAXES,
-
-            self::VIEW_SALES, self::CREATE_SALES, self::EDIT_SALES,
-            self::DELETE_SALES, self::EXPORT_SALES => ModuleEnum::SALES,
-
-            self::VIEW_PURCHASES, self::CREATE_PURCHASES, self::EDIT_PURCHASES,
-            self::DELETE_PURCHASES, self::EXPORT_PURCHASES => ModuleEnum::PURCHASES,
-
-            self::VIEW_EXPENSES, self::CREATE_EXPENSES, self::EDIT_EXPENSES,
-            self::DELETE_EXPENSES => ModuleEnum::EXPENSES,
-
-            self::VIEW_MONEYBOXES, self::CREATE_MONEYBOXES, self::EDIT_MONEYBOXES,
-            self::DELETE_MONEYBOXES => ModuleEnum::MONEYBOXES,
-
-            self::VIEW_CONTACTS, self::CREATE_CONTACTS, self::EDIT_CONTACTS,
-            self::DELETE_CONTACTS, self::IMPORT_CONTACTS, self::EXPORT_CONTACTS => ModuleEnum::CONTACTS,
-
-            self::VIEW_WAREHOUSES, self::CREATE_WAREHOUSES, self::EDIT_WAREHOUSES,
-            self::DELETE_WAREHOUSES => ModuleEnum::WAREHOUSES,
-
-            self::VIEW_REPORTS, self::EXPORT_REPORTS => ModuleEnum::REPORTS,
-
-            self::ACCESS_POS, self::PROCESS_SALES, self::APPLY_DISCOUNTS,
-            self::VOID_SALES => ModuleEnum::POS,
-
-            self::VIEW_SETTINGS, self::EDIT_SETTINGS => ModuleEnum::SETTINGS,
-
-            self::VIEW_USERS, self::CREATE_USERS, self::EDIT_USERS,
-            self::DELETE_USERS => ModuleEnum::USERS,
-
-            self::VIEW_ROLES, self::CREATE_ROLES, self::EDIT_ROLES,
-            self::DELETE_ROLES => ModuleEnum::ROLES,
-        };
     }
 
     public function label(): string

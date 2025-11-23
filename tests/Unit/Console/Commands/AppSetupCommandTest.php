@@ -246,6 +246,6 @@ it('prevents running fresh command in production', function (): void {
         '--fresh' => true,
         '--skip-user' => true,
     ])
-        ->expectsOutput('⚠️ ⚠️ ⚠️  ERROR:you can not run this command in production ⚠️ ⚠️ ⚠️ ')
+        ->expectsOutput('⚠️ ⚠️ ⚠️  ERROR: You cannot run this command in production ⚠️ ⚠️ ⚠️')
         ->assertFailed();
 });

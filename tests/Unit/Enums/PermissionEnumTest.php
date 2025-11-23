@@ -2,15 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Enums\ModuleEnum;
 use App\Enums\PermissionEnum;
 use App\Enums\RoleEnum;
-
-it('returns correct module for permission', function (): void {
-    expect(PermissionEnum::VIEW_PRODUCTS->module())->toBe(ModuleEnum::PRODUCTS)
-        ->and(PermissionEnum::ACCESS_POS->module())->toBe(ModuleEnum::POS)
-        ->and(PermissionEnum::VIEW_SETTINGS->module())->toBe(ModuleEnum::SETTINGS);
-});
 
 it('returns correct label', function (): void {
     expect(PermissionEnum::VIEW_PRODUCTS->label())->toBe('View Products')
@@ -49,15 +42,4 @@ it('returns correct cashier permissions', function (): void {
         ->toContain('access_pos', 'process_sales', 'view_dashboard')
         ->not->toContain('create_products', 'delete_products', 'view_settings')
         ->toHaveCount(7);
-});
-
-it('groups permissions by module correctly', function (): void {
-    $grouped = PermissionEnum::groupedByModule();
-
-    expect($grouped)->toBeArray()
-        ->toHaveKey('products')
-        ->toHaveKey('pos')
-        ->and($grouped['products'])->toHaveKeys(['label', 'permissions'])
-        ->and($grouped['products']['label'])->toBe('Products')
-        ->and($grouped['products']['permissions'])->toBeArray()->not->toBeEmpty();
 });

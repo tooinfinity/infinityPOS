@@ -2,12 +2,13 @@ import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useLanguage } from '@/hooks/use-language';
+import { usePermissions } from '@/hooks/use-permissions';
 import { cn } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit as editPassword } from '@/routes/password';
 import { edit } from '@/routes/user-profile';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
+import { type NavItem, type SharedData } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 
 interface SettingsLayoutProps extends PropsWithChildren {
@@ -19,6 +20,11 @@ export default function SettingsLayout({
     wide = false,
 }: SettingsLayoutProps) {
     const { __ } = useLanguage();
+    const { can, isRole } = usePermissions();
+    const { auth } = usePage<SharedData>().props;
+
+    console.log('User permissions:', auth.user?.permissions);
+    console.log('User roles:', auth.user?.roles);
 
     // When server-side rendering, we only render the layout on the client...
     if (typeof window === 'undefined') {
@@ -26,26 +32,42 @@ export default function SettingsLayout({
     }
 
     const sidebarNavItems: NavItem[] = [
-        {
-            title: __('Profile'),
-            href: edit(),
-            icon: null,
-        },
-        {
-            title: __('Users'),
-            href: '/users',
-            icon: null,
-        },
-        {
-            title: __('Password'),
-            href: editPassword(),
-            icon: null,
-        },
-        {
-            title: __('Appearance'),
-            href: editAppearance(),
-            icon: null,
-        },
+        ...(can('edit_profile')
+            ? [
+                  {
+                      title: __('Profile'),
+                      href: edit(),
+                      icon: null,
+                  },
+              ]
+            : []),
+        ...(isRole('admin')
+            ? [
+                  {
+                      title: __('Users'),
+                      href: '/users',
+                      icon: null,
+                  },
+              ]
+            : []),
+        ...(can('edit_password')
+            ? [
+                  {
+                      title: __('Password'),
+                      href: editPassword(),
+                      icon: null,
+                  },
+              ]
+            : []),
+        ...(can('edit_appearance')
+            ? [
+                  {
+                      title: __('Appearance'),
+                      href: editAppearance(),
+                      icon: null,
+                  },
+              ]
+            : []),
     ];
 
     const currentPath = window.location.pathname;
