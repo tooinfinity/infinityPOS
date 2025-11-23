@@ -48,7 +48,11 @@ final class AppSetupCommand extends Command
         $this->newLine();
 
         if ($this->option('fresh')) {
-            $this->warn('⚠️ ⚠️ ⚠️  DoNot run this command in production ⚠️ ⚠️ ⚠️ ');
+            $this->warn('⚠️ ⚠️ ⚠️  WARNING: Do not run this command in production ⚠️ ⚠️ ⚠️ ');
+            $roleCount = Role::count();
+            $permCount = Permission::count();
+            $this->line("   This will delete {$roleCount} roles and {$permCount} permissions.");
+
             if ($this->confirm('⚠️  This will delete all existing roles and permissions. Continue?', false)) {
                 $this->cleanupExisting();
             } else {
@@ -135,6 +139,10 @@ final class AppSetupCommand extends Command
                 ->where('guard_name', $guardName)
                 ->whereNotIn('name', $enumPermissions)
                 ->delete();
+
+            if ($deletedCount > 0) {
+                $this->warn("   ⚠️  Deleted {$deletedCount} permission(s) not defined in PermissionEnum");
+            }
 
             return [
                 'created' => $created,
@@ -233,7 +241,6 @@ final class AppSetupCommand extends Command
             );
 
             $admin->assignRole(RoleEnum::ADMIN->value);
-            $admin->givePermissionTo(Permission::all());
 
             $this->newLine();
             $this->info('   ✅ Admin user created successfully!');
