@@ -5,11 +5,16 @@ import { type User } from '@/types';
 export function UserInfo({
     user,
     showEmail = false,
+    showRole = false,
 }: {
     user: User;
     showEmail?: boolean;
+    showRole?: boolean;
 }) {
     const getInitials = useInitials();
+    const rolesText = Array.isArray(user.roles)
+        ? user.roles.join(', ')
+        : user.roles;
 
     return (
         <>
@@ -24,6 +29,13 @@ export function UserInfo({
                 {showEmail && (
                     <span className="truncate text-xs text-muted-foreground">
                         {user.email}
+                    </span>
+                )}
+            </div>
+            <div className="grid flex-1 text-center leading-tight">
+                {showRole && (
+                    <span className="truncate text-xs text-muted-foreground">
+                        {rolesText}
                     </span>
                 )}
             </div>

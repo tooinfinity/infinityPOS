@@ -24,6 +24,13 @@
       0 => 'Laravel\\Boost\\BoostServiceProvider',
     ),
   ),
+  'laravel/fortify' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Laravel\\Fortify\\FortifyServiceProvider',
+    ),
+  ),
   'laravel/mcp' => 
   array (
     'aliases' => 
@@ -96,6 +103,13 @@
     'providers' => 
     array (
       0 => 'Pest\\Laravel\\PestServiceProvider',
+    ),
+  ),
+  'spatie/laravel-permission' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Spatie\\Permission\\PermissionServiceProvider',
     ),
   ),
 );

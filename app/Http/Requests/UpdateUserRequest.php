@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Enums\RoleEnum;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,6 +30,11 @@ final class UpdateUserRequest extends FormRequest
                 'email',
                 'max:255',
                 Rule::unique(User::class)->ignore($user->id),
+            ],
+            'role' => [
+                'sometimes',
+                'string',
+                Rule::enum(RoleEnum::class),
             ],
         ];
     }

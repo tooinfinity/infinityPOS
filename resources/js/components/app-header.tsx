@@ -29,6 +29,7 @@ import {
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
 import { useLanguage } from '@/hooks/use-language';
+import { usePermissions } from '@/hooks/use-permissions';
 import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
@@ -49,19 +50,24 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const page = usePage<SharedData>();
     const { auth } = page.props;
     const getInitials = useInitials();
+    const { can } = usePermissions();
 
     const mainNavItems: NavItem[] = [
-        {
-            title: __('Dashboard'),
-            href: dashboard(),
-            icon: LayoutGrid,
-        },
+        ...(can('view_dashboard')
+            ? [
+                  {
+                      title: __('Dashboard'),
+                      href: dashboard(),
+                      icon: LayoutGrid,
+                  },
+              ]
+            : []),
     ];
 
     const rightNavItems: NavItem[] = [
         {
             title: __('Repository'),
-            href: 'https://github.com/laravel/react-starter-kit',
+            href: 'https://github.com/tooinfinity/infinityPOS',
             icon: Folder,
         },
         {

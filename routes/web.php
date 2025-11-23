@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\PermissionEnum;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
@@ -24,12 +25,16 @@ Route::middleware('auth')->group(function (): void {
         ->name('locale.store');
     // User Management...
     Route::get('users', [UserController::class, 'index'])
+        ->middleware('permission:'.PermissionEnum::VIEW_USERS->value)
         ->name('users.index');
     Route::post('users', [UserController::class, 'store'])
+        ->middleware('permission:'.PermissionEnum::CREATE_USERS->value)
         ->name('users.store');
     Route::patch('users/{user}', [UserController::class, 'update'])
+        ->middleware('permission:'.PermissionEnum::EDIT_USERS->value)
         ->name('users.update');
     Route::delete('users/{user}', [UserController::class, 'destroy'])
+        ->middleware('permission:'.PermissionEnum::DELETE_USERS->value)
         ->name('users.destroy');
 
     // User Profile...

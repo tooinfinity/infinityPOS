@@ -37,16 +37,34 @@ final class HandleInertiaRequests extends Middleware
 
         [$message, $author] = str($quote)->explode('-');
 
+        $user = $request->user();
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => mb_trim((string) $message), 'author' => mb_trim((string) $author)],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user ? $this->serializeUser($user) : null,
             ],
             'locale' => app()->getLocale(),
             'language' => $this->loadTranslations(),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+        ];
+    }
+
+    /**
+     * Serialize user with permissions and roles for frontend.
+     *
+     * @return array<string, mixed>
+     */
+    private function serializeUser(\App\Models\User $user): array
+    {
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'permissions' => $user->getAllPermissions()->pluck('name')->values()->toArray(),
+            'roles' => $user->getRoleNames()->values()->toArray(),
         ];
     }
 

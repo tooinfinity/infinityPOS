@@ -11,6 +11,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useLanguage } from '@/hooks/use-language';
+import { usePermissions } from '@/hooks/use-permissions';
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
@@ -19,19 +20,24 @@ import AppLogo from './app-logo';
 
 export function AppSidebar() {
     const { __ } = useLanguage();
+    const { can } = usePermissions();
 
     const mainNavItems: NavItem[] = [
-        {
-            title: __('Dashboard'),
-            href: dashboard(),
-            icon: LayoutGrid,
-        },
+        ...(can('view_dashboard')
+            ? [
+                  {
+                      title: __('Dashboard'),
+                      href: dashboard(),
+                      icon: LayoutGrid,
+                  },
+              ]
+            : []),
     ];
 
     const footerNavItems: NavItem[] = [
         {
             title: __('Repository'),
-            href: 'https://github.com/laravel/react-starter-kit',
+            href: 'https://github.com/tooinfinity/infinityPOS',
             icon: Folder,
         },
         {

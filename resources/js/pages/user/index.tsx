@@ -1,4 +1,5 @@
 import UserController from '@/actions/App/Http/Controllers/UserController';
+import { Can } from '@/components/can';
 import { Form, Head, router } from '@inertiajs/react';
 import { Edit, LoaderCircle, Trash } from 'lucide-react';
 
@@ -24,6 +25,13 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { UserInfo } from '@/components/user-info';
 import { useLanguage } from '@/hooks/use-language';
 import AppLayout from '@/layouts/app-layout';
@@ -31,12 +39,18 @@ import SettingsLayout from '@/layouts/settings/layout';
 import { BreadcrumbItem, User } from '@/types';
 import { useState } from 'react';
 
+interface RoleOption {
+    value: string;
+    label: string;
+    description: string;
+}
 interface UsersProps {
     users: {
         data: User[];
     };
+    available_roles: RoleOption[];
 }
-export default function Index({ users }: UsersProps) {
+export default function Index({ users, available_roles }: UsersProps) {
     const { __ } = useLanguage();
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -83,6 +97,7 @@ export default function Index({ users }: UsersProps) {
                                 'email',
                                 'password',
                                 'password_confirmation',
+                                'role',
                             ]}
                             disableWhileProcessing
                             className="flex flex-col gap-6"
@@ -132,6 +147,37 @@ export default function Index({ users }: UsersProps) {
                                                     message={errors.email}
                                                 />
                                             </div>
+                                        </div>
+
+                                        {/* Role Selection */}
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="role">
+                                                {__('Role')}
+                                            </Label>
+                                            <Select name="role">
+                                                <SelectTrigger>
+                                                    <SelectValue
+                                                        placeholder={__(
+                                                            'Select a role',
+                                                        )}
+                                                    />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {available_roles.map(
+                                                        (role) => (
+                                                            <SelectItem
+                                                                key={role.value}
+                                                                value={
+                                                                    role.value
+                                                                }
+                                                            >
+                                                                {role.label}
+                                                            </SelectItem>
+                                                        ),
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                            <InputError message={errors.role} />
                                         </div>
 
                                         <div className="grid gap-2">
@@ -206,24 +252,34 @@ export default function Index({ users }: UsersProps) {
                                     >
                                         <UserInfo user={u} showEmail={true} />
                                         <button className="ml-auto text-sm text-muted-foreground hover:text-muted-foreground/80">
-                                            {__('Role')}
+                                            {u.roles && u.roles.length > 0
+                                                ? u.roles.join(', ')
+                                                : __('No Role')}
                                         </button>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => setEditingUser(u)}
-                                            className="h-8 w-8"
-                                        >
-                                            <Edit className="h-4 w-4 text-muted-foreground" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => setDeletingUser(u)}
-                                            className="h-8 w-8"
-                                        >
-                                            <Trash className="h-4 w-4 text-destructive hover:text-destructive/80" />
-                                        </Button>
+                                        <Can permission="edit_users">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() =>
+                                                    setEditingUser(u)
+                                                }
+                                                className="h-8 w-8"
+                                            >
+                                                <Edit className="h-4 w-4 text-muted-foreground" />
+                                            </Button>
+                                        </Can>
+                                        <Can permission="delete_users">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() =>
+                                                    setDeletingUser(u)
+                                                }
+                                                className="h-8 w-8"
+                                            >
+                                                <Trash className="h-4 w-4 text-destructive hover:text-destructive/80" />
+                                            </Button>
+                                        </Can>
                                     </div>
                                 ))
                             ) : (
@@ -293,6 +349,45 @@ export default function Index({ users }: UsersProps) {
                                             <InputError
                                                 message={errors.email}
                                             />
+                                        </div>
+
+                                        {/* Edit Role Selection */}
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="edit-role">
+                                                {__('Role')}
+                                            </Label>
+                                            <Select
+                                                name="role"
+                                                defaultValue={
+                                                    editingUser.roles &&
+                                                    editingUser.roles.length > 0
+                                                        ? editingUser.roles[0]
+                                                        : undefined
+                                                }
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue
+                                                        placeholder={__(
+                                                            'Select a role',
+                                                        )}
+                                                    />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {available_roles.map(
+                                                        (role) => (
+                                                            <SelectItem
+                                                                key={role.value}
+                                                                value={
+                                                                    role.value
+                                                                }
+                                                            >
+                                                                {role.label}
+                                                            </SelectItem>
+                                                        ),
+                                                    )}
+                                                </SelectContent>
+                                            </Select>
+                                            <InputError message={errors.role} />
                                         </div>
 
                                         <div className="grid gap-2">
