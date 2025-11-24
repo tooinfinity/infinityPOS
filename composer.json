@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "tooinfinity/infinityPOS",
+    "name": "tooinfinity/infinity-pos",
     "type": "project",
     "description": "Point Of Sale and inventory management system.",
     "keywords": [
