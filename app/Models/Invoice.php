@@ -1,0 +1,100 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+use Carbon\CarbonImmutable;
+use Database\Factories\InvoiceFactory;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+
+/**
+ * @property-read int $id
+ * @property-read string $reference
+ * @property-read int $sale_id
+ * @property-read int|null $client_id
+ * @property-read CarbonImmutable $issued_at
+ * @property-read CarbonImmutable|null $due_at
+ * @property-read CarbonImmutable|null $paid_at
+ * @property-read float $subtotal
+ * @property-read float $discount
+ * @property-read float $tax
+ * @property-read float $total
+ * @property-read float $paid
+ * @property-read string $status
+ * @property-read string|null $notes
+ * @property-read int|null $user_id
+ * @property-read CarbonImmutable $created_at
+ * @property-read CarbonImmutable $updated_at
+ * @property-read Sale $sale
+ * @property-read Client|null $client
+ * @property-read User|null $user
+ * @property-read Collection<int, Payment> $payments
+ */
+final class Invoice extends Model
+{
+    /** @use HasFactory<InvoiceFactory> */
+    use HasFactory;
+
+    /**
+     * @return BelongsTo<Sale, $this>
+     */
+    public function sale(): BelongsTo
+    {
+        return $this->belongsTo(Sale::class);
+    }
+
+    /**
+     * @return BelongsTo<Client, $this>
+     */
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return MorphMany<Payment, $this>
+     */
+    public function payments(): MorphMany
+    {
+        return $this->morphMany(Payment::class, 'payable');
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'id' => 'integer',
+            'reference' => 'string',
+            'sale_id' => 'integer',
+            'client_id' => 'integer',
+            'issued_at' => 'date',
+            'due_at' => 'date',
+            'paid_at' => 'date',
+            'subtotal' => 'decimal:2',
+            'discount' => 'decimal:2',
+            'tax' => 'decimal:2',
+            'total' => 'decimal:2',
+            'paid' => 'decimal:2',
+            'status' => 'string',
+            'notes' => 'string',
+            'user_id' => 'integer',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
+}

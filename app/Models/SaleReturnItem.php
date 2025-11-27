@@ -1,0 +1,79 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+use Carbon\CarbonImmutable;
+use Database\Factories\SaleReturnItemFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+/**
+ * @property-read int $id
+ * @property-read int $sale_return_id
+ * @property-read int $product_id
+ * @property-read int|null $sale_item_id
+ * @property-read float $quantity
+ * @property-read float $price
+ * @property-read float $cost
+ * @property-read float $discount
+ * @property-read float $tax_amount
+ * @property-read float $total
+ * @property-read CarbonImmutable $created_at
+ * @property-read CarbonImmutable $updated_at
+ * @property-read SaleReturn $saleReturn
+ * @property-read Product $product
+ * @property-read SaleItem|null $saleItem
+ */
+final class SaleReturnItem extends Model
+{
+    /** @use HasFactory<SaleReturnItemFactory> */
+    use HasFactory;
+
+    /**
+     * @return BelongsTo<SaleReturn, $this>
+     */
+    public function saleReturn(): BelongsTo
+    {
+        return $this->belongsTo(SaleReturn::class);
+    }
+
+    /**
+     * @return BelongsTo<Product, $this>
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * @return BelongsTo<SaleItem, $this>
+     */
+    public function saleItem(): BelongsTo
+    {
+        return $this->belongsTo(SaleItem::class);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'id' => 'integer',
+            'sale_return_id' => 'integer',
+            'product_id' => 'integer',
+            'sale_item_id' => 'integer',
+            'quantity' => 'decimal:2',
+            'price' => 'decimal:2',
+            'cost' => 'decimal:2',
+            'discount' => 'decimal:2',
+            'tax_amount' => 'decimal:2',
+            'total' => 'decimal:2',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
+}

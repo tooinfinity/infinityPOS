@@ -6,7 +6,9 @@ namespace App\Models;
 
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -19,6 +21,17 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read string|null $remember_token
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read Collection<int, Sale> $sales
+ * @property-read Collection<int, Purchase> $purchases
+ * @property-read Collection<int, SaleReturn> $saleReturns
+ * @property-read Collection<int, PurchaseReturn> $purchaseReturns
+ * @property-read Collection<int, Invoice> $invoices
+ * @property-read Collection<int, Payment> $payments
+ * @property-read Collection<int, Expense> $expenses
+ * @property-read Collection<int, StockMovement> $stockMovements
+ * @property-read Collection<int, StockTransfer> $stockTransfers
+ * @property-read Collection<int, Moneybox> $moneyboxes
+ * @property-read Collection<int, MoneyboxTransaction> $moneyboxTransactions
  */
 final class User extends Authenticatable
 {
@@ -37,6 +50,94 @@ final class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    /**
+     * @return HasMany<Sale, $this>
+     */
+    public function sales(): HasMany
+    {
+        return $this->hasMany(Sale::class);
+    }
+
+    /**
+     * @return HasMany<Purchase, $this>
+     */
+    public function purchases(): HasMany
+    {
+        return $this->hasMany(Purchase::class);
+    }
+
+    /**
+     * @return HasMany<SaleReturn, $this>
+     */
+    public function saleReturns(): HasMany
+    {
+        return $this->hasMany(SaleReturn::class);
+    }
+
+    /**
+     * @return HasMany<PurchaseReturn, $this>
+     */
+    public function purchaseReturns(): HasMany
+    {
+        return $this->hasMany(PurchaseReturn::class);
+    }
+
+    /**
+     * @return HasMany<Invoice, $this>
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    /**
+     * @return HasMany<Payment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * @return HasMany<Expense, $this>
+     */
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class);
+    }
+
+    /**
+     * @return HasMany<StockMovement, $this>
+     */
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class);
+    }
+
+    /**
+     * @return HasMany<StockTransfer, $this>
+     */
+    public function stockTransfers(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class);
+    }
+
+    /**
+     * @return HasMany<Moneybox, $this>
+     */
+    public function moneyboxes(): HasMany
+    {
+        return $this->hasMany(Moneybox::class);
+    }
+
+    /**
+     * @return HasMany<MoneyboxTransaction, $this>
+     */
+    public function moneyboxTransactions(): HasMany
+    {
+        return $this->hasMany(MoneyboxTransaction::class);
+    }
 
     /**
      * @return array<string, string>

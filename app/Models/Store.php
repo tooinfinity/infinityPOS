@@ -1,0 +1,134 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+use Carbon\CarbonImmutable;
+use Database\Factories\StoreFactory;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+/**
+ * @property-read int $id
+ * @property-read string $name
+ * @property-read string|null $city
+ * @property-read string|null $address
+ * @property-read string|null $phone
+ * @property-read bool $is_active
+ * @property-read CarbonImmutable $created_at
+ * @property-read CarbonImmutable $updated_at
+ * @property-read Collection<int, Product> $products
+ * @property-read Collection<int, Sale> $sales
+ * @property-read Collection<int, Purchase> $purchases
+ * @property-read Collection<int, Moneybox> $moneyboxes
+ * @property-read Collection<int, Expense> $expenses
+ * @property-read Collection<int, StockMovement> $stockMovements
+ */
+final class Store extends Model
+{
+    /** @use HasFactory<StoreFactory> */
+    use HasFactory;
+
+    /**
+     * @return BelongsToMany<Product, $this>
+     */
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'store_stock')
+            ->withPivot('quantity')
+            ->withTimestamps();
+    }
+
+    /**
+     * @return HasMany<Sale, $this>
+     */
+    public function sales(): HasMany
+    {
+        return $this->hasMany(Sale::class);
+    }
+
+    /**
+     * @return HasMany<Purchase, $this>
+     */
+    public function purchases(): HasMany
+    {
+        return $this->hasMany(Purchase::class);
+    }
+
+    /**
+     * @return HasMany<SaleReturn, $this>
+     */
+    public function saleReturns(): HasMany
+    {
+        return $this->hasMany(SaleReturn::class);
+    }
+
+    /**
+     * @return HasMany<PurchaseReturn, $this>
+     */
+    public function purchaseReturns(): HasMany
+    {
+        return $this->hasMany(PurchaseReturn::class);
+    }
+
+    /**
+     * @return HasMany<Moneybox, $this>
+     */
+    public function moneyboxes(): HasMany
+    {
+        return $this->hasMany(Moneybox::class);
+    }
+
+    /**
+     * @return HasMany<Expense, $this>
+     */
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class);
+    }
+
+    /**
+     * @return HasMany<StockMovement, $this>
+     */
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class);
+    }
+
+    /**
+     * @return HasMany<StockTransfer, $this>
+     */
+    public function outgoingTransfers(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class, 'from_store_id');
+    }
+
+    /**
+     * @return HasMany<StockTransfer, $this>
+     */
+    public function incomingTransfers(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class, 'to_store_id');
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'id' => 'integer',
+            'name' => 'string',
+            'city' => 'string',
+            'address' => 'string',
+            'phone' => 'string',
+            'is_active' => 'boolean',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
+}
