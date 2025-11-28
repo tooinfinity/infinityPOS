@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\MoneyboxTypeEnum;
+use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\MoneyboxFactory;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -35,6 +37,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, Expense> $expenses
  * @property-read Collection<int, MoneyboxTransaction> $incomingTransfers
  */
+#[ScopedBy(ActiveScope::class)]
 final class Moneybox extends Model
 {
     /** @use HasFactory<MoneyboxFactory> */

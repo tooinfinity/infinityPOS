@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\TaxTypeEnum;
+use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\TaxFactory;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read CarbonInterface $updated_at
  * @property-read Collection<int, Product> $products
  */
+#[ScopedBy(ActiveScope::class)]
 final class Tax extends Model
 {
     /** @use HasFactory<TaxFactory> */
@@ -60,7 +63,7 @@ final class Tax extends Model
 
         return match ($this->type) {
             TaxTypeEnum::PERCENTAGE => ($value * $rate) / 100,
-            TaxTypeEnum::FIXED => $this->rate,
+            TaxTypeEnum::FIXED => $rate,
         };
     }
 

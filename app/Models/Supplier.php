@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\SupplierFactory;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +29,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property-read Collection<int, Purchase> $purchases
  * @property-read Collection<int, PurchaseReturn> $purchaseReturns
  */
+#[ScopedBy(ActiveScope::class)]
 final class Supplier extends Model
 {
     /** @use HasFactory<SupplierFactory> */

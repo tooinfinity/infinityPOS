@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\ProductFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -40,6 +44,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, PurchaseItem> $purchaseItems
  * @property-read Collection<int, Store> $stores
  */
+#[ScopedBy(ActiveScope::class)]
 final class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
@@ -103,35 +108,37 @@ final class Product extends Model
             ->withTimestamps();
     }
 
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    #[Scope]
     protected function lowStock(Builder $query): void
     {
         $query->whereRaw('(SELECT SUM(quantity) FROM store_stock WHERE product_id = products.id) <= alert_quantity');
     }
 
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    #[Scope]
     protected function withBatches(Builder $query): void
     {
         $query->where('has_batches', true);
     }
 
-    protected function getTotalStockAttribute(): float
+    protected function totalStock(): Attribute
     {
-        return $this->stores()->sum('quantity');
+        return Attribute::make(
+            get: fn (): float => (float) $this->stores()->sum('quantity')
+        );
     }
 
-    protected function getIsLowStockAttribute(): bool
+    protected function isLowStock(): Attribute
     {
-        return $this->getTotalStockAttribute() <= $this->alert_quantity;
+        return Attribute::make(
+            get: fn (): bool => $this->total_stock <= $this->alert_quantity
+        );
     }
 
-    protected function getProfitMarginAttribute(): float
+    protected function profitMargin(): Attribute
     {
-        if ($this->cost <= 0) {
-            return 0;
-        }
-
-        return (($this->price - $this->cost) / $this->cost) * 100;
+        return Attribute::make(
+            get: fn (): float => $this->cost <= 0 ? 0.0 : (($this->price - $this->cost) / $this->cost) * 100
+        );
     }
 
     /**

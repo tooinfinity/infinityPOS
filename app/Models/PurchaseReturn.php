@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\PurchaseReturnStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\PurchaseReturnFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -132,9 +133,11 @@ final class PurchaseReturn extends Model
     /**
      * Get the remaining amount to be refunded.
      */
-    protected function getRemainingRefundAttribute(): float
+    protected function remainingRefund(): Attribute
     {
-        return max(0, $this->total - $this->refunded);
+        return Attribute::make(
+            get: fn (): float => max(0, $this->total - $this->refunded)
+        );
     }
 
     /**

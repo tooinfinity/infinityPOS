@@ -54,8 +54,8 @@ enum StockMovementTypeEnum: string
     public function isIncoming(): bool
     {
         return match ($this) {
-            self::PURCHASE, self::SALE_RETURN, self::TRANSFER => true,
-            self::SALE, self::PURCHASE_RETURN, self::ADJUSTMENT => false,
+            self::PURCHASE, self::SALE_RETURN => true,
+            self::SALE, self::PURCHASE_RETURN, self::ADJUSTMENT,  self::TRANSFER => false,
         };
     }
 }

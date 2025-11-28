@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\StockMovementTypeEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\StockMovementFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -78,12 +79,11 @@ final class StockMovement extends Model
         return $this->type->isIncoming();
     }
 
-    /**
-     * Get the effective quantity (positive for incoming, negative for outgoing).
-     */
-    protected function getEffectiveQuantityAttribute(): float
+    protected function effectiveQuantity(): Attribute
     {
-        return $this->isIncoming() ? $this->quantity : -$this->quantity;
+        return Attribute::make(
+            get: fn (): float => $this->isIncoming() ? $this->quantity : -$this->quantity
+        );
     }
 
     /**

@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\SaleStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\SaleFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -140,9 +141,11 @@ final class Sale extends Model
         return max(0, $this->total - $this->paid);
     }
 
-    protected function getBalanceAttribute(): float
+    protected function balance(): Attribute
     {
-        return $this->total - $this->paid;
+        return Attribute::make(
+            get: fn (): float => $this->total - $this->paid
+        );
     }
 
     /**

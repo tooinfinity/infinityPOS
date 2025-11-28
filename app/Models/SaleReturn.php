@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\SaleReturnStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\SaleReturnFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -129,15 +130,17 @@ final class SaleReturn extends Model
      */
     public function isFullyRefunded(): bool
     {
-        return $this->getRemainingRefundAttribute() <= 0;
+        return $this->remainingRefund() <= 0;
     }
 
     /**
      * Get the remaining amount to be refunded.
      */
-    protected function getRemainingRefundAttribute(): float
+    protected function remainingRefund(): Attribute
     {
-        return max(0, $this->total - $this->refunded);
+        return Attribute::make(
+            get: fn (): float => max(0, $this->total - $this->refunded)
+        );
     }
 
     /**

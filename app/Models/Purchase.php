@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\PurchaseStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\PurchaseFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -130,17 +131,18 @@ final class Purchase extends Model
         return $this->getRemainingAmountAttribute() <= 0;
     }
 
-    /**
-     * Get the remaining amount to be paid.
-     */
-    protected function getRemainingAmountAttribute(): float
+    protected function remainingAmount(): Attribute
     {
-        return max(0, $this->total - $this->paid);
+        return Attribute::make(
+            get: fn (): float => max(0, $this->total - $this->paid)
+        );
     }
 
-    protected function getBalanceAttribute(): float
+    protected function balance(): Attribute
     {
-        return $this->total - $this->paid;
+        return Attribute::make(
+            get: fn (): float => $this->total - $this->paid
+        );
     }
 
     /**

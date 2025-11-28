@@ -7,7 +7,9 @@ namespace App\Models;
 use App\Enums\InvoiceStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\InvoiceFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -99,7 +101,7 @@ final class Invoice extends Model
         return $this->getRemainingAmountAttribute() <= 0;
     }
 
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    #[Scope]
     protected function overdue(Builder $query): void
     {
         $query->where('status', InvoiceStatusEnum::OVERDUE)
@@ -112,9 +114,11 @@ final class Invoice extends Model
     /**
      * Get the remaining amount to be paid.
      */
-    protected function getRemainingAmountAttribute(): float
+    protected function remainingAmount(): Attribute
     {
-        return max(0, $this->total - $this->paid);
+        return Attribute::make(
+            get: fn (): float => max(0, $this->total - $this->paid)
+        );
     }
 
     /**

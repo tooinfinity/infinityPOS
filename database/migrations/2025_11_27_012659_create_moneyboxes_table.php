@@ -12,7 +12,7 @@ return new class extends Migration
     {
         Schema::create('moneyboxes', function (Blueprint $table): void {
             $table->id();
-            $table->string('name');
+            $table->string('name')->unique();
             $table->enum('type', ['cash_register', 'bank_account', 'mobile_money', 'other'])->default('cash_register');
             $table->text('description')->nullable();
 
@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('iban')->nullable();
 
             // Assignment
-            $table->foreignId('store_id')->nullable()->constrained();
+            $table->foreignId('store_id')->nullable()->unique()->constrained();
             $table->foreignId('user_id')->nullable()->constrained();
 
             $table->boolean('is_active')->default(true);

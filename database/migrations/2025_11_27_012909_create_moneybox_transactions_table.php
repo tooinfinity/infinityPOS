@@ -32,6 +32,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['moneybox_id', 'created_at']);
+            $table->index(['type', 'created_at']);
         });
     }
 };

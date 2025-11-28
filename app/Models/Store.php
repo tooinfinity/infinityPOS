@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\StoreFactory;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -32,6 +34,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, StockTransfer> $outgoingTransfers
  * @property-read Collection<int, StockTransfer> $incomingTransfers
  */
+#[ScopedBy(ActiveScope::class)]
 final class Store extends Model
 {
     /** @use HasFactory<StoreFactory> */
