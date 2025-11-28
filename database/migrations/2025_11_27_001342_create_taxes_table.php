@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('taxes', function (Blueprint $table): void {
             $table->id();
-            $table->string('name');
+            $table->string('name')->unique();
             $table->enum('type', ['percentage', 'fixed'])->default('percentage');
             $table->decimal('rate', 8, 2);
             $table->boolean('is_active')->default(true)->index();

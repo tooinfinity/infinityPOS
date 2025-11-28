@@ -35,7 +35,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index('price');
-            $table->index(['category_id', 'is_active']);
+            $table->index(['category_id', 'brand_id', 'is_active']);
+            $table->index(['has_batches', 'is_active']);
         });
     }
 };

@@ -9,7 +9,6 @@ use Carbon\CarbonInterface;
 use Database\Factories\SettingFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use JsonException;
 
 /**
  * @property-read int $id
@@ -29,14 +28,7 @@ final class Setting extends Model
     /**
      * Get the typed value based on the type column.
      *
-     * @throws JsonException
-     */
-    /**
-     * Get the typed value based on the type column.
-     *
      * @return string|int|float|bool|array<string, mixed>|null
-     *
-     * @throws JsonException
      */
     protected function getTypedValueAttribute(): string|int|float|bool|array|null
     {

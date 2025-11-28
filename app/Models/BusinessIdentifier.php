@@ -8,7 +8,7 @@ use Carbon\CarbonInterface;
 use Database\Factories\BusinessIdentifierFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property-read int $id
@@ -29,27 +29,27 @@ final class BusinessIdentifier extends Model
     use HasFactory;
 
     /**
-     * @return HasOne<Company, $this>
+     * @return BelongsTo<Company, $this>
      */
-    public function company(): HasOne
+    public function company(): BelongsTo
     {
-        return $this->hasOne(Company::class);
+        return $this->belongsTo(Company::class);
     }
 
     /**
-     * @return HasOne<Client, $this>
+     * @return BelongsTo<Supplier, $this>
      */
-    public function client(): HasOne
+    public function supplier(): BelongsTo
     {
-        return $this->hasOne(Client::class);
+        return $this->belongsTo(Supplier::class);
     }
 
     /**
-     * @return HasOne<Supplier, $this>
+     * @return BelongsTo<Client, $this>
      */
-    public function supplier(): HasOne
+    public function client(): BelongsTo
     {
-        return $this->hasOne(Supplier::class);
+        return $this->belongsTo(Client::class);
     }
 
     /**

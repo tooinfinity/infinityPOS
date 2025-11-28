@@ -9,8 +9,8 @@ use Database\Factories\SupplierFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property-read int $id
@@ -33,11 +33,11 @@ final class Supplier extends Model
     use HasFactory;
 
     /**
-     * @return BelongsTo<BusinessIdentifier, $this>
+     * @return HasOne<BusinessIdentifier, $this>
      */
-    public function businessIdentifier(): BelongsTo
+    public function businessIdentifier(): HasOne
     {
-        return $this->belongsTo(BusinessIdentifier::class);
+        return $this->hasOne(BusinessIdentifier::class);
     }
 
     /**

@@ -56,8 +56,10 @@ final class Tax extends Model
      */
     public function calculate(float $value): float
     {
+        $rate = (float) $this->rate;
+
         return match ($this->type) {
-            TaxTypeEnum::PERCENTAGE => ($value * $this->rate) / 100,
+            TaxTypeEnum::PERCENTAGE => ($value * $rate) / 100,
             TaxTypeEnum::FIXED => $this->rate,
         };
     }

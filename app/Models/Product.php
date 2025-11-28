@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Carbon\CarbonInterface;
 use Database\Factories\ProductFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -100,6 +101,37 @@ final class Product extends Model
         return $this->belongsToMany(Store::class, 'store_stock')
             ->withPivot('quantity')
             ->withTimestamps();
+    }
+
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function lowStock(Builder $query): void
+    {
+        $query->whereRaw('(SELECT SUM(quantity) FROM store_stock WHERE product_id = products.id) <= alert_quantity');
+    }
+
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function withBatches(Builder $query): void
+    {
+        $query->where('has_batches', true);
+    }
+
+    protected function getTotalStockAttribute(): float
+    {
+        return $this->stores()->sum('quantity');
+    }
+
+    protected function getIsLowStockAttribute(): bool
+    {
+        return $this->getTotalStockAttribute() <= $this->alert_quantity;
+    }
+
+    protected function getProfitMarginAttribute(): float
+    {
+        if ($this->cost <= 0) {
+            return 0;
+        }
+
+        return (($this->price - $this->cost) / $this->cost) * 100;
     }
 
     /**

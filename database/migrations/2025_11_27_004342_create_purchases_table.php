@@ -28,6 +28,9 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->foreignId('user_id')->nullable()->constrained();
             $table->timestamps();
+
+            $table->index(['store_id', 'status', 'created_at']);
+            $table->index(['supplier_id', 'created_at']);
         });
     }
 };

@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\InvoiceStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\InvoiceFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -96,6 +97,16 @@ final class Invoice extends Model
     public function isFullyPaid(): bool
     {
         return $this->getRemainingAmountAttribute() <= 0;
+    }
+
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function overdue(Builder $query): void
+    {
+        $query->where('status', InvoiceStatusEnum::OVERDUE)
+            ->orWhere(function ($q): void {
+                $q->whereNotIn('status', [InvoiceStatusEnum::PAID, InvoiceStatusEnum::CANCELLED])
+                    ->where('due_at', '<', now());
+            });
     }
 
     /**

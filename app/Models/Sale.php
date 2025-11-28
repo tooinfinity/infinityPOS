@@ -140,6 +140,11 @@ final class Sale extends Model
         return max(0, $this->total - $this->paid);
     }
 
+    protected function getBalanceAttribute(): float
+    {
+        return $this->total - $this->paid;
+    }
+
     /**
      * @return array<string, string>
      */

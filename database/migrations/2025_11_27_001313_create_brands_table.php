@@ -12,7 +12,7 @@ return new class extends Migration
     {
         Schema::create('brands', function (Blueprint $table): void {
             $table->id();
-            $table->string('name');
+            $table->string('name')->unique();
             $table->boolean('is_active')->default(true)->index();
             $table->timestamps();
         });

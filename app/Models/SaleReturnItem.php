@@ -21,6 +21,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read float $discount
  * @property-read float $tax_amount
  * @property-read float $total
+ * @property-read string|null $batch_number
+ * * @property-read CarbonInterface|null $expiry_date
+ * * @property-read float|null $remaining_quantity
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read SaleReturn $saleReturn

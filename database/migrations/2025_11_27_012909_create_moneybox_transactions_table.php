@@ -31,8 +31,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained();
             $table->timestamps();
 
-            $table->index(['moneybox_id', 'date']);
-            $table->index(['type', 'date']);
+            $table->index(['moneybox_id', 'created_at']);
         });
     }
 };

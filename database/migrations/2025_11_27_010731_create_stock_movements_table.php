@@ -27,6 +27,7 @@ return new class extends Migration
 
             $table->index(['product_id', 'store_id', 'created_at']);
             $table->index(['batch_number']);
+            $table->index(['type', 'created_at']);
         });
     }
 };

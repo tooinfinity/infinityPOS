@@ -6,11 +6,12 @@ namespace App\Models;
 
 use Carbon\CarbonInterface;
 use Database\Factories\ClientFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property-read int $id
@@ -34,11 +35,11 @@ final class Client extends Model
     use HasFactory;
 
     /**
-     * @return BelongsTo<BusinessIdentifier, $this>
+     * @return HasOne<BusinessIdentifier, $this>
      */
-    public function businessIdentifier(): BelongsTo
+    public function businessIdentifier(): HasOne
     {
-        return $this->belongsTo(BusinessIdentifier::class);
+        return $this->hasOne(BusinessIdentifier::class);
     }
 
     /**
@@ -63,6 +64,12 @@ final class Client extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function withBalance(Builder $query): void
+    {
+        $query->where('balance', '>', 0);
     }
 
     /**

@@ -41,4 +41,13 @@ enum PaymentMethodEnum: string
             self::TRANSFER => 'arrow-right-left',
         };
     }
+
+    public function description(): string
+    {
+        return match ($this) {
+            self::CASH => 'Physical cash payment',
+            self::CARD => 'Credit or debit card payment',
+            self::TRANSFER => 'Bank transfer or wire',
+        };
+    }
 }

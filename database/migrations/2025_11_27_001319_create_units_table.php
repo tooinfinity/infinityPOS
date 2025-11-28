@@ -12,7 +12,7 @@ return new class extends Migration
     {
         Schema::create('units', function (Blueprint $table): void {
             $table->id();
-            $table->string('name')->comment('kg, piece, meter, liter, etc');
+            $table->string('name')->unique()->comment('kg, piece, meter, liter, etc');
             $table->string('short_name', 10)->nullable();
             $table->boolean('is_active')->default(true)->index();
             $table->timestamps();
