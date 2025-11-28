@@ -13,7 +13,6 @@ return new class extends Migration
         Schema::create('purchase_returns', function (Blueprint $table): void {
             $table->id();
             $table->string('reference')->unique();
-            $table->date('date')->index();
 
             $table->foreignId('purchase_id')->nullable()->constrained();
             $table->foreignId('supplier_id')->nullable()->constrained();

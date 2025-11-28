@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Database\Factories\PurchaseItemFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,12 +18,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read int $product_id
  * @property-read float $quantity
  * @property-read float $cost
+ * @property-read float|null $discount
+ * @property-read float|null $tax_amount
  * @property-read float $total
  * @property-read string|null $batch_number
- * @property-read CarbonImmutable|null $expiry_date
+ * @property-read CarbonInterface|null $expiry_date
  * @property-read float|null $remaining_quantity
- * @property-read CarbonImmutable $created_at
- * @property-read CarbonImmutable $updated_at
+ * @property-read CarbonInterface $created_at
+ * @property-read CarbonInterface $updated_at
  * @property-read Purchase $purchase
  * @property-read Product $product
  * @property-read Collection<int, PurchaseReturnItem> $returnItems
@@ -68,9 +70,11 @@ final class PurchaseItem extends Model
             'product_id' => 'integer',
             'quantity' => 'decimal:2',
             'cost' => 'decimal:2',
+            'discount' => 'decimal:2',
+            'tax_amount' => 'decimal:2',
             'total' => 'decimal:2',
             'batch_number' => 'string',
-            'expiry_date' => 'date',
+            'expiry_date' => 'datetime',
             'remaining_quantity' => 'decimal:2',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

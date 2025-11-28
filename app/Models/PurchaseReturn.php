@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Database\Factories\PurchaseReturnFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 /**
  * @property-read int $id
  * @property-read string $reference
- * @property-read CarbonImmutable $date
  * @property-read int|null $purchase_id
  * @property-read int|null $supplier_id
  * @property-read int $store_id
@@ -26,14 +25,15 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read string|null $reason
  * @property-read string|null $notes
  * @property-read int|null $user_id
- * @property-read CarbonImmutable $created_at
- * @property-read CarbonImmutable $updated_at
+ * @property-read CarbonInterface $created_at
+ * @property-read CarbonInterface $updated_at
  * @property-read Purchase|null $purchase
  * @property-read Supplier|null $supplier
  * @property-read Store $store
  * @property-read User|null $user
  * @property-read Collection<int, PurchaseReturnItem> $items
  * @property-read Collection<int, Payment> $payments
+ * @property-read Collection<int, StockMovement> $stockMovements
  */
 final class PurchaseReturn extends Model
 {
@@ -104,7 +104,6 @@ final class PurchaseReturn extends Model
         return [
             'id' => 'integer',
             'reference' => 'string',
-            'date' => 'date',
             'purchase_id' => 'integer',
             'supplier_id' => 'integer',
             'store_id' => 'integer',

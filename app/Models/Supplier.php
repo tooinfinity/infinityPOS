@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Database\Factories\SupplierFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,8 +21,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read float $balance
  * @property-read bool $is_active
  * @property-read int|null $business_identifier_id
- * @property-read CarbonImmutable $created_at
- * @property-read CarbonImmutable $updated_at
+ * @property-read CarbonInterface $created_at
+ * @property-read CarbonInterface $updated_at
  * @property-read BusinessIdentifier|null $businessIdentifier
  * @property-read Collection<int, Purchase> $purchases
  * @property-read Collection<int, PurchaseReturn> $purchaseReturns

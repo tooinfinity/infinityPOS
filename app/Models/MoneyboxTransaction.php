@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Database\Factories\MoneyboxTransactionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,10 +23,9 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property-read int $transactionable_id
  * @property-read string|null $reference
  * @property-read string|null $notes
- * @property-read CarbonImmutable $date
  * @property-read int|null $user_id
- * @property-read CarbonImmutable $created_at
- * @property-read CarbonImmutable $updated_at
+ * @property-read CarbonInterface $created_at
+ * @property-read CarbonInterface $updated_at
  * @property-read Moneybox $moneybox
  * @property-read Moneybox|null $transferToMoneybox
  * @property-read User|null $user
@@ -86,7 +85,6 @@ final class MoneyboxTransaction extends Model
             'transactionable_id' => 'integer',
             'reference' => 'string',
             'notes' => 'string',
-            'date' => 'datetime',
             'user_id' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

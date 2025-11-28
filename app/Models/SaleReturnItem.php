@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Database\Factories\SaleReturnItemFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,8 +21,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read float $discount
  * @property-read float $tax_amount
  * @property-read float $total
- * @property-read CarbonImmutable $created_at
- * @property-read CarbonImmutable $updated_at
+ * @property-read CarbonInterface $created_at
+ * @property-read CarbonInterface $updated_at
  * @property-read SaleReturn $saleReturn
  * @property-read Product $product
  * @property-read SaleItem|null $saleItem
@@ -72,6 +72,9 @@ final class SaleReturnItem extends Model
             'discount' => 'decimal:2',
             'tax_amount' => 'decimal:2',
             'total' => 'decimal:2',
+            'batch_number' => 'string',
+            'expiry_date' => 'datetime',
+            'remaining_quantity' => 'decimal:2',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

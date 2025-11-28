@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Database\Factories\SaleItemFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,9 +23,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read float|null $tax_amount
  * @property-read float $total
  * @property-read string|null $batch_number
- * @property-read CarbonImmutable|null $expiry_date
- * @property-read CarbonImmutable $created_at
- * @property-read CarbonImmutable $updated_at
+ * @property-read CarbonInterface|null $expiry_date
+ * @property-read CarbonInterface $created_at
+ * @property-read CarbonInterface $updated_at
  * @property-read Sale $sale
  * @property-read Product $product
  * @property-read Collection<int, SaleReturnItem> $returnItems
@@ -75,7 +75,7 @@ final class SaleItem extends Model
             'tax_amount' => 'decimal:2',
             'total' => 'decimal:2',
             'batch_number' => 'string',
-            'expiry_date' => 'date',
+            'expiry_date' => 'datetime',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

@@ -13,7 +13,6 @@ return new class extends Migration
         Schema::create('sale_returns', function (Blueprint $table): void {
             $table->id();
             $table->string('reference')->unique();
-            $table->date('date')->index();
 
             $table->foreignId('sale_id')->nullable()->constrained();
             $table->foreignId('client_id')->nullable()->constrained();

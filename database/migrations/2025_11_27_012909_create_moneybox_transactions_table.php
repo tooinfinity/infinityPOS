@@ -27,7 +27,6 @@ return new class extends Migration
 
             $table->string('reference')->nullable();
             $table->text('notes')->nullable();
-            $table->dateTime('date')->index();
 
             $table->foreignId('user_id')->nullable()->constrained();
             $table->timestamps();

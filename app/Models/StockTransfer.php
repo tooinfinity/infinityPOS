@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Database\Factories\StockTransferFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,14 +16,13 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 /**
  * @property-read int $id
  * @property-read string $reference
- * @property-read CarbonImmutable $date
  * @property-read int $from_store_id
  * @property-read int $to_store_id
  * @property-read string $status
  * @property-read string|null $notes
  * @property-read int|null $user_id
- * @property-read CarbonImmutable $created_at
- * @property-read CarbonImmutable $updated_at
+ * @property-read CarbonInterface $created_at
+ * @property-read CarbonInterface $updated_at
  * @property-read Store $fromStore
  * @property-read Store $toStore
  * @property-read User|null $user
@@ -82,7 +81,6 @@ final class StockTransfer extends Model
         return [
             'id' => 'integer',
             'reference' => 'string',
-            'date' => 'date',
             'from_store_id' => 'integer',
             'to_store_id' => 'integer',
             'status' => 'string',

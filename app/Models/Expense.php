@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\CarbonImmutable;
 use Database\Factories\ExpenseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,15 +12,14 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * @property-read int $id
- * @property-read CarbonImmutable $date
  * @property-read float $amount
  * @property-read string|null $description
  * @property-read int|null $category_id
  * @property-read int|null $store_id
  * @property-read int|null $user_id
  * @property-read int|null $moneybox_id
- * @property-read CarbonImmutable $created_at
- * @property-read CarbonImmutable $updated_at
+ * @property-read CarbonInterface $created_at
+ * @property-read CarbonInterface $updated_at
  * @property-read Category|null $category
  * @property-read Store|null $store
  * @property-read User|null $user
@@ -79,7 +77,6 @@ final class Expense extends Model
     {
         return [
             'id' => 'integer',
-            'date' => 'date',
             'amount' => 'decimal:2',
             'description' => 'string',
             'category_id' => 'integer',

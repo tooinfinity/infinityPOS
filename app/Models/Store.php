@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Database\Factories\StoreFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,14 +19,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read string|null $address
  * @property-read string|null $phone
  * @property-read bool $is_active
- * @property-read CarbonImmutable $created_at
- * @property-read CarbonImmutable $updated_at
+ * @property-read CarbonInterface $created_at
+ * @property-read CarbonInterface $updated_at
  * @property-read Collection<int, Product> $products
  * @property-read Collection<int, Sale> $sales
  * @property-read Collection<int, Purchase> $purchases
+ * @property-read Collection<int, SaleReturn> $saleReturns
+ * @property-read Collection<int, PurchaseReturn> $purchaseReturns
  * @property-read Collection<int, Moneybox> $moneyboxes
  * @property-read Collection<int, Expense> $expenses
  * @property-read Collection<int, StockMovement> $stockMovements
+ * @property-read Collection<int, StockTransfer> $outgoingTransfers
+ * @property-read Collection<int, StockTransfer> $incomingTransfers
  */
 final class Store extends Model
 {

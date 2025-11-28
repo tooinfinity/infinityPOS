@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Database\Factories\MoneyboxFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,13 +25,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read int|null $store_id
  * @property-read int|null $user_id
  * @property-read bool $is_active
- * @property-read CarbonImmutable $created_at
- * @property-read CarbonImmutable $updated_at
+ * @property-read CarbonInterface $created_at
+ * @property-read CarbonInterface $updated_at
  * @property-read Store|null $store
  * @property-read User|null $user
  * @property-read Collection<int, MoneyboxTransaction> $transactions
  * @property-read Collection<int, Payment> $payments
  * @property-read Collection<int, Expense> $expenses
+ * @property-read Collection<int, MoneyboxTransaction> $incomingTransfers
  */
 final class Moneybox extends Model
 {

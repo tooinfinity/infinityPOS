@@ -13,7 +13,6 @@ return new class extends Migration
         Schema::create('stock_transfers', function (Blueprint $table): void {
             $table->id();
             $table->string('reference')->unique();
-            $table->date('date');
 
             $table->foreignId('from_store_id')->constrained('stores');
             $table->foreignId('to_store_id')->constrained('stores');

@@ -13,7 +13,6 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table): void {
             $table->id();
             $table->string('reference')->nullable();
-            $table->date('date');
 
             $table->morphs('payable'); // sales, purchases, invoices, returns
 
