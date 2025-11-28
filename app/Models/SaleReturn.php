@@ -39,6 +39,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read Collection<int, SaleReturnItem> $items
  * @property-read Collection<int, Payment> $payments
  * @property-read Collection<int, StockMovement> $stockMovements
+ * @property-read float $remaining_refund
  */
 final class SaleReturn extends Model
 {
@@ -130,16 +131,19 @@ final class SaleReturn extends Model
      */
     public function isFullyRefunded(): bool
     {
-        return $this->remainingRefund() <= 0;
+        return $this->remaining_refund <= 0;
     }
 
     /**
      * Get the remaining amount to be refunded.
      */
+    /**
+     * @return Attribute<float, never>
+     */
     protected function remainingRefund(): Attribute
     {
         return Attribute::make(
-            get: fn (): float => max(0, $this->total - $this->refunded)
+            get: fn (): float => max(0, (float) $this->total - (float) $this->refunded)
         );
     }
 

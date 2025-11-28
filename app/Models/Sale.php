@@ -39,6 +39,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read Invoice|null $invoice
  * @property-read Collection<int, Payment> $payments
  * @property-read Collection<int, StockMovement> $stockMovements
+ * @property-read float $remaining_amount
+ * @property-read float $balance
  */
 final class Sale extends Model
 {
@@ -130,21 +132,29 @@ final class Sale extends Model
      */
     public function isFullyPaid(): bool
     {
-        return $this->getRemainingAmountAttribute() <= 0;
+        return $this->remaining_amount <= 0;
     }
 
     /**
      * Get the remaining amount to be paid.
      */
-    protected function getRemainingAmountAttribute(): float
+    /**
+     * @return Attribute<float, never>
+     */
+    protected function remainingAmount(): Attribute
     {
-        return max(0, $this->total - $this->paid);
+        return Attribute::make(
+            get: fn (): float => max(0, (float) $this->total - (float) $this->paid),
+        );
     }
 
+    /**
+     * @return Attribute<float, never>
+     */
     protected function balance(): Attribute
     {
         return Attribute::make(
-            get: fn (): float => $this->total - $this->paid
+            get: fn (): float => (float) $this->total - (float) $this->paid
         );
     }
 

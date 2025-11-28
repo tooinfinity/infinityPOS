@@ -23,7 +23,7 @@ return new class extends Migration
             $table->decimal('total', 15, 2);
             $table->decimal('paid', 15, 2);
 
-            $table->enum('status', ['pending', 'received', 'cancelled'])->default('received')->index();
+            $table->enum('status', ['pending', 'received', 'cancelled'])->default('pending')->index();
 
             $table->text('notes')->nullable();
             $table->foreignId('user_id')->nullable()->constrained();

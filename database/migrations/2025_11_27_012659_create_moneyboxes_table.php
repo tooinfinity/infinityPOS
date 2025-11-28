@@ -26,13 +26,12 @@ return new class extends Migration
             $table->string('iban')->nullable();
 
             // Assignment
-            $table->foreignId('store_id')->nullable()->unique()->constrained();
+            $table->foreignId('store_id')->nullable()->constrained();
             $table->foreignId('user_id')->nullable()->constrained();
 
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            $table->index(['store_id', 'is_active']);
             $table->index(['type', 'is_active']);
         });
     }

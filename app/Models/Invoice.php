@@ -98,21 +98,29 @@ final class Invoice extends Model
      */
     public function isFullyPaid(): bool
     {
-        return $this->getRemainingAmountAttribute() <= 0;
+        return $this->remaining_amount <= 0;
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     #[Scope]
     protected function overdue(Builder $query): void
     {
-        $query->where('status', InvoiceStatusEnum::OVERDUE)
-            ->orWhere(function ($q): void {
-                $q->whereNotIn('status', [InvoiceStatusEnum::PAID, InvoiceStatusEnum::CANCELLED])
-                    ->where('due_at', '<', now());
-            });
+        $query->where(function ($q): void {
+            $q->where('status', InvoiceStatusEnum::OVERDUE)
+                ->orWhere(function ($inner): void {
+                    $inner->whereNotIn('status', [InvoiceStatusEnum::PAID, InvoiceStatusEnum::CANCELLED])
+                        ->where('due_at', '<', now());
+                });
+        });
     }
 
     /**
      * Get the remaining amount to be paid.
+     */
+    /**
+     * @return Attribute<float, never>
      */
     protected function remainingAmount(): Attribute
     {

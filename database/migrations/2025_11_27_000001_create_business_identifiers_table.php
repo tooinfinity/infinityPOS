@@ -12,6 +12,9 @@ return new class extends Migration
     {
         Schema::create('business_identifiers', function (Blueprint $table): void {
             $table->id();
+            $table->foreignId('company_id')->nullable()->constrained();
+            $table->foreignId('supplier_id')->nullable()->constrained();
+            $table->foreignId('client_id')->nullable()->constrained();
             $table->string('article')->nullable();
             $table->string('nif')->nullable();
             $table->string('nis')->nullable();

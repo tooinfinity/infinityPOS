@@ -40,17 +40,26 @@ enum SettingTypeEnum: string
     }
 
     /**
-     * @return string|int|float|bool|array<string, mixed>|null
+     * @param  string|int|float|bool|array<mixed>|null  $value
+     * @return string|float|bool|array<mixed>
      */
-    public function castValue(mixed $value): string|int|float|bool|array|null
+    public function castValue(string|int|float|bool|array|null $value): string|float|bool|array
     {
         return match ($this) {
-            self::STRING => (string) $value,
-            self::NUMBER => is_numeric($value) ? (float) $value : 0,
+            self::STRING => is_string($value)
+                ? $value
+                : (is_array($value)
+                    ? json_encode($value, JSON_THROW_ON_ERROR)
+                    : (string) ($value ?? '')),
+            self::NUMBER => is_int($value) || is_float($value) || (is_string($value) && is_numeric($value))
+                ? (float) $value
+                : 0.0,
             self::BOOLEAN => (bool) $value,
-            self::JSON => is_string($value) ? json_decode($value, true) : $value,
-            self::ARRAY => is_array($value) ? $value : (array) $value,
-            self::FILE => (string) $value,
+            self::JSON => is_string($value)
+                ? (array) json_decode($value, true, flags: JSON_THROW_ON_ERROR)
+                : (is_array($value) ? $value : []),
+            self::ARRAY => is_array($value) ? $value : [],
+            self::FILE => is_string($value) ? $value : '',
         };
     }
 }

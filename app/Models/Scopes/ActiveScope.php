@@ -13,8 +13,8 @@ final class ActiveScope implements Scope
     /**
      * Apply the scope to a given Eloquent query builder.
      */
-    public function apply(Builder $builder, Model $model): Builder
+    public function apply(Builder $builder, Model $model): void
     {
-        return $builder->where('is_active', true);
+        $builder->where('is_active', true);
     }
 }

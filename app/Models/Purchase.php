@@ -128,16 +128,22 @@ final class Purchase extends Model
      */
     public function isFullyPaid(): bool
     {
-        return $this->getRemainingAmountAttribute() <= 0;
+        return $this->remaining_amount <= 0;
     }
 
+    /**
+     * @return Attribute<float, never>
+     */
     protected function remainingAmount(): Attribute
     {
         return Attribute::make(
-            get: fn (): float => max(0, $this->total - $this->paid)
+            get: fn (): float => max(0, (float) $this->total - (float) $this->paid)
         );
     }
 
+    /**
+     * @return Attribute<float, never>
+     */
     protected function balance(): Attribute
     {
         return Attribute::make(

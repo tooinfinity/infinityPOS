@@ -12,8 +12,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property-read int $id
@@ -38,11 +38,11 @@ final class Client extends Model
     use HasFactory;
 
     /**
-     * @return HasOne<BusinessIdentifier, $this>
+     * @return BelongsTo<BusinessIdentifier, $this>
      */
-    public function businessIdentifier(): HasOne
+    public function businessIdentifier(): BelongsTo
     {
-        return $this->hasOne(BusinessIdentifier::class);
+        return $this->belongsTo(BusinessIdentifier::class);
     }
 
     /**
@@ -69,6 +69,9 @@ final class Client extends Model
         return $this->hasMany(Invoice::class);
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     #[\Illuminate\Database\Eloquent\Attributes\Scope]
     protected function withBalance(Builder $query): void
     {

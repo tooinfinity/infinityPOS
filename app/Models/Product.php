@@ -43,6 +43,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, SaleItem> $saleItems
  * @property-read Collection<int, PurchaseItem> $purchaseItems
  * @property-read Collection<int, Store> $stores
+ * @property-read float $total_stock
+ * @property-read bool $is_low_stock
+ * @property-read float $profit_margin
  */
 #[ScopedBy(ActiveScope::class)]
 final class Product extends Model
@@ -108,18 +111,27 @@ final class Product extends Model
             ->withTimestamps();
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     #[Scope]
     protected function lowStock(Builder $query): void
     {
-        $query->whereRaw('(SELECT SUM(quantity) FROM store_stock WHERE product_id = products.id) <= alert_quantity');
+        $query->whereRaw('COALESCE((SELECT SUM(quantity) FROM store_stock WHERE product_id = products.id), 0) <= alert_quantity');
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     #[Scope]
     protected function withBatches(Builder $query): void
     {
         $query->where('has_batches', true);
     }
 
+    /**
+     * @return Attribute<float, never>
+     */
     protected function totalStock(): Attribute
     {
         return Attribute::make(
@@ -127,6 +139,9 @@ final class Product extends Model
         );
     }
 
+    /**
+     * @return Attribute<bool, never>
+     */
     protected function isLowStock(): Attribute
     {
         return Attribute::make(
@@ -134,6 +149,9 @@ final class Product extends Model
         );
     }
 
+    /**
+     * @return Attribute<float, never>
+     */
     protected function profitMargin(): Attribute
     {
         return Attribute::make(

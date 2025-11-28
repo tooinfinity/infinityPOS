@@ -79,6 +79,9 @@ final class StockMovement extends Model
         return $this->type->isIncoming();
     }
 
+    /**
+     * @return Attribute<float, never>
+     */
     protected function effectiveQuantity(): Attribute
     {
         return Attribute::make(
