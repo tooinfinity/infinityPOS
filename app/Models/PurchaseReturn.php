@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\PurchaseReturnStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\PurchaseReturnFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read int $store_id
  * @property-read float $total
  * @property-read float $refunded
- * @property-read string $status
+ * @property-read PurchaseReturnStatusEnum $status
  * @property-read string|null $reason
  * @property-read string|null $notes
  * @property-read int|null $user_id
@@ -97,6 +98,46 @@ final class PurchaseReturn extends Model
     }
 
     /**
+     * Check if return is pending.
+     */
+    public function isPending(): bool
+    {
+        return $this->status === PurchaseReturnStatusEnum::PENDING;
+    }
+
+    /**
+     * Check if return is completed.
+     */
+    public function isCompleted(): bool
+    {
+        return $this->status === PurchaseReturnStatusEnum::COMPLETED;
+    }
+
+    /**
+     * Check if return is cancelled.
+     */
+    public function isCancelled(): bool
+    {
+        return $this->status === PurchaseReturnStatusEnum::CANCELLED;
+    }
+
+    /**
+     * Check if the return is fully refunded.
+     */
+    public function isFullyRefunded(): bool
+    {
+        return $this->getRemainingRefundAttribute() <= 0;
+    }
+
+    /**
+     * Get the remaining amount to be refunded.
+     */
+    protected function getRemainingRefundAttribute(): float
+    {
+        return max(0, $this->total - $this->refunded);
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
@@ -109,7 +150,7 @@ final class PurchaseReturn extends Model
             'store_id' => 'integer',
             'total' => 'decimal:2',
             'refunded' => 'decimal:2',
-            'status' => 'string',
+            'status' => PurchaseReturnStatusEnum::class,
             'reason' => 'string',
             'notes' => 'string',
             'user_id' => 'integer',

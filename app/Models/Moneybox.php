@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\MoneyboxTypeEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\MoneyboxFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property-read int $id
  * @property-read string $name
- * @property-read string $type
+ * @property-read MoneyboxTypeEnum $type
  * @property-read string|null $description
  * @property-read float $opening_balance
  * @property-read float $current_balance
@@ -88,6 +89,14 @@ final class Moneybox extends Model
     }
 
     /**
+     * Get the total balance change since opening.
+     */
+    protected function getBalanceChangeAttribute(): float
+    {
+        return $this->current_balance - $this->opening_balance;
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
@@ -95,7 +104,7 @@ final class Moneybox extends Model
         return [
             'id' => 'integer',
             'name' => 'string',
-            'type' => 'string',
+            'type' => MoneyboxTypeEnum::class,
             'description' => 'string',
             'opening_balance' => 'decimal:2',
             'current_balance' => 'decimal:2',

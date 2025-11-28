@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\StockTransferStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\StockTransferFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read string $reference
  * @property-read int $from_store_id
  * @property-read int $to_store_id
- * @property-read string $status
+ * @property-read StockTransferStatusEnum $status
  * @property-read string|null $notes
  * @property-read int|null $user_id
  * @property-read CarbonInterface $created_at
@@ -74,6 +75,30 @@ final class StockTransfer extends Model
     }
 
     /**
+     * Check if transfer is pending.
+     */
+    public function isPending(): bool
+    {
+        return $this->status === StockTransferStatusEnum::PENDING;
+    }
+
+    /**
+     * Check if transfer is completed.
+     */
+    public function isCompleted(): bool
+    {
+        return $this->status === StockTransferStatusEnum::COMPLETED;
+    }
+
+    /**
+     * Check if transfer is cancelled.
+     */
+    public function isCancelled(): bool
+    {
+        return $this->status === StockTransferStatusEnum::CANCELLED;
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
@@ -83,7 +108,7 @@ final class StockTransfer extends Model
             'reference' => 'string',
             'from_store_id' => 'integer',
             'to_store_id' => 'integer',
-            'status' => 'string',
+            'status' => StockTransferStatusEnum::class,
             'notes' => 'string',
             'user_id' => 'integer',
             'created_at' => 'datetime',

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\SaleStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\SaleFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -24,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read float|null $tax
  * @property-read float $total
  * @property-read float $paid
- * @property-read string $status
+ * @property-read SaleStatusEnum $status
  * @property-read string|null $notes
  * @property-read int|null $user_id
  * @property-read CarbonInterface $created_at
@@ -108,6 +109,38 @@ final class Sale extends Model
     }
 
     /**
+     * Check if the sale is completed.
+     */
+    public function isCompleted(): bool
+    {
+        return $this->status === SaleStatusEnum::COMPLETED;
+    }
+
+    /**
+     * Check if the sale is cancelled.
+     */
+    public function isCancelled(): bool
+    {
+        return $this->status === SaleStatusEnum::CANCELLED;
+    }
+
+    /**
+     * Check if the sale is fully paid.
+     */
+    public function isFullyPaid(): bool
+    {
+        return $this->getRemainingAmountAttribute() <= 0;
+    }
+
+    /**
+     * Get the remaining amount to be paid.
+     */
+    protected function getRemainingAmountAttribute(): float
+    {
+        return max(0, $this->total - $this->paid);
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
@@ -122,7 +155,7 @@ final class Sale extends Model
             'tax' => 'decimal:2',
             'total' => 'decimal:2',
             'paid' => 'decimal:2',
-            'status' => 'string',
+            'status' => SaleStatusEnum::class,
             'notes' => 'string',
             'user_id' => 'integer',
             'created_at' => 'datetime',

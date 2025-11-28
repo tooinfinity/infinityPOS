@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\PaymentMethodEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\PaymentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property-read string $payable_type
  * @property-read int $payable_id
  * @property-read float $amount
- * @property-read string $method
+ * @property-read PaymentMethodEnum $method
  * @property-read int|null $moneybox_id
  * @property-read string|null $notes
  * @property-read int|null $user_id
@@ -57,6 +58,30 @@ final class Payment extends Model
     }
 
     /**
+     * Check if payment is cash.
+     */
+    public function isCash(): bool
+    {
+        return $this->method === PaymentMethodEnum::CASH;
+    }
+
+    /**
+     * Check if payment is card.
+     */
+    public function isCard(): bool
+    {
+        return $this->method === PaymentMethodEnum::CARD;
+    }
+
+    /**
+     * Check if payment is transfer.
+     */
+    public function isTransfer(): bool
+    {
+        return $this->method === PaymentMethodEnum::TRANSFER;
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
@@ -67,7 +92,7 @@ final class Payment extends Model
             'payable_type' => 'string',
             'payable_id' => 'integer',
             'amount' => 'decimal:2',
-            'method' => 'string',
+            'method' => PaymentMethodEnum::class,
             'moneybox_id' => 'integer',
             'notes' => 'string',
             'user_id' => 'integer',

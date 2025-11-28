@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\SettingTypeEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\SettingFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +15,7 @@ use JsonException;
  * @property-read int $id
  * @property-read string $key
  * @property-read string|null $value
- * @property-read string $type
+ * @property-read SettingTypeEnum $type
  * @property-read string|null $group
  * @property-read string|null $description
  * @property-read CarbonInterface $created_at
@@ -30,14 +31,16 @@ final class Setting extends Model
      *
      * @throws JsonException
      */
-    protected function getTypedValueAttribute(): mixed
+    /**
+     * Get the typed value based on the type column.
+     *
+     * @return string|int|float|bool|array<string, mixed>|null
+     *
+     * @throws JsonException
+     */
+    protected function getTypedValueAttribute(): string|int|float|bool|array|null
     {
-        return match ($this->type) {
-            'boolean' => filter_var($this->value, FILTER_VALIDATE_BOOLEAN),
-            'number' => is_numeric($this->value) ? (float) $this->value : null,
-            'json', 'array' => json_decode($this->value ?? '[]', true, 512, JSON_THROW_ON_ERROR),
-            default => $this->value,
-        };
+        return $this->type->castValue($this->value);
     }
 
     /**
@@ -49,7 +52,7 @@ final class Setting extends Model
             'id' => 'integer',
             'key' => 'string',
             'value' => 'string',
-            'type' => 'string',
+            'type' => SettingTypeEnum::class,
             'group' => 'string',
             'description' => 'string',
             'created_at' => 'datetime',

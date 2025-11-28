@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\StockMovementTypeEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\StockMovementFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property-read int $product_id
  * @property-read int $store_id
  * @property-read float $quantity
- * @property-read string $type
+ * @property-read StockMovementTypeEnum $type
  * @property-read string|null $source_type
  * @property-read int|null $source_id
  * @property-read string|null $batch_number
@@ -67,6 +68,25 @@ final class StockMovement extends Model
     }
 
     /**
+     * Check if stock movement is incoming.
+     */
+    /**
+     * Check if movement is incoming (increases stock).
+     */
+    public function isIncoming(): bool
+    {
+        return $this->type->isIncoming();
+    }
+
+    /**
+     * Get the effective quantity (positive for incoming, negative for outgoing).
+     */
+    protected function getEffectiveQuantityAttribute(): float
+    {
+        return $this->isIncoming() ? $this->quantity : -$this->quantity;
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
@@ -76,7 +96,7 @@ final class StockMovement extends Model
             'product_id' => 'integer',
             'store_id' => 'integer',
             'quantity' => 'decimal:2',
-            'type' => 'string',
+            'type' => StockMovementTypeEnum::class,
             'source_type' => 'string',
             'source_id' => 'integer',
             'batch_number' => 'string',

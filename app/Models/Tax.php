@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\TaxTypeEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\TaxFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property-read int $id
  * @property-read string $name
- * @property-read string $type
+ * @property-read TaxTypeEnum $type
  * @property-read string $rate
  * @property-read bool $is_active
  * @property-read CarbonInterface $created_at
@@ -35,6 +36,33 @@ final class Tax extends Model
     }
 
     /**
+     * Check if tax is percentage type.
+     */
+    public function isPercentage(): bool
+    {
+        return $this->type === TaxTypeEnum::PERCENTAGE;
+    }
+
+    /**
+     * Check if tax is fixed type.
+     */
+    public function isFixed(): bool
+    {
+        return $this->type === TaxTypeEnum::FIXED;
+    }
+
+    /**
+     * Calculate tax amount for a given value.
+     */
+    public function calculate(float $value): float
+    {
+        return match ($this->type) {
+            TaxTypeEnum::PERCENTAGE => ($value * $this->rate) / 100,
+            TaxTypeEnum::FIXED => $this->rate,
+        };
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
@@ -42,7 +70,7 @@ final class Tax extends Model
         return [
             'id' => 'integer',
             'name' => 'string',
-            'type' => 'string',
+            'type' => TaxTypeEnum::class,
             'rate' => 'decimal:2',
             'is_active' => 'boolean',
             'created_at' => 'datetime',

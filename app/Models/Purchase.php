@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\PurchaseStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\PurchaseFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -23,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read float|null $tax
  * @property-read float $total
  * @property-read float $paid
- * @property-read string $status
+ * @property-read PurchaseStatusEnum $status
  * @property-read string|null $notes
  * @property-read int|null $user_id
  * @property-read CarbonInterface $created_at
@@ -98,6 +99,46 @@ final class Purchase extends Model
     }
 
     /**
+     * Check if the purchase is pending.
+     */
+    public function isPending(): bool
+    {
+        return $this->status === PurchaseStatusEnum::PENDING;
+    }
+
+    /**
+     * Check if the purchase is received.
+     */
+    public function isReceived(): bool
+    {
+        return $this->status === PurchaseStatusEnum::RECEIVED;
+    }
+
+    /**
+     * Check if the purchase is cancelled.
+     */
+    public function isCancelled(): bool
+    {
+        return $this->status === PurchaseStatusEnum::CANCELLED;
+    }
+
+    /**
+     * Check if the purchase is fully paid.
+     */
+    public function isFullyPaid(): bool
+    {
+        return $this->getRemainingAmountAttribute() <= 0;
+    }
+
+    /**
+     * Get the remaining amount to be paid.
+     */
+    protected function getRemainingAmountAttribute(): float
+    {
+        return max(0, $this->total - $this->paid);
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
@@ -112,7 +153,7 @@ final class Purchase extends Model
             'tax' => 'decimal:2',
             'total' => 'decimal:2',
             'paid' => 'decimal:2',
-            'status' => 'string',
+            'status' => PurchaseStatusEnum::class,
             'notes' => 'string',
             'user_id' => 'integer',
             'created_at' => 'datetime',

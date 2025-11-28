@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\CategoryTypeEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read int $id
  * @property-read string $name
  * @property-read string $code
- * @property-read string $type
+ * @property-read CategoryTypeEnum $type
  * @property-read bool $is_active
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
@@ -44,6 +45,22 @@ final class Category extends Model
     }
 
     /**
+     * Check if category is for products.
+     */
+    public function isProductCategory(): bool
+    {
+        return $this->type === CategoryTypeEnum::PRODUCT;
+    }
+
+    /**
+     * Check if category is for expenses.
+     */
+    public function isExpenseCategory(): bool
+    {
+        return $this->type === CategoryTypeEnum::EXPENSE;
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
@@ -52,7 +69,7 @@ final class Category extends Model
             'id' => 'integer',
             'name' => 'string',
             'code' => 'string',
-            'type' => 'string',
+            'type' => CategoryTypeEnum::class,
             'is_active' => 'boolean',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

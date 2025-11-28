@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\MoneyboxTransactionTypeEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\MoneyboxTransactionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 /**
  * @property-read int $id
  * @property-read int $moneybox_id
- * @property-read string $type
+ * @property-read MoneyboxTransactionTypeEnum $type
  * @property-read float $amount
  * @property-read float $balance_before
  * @property-read float $balance_after
@@ -69,6 +70,30 @@ final class MoneyboxTransaction extends Model
     }
 
     /**
+     * Check if transaction is incoming.
+     */
+    public function isIncoming(): bool
+    {
+        return $this->type === MoneyboxTransactionTypeEnum::IN;
+    }
+
+    /**
+     * Check if transaction is outgoing.
+     */
+    public function isOutgoing(): bool
+    {
+        return $this->type === MoneyboxTransactionTypeEnum::OUT;
+    }
+
+    /**
+     * Check if transaction is a transfer.
+     */
+    public function isTransfer(): bool
+    {
+        return $this->type === MoneyboxTransactionTypeEnum::TRANSFER;
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
@@ -76,7 +101,7 @@ final class MoneyboxTransaction extends Model
         return [
             'id' => 'integer',
             'moneybox_id' => 'integer',
-            'type' => 'string',
+            'type' => MoneyboxTransactionTypeEnum::class,
             'amount' => 'decimal:2',
             'balance_before' => 'decimal:2',
             'balance_after' => 'decimal:2',

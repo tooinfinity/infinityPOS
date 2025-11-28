@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\InvoiceStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\InvoiceFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -25,7 +26,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read float $tax
  * @property-read float $total
  * @property-read float $paid
- * @property-read string $status
+ * @property-read InvoiceStatusEnum $status
  * @property-read string|null $notes
  * @property-read int|null $user_id
  * @property-read CarbonInterface $created_at
@@ -73,6 +74,39 @@ final class Invoice extends Model
     }
 
     /**
+     * Check if invoice is paid.
+     */
+    public function isPaid(): bool
+    {
+        return $this->status->isPaid();
+    }
+
+    /**
+     * Check if invoice is overdue.
+     */
+    public function isOverdue(): bool
+    {
+        return $this->status === InvoiceStatusEnum::OVERDUE
+            || ($this->due_at && $this->due_at->isPast() && ! $this->isPaid());
+    }
+
+    /**
+     * Check if the invoice is fully paid.
+     */
+    public function isFullyPaid(): bool
+    {
+        return $this->getRemainingAmountAttribute() <= 0;
+    }
+
+    /**
+     * Get the remaining amount to be paid.
+     */
+    protected function getRemainingAmountAttribute(): float
+    {
+        return max(0, $this->total - $this->paid);
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
@@ -90,7 +124,7 @@ final class Invoice extends Model
             'tax' => 'decimal:2',
             'total' => 'decimal:2',
             'paid' => 'decimal:2',
-            'status' => 'string',
+            'status' => InvoiceStatusEnum::class,
             'notes' => 'string',
             'user_id' => 'integer',
             'created_at' => 'datetime',
