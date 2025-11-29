@@ -27,21 +27,9 @@ final class Setting extends Model
     use HasFactory;
 
     /**
-     * Get the typed value based on the type column.
-     *
-     * @return string|float|bool|array<mixed>
-     *
-     * @throws JsonException
-     */
-    protected function getTypedValueAttribute(): string|float|bool|array
-    {
-        return $this->type->castValue($this->value);
-    }
-
-    /**
      * @return array<string, string>
      */
-    protected function casts(): array
+    public function casts(): array
     {
         return [
             'id' => 'integer',
@@ -53,5 +41,17 @@ final class Setting extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Get the typed value based on the type column.
+     *
+     * @return string|float|bool|array<mixed>
+     *
+     * @throws JsonException
+     */
+    protected function getTypedValueAttribute(): string|float|bool|array
+    {
+        return $this->type->castValue($this->value);
     }
 }

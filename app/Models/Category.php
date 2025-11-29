@@ -66,7 +66,7 @@ final class Category extends Model
     /**
      * @return array<string, string>
      */
-    protected function casts(): array
+    public function casts(): array
     {
         return [
             'id' => 'integer',

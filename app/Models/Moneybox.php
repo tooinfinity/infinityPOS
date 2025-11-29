@@ -92,17 +92,9 @@ final class Moneybox extends Model
     }
 
     /**
-     * Get the total balance change since opening.
-     */
-    protected function getBalanceChangeAttribute(): float
-    {
-        return $this->current_balance - $this->opening_balance;
-    }
-
-    /**
      * @return array<string, string>
      */
-    protected function casts(): array
+    public function casts(): array
     {
         return [
             'id' => 'integer',
@@ -120,5 +112,13 @@ final class Moneybox extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Get the total balance change since opening.
+     */
+    protected function getBalanceChangeAttribute(): float
+    {
+        return $this->current_balance - $this->opening_balance;
     }
 }

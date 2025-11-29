@@ -131,22 +131,9 @@ final class PurchaseReturn extends Model
     }
 
     /**
-     * Get the remaining amount to be refunded.
-     */
-    /**
-     * @return Attribute<float, never>
-     */
-    protected function remainingRefund(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): float => max(0, (float) $this->total - (float) $this->refunded)
-        );
-    }
-
-    /**
      * @return array<string, string>
      */
-    protected function casts(): array
+    public function casts(): array
     {
         return [
             'id' => 'integer',
@@ -163,5 +150,18 @@ final class PurchaseReturn extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Get the remaining amount to be refunded.
+     */
+    /**
+     * @return Attribute<float, never>
+     */
+    protected function remainingRefund(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): float => max(0, (float) $this->total - (float) $this->refunded)
+        );
     }
 }

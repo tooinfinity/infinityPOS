@@ -112,6 +112,32 @@ final class Product extends Model
     }
 
     /**
+     * @return array<string, string>
+     */
+    public function casts(): array
+    {
+        return [
+            'id' => 'integer',
+            'sku' => 'string',
+            'barcode' => 'string',
+            'name' => 'string',
+            'description' => 'string',
+            'image' => 'string',
+            'category_id' => 'integer',
+            'brand_id' => 'integer',
+            'unit_id' => 'integer',
+            'tax_id' => 'integer',
+            'cost' => 'decimal:2',
+            'price' => 'decimal:2',
+            'alert_quantity' => 'decimal:2',
+            'has_batches' => 'boolean',
+            'is_active' => 'boolean',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
+
+    /**
      * @param  Builder<self>  $query
      */
     #[Scope]
@@ -157,31 +183,5 @@ final class Product extends Model
         return Attribute::make(
             get: fn (): float => $this->cost <= 0 ? 0.0 : (($this->price - $this->cost) / $this->cost) * 100
         );
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'id' => 'integer',
-            'sku' => 'string',
-            'barcode' => 'string',
-            'name' => 'string',
-            'description' => 'string',
-            'image' => 'string',
-            'category_id' => 'integer',
-            'brand_id' => 'integer',
-            'unit_id' => 'integer',
-            'tax_id' => 'integer',
-            'cost' => 'decimal:2',
-            'price' => 'decimal:2',
-            'alert_quantity' => 'decimal:2',
-            'has_batches' => 'boolean',
-            'is_active' => 'boolean',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-        ];
     }
 }

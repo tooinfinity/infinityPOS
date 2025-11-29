@@ -102,37 +102,9 @@ final class Invoice extends Model
     }
 
     /**
-     * @param  Builder<self>  $query
-     */
-    #[Scope]
-    protected function overdue(Builder $query): void
-    {
-        $query->where(function ($q): void {
-            $q->where('status', InvoiceStatusEnum::OVERDUE)
-                ->orWhere(function ($inner): void {
-                    $inner->whereNotIn('status', [InvoiceStatusEnum::PAID, InvoiceStatusEnum::CANCELLED])
-                        ->where('due_at', '<', now());
-                });
-        });
-    }
-
-    /**
-     * Get the remaining amount to be paid.
-     */
-    /**
-     * @return Attribute<float, never>
-     */
-    protected function remainingAmount(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): float => max(0, $this->total - $this->paid)
-        );
-    }
-
-    /**
      * @return array<string, string>
      */
-    protected function casts(): array
+    public function casts(): array
     {
         return [
             'id' => 'integer',
@@ -153,5 +125,33 @@ final class Invoice extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function overdue(Builder $query): void
+    {
+        $query->where(function (Builder $q): void {
+            $q->where('status', InvoiceStatusEnum::OVERDUE)
+                ->orWhere(function (Builder $inner): void {
+                    $inner->whereNotIn('status', [InvoiceStatusEnum::PAID, InvoiceStatusEnum::CANCELLED])
+                        ->where('due_at', '<', now());
+                });
+        });
+    }
+
+    /**
+     * Get the remaining amount to be paid.
+     */
+    /**
+     * @return Attribute<float, never>
+     */
+    protected function remainingAmount(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): float => max(0, $this->total - $this->paid)
+        );
     }
 }

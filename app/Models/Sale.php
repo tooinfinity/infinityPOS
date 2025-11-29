@@ -136,6 +136,29 @@ final class Sale extends Model
     }
 
     /**
+     * @return array<string, string>
+     */
+    public function casts(): array
+    {
+        return [
+            'id' => 'integer',
+            'reference' => 'string',
+            'client_id' => 'integer',
+            'store_id' => 'integer',
+            'subtotal' => 'decimal:2',
+            'discount' => 'decimal:2',
+            'tax' => 'decimal:2',
+            'total' => 'decimal:2',
+            'paid' => 'decimal:2',
+            'status' => SaleStatusEnum::class,
+            'notes' => 'string',
+            'user_id' => 'integer',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
+
+    /**
      * Get the remaining amount to be paid.
      */
     /**
@@ -156,28 +179,5 @@ final class Sale extends Model
         return Attribute::make(
             get: fn (): float => (float) $this->total - (float) $this->paid
         );
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'id' => 'integer',
-            'reference' => 'string',
-            'client_id' => 'integer',
-            'store_id' => 'integer',
-            'subtotal' => 'decimal:2',
-            'discount' => 'decimal:2',
-            'tax' => 'decimal:2',
-            'total' => 'decimal:2',
-            'paid' => 'decimal:2',
-            'status' => SaleStatusEnum::class,
-            'notes' => 'string',
-            'user_id' => 'integer',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-        ];
     }
 }

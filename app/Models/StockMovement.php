@@ -80,19 +80,9 @@ final class StockMovement extends Model
     }
 
     /**
-     * @return Attribute<float, never>
-     */
-    protected function effectiveQuantity(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): float => $this->isIncoming() ? $this->quantity : -$this->quantity
-        );
-    }
-
-    /**
      * @return array<string, string>
      */
-    protected function casts(): array
+    public function casts(): array
     {
         return [
             'id' => 'integer',
@@ -108,5 +98,15 @@ final class StockMovement extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return Attribute<float, never>
+     */
+    protected function effectiveQuantity(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): float => $this->isIncoming() ? $this->quantity : -$this->quantity
+        );
     }
 }

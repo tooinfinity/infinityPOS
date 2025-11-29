@@ -47,7 +47,7 @@ final class StoreStock extends Pivot
     /**
      * @return array<string, string>
      */
-    protected function casts(): array
+    public function casts(): array
     {
         return [
             'store_id' => 'integer',

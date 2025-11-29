@@ -70,18 +70,9 @@ final class Client extends Model
     }
 
     /**
-     * @param  Builder<self>  $query
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function withBalance(Builder $query): void
-    {
-        $query->where('balance', '>', 0);
-    }
-
-    /**
      * @return array<string, string>
      */
-    protected function casts(): array
+    public function casts(): array
     {
         return [
             'id' => 'integer',
@@ -95,5 +86,14 @@ final class Client extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[\Illuminate\Database\Eloquent\Attributes\Scope]
+    protected function withBalance(Builder $query): void
+    {
+        $query->where('balance', '>', 0);
     }
 }
