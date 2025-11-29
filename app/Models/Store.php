@@ -4,52 +4,51 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
-use Database\Factories\UserFactory;
+use Database\Factories\StoreFactory;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasRoles;
 
 /**
  * @property-read int $id
  * @property-read string $name
- * @property-read string $email
- * @property-read string $password
- * @property-read string|null $remember_token
+ * @property-read string|null $city
+ * @property-read string|null $address
+ * @property-read string|null $phone
+ * @property-read bool $is_active
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read Collection<int, Product> $products
  * @property-read Collection<int, Sale> $sales
  * @property-read Collection<int, Purchase> $purchases
  * @property-read Collection<int, SaleReturn> $saleReturns
  * @property-read Collection<int, PurchaseReturn> $purchaseReturns
- * @property-read Collection<int, Invoice> $invoices
- * @property-read Collection<int, Payment> $payments
+ * @property-read Collection<int, Moneybox> $moneyboxes
  * @property-read Collection<int, Expense> $expenses
  * @property-read Collection<int, StockMovement> $stockMovements
- * @property-read Collection<int, StockTransfer> $stockTransfers
- * @property-read Collection<int, Moneybox> $moneyboxes
- * @property-read Collection<int, MoneyboxTransaction> $moneyboxTransactions
+ * @property-read Collection<int, StockTransfer> $outgoingTransfers
+ * @property-read Collection<int, StockTransfer> $incomingTransfers
  */
-final class User extends Authenticatable
+#[ScopedBy(ActiveScope::class)]
+final class Store extends Model
 {
-    /**
-     * @use HasFactory<UserFactory>
-     */
+    /** @use HasFactory<StoreFactory> */
     use HasFactory;
 
-    use HasRoles;
-    use Notifiable;
-
     /**
-     * @var list<string>
+     * @return BelongsToMany<Product, $this>
      */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'store_stock')
+            ->withPivot('quantity')
+            ->withTimestamps();
+    }
 
     /**
      * @return HasMany<Sale, $this>
@@ -84,19 +83,11 @@ final class User extends Authenticatable
     }
 
     /**
-     * @return HasMany<Invoice, $this>
+     * @return HasMany<Moneybox, $this>
      */
-    public function invoices(): HasMany
+    public function moneyboxes(): HasMany
     {
-        return $this->hasMany(Invoice::class);
-    }
-
-    /**
-     * @return HasMany<Payment, $this>
-     */
-    public function payments(): HasMany
-    {
-        return $this->hasMany(Payment::class);
+        return $this->hasMany(Moneybox::class);
     }
 
     /**
@@ -118,25 +109,17 @@ final class User extends Authenticatable
     /**
      * @return HasMany<StockTransfer, $this>
      */
-    public function stockTransfers(): HasMany
+    public function outgoingTransfers(): HasMany
     {
-        return $this->hasMany(StockTransfer::class);
+        return $this->hasMany(StockTransfer::class, 'from_store_id');
     }
 
     /**
-     * @return HasMany<Moneybox, $this>
+     * @return HasMany<StockTransfer, $this>
      */
-    public function moneyboxes(): HasMany
+    public function incomingTransfers(): HasMany
     {
-        return $this->hasMany(Moneybox::class);
-    }
-
-    /**
-     * @return HasMany<MoneyboxTransaction, $this>
-     */
-    public function moneyboxTransactions(): HasMany
-    {
-        return $this->hasMany(MoneyboxTransaction::class);
+        return $this->hasMany(StockTransfer::class, 'to_store_id');
     }
 
     /**
@@ -147,9 +130,10 @@ final class User extends Authenticatable
         return [
             'id' => 'integer',
             'name' => 'string',
-            'email' => 'string',
-            'password' => 'hashed',
-            'remember_token' => 'string',
+            'city' => 'string',
+            'address' => 'string',
+            'phone' => 'string',
+            'is_active' => 'boolean',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
