@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Store;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Store>
+ * @extends Factory<Store>
  */
 final class StoreFactory extends Factory
 {
@@ -19,7 +20,21 @@ final class StoreFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->unique()->company().' Store',
+            'city' => $this->faker->optional()->city(),
+            'address' => $this->faker->optional()->streetAddress(),
+            'phone' => $this->faker->optional()->phoneNumber(),
+            'is_active' => $this->faker->boolean(95),
         ];
+    }
+
+    public function active(): self
+    {
+        return $this->state(fn (array $attrs): array => [...$attrs, 'is_active' => true]);
+    }
+
+    public function inactive(): self
+    {
+        return $this->state(fn (array $attrs): array => [...$attrs, 'is_active' => false]);
     }
 }

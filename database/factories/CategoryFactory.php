@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Category;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Category>
+ * @extends Factory<Category>
  */
 final class CategoryFactory extends Factory
 {
@@ -19,7 +21,18 @@ final class CategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => ucfirst($this->faker->unique()->word()),
+            'code' => mb_strtoupper(Str::random(6)),
+            'type' => $this->faker->randomElement(['product', 'expense']),
+            'is_active' => $this->faker->boolean(90),
         ];
+    }
+
+    /**
+     * Mark the category inactive.
+     */
+    public function inactive(): self
+    {
+        return $this->state(fn (): array => ['is_active' => false]);
     }
 }

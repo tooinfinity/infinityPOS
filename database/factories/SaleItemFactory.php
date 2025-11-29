@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\SaleItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\SaleItem>
+ * @extends Factory<SaleItem>
  */
 final class SaleItemFactory extends Factory
 {
@@ -18,8 +19,25 @@ final class SaleItemFactory extends Factory
      */
     public function definition(): array
     {
+        $quantity = $this->faker->randomFloat(2, 1, 10);
+        $price = $this->faker->randomFloat(2, 5, 500);
+        $cost = round($price * $this->faker->randomFloat(2, 0.5, 0.9), 2);
+        $discount = $this->faker->optional(0.3, 0.0)->randomFloat(2, 0, $price * $quantity * 0.2);
+        $taxBase = max(0, ($price * $quantity) - $discount);
+        $taxAmount = round($taxBase * $this->faker->randomFloat(2, 0.0, 0.2), 2);
+        $total = round($taxBase + $taxAmount, 2);
+
         return [
-            //
+            'sale_id' => null,
+            'product_id' => null,
+            'quantity' => $quantity,
+            'price' => $price,
+            'cost' => $cost,
+            'discount' => $discount,
+            'tax_amount' => $taxAmount,
+            'total' => $total,
+            'batch_number' => $this->faker->optional(0.2)->bothify('BATCH-#####'),
+            'expiry_date' => null,
         ];
     }
 }

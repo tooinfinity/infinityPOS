@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\BusinessIdentifier;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\BusinessIdentifier>
+ * @extends Factory<BusinessIdentifier>
  */
 final class BusinessIdentifierFactory extends Factory
 {
@@ -19,7 +20,11 @@ final class BusinessIdentifierFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'article' => $this->faker->optional()->bothify('ART-#####'),
+            'nif' => $this->faker->optional()->bothify('NIF-########'),
+            'nis' => $this->faker->optional()->bothify('NIS-########'),
+            'rc' => $this->faker->optional()->bothify('RC-#####'),
+            'rib' => $this->faker->optional()->iban(),
         ];
     }
 }

@@ -25,7 +25,6 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained();
             $table->timestamps();
 
-            $table->index(['payable_type', 'payable_id']);
             $table->index('reference');
             $table->index('method');
             $table->index('moneybox_id');
