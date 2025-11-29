@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\MoneyboxTypeEnum;
 use App\Models\Scopes\ActiveScope;
+use Attribute;
 use Carbon\CarbonInterface;
 use Database\Factories\MoneyboxFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
@@ -115,10 +116,12 @@ final class Moneybox extends Model
     }
 
     /**
-     * Get the total balance change since opening.
+     * @return Attribute<float, never>
      */
-    protected function getBalanceChangeAttribute(): float
+    public function getBalanceChange(): Attribute
     {
-        return $this->current_balance - $this->opening_balance;
+        return Attribute::make(
+            get: fn (): float => $this->current_balance - $this->opening_balance
+        );
     }
 }

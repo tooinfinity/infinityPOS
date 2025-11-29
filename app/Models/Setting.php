@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\SettingTypeEnum;
+use Attribute;
 use Carbon\CarbonInterface;
 use Database\Factories\SettingFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -46,12 +47,14 @@ final class Setting extends Model
     /**
      * Get the typed value based on the type column.
      *
-     * @return string|float|bool|array<mixed>
+     * @return Attribute<string|float|bool|array<mixed>, never>
      *
      * @throws JsonException
      */
-    protected function getTypedValueAttribute(): string|float|bool|array
+    public function typedValue(): Attribute
     {
-        return $this->type->castValue($this->value);
+        return Attribute::get(
+            fn (mixed $value, array $attributes): string|float|bool|array => $this->type->castValue($attributes['value'])
+        );
     }
 }

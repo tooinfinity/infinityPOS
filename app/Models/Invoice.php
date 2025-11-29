@@ -143,9 +143,6 @@ final class Invoice extends Model
     }
 
     /**
-     * Get the remaining amount to be paid.
-     */
-    /**
      * @return Attribute<float, never>
      */
     protected function remainingAmount(): Attribute
