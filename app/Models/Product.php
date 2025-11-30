@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Casts\ProfitMarginCast;
+use App\Casts\TotalStockCast;
 use App\Models\Scopes\ActiveScope;
+use App\Models\Scopes\LowStockScope;
+use App\Models\Scopes\WithBatchesScope;
+use App\QueryBuilders\ProductQueryBuilder;
 use Carbon\CarbonInterface;
 use Database\Factories\ProductFactory;
-use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -47,7 +50,7 @@ use Illuminate\Database\Query\Builder;
  * @property-read bool $is_low_stock
  * @property-read float $profit_margin
  */
-#[ScopedBy(ActiveScope::class)]
+#[ScopedBy([ActiveScope::class, LowStockScope::class, WithBatchesScope::class])]
 final class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
@@ -132,56 +135,18 @@ final class Product extends Model
             'alert_quantity' => 'decimal:2',
             'has_batches' => 'boolean',
             'is_active' => 'boolean',
+            'total_stock' => TotalStockCast::class,
+            'profit_margin' => ProfitMarginCast::class,
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
     }
 
     /**
-     * @param  Builder<self>  $query
+     * @return ProductQueryBuilder<self>
      */
-    #[Scope]
-    protected function lowStock(Builder $query): void
+    public function newEloquentBuilder(Builder $query): ProductQueryBuilder
     {
-        $query->whereRaw('COALESCE((SELECT SUM(quantity) FROM store_stock WHERE product_id = products.id), 0) <= alert_quantity');
-    }
-
-    /**
-     * @param  Builder<self>  $query
-     */
-    #[Scope]
-    protected function withBatches(Builder $query): void
-    {
-        $query->where('has_batches', true);
-    }
-
-    /**
-     * @return Attribute<float, never>
-     */
-    protected function totalStock(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): float => (float) $this->stores()->sum('quantity')
-        );
-    }
-
-    /**
-     * @return Attribute<bool, never>
-     */
-    protected function isLowStock(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): bool => $this->total_stock <= $this->alert_quantity
-        );
-    }
-
-    /**
-     * @return Attribute<float, never>
-     */
-    protected function profitMargin(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): float => $this->cost <= 0 ? 0.0 : (($this->price - $this->cost) / $this->cost) * 100
-        );
+        return new ProductQueryBuilder($query);
     }
 }
