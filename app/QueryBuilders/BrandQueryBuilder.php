@@ -29,7 +29,7 @@ final class BrandQueryBuilder extends Builder
 
     public function withActiveProducts(): self
     {
-        return $this->with(['products' => function ($query) {
+        return $this->with(['products' => function ($query): void {
             $query->where('is_active', true);
         }]);
     }
@@ -46,7 +46,7 @@ final class BrandQueryBuilder extends Builder
 
     public function searchByName(string $search): self
     {
-        return $this->where('name', 'like', "%{$search}%");
+        return $this->where('name', 'like', sprintf('%%%s%%', $search));
     }
 
     public function orderByProductCount(string $direction = 'desc'): self

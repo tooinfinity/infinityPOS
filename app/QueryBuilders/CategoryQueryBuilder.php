@@ -81,19 +81,19 @@ final class CategoryQueryBuilder extends Builder
 
     public function searchByName(string $search): self
     {
-        return $this->where('name', 'like', "%{$search}%");
+        return $this->where('name', 'like', sprintf('%%%s%%', $search));
     }
 
     public function searchByCode(string $search): self
     {
-        return $this->where('code', 'like', "%{$search}%");
+        return $this->where('code', 'like', sprintf('%%%s%%', $search));
     }
 
     public function search(string $search): self
     {
-        return $this->where(function ($query) use ($search) {
-            $query->where('name', 'like', "%{$search}%")
-                ->orWhere('code', 'like', "%{$search}%");
+        return $this->where(function ($query) use ($search): void {
+            $query->where('name', 'like', sprintf('%%%s%%', $search))
+                ->orWhere('code', 'like', sprintf('%%%s%%', $search));
         });
     }
 
