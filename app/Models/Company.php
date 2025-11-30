@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\QueryBuilders\CompanyQueryBuilder;
 use Carbon\CarbonInterface;
 use Database\Factories\CompanyFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Query\Builder;
 
 /**
  * @property-read int $id
@@ -44,6 +46,14 @@ final class Company extends Model
     public function businessIdentifier(): BelongsTo
     {
         return $this->belongsTo(BusinessIdentifier::class);
+    }
+
+    /**
+     * @return CompanyQueryBuilder<self>
+     */
+    public function newEloquentBuilder(Builder $query): CompanyQueryBuilder
+    {
+        return new CompanyQueryBuilder($query);
     }
 
     /**
