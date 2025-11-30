@@ -120,7 +120,7 @@ final class ClientQueryBuilder extends Builder
 
     public function search(string $search): self
     {
-        return $this->where(function ($query) use ($search): void {
+        return $this->where(function (Builder $query) use ($search): void {
             $query->where('name', 'like', sprintf('%%%s%%', $search))
                 ->orWhere('phone', 'like', sprintf('%%%s%%', $search))
                 ->orWhere('email', 'like', sprintf('%%%s%%', $search));
@@ -136,14 +136,14 @@ final class ClientQueryBuilder extends Builder
 
     public function recentlyActive(int $days = 30): self
     {
-        return $this->whereHas('sales', function ($query) use ($days): void {
+        return $this->whereHas('sales', function (Builder $query) use ($days): void {
             $query->where('created_at', '>=', now()->subDays($days));
         });
     }
 
     public function inactiveClient(int $days = 90): self
     {
-        return $this->whereDoesntHave('sales', function ($query) use ($days): void {
+        return $this->whereDoesntHave('sales', function (Builder $query) use ($days): void {
             $query->where('created_at', '>=', now()->subDays($days));
         });
     }

@@ -29,7 +29,7 @@ final class BrandQueryBuilder extends Builder
 
     public function withActiveProducts(): self
     {
-        return $this->with(['products' => function ($query): void {
+        return $this->with(['products' => function (Builder $query): void {
             $query->where('is_active', true);
         }]);
     }
