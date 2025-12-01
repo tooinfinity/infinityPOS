@@ -6,20 +6,19 @@ namespace App\Models;
 
 use App\Casts\ProfitMarginCast;
 use App\Casts\TotalStockCast;
-use App\Models\Scopes\ActiveScope;
 use App\Models\Scopes\LowStockScope;
 use App\Models\Scopes\WithBatchesScope;
 use App\QueryBuilders\ProductQueryBuilder;
 use Carbon\CarbonInterface;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Query\Builder;
 
 /**
  * @property-read int $id
@@ -51,6 +50,7 @@ use Illuminate\Database\Query\Builder;
  * @property-read float $profit_margin
  */
 #[ScopedBy([LowStockScope::class, WithBatchesScope::class])]
+#[UseEloquentBuilder(ProductQueryBuilder::class)]
 final class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
@@ -140,13 +140,5 @@ final class Product extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @return ProductQueryBuilder<self>
-     */
-    public function newEloquentBuilder(Builder $query): ProductQueryBuilder
-    {
-        return new ProductQueryBuilder($query);
     }
 }

@@ -5,16 +5,14 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\CategoryTypeEnum;
-use App\Models\Scopes\ActiveScope;
 use App\QueryBuilders\CategoryQueryBuilder;
 use Carbon\CarbonInterface;
 use Database\Factories\CategoryFactory;
-use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Query\Builder;
 
 /**
  * @property-read int $id
@@ -27,6 +25,7 @@ use Illuminate\Database\Query\Builder;
  * @property-read Collection<int, Product> $products
  * @property-read Collection<int, Expense> $expenses
  */
+#[UseEloquentBuilder(CategoryQueryBuilder::class)]
 final class Category extends Model
 {
     /** @use HasFactory<CategoryFactory> */
@@ -62,14 +61,6 @@ final class Category extends Model
     public function isExpenseCategory(): bool
     {
         return $this->type === CategoryTypeEnum::EXPENSE;
-    }
-
-    /**
-     * @return CategoryQueryBuilder<self>
-     */
-    public function newEloquentBuilder(Builder $query): CategoryQueryBuilder
-    {
-        return new CategoryQueryBuilder($query);
     }
 
     /**

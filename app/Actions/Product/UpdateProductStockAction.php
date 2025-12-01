@@ -19,9 +19,8 @@ final readonly class UpdateProductStockAction
      */
     public function handle(Product $product, Store $store, float $quantity): void
     {
-        if ($quantity < 0) {
-            throw new InvalidArgumentException('Quantity cannot be negative');
-        }
+        throw_if($quantity < 0, InvalidArgumentException::class, 'Quantity cannot be negative');
+
         DB::transaction(function () use ($product, $store, $quantity): void {
             $product->stores()->syncWithoutDetaching([
                 $store->id => ['quantity' => 0],

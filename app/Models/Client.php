@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Models\Scopes\ActiveScope;
 use App\QueryBuilders\ClientQueryBuilder;
 use Carbon\CarbonInterface;
 use Database\Factories\ClientFactory;
-use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -32,6 +31,7 @@ use Illuminate\Database\Query\Builder;
  * @property-read Collection<int, SaleReturn> $saleReturns
  * @property-read Collection<int, Invoice> $invoices
  */
+#[UseEloquentBuilder(ClientQueryBuilder::class)]
 final class Client extends Model
 {
     /** @use HasFactory<ClientFactory> */
@@ -67,14 +67,6 @@ final class Client extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
-    }
-
-    /**
-     * @return ClientQueryBuilder<self>
-     */
-    public function newEloquentBuilder(Builder $query): ClientQueryBuilder
-    {
-        return new ClientQueryBuilder($query);
     }
 
     /**

@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\MoneyboxTypeEnum;
-use App\Models\Scopes\ActiveScope;
 use Attribute;
 use Carbon\CarbonInterface;
 use Database\Factories\MoneyboxFactory;
-use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
