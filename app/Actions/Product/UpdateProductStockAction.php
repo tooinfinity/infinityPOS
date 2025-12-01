@@ -7,6 +7,7 @@ namespace App\Actions\Product;
 use App\Models\Product;
 use App\Models\Store;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 use Throwable;
 
 final readonly class UpdateProductStockAction
@@ -18,13 +19,18 @@ final readonly class UpdateProductStockAction
      */
     public function handle(Product $product, Store $store, float $quantity): void
     {
+        if ($quantity < 0) {
+            throw new InvalidArgumentException('Quantity cannot be negative');
+        }
         DB::transaction(function () use ($product, $store, $quantity): void {
             $product->stores()->syncWithoutDetaching([
-                $store->id => [
-                    'quantity' => DB::raw('quantity + '.$quantity),
-                    'updated_at' => now(),
-                ],
+                $store->id => ['quantity' => 0],
             ]);
+
+            DB::table('store_stock')
+                ->where('product_id', $product->id)
+                ->where('store_id', $store->id)
+                ->increment('quantity', $quantity, ['updated_at' => now()]);
         });
     }
 }

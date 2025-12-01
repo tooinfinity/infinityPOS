@@ -38,7 +38,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, Expense> $expenses
  * @property-read Collection<int, MoneyboxTransaction> $incomingTransfers
  */
-#[ScopedBy(ActiveScope::class)]
 final class Moneybox extends Model
 {
     /** @use HasFactory<MoneyboxFactory> */

@@ -50,7 +50,7 @@ use Illuminate\Database\Query\Builder;
  * @property-read bool $is_low_stock
  * @property-read float $profit_margin
  */
-#[ScopedBy([ActiveScope::class, LowStockScope::class, WithBatchesScope::class])]
+#[ScopedBy([LowStockScope::class, WithBatchesScope::class])]
 final class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */

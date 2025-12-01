@@ -15,8 +15,13 @@ final class LowStockScope implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
+        $table = $model->getTable();
+
         $builder->whereRaw(
-            'COALESCE((SELECT SUM(quantity) FROM store_stock WHERE product_id = products.id), 0) <= alert_quantity'
+            sprintf(
+                'COALESCE((SELECT SUM(quantity) FROM store_stock WHERE product_id = %1$s.id), 0) <= %1$s.alert_quantity',
+                $table,
+            )
         );
     }
 }

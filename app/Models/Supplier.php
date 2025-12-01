@@ -29,7 +29,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, Purchase> $purchases
  * @property-read Collection<int, PurchaseReturn> $purchaseReturns
  */
-#[ScopedBy(ActiveScope::class)]
 final class Supplier extends Model
 {
     /** @use HasFactory<SupplierFactory> */

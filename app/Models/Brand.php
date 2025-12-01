@@ -23,7 +23,6 @@ use Illuminate\Database\Query\Builder;
  * @property-read CarbonInterface $updated_at
  * @property-read Collection<int, Product> $products
  */
-#[ScopedBy(ActiveScope::class)]
 final class Brand extends Model
 {
     /** @use HasFactory<BrandFactory> */

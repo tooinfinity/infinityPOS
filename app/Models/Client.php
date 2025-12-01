@@ -32,7 +32,6 @@ use Illuminate\Database\Query\Builder;
  * @property-read Collection<int, SaleReturn> $saleReturns
  * @property-read Collection<int, Invoice> $invoices
  */
-#[ScopedBy(ActiveScope::class)]
 final class Client extends Model
 {
     /** @use HasFactory<ClientFactory> */

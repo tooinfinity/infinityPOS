@@ -24,7 +24,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read CarbonInterface $updated_at
  * @property-read Collection<int, Product> $products
  */
-#[ScopedBy(ActiveScope::class)]
 final class Tax extends Model
 {
     /** @use HasFactory<TaxFactory> */

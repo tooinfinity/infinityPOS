@@ -22,7 +22,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read CarbonInterface $updated_at
  * @property-read Collection<int, Product> $products
  */
-#[ScopedBy(ActiveScope::class)]
 final class Unit extends Model
 {
     /** @use HasFactory<UnitFactory> */

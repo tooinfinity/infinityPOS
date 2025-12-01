@@ -27,7 +27,6 @@ use Illuminate\Database\Query\Builder;
  * @property-read Collection<int, Product> $products
  * @property-read Collection<int, Expense> $expenses
  */
-#[ScopedBy(ActiveScope::class)]
 final class Category extends Model
 {
     /** @use HasFactory<CategoryFactory> */

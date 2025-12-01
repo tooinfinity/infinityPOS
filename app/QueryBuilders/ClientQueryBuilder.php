@@ -32,11 +32,6 @@ final class ClientQueryBuilder extends Builder
         return $this->where('balance', '<', 0);
     }
 
-    public function withCredit(): self
-    {
-        return $this->where('balance', '>', 0);
-    }
-
     public function withZeroBalance(): self
     {
         return $this->where('balance', '=', 0);
@@ -101,21 +96,6 @@ final class ClientQueryBuilder extends Builder
     public function withAllCounts(): self
     {
         return $this->withCount(['sales', 'invoices', 'saleReturns']);
-    }
-
-    public function searchByName(string $search): self
-    {
-        return $this->where('name', 'like', sprintf('%%%s%%', $search));
-    }
-
-    public function searchByPhone(string $search): self
-    {
-        return $this->where('phone', 'like', sprintf('%%%s%%', $search));
-    }
-
-    public function searchByEmail(string $search): self
-    {
-        return $this->where('email', 'like', sprintf('%%%s%%', $search));
     }
 
     public function search(string $search): self
