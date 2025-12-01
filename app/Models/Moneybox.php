@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\MoneyboxTypeEnum;
-use Attribute;
 use Carbon\CarbonInterface;
 use Database\Factories\MoneyboxFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -110,15 +109,5 @@ final class Moneybox extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @return Attribute<float, never>
-     */
-    public function getBalanceChange(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): float => $this->current_balance - $this->opening_balance
-        );
     }
 }

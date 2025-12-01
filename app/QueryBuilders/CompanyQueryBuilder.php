@@ -45,7 +45,7 @@ final class CompanyQueryBuilder extends Builder
 
     public function searchByPhone(string $search): self
     {
-        return $this->where(function ($query) use ($search): void {
+        return $this->where(function (Builder $query) use ($search): void {
             $query->where('phone', 'like', sprintf('%%%s%%', $search))
                 ->orWhere('phone_secondary', 'like', sprintf('%%%s%%', $search));
         });
@@ -53,7 +53,7 @@ final class CompanyQueryBuilder extends Builder
 
     public function search(string $search): self
     {
-        return $this->where(function ($query) use ($search): void {
+        return $this->where(function (Builder $query) use ($search): void {
             $query->where('name', 'like', sprintf('%%%s%%', $search))
                 ->orWhere('email', 'like', sprintf('%%%s%%', $search))
                 ->orWhere('phone', 'like', sprintf('%%%s%%', $search))

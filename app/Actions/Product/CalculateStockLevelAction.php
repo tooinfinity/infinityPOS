@@ -12,6 +12,8 @@ final readonly class CalculateStockLevelAction
     /**
      * Execute the action.
      *
+     * @return array<string, mixed>
+     *
      * @throws Throwable
      */
     public function handle(Product $product): array

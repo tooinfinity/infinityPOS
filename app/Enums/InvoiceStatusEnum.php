@@ -7,8 +7,9 @@ namespace App\Enums;
 enum InvoiceStatusEnum: string
 {
     case DRAFT = 'draft';
-    case SENT = 'sent';
+    case PENDING = 'pending';
     case PAID = 'paid';
+    case PARTIALLY_PAID = 'partially_paid';
     case OVERDUE = 'overdue';
     case CANCELLED = 'cancelled';
 
@@ -30,8 +31,9 @@ enum InvoiceStatusEnum: string
     {
         return match ($this) {
             self::DRAFT => 'Draft',
-            self::SENT => 'Sent',
+            self::PENDING => 'Pending',
             self::PAID => 'Paid',
+            self::PARTIALLY_PAID => 'Partially Paid',
             self::OVERDUE => 'Overdue',
             self::CANCELLED => 'Cancelled',
         };
@@ -41,8 +43,9 @@ enum InvoiceStatusEnum: string
     {
         return match ($this) {
             self::DRAFT => 'gray',
-            self::SENT => 'blue',
+            self::PENDING => 'blue',
             self::PAID => 'green',
+            self::PARTIALLY_PAID => 'yellow',
             self::OVERDUE => 'red',
             self::CANCELLED => 'red',
         };
@@ -55,6 +58,6 @@ enum InvoiceStatusEnum: string
 
     public function isPending(): bool
     {
-        return in_array($this, [self::DRAFT, self::SENT, self::OVERDUE], true);
+        return in_array($this, [self::DRAFT, self::PARTIALLY_PAID, self::PENDING, self::OVERDUE], true);
     }
 }

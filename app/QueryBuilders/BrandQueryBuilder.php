@@ -6,6 +6,7 @@ namespace App\QueryBuilders;
 
 use App\Models\Brand;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
  * @extends Builder<Brand>
@@ -29,9 +30,11 @@ final class BrandQueryBuilder extends Builder
 
     public function withActiveProducts(): self
     {
-        return $this->with(['products' => function (Builder $query): void {
-            $query->where('is_active', true);
-        }]);
+        return $this->with([
+            'products' => function (Relation $relation): void {
+                $relation->where('is_active', true);
+            },
+        ]);
     }
 
     public function hasProducts(): self

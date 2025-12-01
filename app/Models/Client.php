@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Query\Builder;
 
 /**
  * @property-read int $id
@@ -86,14 +85,5 @@ final class Client extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @param  Builder<self>  $query
-     */
-    #[\Illuminate\Database\Eloquent\Attributes\Scope]
-    protected function withBalance(Builder $query): void
-    {
-        $query->where('balance', '>', 0);
     }
 }

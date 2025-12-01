@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
+use JsonException;
+
 enum SettingTypeEnum: string
 {
     case STRING = 'string';
@@ -42,6 +44,8 @@ enum SettingTypeEnum: string
     /**
      * @param  string|int|float|bool|array<mixed>|null  $value
      * @return string|float|bool|array<mixed>
+     *
+     * @throws JsonException
      */
     public function castValue(string|int|float|bool|array|null $value): string|float|bool|array
     {

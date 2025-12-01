@@ -8,15 +8,18 @@ use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @template TModel of Product
- *
- * @extends Builder<TModel>
+ * @extends Builder<Product>
  */
 final class ProductQueryBuilder extends Builder
 {
     public function active(): self
     {
         return $this->where('is_active', true);
+    }
+
+    public function inactive(): self
+    {
+        return $this->where('is_active', false);
     }
 
     public function lowStock(): self

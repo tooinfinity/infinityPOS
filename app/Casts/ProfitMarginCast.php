@@ -16,9 +16,9 @@ final class ProfitMarginCast implements CastsAttributes
     /**
      * Cast the given value.
      *
-     * @param  array<string, mixed>  $attributes
+     * @param  array<string, float>  $attributes
      */
-    public function get(Model $model, string $key, mixed $value, array $attributes): mixed
+    public function get(Model $model, string $key, mixed $value, array $attributes): float
     {
         $cost = (float) ($attributes['cost'] ?? 0);
         $price = (float) ($attributes['price'] ?? 0);

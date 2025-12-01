@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Casts;
 
-use App\Models\Product;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;
 use LogicException;
@@ -12,17 +11,19 @@ use LogicException;
 /**
  * @implements CastsAttributes<float, never>
  */
-final class TotalStockCast implements CastsAttributes
+final class InvoicePaymentProgressCast implements CastsAttributes
 {
     /**
      * Cast the given value.
      *
-     * @param  array<string, mixed>  $attributes
+     * @param  array<string, float>  $attributes
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): float
     {
-        /** @var Product $model */
-        return (float) $model->stores()->sum('quantity');
+        $total = (float) ($attributes['total'] ?? 0);
+        $paid = (float) ($attributes['paid'] ?? 0);
+
+        return $total > 0 ? min(100, ($paid / $total) * 100) : 0;
     }
 
     /**
@@ -32,6 +33,6 @@ final class TotalStockCast implements CastsAttributes
      */
     public function set(Model $model, string $key, mixed $value, array $attributes): mixed
     {
-        throw new LogicException('Total stock cannot be set directly');
+        throw new LogicException('Payment progress is calculated and cannot be set');
     }
 }

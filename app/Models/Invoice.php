@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Casts\InvoicePaymentProgressCast;
+use App\Casts\InvoiceRemainingAmountCast;
 use App\Enums\InvoiceStatusEnum;
+use App\QueryBuilders\InvoiceQueryBuilder;
 use Carbon\CarbonInterface;
 use Database\Factories\InvoiceFactory;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -38,7 +39,10 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read Client|null $client
  * @property-read User|null $user
  * @property-read Collection<int, Payment> $payments
+ * @property-read float $remaining_amount
+ * @property-read float $payment_progress
  */
+#[UseEloquentBuilder(InvoiceQueryBuilder::class)]
 final class Invoice extends Model
 {
     /** @use HasFactory<InvoiceFactory> */
@@ -122,33 +126,10 @@ final class Invoice extends Model
             'status' => InvoiceStatusEnum::class,
             'notes' => 'string',
             'user_id' => 'integer',
+            'remaining_amount' => InvoiceRemainingAmountCast::class,
+            'payment_progress' => InvoicePaymentProgressCast::class,
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @param  Builder<self>  $query
-     */
-    #[Scope]
-    protected function overdue(Builder $query): void
-    {
-        $query->where(function (Builder $q): void {
-            $q->where('status', InvoiceStatusEnum::OVERDUE)
-                ->orWhere(function (Builder $inner): void {
-                    $inner->whereNotIn('status', [InvoiceStatusEnum::PAID, InvoiceStatusEnum::CANCELLED])
-                        ->where('due_at', '<', now());
-                });
-        });
-    }
-
-    /**
-     * @return Attribute<float, never>
-     */
-    protected function remainingAmount(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): float => max(0, $this->total - $this->paid)
-        );
     }
 }
