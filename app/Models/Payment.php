@@ -58,30 +58,6 @@ final class Payment extends Model
     }
 
     /**
-     * Check if payment is cash.
-     */
-    public function isCash(): bool
-    {
-        return $this->method === PaymentMethodEnum::CASH;
-    }
-
-    /**
-     * Check if payment is card.
-     */
-    public function isCard(): bool
-    {
-        return $this->method === PaymentMethodEnum::CARD;
-    }
-
-    /**
-     * Check if payment is transfer.
-     */
-    public function isTransfer(): bool
-    {
-        return $this->method === PaymentMethodEnum::TRANSFER;
-    }
-
-    /**
      * @return array<string, string>
      */
     public function casts(): array

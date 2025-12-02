@@ -7,7 +7,6 @@ namespace App\Models;
 use App\Enums\StockMovementTypeEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\StockMovementFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -69,17 +68,6 @@ final class StockMovement extends Model
     }
 
     /**
-     * Check if stock movement is incoming.
-     */
-    /**
-     * Check if movement is incoming (increases stock).
-     */
-    public function isIncoming(): bool
-    {
-        return $this->type->isIncoming();
-    }
-
-    /**
      * @return array<string, string>
      */
     public function casts(): array
@@ -98,15 +86,5 @@ final class StockMovement extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @return Attribute<float, never>
-     */
-    protected function effectiveQuantity(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): float => $this->isIncoming() ? $this->quantity : -$this->quantity
-        );
     }
 }

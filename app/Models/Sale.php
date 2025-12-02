@@ -7,7 +7,6 @@ namespace App\Models;
 use App\Enums\SaleStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\SaleFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -112,30 +111,6 @@ final class Sale extends Model
     }
 
     /**
-     * Check if the sale is completed.
-     */
-    public function isCompleted(): bool
-    {
-        return $this->status === SaleStatusEnum::COMPLETED;
-    }
-
-    /**
-     * Check if the sale is cancelled.
-     */
-    public function isCancelled(): bool
-    {
-        return $this->status === SaleStatusEnum::CANCELLED;
-    }
-
-    /**
-     * Check if the sale is fully paid.
-     */
-    public function isFullyPaid(): bool
-    {
-        return $this->remaining_amount <= 0;
-    }
-
-    /**
      * @return array<string, string>
      */
     public function casts(): array
@@ -156,28 +131,5 @@ final class Sale extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * Get the remaining amount to be paid.
-     */
-    /**
-     * @return Attribute<float, never>
-     */
-    protected function remainingAmount(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): float => max(0, (float) $this->total - (float) $this->paid),
-        );
-    }
-
-    /**
-     * @return Attribute<float, never>
-     */
-    protected function balance(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): float => (float) $this->total - (float) $this->paid
-        );
     }
 }

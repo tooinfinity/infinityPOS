@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Casts\ProfitMarginCast;
-use App\Casts\TotalStockCast;
 use App\Models\Scopes\LowStockScope;
 use App\Models\Scopes\WithBatchesScope;
 use App\QueryBuilders\ProductQueryBuilder;
@@ -135,8 +133,6 @@ final class Product extends Model
             'alert_quantity' => 'decimal:2',
             'has_batches' => 'boolean',
             'is_active' => 'boolean',
-            'total_stock' => TotalStockCast::class,
-            'profit_margin' => ProfitMarginCast::class,
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

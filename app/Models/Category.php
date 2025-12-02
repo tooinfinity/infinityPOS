@@ -48,22 +48,6 @@ final class Category extends Model
     }
 
     /**
-     * Check if category is for products.
-     */
-    public function isProductCategory(): bool
-    {
-        return $this->type === CategoryTypeEnum::PRODUCT;
-    }
-
-    /**
-     * Check if category is for expenses.
-     */
-    public function isExpenseCategory(): bool
-    {
-        return $this->type === CategoryTypeEnum::EXPENSE;
-    }
-
-    /**
      * @return array<string, string>
      */
     public function casts(): array

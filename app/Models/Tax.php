@@ -36,35 +36,6 @@ final class Tax extends Model
     }
 
     /**
-     * Check if tax is percentage type.
-     */
-    public function isPercentage(): bool
-    {
-        return $this->type === TaxTypeEnum::PERCENTAGE;
-    }
-
-    /**
-     * Check if tax is fixed type.
-     */
-    public function isFixed(): bool
-    {
-        return $this->type === TaxTypeEnum::FIXED;
-    }
-
-    /**
-     * Calculate tax amount for a given value.
-     */
-    public function calculate(float $value): float
-    {
-        $rate = (float) $this->rate;
-
-        return match ($this->type) {
-            TaxTypeEnum::PERCENTAGE => ($value * $rate) / 100,
-            TaxTypeEnum::FIXED => $rate,
-        };
-    }
-
-    /**
      * @return array<string, string>
      */
     public function casts(): array

@@ -75,30 +75,6 @@ final class StockTransfer extends Model
     }
 
     /**
-     * Check if transfer is pending.
-     */
-    public function isPending(): bool
-    {
-        return $this->status === StockTransferStatusEnum::PENDING;
-    }
-
-    /**
-     * Check if transfer is completed.
-     */
-    public function isCompleted(): bool
-    {
-        return $this->status === StockTransferStatusEnum::COMPLETED;
-    }
-
-    /**
-     * Check if transfer is cancelled.
-     */
-    public function isCancelled(): bool
-    {
-        return $this->status === StockTransferStatusEnum::CANCELLED;
-    }
-
-    /**
      * @return array<string, string>
      */
     public function casts(): array

@@ -7,7 +7,6 @@ namespace App\Models;
 use App\Enums\PurchaseStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\PurchaseFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -100,38 +99,6 @@ final class Purchase extends Model
     }
 
     /**
-     * Check if the purchase is pending.
-     */
-    public function isPending(): bool
-    {
-        return $this->status === PurchaseStatusEnum::PENDING;
-    }
-
-    /**
-     * Check if the purchase is received.
-     */
-    public function isReceived(): bool
-    {
-        return $this->status === PurchaseStatusEnum::RECEIVED;
-    }
-
-    /**
-     * Check if the purchase is cancelled.
-     */
-    public function isCancelled(): bool
-    {
-        return $this->status === PurchaseStatusEnum::CANCELLED;
-    }
-
-    /**
-     * Check if the purchase is fully paid.
-     */
-    public function isFullyPaid(): bool
-    {
-        return $this->remaining_amount <= 0;
-    }
-
-    /**
      * @return array<string, string>
      */
     public function casts(): array
@@ -152,25 +119,5 @@ final class Purchase extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @return Attribute<float, never>
-     */
-    protected function remainingAmount(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): float => max(0, (float) $this->total - (float) $this->paid)
-        );
-    }
-
-    /**
-     * @return Attribute<float, never>
-     */
-    protected function balance(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): float => $this->total - $this->paid
-        );
     }
 }

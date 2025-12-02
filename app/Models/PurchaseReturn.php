@@ -7,7 +7,6 @@ namespace App\Models;
 use App\Enums\PurchaseReturnStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\PurchaseReturnFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -99,38 +98,6 @@ final class PurchaseReturn extends Model
     }
 
     /**
-     * Check if return is pending.
-     */
-    public function isPending(): bool
-    {
-        return $this->status === PurchaseReturnStatusEnum::PENDING;
-    }
-
-    /**
-     * Check if return is completed.
-     */
-    public function isCompleted(): bool
-    {
-        return $this->status === PurchaseReturnStatusEnum::COMPLETED;
-    }
-
-    /**
-     * Check if return is cancelled.
-     */
-    public function isCancelled(): bool
-    {
-        return $this->status === PurchaseReturnStatusEnum::CANCELLED;
-    }
-
-    /**
-     * Check if the return is fully refunded.
-     */
-    public function isFullyRefunded(): bool
-    {
-        return $this->remaining_refund <= 0;
-    }
-
-    /**
      * @return array<string, string>
      */
     public function casts(): array
@@ -150,18 +117,5 @@ final class PurchaseReturn extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * Get the remaining amount to be refunded.
-     */
-    /**
-     * @return Attribute<float, never>
-     */
-    protected function remainingRefund(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): float => max(0, (float) $this->total - (float) $this->refunded)
-        );
     }
 }

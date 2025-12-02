@@ -54,6 +54,14 @@ final class MoneyboxTransaction extends Model
     }
 
     /**
+     * @return BelongsTo<Moneybox, $this>
+     */
+    public function transferFromMoneybox(): BelongsTo
+    {
+        return $this->belongsTo(Moneybox::class, 'transfer_from_moneybox_id');
+    }
+
+    /**
      * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
@@ -70,30 +78,6 @@ final class MoneyboxTransaction extends Model
     }
 
     /**
-     * Check if transaction is incoming.
-     */
-    public function isIncoming(): bool
-    {
-        return $this->type === MoneyboxTransactionTypeEnum::IN;
-    }
-
-    /**
-     * Check if transaction is outgoing.
-     */
-    public function isOutgoing(): bool
-    {
-        return $this->type === MoneyboxTransactionTypeEnum::OUT;
-    }
-
-    /**
-     * Check if transaction is a transfer.
-     */
-    public function isTransfer(): bool
-    {
-        return $this->type === MoneyboxTransactionTypeEnum::TRANSFER;
-    }
-
-    /**
      * @return array<string, string>
      */
     public function casts(): array
@@ -106,6 +90,7 @@ final class MoneyboxTransaction extends Model
             'balance_before' => 'decimal:2',
             'balance_after' => 'decimal:2',
             'transfer_to_moneybox_id' => 'integer',
+            'transfer_from_moneybox_id' => 'integer',
             'transactionable_type' => 'string',
             'transactionable_id' => 'integer',
             'reference' => 'string',

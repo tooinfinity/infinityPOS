@@ -81,31 +81,6 @@ final class Invoice extends Model
     }
 
     /**
-     * Check if invoice is paid.
-     */
-    public function isPaid(): bool
-    {
-        return $this->status->isPaid();
-    }
-
-    /**
-     * Check if invoice is overdue.
-     */
-    public function isOverdue(): bool
-    {
-        return $this->status === InvoiceStatusEnum::OVERDUE
-            || ($this->due_at && $this->due_at->isPast() && ! $this->isPaid());
-    }
-
-    /**
-     * Check if the invoice is fully paid.
-     */
-    public function isFullyPaid(): bool
-    {
-        return $this->remaining_amount <= 0;
-    }
-
-    /**
      * @return array<string, string>
      */
     public function casts(): array
