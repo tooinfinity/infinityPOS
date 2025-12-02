@@ -17,21 +17,20 @@ return new class extends Migration
             $table->string('name')->index();
             $table->text('description')->nullable();
             $table->string('image')->nullable();
+            $table->decimal('cost', 15, 2)->default(0);
+            $table->decimal('price', 15, 2)->default(0);
+            $table->decimal('alert_quantity', 15, 2)->default(0);
+            // Batch tracking option
+            $table->boolean('has_batches');
+            $table->boolean('is_active');
 
             $table->foreignId('category_id')->nullable()->constrained();
             $table->foreignId('brand_id')->nullable()->constrained();
             $table->foreignId('unit_id')->nullable()->constrained();
             $table->foreignId('tax_id')->nullable()->constrained();
+            $table->foreignId('created_by')->references('id')->on('users');
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
 
-            $table->decimal('cost', 15, 2)->default(0);
-            $table->decimal('price', 15, 2)->default(0);
-
-            $table->decimal('alert_quantity', 15, 2)->default(0);
-
-            // Batch tracking option
-            $table->boolean('has_batches')->default(false)->comment('Enable lot/batch tracking');
-
-            $table->boolean('is_active')->default(true);
             $table->timestamps();
 
             $table->index('price');

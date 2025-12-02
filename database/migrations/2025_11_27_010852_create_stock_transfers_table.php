@@ -13,14 +13,14 @@ return new class extends Migration
         Schema::create('stock_transfers', function (Blueprint $table): void {
             $table->id();
             $table->string('reference')->unique();
+            $table->string('status', 20); // ['pending', 'completed', 'cancelled']
+            $table->text('notes')->nullable();
 
             $table->foreignId('from_store_id')->constrained('stores');
             $table->foreignId('to_store_id')->constrained('stores');
+            $table->foreignId('created_by')->references('id')->on('users');
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
 
-            $table->enum('status', ['pending', 'completed', 'cancelled'])->default('pending');
-
-            $table->text('notes')->nullable();
-            $table->foreignId('user_id')->nullable()->constrained();
             $table->timestamps();
         });
     }

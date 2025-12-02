@@ -14,8 +14,12 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('code')->unique()->comment('PRD-001, EXP-001');
-            $table->enum('type', ['product', 'expense']);
-            $table->boolean('is_active')->default(true)->index();
+            $table->string('type');
+            $table->boolean('is_active')->index();
+
+            $table->foreignId('created_by')->references('id')->on('users');
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
+
             $table->timestamps();
         });
     }

@@ -21,7 +21,6 @@ return new class extends Migration
             $table->decimal('discount', 15, 2)->nullable();
             $table->decimal('tax_amount', 15, 2)->nullable();
             $table->decimal('total', 15, 2);
-
             // Batch/Lot tracking
             $table->string('batch_number')->nullable()->index();
             $table->date('expiry_date')->nullable();

@@ -12,14 +12,11 @@ return new class extends Migration
     {
         Schema::create('business_identifiers', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('company_id')->nullable()->constrained();
-            $table->foreignId('supplier_id')->nullable()->constrained();
-            $table->foreignId('client_id')->nullable()->constrained();
-            $table->string('article')->nullable();
-            $table->string('nif')->nullable();
-            $table->string('nis')->nullable();
-            $table->string('rc')->nullable();
-            $table->string('rib')->nullable();
+            $table->string('article')->unique()->nullable();
+            $table->string('nif')->unique()->nullable();
+            $table->string('nis')->unique()->nullable();
+            $table->string('rc')->unique()->nullable();
+            $table->string('rib')->unique()->nullable();
 
             $table->timestamps();
         });

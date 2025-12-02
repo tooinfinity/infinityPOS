@@ -12,23 +12,19 @@ return new class extends Migration
     {
         Schema::create('moneybox_transactions', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('moneybox_id')->constrained();
-
-            $table->enum('type', ['in', 'out', 'transfer'])->index();
+            $table->foreignId('moneybox_id')->constrained()->cascadeOnDelete();
+            $table->string('type', 20)->index(); // ['in', 'out', 'transfer']
             $table->decimal('amount', 15, 2);
-            $table->decimal('balance_before', 15, 2);
-            $table->decimal('balance_after', 15, 2);
-
-            // Transfer details (if type = transfer)
-            $table->foreignId('transfer_to_moneybox_id')->nullable()->constrained('moneyboxes');
-
-            // Link to source transaction
-            $table->morphs('transactionable'); // payments, expenses, etc
-
+            $table->decimal('balance_after', 15, 2)->comment('Balance after transaction');
             $table->string('reference')->nullable();
             $table->text('notes')->nullable();
 
-            $table->foreignId('user_id')->nullable()->constrained();
+            $table->foreignId('payment_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('expense_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('transfer_to_id')->nullable()->constrained('moneyboxes')->nullOnDelete();
+            $table->foreignId('created_by')->references('id')->on('users');
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
+
             $table->timestamps();
 
             $table->index(['moneybox_id', 'created_at']);

@@ -19,6 +19,8 @@ return new class extends Migration
             $table->decimal('balance', 15, 2)->default(0);
             $table->boolean('is_active')->default(true);
 
+            $table->foreignId('created_by')->references('id')->on('users');
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
             $table->foreignId('business_identifier_id')->nullable()->constrained();
 
             $table->timestamps();

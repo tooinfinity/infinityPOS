@@ -13,19 +13,18 @@ return new class extends Migration
         Schema::create('purchase_returns', function (Blueprint $table): void {
             $table->id();
             $table->string('reference')->unique();
+            $table->decimal('total', 15, 2)->default(0);
+            $table->decimal('refunded', 15, 2)->default(0);
+            $table->string('status', 20)->index();
+            $table->text('reason')->nullable();
+            $table->text('notes')->nullable();
 
             $table->foreignId('purchase_id')->nullable()->constrained();
             $table->foreignId('supplier_id')->nullable()->constrained();
             $table->foreignId('store_id')->constrained();
+            $table->foreignId('created_by')->constrained('users');
+            $table->foreignId('updated_by')->nullable()->constrained();
 
-            $table->decimal('total', 15, 2)->default(0);
-            $table->decimal('refunded', 15, 2)->default(0);
-
-            $table->enum('status', ['pending', 'completed', 'cancelled'])->default('completed')->index();
-
-            $table->text('reason')->nullable();
-            $table->text('notes')->nullable();
-            $table->foreignId('user_id')->nullable()->constrained();
             $table->timestamps();
         });
     }

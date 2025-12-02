@@ -13,24 +13,22 @@ return new class extends Migration
         Schema::create('invoices', function (Blueprint $table): void {
             $table->id();
             $table->string('reference')->unique();
-
-            $table->foreignId('sale_id')->constrained();
-            $table->foreignId('client_id')->nullable()->constrained();
-
             $table->date('issued_at')->index();
             $table->date('due_at')->nullable();
             $table->date('paid_at')->nullable();
-
             $table->decimal('subtotal', 15, 2)->default(0);
             $table->decimal('discount', 15, 2)->default(0);
             $table->decimal('tax', 15, 2)->default(0);
             $table->decimal('total', 15, 2)->default(0);
             $table->decimal('paid', 15, 2)->default(0);
-
-            $table->enum('status', ['draft', 'sent', 'paid', 'overdue', 'cancelled'])->default('draft')->index();
-
+            $table->string('status', 20)->index();
             $table->text('notes')->nullable();
-            $table->foreignId('user_id')->nullable()->constrained();
+
+            $table->foreignId('sale_id')->constrained();
+            $table->foreignId('client_id')->nullable()->constrained();
+            $table->foreignId('created_by')->references('id')->on('users');
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
+
             $table->timestamps();
 
             $table->index(['client_id', 'status']);

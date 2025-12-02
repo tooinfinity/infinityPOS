@@ -16,7 +16,11 @@ return new class extends Migration
             $table->string('city')->nullable();
             $table->text('address')->nullable();
             $table->string('phone')->nullable();
-            $table->boolean('is_active')->default(true)->index();
+            $table->boolean('is_active')->index();
+
+            $table->foreignId('created_by')->references('id')->on('users');
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
+
             $table->timestamps();
         });
     }

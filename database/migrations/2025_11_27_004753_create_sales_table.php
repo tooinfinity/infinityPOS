@@ -13,20 +13,19 @@ return new class extends Migration
         Schema::create('sales', function (Blueprint $table): void {
             $table->id();
             $table->string('reference')->unique();
-
-            $table->foreignId('client_id')->nullable()->constrained();
-            $table->foreignId('store_id')->constrained();
-
             $table->decimal('subtotal', 15, 2);
             $table->decimal('discount', 15, 2)->nullable();
             $table->decimal('tax', 15, 2)->nullable();
             $table->decimal('total', 15, 2);
             $table->decimal('paid', 15, 2);
-
-            $table->enum('status', ['completed', 'cancelled'])->default('completed')->index();
-
+            $table->string('status')->index();
             $table->text('notes')->nullable();
-            $table->foreignId('user_id')->nullable()->constrained();
+
+            $table->foreignId('client_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('store_id')->constrained()->restrictOnDelete();
+            $table->foreignId('created_by')->references('id')->on('users');
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users')->nullOnDelete();
+
             $table->timestamps();
 
             $table->index(['store_id', 'status', 'created_at']);

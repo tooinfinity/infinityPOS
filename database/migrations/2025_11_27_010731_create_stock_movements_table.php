@@ -12,21 +12,20 @@ return new class extends Migration
     {
         Schema::create('stock_movements', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('product_id')->constrained();
-            $table->foreignId('store_id')->constrained();
-
             $table->decimal('quantity', 15, 2)->comment('Positive = in, Negative = out');
-            $table->enum('type', ['purchase', 'sale', 'sale_return', 'purchase_return', 'adjustment', 'transfer']);
-
-            $table->nullableMorphs('source');
-            $table->string('batch_number')->nullable();
+            $table->string('type', 20)->index(); //  ['purchase', 'sale', 'return', 'adjustment', 'transfer']
+            $table->string('reference')->nullable()->comment('Link to source document');
+            $table->string('batch_number')->nullable()->index();
             $table->text('notes')->nullable();
 
-            $table->foreignId('user_id')->nullable()->constrained();
+            $table->foreignId('created_by')->references('id')->on('users');
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
+            $table->foreignId('product_id')->constrained()->restrictOnDelete();
+            $table->foreignId('store_id')->constrained()->restrictOnDelete();
+
             $table->timestamps();
 
             $table->index(['product_id', 'store_id', 'created_at']);
-            $table->index(['batch_number']);
             $table->index(['type', 'created_at']);
         });
     }

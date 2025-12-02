@@ -13,7 +13,11 @@ return new class extends Migration
         Schema::create('brands', function (Blueprint $table): void {
             $table->id();
             $table->string('name')->unique();
-            $table->boolean('is_active')->default(true)->index();
+            $table->boolean('is_active')->index();
+
+            $table->foreignId('created_by')->references('id')->on('users');
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
+
             $table->timestamps();
         });
     }

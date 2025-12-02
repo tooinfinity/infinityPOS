@@ -12,22 +12,20 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table): void {
             $table->id();
-            $table->string('reference')->nullable();
-
-            $table->morphs('payable'); // sales, purchases, invoices, returns
-
+            $table->string('reference')->nullable()->unique();
+            $table->enum('type', ['sale', 'purchase', 'expense', 'other'])->index();
             $table->decimal('amount', 15, 2);
-            $table->enum('method', ['cash', 'card', 'transfer'])->default('cash');
-
-            $table->foreignId('moneybox_id')->nullable()->constrained();
-
+            $table->string('method', 20)->index();
             $table->text('notes')->nullable();
-            $table->foreignId('user_id')->nullable()->constrained();
+
+            $table->foreignId('related_id')->nullable()->comment('ID of sale/purchase/expense');
+            $table->foreignId('moneybox_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('created_by')->references('id')->on('users');
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
+
             $table->timestamps();
 
-            $table->index('reference');
-            $table->index('method');
-            $table->index('moneybox_id');
+            $table->index(['type', 'related_id']);
         });
     }
 };

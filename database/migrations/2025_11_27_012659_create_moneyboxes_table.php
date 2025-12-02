@@ -13,23 +13,17 @@ return new class extends Migration
         Schema::create('moneyboxes', function (Blueprint $table): void {
             $table->id();
             $table->string('name')->unique();
-            $table->enum('type', ['cash_register', 'bank_account', 'mobile_money', 'other'])->default('cash_register');
+            $table->string('type', 20); // ['cash', 'bank', 'mobile']
             $table->text('description')->nullable();
-
-            // Balance tracking
-            $table->decimal('opening_balance', 15, 2)->default(0);
-            $table->decimal('current_balance', 15, 2)->default(0);
-
-            // Bank details (if type = bank_account)
+            $table->decimal('balance', 15, 2)->default(0)->comment('Current balance');
             $table->string('bank_name')->nullable();
             $table->string('account_number')->nullable();
-            $table->string('iban')->nullable();
+            $table->boolean('is_active')->default(true)->index();
 
-            // Assignment
-            $table->foreignId('store_id')->nullable()->constrained();
-            $table->foreignId('user_id')->nullable()->constrained();
+            $table->foreignId('store_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('created_by')->references('id')->on('users');
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
 
-            $table->boolean('is_active')->default(true);
             $table->timestamps();
 
             $table->index(['type', 'is_active']);
