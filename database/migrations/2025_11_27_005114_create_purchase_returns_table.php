@@ -22,8 +22,8 @@ return new class extends Migration
             $table->foreignId('purchase_id')->nullable()->constrained();
             $table->foreignId('supplier_id')->nullable()->constrained();
             $table->foreignId('store_id')->constrained();
-            $table->foreignId('created_by')->constrained('users');
-            $table->foreignId('updated_by')->nullable()->constrained();
+            $table->foreignId('created_by')->references('id')->on('users');
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
 
             $table->timestamps();
         });
