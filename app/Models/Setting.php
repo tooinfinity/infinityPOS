@@ -9,6 +9,7 @@ use Carbon\CarbonInterface;
 use Database\Factories\SettingFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property-read int $id
@@ -17,13 +18,23 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read SettingTypeEnum $type
  * @property-read string|null $group
  * @property-read string|null $description
+ * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read User|null $updater
  */
 final class Setting extends Model
 {
     /** @use HasFactory<SettingFactory> */
     use HasFactory;
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
 
     /**
      * @return array<string, string>
@@ -37,6 +48,7 @@ final class Setting extends Model
             'type' => SettingTypeEnum::class,
             'group' => 'string',
             'description' => 'string',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Casts\InvoicePaymentProgressCast;
-use App\Casts\InvoiceRemainingAmountCast;
-use App\Enums\InvoiceStatusEnum;
 use App\QueryBuilders\InvoiceQueryBuilder;
 use Carbon\CarbonInterface;
 use Database\Factories\InvoiceFactory;
@@ -15,7 +12,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property-read int $id
@@ -30,17 +27,17 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read float $tax
  * @property-read float $total
  * @property-read float $paid
- * @property-read InvoiceStatusEnum $status
+ * @property-read string $status
  * @property-read string|null $notes
- * @property-read int|null $user_id
+ * @property-read int $created_by
+ * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Sale $sale
  * @property-read Client|null $client
- * @property-read User|null $user
+ * @property-read User $creator
+ * @property-read User|null $updater
  * @property-read Collection<int, Payment> $payments
- * @property-read float $remaining_amount
- * @property-read float $payment_progress
  */
 #[UseEloquentBuilder(InvoiceQueryBuilder::class)]
 final class Invoice extends Model
@@ -67,17 +64,26 @@ final class Invoice extends Model
     /**
      * @return BelongsTo<User, $this>
      */
-    public function user(): BelongsTo
+    public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     /**
-     * @return MorphMany<Payment, $this>
+     * @return BelongsTo<User, $this>
      */
-    public function payments(): MorphMany
+    public function updater(): BelongsTo
     {
-        return $this->morphMany(Payment::class, 'payable');
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * @return HasMany<Payment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'related_id')
+            ->where('payments.type', 'sale');
     }
 
     /**
@@ -98,11 +104,10 @@ final class Invoice extends Model
             'tax' => 'decimal:2',
             'total' => 'decimal:2',
             'paid' => 'decimal:2',
-            'status' => InvoiceStatusEnum::class,
+            'status' => 'string',
             'notes' => 'string',
-            'user_id' => 'integer',
-            'remaining_amount' => InvoiceRemainingAmountCast::class,
-            'payment_progress' => InvoicePaymentProgressCast::class,
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

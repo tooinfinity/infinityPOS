@@ -9,6 +9,7 @@ use Database\Factories\StoreFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -19,8 +20,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read string|null $address
  * @property-read string|null $phone
  * @property-read bool $is_active
+ * @property-read int $created_by
+ * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read User $creator
+ * @property-read User|null $updater
  * @property-read Collection<int, Product> $products
  * @property-read Collection<int, Sale> $sales
  * @property-read Collection<int, Purchase> $purchases
@@ -36,6 +41,22 @@ final class Store extends Model
 {
     /** @use HasFactory<StoreFactory> */
     use HasFactory;
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
 
     /**
      * @return BelongsToMany<Product, $this>
@@ -131,6 +152,8 @@ final class Store extends Model
             'address' => 'string',
             'phone' => 'string',
             'is_active' => 'boolean',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

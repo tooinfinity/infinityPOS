@@ -21,9 +21,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read float $balance
  * @property-read bool $is_active
  * @property-read int|null $business_identifier_id
+ * @property-read int $created_by
+ * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read BusinessIdentifier|null $businessIdentifier
+ * @property-read User $creator
+ * @property-read User|null $updater
  * @property-read Collection<int, Purchase> $purchases
  * @property-read Collection<int, PurchaseReturn> $purchaseReturns
  */
@@ -38,6 +42,22 @@ final class Supplier extends Model
     public function businessIdentifier(): BelongsTo
     {
         return $this->belongsTo(BusinessIdentifier::class);
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     /**
@@ -70,6 +90,8 @@ final class Supplier extends Model
             'balance' => 'decimal:2',
             'is_active' => 'boolean',
             'business_identifier_id' => 'integer',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

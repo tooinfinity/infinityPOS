@@ -4,31 +4,29 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\StockMovementTypeEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\StockMovementFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * @property-read int $id
  * @property-read int $product_id
  * @property-read int $store_id
  * @property-read float $quantity
- * @property-read StockMovementTypeEnum $type
- * @property-read string|null $source_type
- * @property-read int|null $source_id
+ * @property-read string $type
+ * @property-read string|null $reference
  * @property-read string|null $batch_number
  * @property-read string|null $notes
- * @property-read int|null $user_id
+ * @property-read int $created_by
+ * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Product $product
  * @property-read Store $store
- * @property-read User|null $user
- * @property-read Model|null $source
+ * @property-read User $creator
+ * @property-read User|null $updater
  */
 final class StockMovement extends Model
 {
@@ -54,17 +52,33 @@ final class StockMovement extends Model
     /**
      * @return BelongsTo<User, $this>
      */
-    public function user(): BelongsTo
+    public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     /**
-     * @return MorphTo<Model, $this>
+     * @return BelongsTo<User, $this>
      */
-    public function source(): MorphTo
+    public function updater(): BelongsTo
     {
-        return $this->morphTo();
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * Check if movement is incoming (increases stock).
+     */
+    public function isIncoming(): bool
+    {
+        return $this->quantity > 0;
+    }
+
+    /**
+     * Check if movement is outgoing (decreases stock).
+     */
+    public function isOutgoing(): bool
+    {
+        return $this->quantity < 0;
     }
 
     /**
@@ -77,14 +91,22 @@ final class StockMovement extends Model
             'product_id' => 'integer',
             'store_id' => 'integer',
             'quantity' => 'decimal:2',
-            'type' => StockMovementTypeEnum::class,
-            'source_type' => 'string',
-            'source_id' => 'integer',
+            'type' => 'string',
+            'reference' => 'string',
             'batch_number' => 'string',
             'notes' => 'string',
-            'user_id' => 'integer',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Get the effective quantity (always positive).
+     */
+    protected function getEffectiveQuantityAttribute(): float
+    {
+        return abs($this->quantity);
     }
 }

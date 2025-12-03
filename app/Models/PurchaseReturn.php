@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * @property-read int $id
@@ -22,16 +21,18 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read int $store_id
  * @property-read float $total
  * @property-read float $refunded
- * @property-read PurchaseReturnStatusEnum $status
+ * @property-read string $status
  * @property-read string|null $reason
  * @property-read string|null $notes
- * @property-read int|null $user_id
+ * @property-read int $created_by
+ * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Purchase|null $purchase
  * @property-read Supplier|null $supplier
  * @property-read Store $store
- * @property-read User|null $user
+ * @property-read User $creator
+ * @property-read User|null $updater
  * @property-read Collection<int, PurchaseReturnItem> $items
  * @property-read Collection<int, Payment> $payments
  * @property-read Collection<int, StockMovement> $stockMovements
@@ -68,9 +69,17 @@ final class PurchaseReturn extends Model
     /**
      * @return BelongsTo<User, $this>
      */
-    public function user(): BelongsTo
+    public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     /**
@@ -82,19 +91,53 @@ final class PurchaseReturn extends Model
     }
 
     /**
-     * @return MorphMany<Payment, $this>
+     * @return HasMany<Payment, $this>
      */
-    public function payments(): MorphMany
+    public function payments(): HasMany
     {
-        return $this->morphMany(Payment::class, 'payable');
+        return $this->hasMany(Payment::class, 'related_id')
+            ->where('payments.type', 'purchase');
     }
 
     /**
-     * @return MorphMany<StockMovement, $this>
+     * @return HasMany<StockMovement, $this>
      */
-    public function stockMovements(): MorphMany
+    public function stockMovements(): HasMany
     {
-        return $this->morphMany(StockMovement::class, 'source');
+        return $this->hasMany(StockMovement::class, 'reference', 'reference')
+            ->where('stock_movements.type', 'return');
+    }
+
+    /**
+     * Check if return is pending.
+     */
+    public function isPending(): bool
+    {
+        return $this->status === PurchaseReturnStatusEnum::PENDING->value;
+    }
+
+    /**
+     * Check if return is completed.
+     */
+    public function isCompleted(): bool
+    {
+        return $this->status === PurchaseReturnStatusEnum::COMPLETED->value;
+    }
+
+    /**
+     * Check if return is cancelled.
+     */
+    public function isCancelled(): bool
+    {
+        return $this->status === PurchaseReturnStatusEnum::CANCELLED->value;
+    }
+
+    /**
+     * Check if the return is fully refunded.
+     */
+    public function isFullyRefunded(): bool
+    {
+        return $this->getRemainingRefundAttribute() <= 0;
     }
 
     /**
@@ -110,12 +153,21 @@ final class PurchaseReturn extends Model
             'store_id' => 'integer',
             'total' => 'decimal:2',
             'refunded' => 'decimal:2',
-            'status' => PurchaseReturnStatusEnum::class,
+            'status' => 'string',
             'reason' => 'string',
             'notes' => 'string',
-            'user_id' => 'integer',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Get the remaining amount to be refunded.
+     */
+    protected function getRemainingRefundAttribute(): float
+    {
+        return max(0, $this->total - $this->refunded);
     }
 }

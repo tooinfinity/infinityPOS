@@ -12,18 +12,23 @@ use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property-read int $id
  * @property-read string $name
  * @property-read string $code
- * @property-read CategoryTypeEnum $type
+ * @property-read string $type
  * @property-read bool $is_active
+ * @property-read int $created_by
+ * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Collection<int, Product> $products
  * @property-read Collection<int, Expense> $expenses
+ * @property-read User $creator
+ * @property-read User|null $updater
  */
 #[UseEloquentBuilder(CategoryQueryBuilder::class)]
 final class Category extends Model
@@ -48,6 +53,38 @@ final class Category extends Model
     }
 
     /**
+     * @return BelongsTo<User, $this>
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * Check if category is for products.
+     */
+    public function isProductCategory(): bool
+    {
+        return $this->type === CategoryTypeEnum::PRODUCT->value;
+    }
+
+    /**
+     * Check if category is for expenses.
+     */
+    public function isExpenseCategory(): bool
+    {
+        return $this->type === CategoryTypeEnum::EXPENSE->value;
+    }
+
+    /**
      * @return array<string, string>
      */
     public function casts(): array
@@ -56,8 +93,10 @@ final class Category extends Model
             'id' => 'integer',
             'name' => 'string',
             'code' => 'string',
-            'type' => CategoryTypeEnum::class,
+            'type' => 'string',
             'is_active' => 'boolean',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

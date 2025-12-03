@@ -15,8 +15,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property-read int $id
  * @property-read string $name
- * @property-read TaxTypeEnum $type
- * @property-read string $rate
+ * @property-read string $tax_type
+ * @property-read float $rate
  * @property-read bool $is_active
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
@@ -36,6 +36,34 @@ final class Tax extends Model
     }
 
     /**
+     * Check if tax is percentage type.
+     */
+    public function isPercentage(): bool
+    {
+        return $this->tax_type === TaxTypeEnum::PERCENTAGE->value;
+    }
+
+    /**
+     * Check if tax is fixed type.
+     */
+    public function isFixed(): bool
+    {
+        return $this->tax_type === TaxTypeEnum::FIXED->value;
+    }
+
+    /**
+     * Calculate tax amount for a given value.
+     */
+    public function calculate(float $value): float
+    {
+        return match ($this->tax_type) {
+            TaxTypeEnum::PERCENTAGE->value => ($value * $this->rate) / 100,
+            TaxTypeEnum::FIXED->value => $this->rate,
+            default => 0,
+        };
+    }
+
+    /**
      * @return array<string, string>
      */
     public function casts(): array
@@ -43,7 +71,7 @@ final class Tax extends Model
         return [
             'id' => 'integer',
             'name' => 'string',
-            'type' => TaxTypeEnum::class,
+            'tax_type' => 'string',
             'rate' => 'decimal:2',
             'is_active' => 'boolean',
             'created_at' => 'datetime',

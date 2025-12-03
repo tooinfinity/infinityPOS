@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property-read int $id
@@ -19,14 +19,16 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read string|null $description
  * @property-read int|null $category_id
  * @property-read int|null $store_id
- * @property-read int|null $user_id
  * @property-read int|null $moneybox_id
+ * @property-read int $created_by
+ * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Category|null $category
  * @property-read Store|null $store
- * @property-read User|null $user
  * @property-read Moneybox|null $moneybox
+ * @property-read User $creator
+ * @property-read User|null $updater
  */
 #[UseEloquentBuilder(ExpenseQueryBuilder::class)]
 final class Expense extends Model
@@ -51,14 +53,6 @@ final class Expense extends Model
     }
 
     /**
-     * @return BelongsTo<User, $this>
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    /**
      * @return BelongsTo<Moneybox, $this>
      */
     public function moneybox(): BelongsTo
@@ -67,11 +61,27 @@ final class Expense extends Model
     }
 
     /**
-     * @return MorphMany<MoneyboxTransaction, $this>
+     * @return BelongsTo<User, $this>
      */
-    public function moneyboxTransactions(): MorphMany
+    public function creator(): BelongsTo
     {
-        return $this->morphMany(MoneyboxTransaction::class, 'transactionable');
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * @return HasMany<MoneyboxTransaction, $this>
+     */
+    public function moneyboxTransactions(): HasMany
+    {
+        return $this->hasMany(MoneyboxTransaction::class, 'expense_id');
     }
 
     /**
@@ -85,8 +95,9 @@ final class Expense extends Model
             'description' => 'string',
             'category_id' => 'integer',
             'store_id' => 'integer',
-            'user_id' => 'integer',
             'moneybox_id' => 'integer',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

@@ -21,9 +21,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read float $discount
  * @property-read float $tax_amount
  * @property-read float $total
- * @property-read string|null $batch_number
- * @property-read CarbonInterface|null $expiry_date
- * @property-read float|null $remaining_quantity
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read SaleReturn $saleReturn
@@ -75,9 +72,6 @@ final class SaleReturnItem extends Model
             'discount' => 'decimal:2',
             'tax_amount' => 'decimal:2',
             'total' => 'decimal:2',
-            'batch_number' => 'string',
-            'expiry_date' => 'datetime',
-            'remaining_quantity' => 'decimal:2',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

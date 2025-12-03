@@ -10,27 +10,28 @@ use Database\Factories\MoneyboxTransactionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * @property-read int $id
  * @property-read int $moneybox_id
- * @property-read MoneyboxTransactionTypeEnum $type
+ * @property-read string $type
  * @property-read float $amount
- * @property-read float $balance_before
  * @property-read float $balance_after
- * @property-read int|null $transfer_to_moneybox_id
- * @property-read string $transactionable_type
- * @property-read int $transactionable_id
  * @property-read string|null $reference
  * @property-read string|null $notes
- * @property-read int|null $user_id
+ * @property-read int|null $payment_id
+ * @property-read int|null $expense_id
+ * @property-read int|null $transfer_to_id
+ * @property-read int $created_by
+ * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Moneybox $moneybox
- * @property-read Moneybox|null $transferToMoneybox
- * @property-read User|null $user
- * @property-read Model $transactionable
+ * @property-read Payment|null $payment
+ * @property-read Expense|null $expense
+ * @property-read Moneybox|null $transferTo
+ * @property-read User $creator
+ * @property-read User|null $updater
  */
 final class MoneyboxTransaction extends Model
 {
@@ -46,35 +47,67 @@ final class MoneyboxTransaction extends Model
     }
 
     /**
-     * @return BelongsTo<Moneybox, $this>
+     * @return BelongsTo<Payment, $this>
      */
-    public function transferToMoneybox(): BelongsTo
+    public function payment(): BelongsTo
     {
-        return $this->belongsTo(Moneybox::class, 'transfer_to_moneybox_id');
+        return $this->belongsTo(Payment::class);
+    }
+
+    /**
+     * @return BelongsTo<Expense, $this>
+     */
+    public function expense(): BelongsTo
+    {
+        return $this->belongsTo(Expense::class);
     }
 
     /**
      * @return BelongsTo<Moneybox, $this>
      */
-    public function transferFromMoneybox(): BelongsTo
+    public function transferTo(): BelongsTo
     {
-        return $this->belongsTo(Moneybox::class, 'transfer_from_moneybox_id');
+        return $this->belongsTo(Moneybox::class, 'transfer_to_id');
     }
 
     /**
      * @return BelongsTo<User, $this>
      */
-    public function user(): BelongsTo
+    public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     /**
-     * @return MorphTo<Model, $this>
+     * @return BelongsTo<User, $this>
      */
-    public function transactionable(): MorphTo
+    public function updater(): BelongsTo
     {
-        return $this->morphTo();
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * Check if transaction is incoming.
+     */
+    public function isIncoming(): bool
+    {
+        return $this->type === MoneyboxTransactionTypeEnum::IN->value;
+    }
+
+    /**
+     * Check if transaction is outgoing.
+     */
+    public function isOutgoing(): bool
+    {
+        return $this->type === MoneyboxTransactionTypeEnum::OUT->value;
+    }
+
+    /**
+     * Check if transaction is a transfer.
+     */
+    public function isTransfer(): bool
+    {
+        return $this->type === MoneyboxTransactionTypeEnum::TRANSFER->value;
     }
 
     /**
@@ -85,17 +118,16 @@ final class MoneyboxTransaction extends Model
         return [
             'id' => 'integer',
             'moneybox_id' => 'integer',
-            'type' => MoneyboxTransactionTypeEnum::class,
+            'type' => 'string',
             'amount' => 'decimal:2',
-            'balance_before' => 'decimal:2',
             'balance_after' => 'decimal:2',
-            'transfer_to_moneybox_id' => 'integer',
-            'transfer_from_moneybox_id' => 'integer',
-            'transactionable_type' => 'string',
-            'transactionable_id' => 'integer',
             'reference' => 'string',
             'notes' => 'string',
-            'user_id' => 'integer',
+            'payment_id' => 'integer',
+            'expense_id' => 'integer',
+            'transfer_to_id' => 'integer',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

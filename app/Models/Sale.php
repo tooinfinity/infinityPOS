@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * @property-read int $id
@@ -25,21 +24,21 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read float|null $tax
  * @property-read float $total
  * @property-read float $paid
- * @property-read SaleStatusEnum $status
+ * @property-read string $status
  * @property-read string|null $notes
- * @property-read int|null $user_id
+ * @property-read int $created_by
+ * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Client|null $client
  * @property-read Store $store
- * @property-read User|null $user
+ * @property-read User $creator
+ * @property-read User|null $updater
  * @property-read Collection<int, SaleItem> $items
  * @property-read Collection<int, SaleReturn> $returns
  * @property-read Invoice|null $invoice
  * @property-read Collection<int, Payment> $payments
  * @property-read Collection<int, StockMovement> $stockMovements
- * @property-read float $remaining_amount
- * @property-read float $balance
  */
 final class Sale extends Model
 {
@@ -65,9 +64,17 @@ final class Sale extends Model
     /**
      * @return BelongsTo<User, $this>
      */
-    public function user(): BelongsTo
+    public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     /**
@@ -95,19 +102,45 @@ final class Sale extends Model
     }
 
     /**
-     * @return MorphMany<Payment, $this>
+     * @return HasMany<Payment, $this>
      */
-    public function payments(): MorphMany
+    public function payments(): HasMany
     {
-        return $this->morphMany(Payment::class, 'payable');
+        return $this->hasMany(Payment::class, 'related_id')
+            ->where('payments.type', 'sale');
     }
 
     /**
-     * @return MorphMany<StockMovement, $this>
+     * @return HasMany<StockMovement, $this>
      */
-    public function stockMovements(): MorphMany
+    public function stockMovements(): HasMany
     {
-        return $this->morphMany(StockMovement::class, 'source');
+        return $this->hasMany(StockMovement::class, 'reference', 'reference')
+            ->where('stock_movements.type', 'sale');
+    }
+
+    /**
+     * Check if the sale is completed.
+     */
+    public function isCompleted(): bool
+    {
+        return $this->status === SaleStatusEnum::COMPLETED->value;
+    }
+
+    /**
+     * Check if the sale is cancelled.
+     */
+    public function isCancelled(): bool
+    {
+        return $this->status === SaleStatusEnum::CANCELLED->value;
+    }
+
+    /**
+     * Check if the sale is fully paid.
+     */
+    public function isFullyPaid(): bool
+    {
+        return $this->getRemainingAmountAttribute() <= 0;
     }
 
     /**
@@ -125,11 +158,20 @@ final class Sale extends Model
             'tax' => 'decimal:2',
             'total' => 'decimal:2',
             'paid' => 'decimal:2',
-            'status' => SaleStatusEnum::class,
+            'status' => 'string',
             'notes' => 'string',
-            'user_id' => 'integer',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Get the remaining amount to be paid.
+     */
+    protected function getRemainingAmountAttribute(): float
+    {
+        return max(0, $this->total - $this->paid);
     }
 }

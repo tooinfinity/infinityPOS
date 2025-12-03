@@ -34,12 +34,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read float $alert_quantity
  * @property-read bool $has_batches
  * @property-read bool $is_active
+ * @property-read int $created_by
+ * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Category|null $category
  * @property-read Brand|null $brand
  * @property-read Unit|null $unit
  * @property-read Tax|null $tax
+ * @property-read User $creator
+ * @property-read User|null $updater
  * @property-read Collection<int, SaleItem> $saleItems
  * @property-read Collection<int, PurchaseItem> $purchaseItems
  * @property-read Collection<int, Store> $stores
@@ -113,6 +117,22 @@ final class Product extends Model
     }
 
     /**
+     * @return BelongsTo<User, $this>
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
      * @return array<string, string>
      */
     public function casts(): array
@@ -133,6 +153,8 @@ final class Product extends Model
             'alert_quantity' => 'decimal:2',
             'has_batches' => 'boolean',
             'is_active' => 'boolean',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
