@@ -26,8 +26,9 @@ final class ExpenseFactory extends Factory
             'description' => $this->faker->optional()->sentence(),
             'category_id' => null,
             'store_id' => null,
-            'user_id' => null,
             'moneybox_id' => null,
+            'created_by' => null,
+            'updated_by' => null,
         ];
     }
 

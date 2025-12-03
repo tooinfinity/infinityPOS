@@ -38,9 +38,10 @@ final class SettingFactory extends Factory
         return [
             'key' => 'setting_'.str_replace('-', '_', $this->faker->unique()->slug()),
             'value' => $value,
-            'type' => $type,
+            'type' => $type->value,
             'group' => $this->faker->optional()->word(),
             'description' => $this->faker->optional()->sentence(),
+            'updated_by' => null,
         ];
     }
 }

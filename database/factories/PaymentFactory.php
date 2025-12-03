@@ -5,12 +5,9 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\PaymentMethodEnum;
-use App\Models\Invoice;
+use App\Enums\PaymentTypeEnum;
 use App\Models\Payment;
-use App\Models\Purchase;
-use App\Models\Sale;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 /**
@@ -27,13 +24,14 @@ final class PaymentFactory extends Factory
     {
         return [
             'reference' => mb_strtoupper(Str::random(12)),
-            'payable_type' => null,
-            'payable_id' => null,
+            'type' => $this->faker->randomElement(array_map(fn (PaymentTypeEnum $e) => $e->value, PaymentTypeEnum::cases())),
             'amount' => $this->faker->randomFloat(2, 5, 2000),
             'method' => $this->faker->randomElement(array_map(fn (PaymentMethodEnum $e) => $e->value, PaymentMethodEnum::cases())),
+            'related_id' => null,
             'moneybox_id' => null,
             'notes' => $this->faker->optional()->sentence(6),
-            'user_id' => null,
+            'created_by' => null,
+            'updated_by' => null,
         ];
     }
 
@@ -52,23 +50,30 @@ final class PaymentFactory extends Factory
         return $this->state(fn (array $attrs): array => [...$attrs, 'method' => PaymentMethodEnum::TRANSFER->value]);
     }
 
-    public function forPayable(Model $model): self
+    public function forSale(int $saleId): self
     {
-        return $this->for($model, 'payable');
+        return $this->state(fn (array $attrs): array => [
+            ...$attrs,
+            'type' => PaymentTypeEnum::SALE->value,
+            'related_id' => $saleId,
+        ]);
     }
 
-    public function forSale(Sale $sale): self
+    public function forPurchase(int $purchaseId): self
     {
-        return $this->for($sale, 'payable');
+        return $this->state(fn (array $attrs): array => [
+            ...$attrs,
+            'type' => PaymentTypeEnum::PURCHASE->value,
+            'related_id' => $purchaseId,
+        ]);
     }
 
-    public function forInvoice(Invoice $invoice): self
+    public function forExpense(int $expenseId): self
     {
-        return $this->for($invoice, 'payable');
-    }
-
-    public function forPurchase(Purchase $purchase): self
-    {
-        return $this->for($purchase, 'payable');
+        return $this->state(fn (array $attrs): array => [
+            ...$attrs,
+            'type' => PaymentTypeEnum::EXPENSE->value,
+            'related_id' => $expenseId,
+        ]);
     }
 }

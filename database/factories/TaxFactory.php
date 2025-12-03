@@ -28,7 +28,7 @@ final class TaxFactory extends Factory
 
         return [
             'name' => $this->faker->unique()->word().' Tax',
-            'type' => $type,
+            'tax_type' => $type->value,
             'rate' => $rate,
             'is_active' => $this->faker->boolean(95),
         ];
@@ -38,7 +38,7 @@ final class TaxFactory extends Factory
     {
         return $this->state(fn (array $attrs): array => [
             ...$attrs,
-            'type' => TaxTypeEnum::PERCENTAGE,
+            'tax_type' => TaxTypeEnum::PERCENTAGE->value,
             'rate' => $rate ?? $this->faker->randomFloat(2, 1, 30),
         ]);
     }
@@ -47,7 +47,7 @@ final class TaxFactory extends Factory
     {
         return $this->state(fn (array $attrs): array => [
             ...$attrs,
-            'type' => TaxTypeEnum::FIXED,
+            'tax_type' => TaxTypeEnum::FIXED->value,
             'rate' => $amount ?? $this->faker->randomFloat(2, 0.1, 50),
         ]);
     }

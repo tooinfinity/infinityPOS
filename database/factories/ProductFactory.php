@@ -38,6 +38,8 @@ final class ProductFactory extends Factory
             'alert_quantity' => $this->faker->numberBetween(0, 10),
             'has_batches' => $this->faker->boolean(20),
             'is_active' => true,
+            'created_by' => null,
+            'updated_by' => null,
         ];
     }
 

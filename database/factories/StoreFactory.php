@@ -25,6 +25,8 @@ final class StoreFactory extends Factory
             'address' => $this->faker->optional()->streetAddress(),
             'phone' => $this->faker->optional()->phoneNumber(),
             'is_active' => $this->faker->boolean(95),
+            'created_by' => null,
+            'updated_by' => null,
         ];
     }
 

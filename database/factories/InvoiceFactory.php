@@ -55,7 +55,8 @@ final class InvoiceFactory extends Factory
                 ? 'paid'
                 : ($dueAt < new DateTimeImmutable('now') ? 'overdue' : 'sent'),
             'notes' => $this->faker->optional()->sentence(8),
-            'user_id' => null,
+            'created_by' => null,
+            'updated_by' => null,
         ];
     }
 

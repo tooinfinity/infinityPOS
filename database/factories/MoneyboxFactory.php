@@ -21,20 +21,17 @@ final class MoneyboxFactory extends Factory
     public function definition(): array
     {
         $type = $this->faker->randomElement(MoneyboxTypeEnum::cases());
-        $opening = $this->faker->randomFloat(2, 0, 10000);
-        $delta = $this->faker->randomFloat(2, -2000, 4000);
 
         return [
             'name' => ucfirst($this->faker->unique()->words(2, true)),
-            'type' => $type,
+            'type' => $type->value,
             'description' => $this->faker->optional()->sentence(),
-            'opening_balance' => $opening,
-            'current_balance' => max(0, $opening + $delta),
+            'balance' => $this->faker->randomFloat(2, 0, 10000),
             'bank_name' => $type === MoneyboxTypeEnum::BANK_ACCOUNT ? $this->faker->optional()->company() : null,
             'account_number' => $type === MoneyboxTypeEnum::BANK_ACCOUNT ? $this->faker->optional()->bankAccountNumber() : null,
-            'iban' => $type === MoneyboxTypeEnum::BANK_ACCOUNT ? $this->faker->optional()->iban() : null,
             'store_id' => null,
-            'user_id' => null,
+            'created_by' => null,
+            'updated_by' => null,
             'is_active' => $this->faker->boolean(95),
         ];
     }
@@ -54,13 +51,8 @@ final class MoneyboxFactory extends Factory
         return $this->state(fn (array $attrs): array => [...$attrs, 'store_id' => $storeId]);
     }
 
-    public function forUser(int $userId): self
-    {
-        return $this->state(fn (array $attrs): array => [...$attrs, 'user_id' => $userId]);
-    }
-
     public function bankAccount(): self
     {
-        return $this->state(fn (array $attrs): array => [...$attrs, 'type' => MoneyboxTypeEnum::BANK_ACCOUNT]);
+        return $this->state(fn (array $attrs): array => [...$attrs, 'type' => MoneyboxTypeEnum::BANK_ACCOUNT->value]);
     }
 }

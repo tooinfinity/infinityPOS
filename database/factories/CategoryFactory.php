@@ -25,6 +25,8 @@ final class CategoryFactory extends Factory
             'code' => mb_strtoupper(Str::random(6)),
             'type' => $this->faker->randomElement(['product', 'expense']),
             'is_active' => $this->faker->boolean(90),
+            'created_by' => null,
+            'updated_by' => null,
         ];
     }
 

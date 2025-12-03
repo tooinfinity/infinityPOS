@@ -27,6 +27,8 @@ final class ClientFactory extends Factory
             'balance' => $this->faker->randomFloat(2, 0, 10000),
             'is_active' => $this->faker->boolean(95),
             'business_identifier_id' => null,
+            'created_by' => null,
+            'updated_by' => null,
         ];
     }
 

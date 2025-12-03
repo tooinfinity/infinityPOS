@@ -22,6 +22,8 @@ final class BrandFactory extends Factory
         return [
             'name' => $this->faker->unique()->company(),
             'is_active' => $this->faker->boolean(90),
+            'created_by' => null,
+            'updated_by' => null,
         ];
     }
 

@@ -168,12 +168,4 @@ final class SaleReturn extends Model
             'updated_at' => 'datetime',
         ];
     }
-
-    /**
-     * Get the remaining amount to be refunded.
-     */
-    protected function getRemainingRefundAttribute(): float
-    {
-        return max(0, $this->total - $this->refunded);
-    }
 }

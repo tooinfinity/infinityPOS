@@ -46,7 +46,8 @@ final class SaleFactory extends Factory
                 SaleStatusEnum::CANCELLED->value,
             ]),
             'notes' => $this->faker->optional()->sentence(8),
-            'user_id' => null,
+            'created_by' => null,
+            'updated_by' => null,
         ];
     }
 
@@ -111,7 +112,11 @@ final class SaleFactory extends Factory
             $amounts[array_key_first($amounts)] += $remaining - ($base * $splits);
 
             foreach ($amounts as $amt) {
-                PaymentFactory::new()->for($sale, 'payable')->create(['amount' => max(0.01, $amt)]);
+                PaymentFactory::new()->create([
+                    'type' => 'sale',
+                    'related_id' => $sale->id,
+                    'amount' => max(0.01, $amt),
+                ]);
             }
         });
     }

@@ -31,7 +31,8 @@ final class StockTransferFactory extends Factory
                 StockTransferStatusEnum::CANCELLED->value,
             ]),
             'notes' => $this->faker->optional()->sentence(),
-            'user_id' => null,
+            'created_by' => null,
+            'updated_by' => null,
         ];
     }
 

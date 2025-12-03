@@ -7,7 +7,6 @@ namespace Database\Factories;
 use App\Enums\StockMovementTypeEnum;
 use App\Models\StockMovement;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends Factory<StockMovement>
@@ -29,11 +28,11 @@ final class StockMovementFactory extends Factory
             'store_id' => null,
             'quantity' => $qty,
             'type' => $type,
-            'source_type' => null,
-            'source_id' => null,
+            'reference' => $this->faker->optional()->bothify('REF-#####'),
             'batch_number' => $this->faker->optional(0.2)->bothify('BATCH-#####'),
             'notes' => $this->faker->optional()->sentence(6),
-            'user_id' => null,
+            'created_by' => null,
+            'updated_by' => null,
         ];
     }
 
@@ -61,8 +60,8 @@ final class StockMovementFactory extends Factory
         });
     }
 
-    public function forSource(Model $model): self
+    public function withReference(string $reference): self
     {
-        return $this->for($model, 'source');
+        return $this->state(fn (array $attrs): array => [...$attrs, 'reference' => $reference]);
     }
 }

@@ -44,7 +44,8 @@ final class PurchaseReturnFactory extends Factory
             ]),
             'reason' => $this->faker->optional()->sentence(6),
             'notes' => $this->faker->optional()->sentence(8),
-            'user_id' => null,
+            'created_by' => null,
+            'updated_by' => null,
         ];
     }
 
@@ -87,7 +88,11 @@ final class PurchaseReturnFactory extends Factory
             $amounts[array_key_first($amounts)] += $remaining - ($base * $splits);
 
             foreach ($amounts as $amt) {
-                Payment::factory()->for($return, 'payable')->create(['amount' => max(0.01, $amt)]);
+                Payment::factory()->create([
+                    'type' => 'purchase',
+                    'related_id' => $return->id,
+                    'amount' => max(0.01, $amt),
+                ]);
             }
         });
     }

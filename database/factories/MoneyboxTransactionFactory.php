@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\MoneyboxTransactionTypeEnum;
-use App\Models\Expense;
 use App\Models\Moneybox;
 use App\Models\MoneyboxTransaction;
-use App\Models\Payment;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -24,29 +22,21 @@ final class MoneyboxTransactionFactory extends Factory
     public function definition(): array
     {
         $amount = $this->faker->randomFloat(2, 1, 5000);
-        $before = $this->faker->randomFloat(2, 0, 20000);
         $type = $this->faker->randomElement(MoneyboxTransactionTypeEnum::cases());
-        $after = match ($type) {
-            MoneyboxTransactionTypeEnum::IN => $before + $amount,
-            MoneyboxTransactionTypeEnum::OUT => max(0, $before - $amount),
-            MoneyboxTransactionTypeEnum::TRANSFER => $before, // balance may remain same on source if mirrored separately
-        };
+        $balanceAfter = $this->faker->randomFloat(2, 0, 20000);
 
         return [
             'moneybox_id' => Moneybox::factory(),
-            'type' => $type,
+            'type' => $type->value,
             'amount' => $amount,
-            'balance_before' => $before,
-            'balance_after' => $after,
-            'transfer_to_moneybox_id' => null,
-            'transactionable_type' => $this->faker->randomElement([
-                Payment::class,
-                Expense::class,
-            ]),
-            'transactionable_id' => 1, // recommend overriding in tests when linking to real models
+            'balance_after' => $balanceAfter,
             'reference' => $this->faker->optional()->bothify('TRX-#####'),
             'notes' => $this->faker->optional()->sentence(),
-            'user_id' => null,
+            'payment_id' => null,
+            'expense_id' => null,
+            'transfer_to_id' => null,
+            'created_by' => null,
+            'updated_by' => null,
         ];
     }
 
@@ -72,11 +62,16 @@ final class MoneyboxTransactionFactory extends Factory
 
     public function forTransferTo(Moneybox $moneybox): self
     {
-        return $this->state(fn (array $attrs): array => [...$attrs, 'transfer_to_moneybox_id' => $moneybox->id]);
+        return $this->state(fn (array $attrs): array => [...$attrs, 'transfer_to_id' => $moneybox->id]);
     }
 
-    public function byUser(int $userId): self
+    public function forPayment(int $paymentId): self
     {
-        return $this->state(fn (array $attrs): array => [...$attrs, 'user_id' => $userId]);
+        return $this->state(fn (array $attrs): array => [...$attrs, 'payment_id' => $paymentId]);
+    }
+
+    public function forExpense(int $expenseId): self
+    {
+        return $this->state(fn (array $attrs): array => [...$attrs, 'expense_id' => $expenseId]);
     }
 }

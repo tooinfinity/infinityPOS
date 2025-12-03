@@ -166,12 +166,4 @@ final class Sale extends Model
             'updated_at' => 'datetime',
         ];
     }
-
-    /**
-     * Get the remaining amount to be paid.
-     */
-    protected function getRemainingAmountAttribute(): float
-    {
-        return max(0, $this->total - $this->paid);
-    }
 }

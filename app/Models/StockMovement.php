@@ -101,12 +101,4 @@ final class StockMovement extends Model
             'updated_at' => 'datetime',
         ];
     }
-
-    /**
-     * Get the effective quantity (always positive).
-     */
-    protected function getEffectiveQuantityAttribute(): float
-    {
-        return abs($this->quantity);
-    }
 }
