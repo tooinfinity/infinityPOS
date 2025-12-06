@@ -9,8 +9,6 @@ enum InvoiceStatusEnum: string
     case DRAFT = 'draft';
     case PENDING = 'pending';
     case PAID = 'paid';
-    case PARTIALLY_PAID = 'partially_paid';
-    case OVERDUE = 'overdue';
     case CANCELLED = 'cancelled';
 
     /**
@@ -33,8 +31,6 @@ enum InvoiceStatusEnum: string
             self::DRAFT => 'Draft',
             self::PENDING => 'Pending',
             self::PAID => 'Paid',
-            self::PARTIALLY_PAID => 'Partially Paid',
-            self::OVERDUE => 'Overdue',
             self::CANCELLED => 'Cancelled',
         };
     }
@@ -45,8 +41,6 @@ enum InvoiceStatusEnum: string
             self::DRAFT => 'gray',
             self::PENDING => 'blue',
             self::PAID => 'green',
-            self::PARTIALLY_PAID => 'yellow',
-            self::OVERDUE => 'red',
             self::CANCELLED => 'red',
         };
     }
@@ -58,6 +52,6 @@ enum InvoiceStatusEnum: string
 
     public function isPending(): bool
     {
-        return in_array($this, [self::DRAFT, self::PARTIALLY_PAID, self::PENDING, self::OVERDUE], true);
+        return in_array($this, [self::DRAFT, self::PENDING, self::CANCELLED], true);
     }
 }

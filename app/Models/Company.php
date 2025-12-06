@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\QueryBuilders\CompanyQueryBuilder;
 use Carbon\CarbonInterface;
 use Database\Factories\CompanyFactory;
-use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,7 +33,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read CarbonInterface $updated_at
  * @property-read BusinessIdentifier|null $businessIdentifier
  */
-#[UseEloquentBuilder(CompanyQueryBuilder::class)]
 final class Company extends Model
 {
     /** @use HasFactory<CompanyFactory> */

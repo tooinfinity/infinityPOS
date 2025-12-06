@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Enums\CategoryTypeEnum;
 use App\Models\Category;
+use App\Models\Expense;
+use App\Models\Product;
 use App\Models\User;
 
 test('to array', function (): void {
@@ -22,4 +25,34 @@ test('to array', function (): void {
             'created_at',
             'updated_at',
         ]);
+});
+
+test('category relationships', function (): void {
+    $user = User::factory()->create()->refresh();
+    $category = Category::factory()->create(['created_by' => $user->id]);
+    $expense = Expense::factory()->create(['category_id' => $category->id, 'created_by' => $user->id]);
+    $product = Product::factory()->create(['category_id' => $category->id, 'created_by' => $user->id]);
+
+    $category->update(['updated_by' => $user->id]);
+
+    expect($category->expenses)->toHaveCount(1)
+        ->and($category->products)->toHaveCount(1)
+        ->and($category->expenses->first()->id)->toBe($expense->id)
+        ->and($category->products->first()->id)->toBe($product->id)
+        ->and($category->creator->id)->toBe($user->id)
+        ->and($category->updater->id)->toBe($user->id);
+});
+
+test('is product category', function (): void {
+    $user = User::factory()->create()->refresh();
+    $category = Category::factory()->create(['type' => CategoryTypeEnum::PRODUCT->value, 'created_by' => $user->id]);
+
+    expect($category->isProductCategory())->toBeTrue();
+});
+
+test('is expense category', function (): void {
+    $user = User::factory()->create()->refresh();
+    $category = Category::factory()->create(['type' => CategoryTypeEnum::EXPENSE->value, 'created_by' => $user->id]);
+
+    expect($category->isExpenseCategory())->toBeTrue();
 });

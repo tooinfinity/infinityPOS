@@ -133,14 +133,6 @@ final class PurchaseReturn extends Model
     }
 
     /**
-     * Check if the return is fully refunded.
-     */
-    public function isFullyRefunded(): bool
-    {
-        return $this->getRemainingRefundAttribute() <= 0;
-    }
-
-    /**
      * @return array<string, string>
      */
     public function casts(): array

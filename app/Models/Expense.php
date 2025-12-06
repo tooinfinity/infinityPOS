@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\QueryBuilders\ExpenseQueryBuilder;
 use Carbon\CarbonInterface;
 use Database\Factories\ExpenseFactory;
-use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,11 +16,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read int $id
  * @property-read float $amount
  * @property-read string|null $description
- * @property-read int|null $category_id
- * @property-read int|null $store_id
- * @property-read int|null $moneybox_id
- * @property-read int $created_by
- * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Category|null $category
@@ -29,8 +23,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Moneybox|null $moneybox
  * @property-read User $creator
  * @property-read User|null $updater
+ * @property-read Collection<int, MoneyboxTransaction> $moneyboxTransactions
  */
-#[UseEloquentBuilder(ExpenseQueryBuilder::class)]
 final class Expense extends Model
 {
     /** @use HasFactory<ExpenseFactory> */

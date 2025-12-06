@@ -6,6 +6,7 @@ namespace Database\Factories;
 
 use App\Enums\TaxTypeEnum;
 use App\Models\Tax;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -31,6 +32,8 @@ final class TaxFactory extends Factory
             'tax_type' => $type->value,
             'rate' => $rate,
             'is_active' => $this->faker->boolean(95),
+            'created_by' => User::factory(),
+            'updated_by' => null,
         ];
     }
 

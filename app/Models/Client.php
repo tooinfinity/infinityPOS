@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\QueryBuilders\ClientQueryBuilder;
 use Carbon\CarbonInterface;
 use Database\Factories\ClientFactory;
-use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -34,7 +32,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, SaleReturn> $saleReturns
  * @property-read Collection<int, Invoice> $invoices
  */
-#[UseEloquentBuilder(ClientQueryBuilder::class)]
 final class Client extends Model
 {
     /** @use HasFactory<ClientFactory> */

@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\MoneyboxTransactionTypeEnum;
-use App\QueryBuilders\MoneyboxQueryBuilder;
 use Carbon\CarbonInterface;
 use Database\Factories\MoneyboxFactory;
-use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -38,7 +36,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, MoneyboxTransaction> $incomingTransfers
  * @property-read Collection<int, MoneyboxTransaction> $outgoingTransfers
  */
-#[UseEloquentBuilder(MoneyboxQueryBuilder::class)]
 final class Moneybox extends Model
 {
     /** @use HasFactory<MoneyboxFactory> */

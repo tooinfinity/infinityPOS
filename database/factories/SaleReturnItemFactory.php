@@ -37,9 +37,6 @@ final class SaleReturnItemFactory extends Factory
             'discount' => $discount,
             'tax_amount' => $taxAmount,
             'total' => $total,
-            'batch_number' => $this->faker->optional(0.2)->bothify('BATCH-#####'),
-            'expiry_date' => null,
-            'remaining_quantity' => $quantity,
         ];
     }
 }

@@ -16,6 +16,10 @@ return new class extends Migration
             $table->string('tax_type');
             $table->decimal('rate', 8, 2);
             $table->boolean('is_active')->index();
+
+            $table->foreignId('created_by')->references('id')->on('users');
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
+
             $table->timestamps();
         });
     }

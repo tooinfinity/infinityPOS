@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\QueryBuilders\InvoiceQueryBuilder;
 use Carbon\CarbonInterface;
 use Database\Factories\InvoiceFactory;
-use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -39,7 +37,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read User|null $updater
  * @property-read Collection<int, Payment> $payments
  */
-#[UseEloquentBuilder(InvoiceQueryBuilder::class)]
 final class Invoice extends Model
 {
     /** @use HasFactory<InvoiceFactory> */

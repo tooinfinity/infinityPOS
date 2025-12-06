@@ -56,7 +56,7 @@ final class User extends Authenticatable
      */
     public function sales(): HasMany
     {
-        return $this->hasMany(Sale::class);
+        return $this->hasMany(Sale::class, 'created_by');
     }
 
     /**
@@ -64,7 +64,7 @@ final class User extends Authenticatable
      */
     public function purchases(): HasMany
     {
-        return $this->hasMany(Purchase::class);
+        return $this->hasMany(Purchase::class, 'created_by');
     }
 
     /**
@@ -72,7 +72,7 @@ final class User extends Authenticatable
      */
     public function saleReturns(): HasMany
     {
-        return $this->hasMany(SaleReturn::class);
+        return $this->hasMany(SaleReturn::class, 'created_by');
     }
 
     /**
@@ -80,7 +80,7 @@ final class User extends Authenticatable
      */
     public function purchaseReturns(): HasMany
     {
-        return $this->hasMany(PurchaseReturn::class);
+        return $this->hasMany(PurchaseReturn::class, 'created_by');
     }
 
     /**
@@ -88,7 +88,7 @@ final class User extends Authenticatable
      */
     public function invoices(): HasMany
     {
-        return $this->hasMany(Invoice::class);
+        return $this->hasMany(Invoice::class, 'created_by');
     }
 
     /**
@@ -96,7 +96,7 @@ final class User extends Authenticatable
      */
     public function payments(): HasMany
     {
-        return $this->hasMany(Payment::class);
+        return $this->hasMany(Payment::class, 'created_by');
     }
 
     /**
@@ -104,7 +104,7 @@ final class User extends Authenticatable
      */
     public function expenses(): HasMany
     {
-        return $this->hasMany(Expense::class);
+        return $this->hasMany(Expense::class, 'created_by');
     }
 
     /**
@@ -112,7 +112,7 @@ final class User extends Authenticatable
      */
     public function stockMovements(): HasMany
     {
-        return $this->hasMany(StockMovement::class);
+        return $this->hasMany(StockMovement::class, 'created_by');
     }
 
     /**
@@ -120,7 +120,7 @@ final class User extends Authenticatable
      */
     public function stockTransfers(): HasMany
     {
-        return $this->hasMany(StockTransfer::class);
+        return $this->hasMany(StockTransfer::class, 'created_by');
     }
 
     /**
@@ -128,7 +128,7 @@ final class User extends Authenticatable
      */
     public function moneyboxes(): HasMany
     {
-        return $this->hasMany(Moneybox::class);
+        return $this->hasMany(Moneybox::class, 'created_by');
     }
 
     /**
@@ -136,7 +136,7 @@ final class User extends Authenticatable
      */
     public function moneyboxTransactions(): HasMany
     {
-        return $this->hasMany(MoneyboxTransaction::class);
+        return $this->hasMany(MoneyboxTransaction::class, 'created_by');
     }
 
     /**

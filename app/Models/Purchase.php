@@ -134,14 +134,6 @@ final class Purchase extends Model
     }
 
     /**
-     * Check if the purchase is fully paid.
-     */
-    public function isFullyPaid(): bool
-    {
-        return $this->getRemainingAmountAttribute() <= 0;
-    }
-
-    /**
      * @return array<string, string>
      */
     public function casts(): array

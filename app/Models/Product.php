@@ -4,13 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Models\Scopes\LowStockScope;
-use App\Models\Scopes\WithBatchesScope;
-use App\QueryBuilders\ProductQueryBuilder;
 use Carbon\CarbonInterface;
 use Database\Factories\ProductFactory;
-use Illuminate\Database\Eloquent\Attributes\ScopedBy;
-use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -42,8 +37,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Brand|null $brand
  * @property-read Unit|null $unit
  * @property-read Tax|null $tax
- * @property-read User $creator
- * @property-read User|null $updater
+ * @property-read int $creator
+ * @property-read int|null $updater
  * @property-read Collection<int, SaleItem> $saleItems
  * @property-read Collection<int, PurchaseItem> $purchaseItems
  * @property-read Collection<int, Store> $stores
@@ -51,8 +46,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read bool $is_low_stock
  * @property-read float $profit_margin
  */
-#[ScopedBy([LowStockScope::class, WithBatchesScope::class])]
-#[UseEloquentBuilder(ProductQueryBuilder::class)]
 final class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */

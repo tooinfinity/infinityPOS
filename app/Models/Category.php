@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\CategoryTypeEnum;
-use App\QueryBuilders\CategoryQueryBuilder;
 use Carbon\CarbonInterface;
 use Database\Factories\CategoryFactory;
-use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,7 +28,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read User $creator
  * @property-read User|null $updater
  */
-#[UseEloquentBuilder(CategoryQueryBuilder::class)]
 final class Category extends Model
 {
     /** @use HasFactory<CategoryFactory> */

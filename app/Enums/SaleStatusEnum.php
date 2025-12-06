@@ -7,6 +7,7 @@ namespace App\Enums;
 enum SaleStatusEnum: string
 {
     case COMPLETED = 'completed';
+    case PENDING = 'pending';
     case CANCELLED = 'cancelled';
 
     /**
@@ -27,6 +28,7 @@ enum SaleStatusEnum: string
     {
         return match ($this) {
             self::COMPLETED => 'Completed',
+            self::PENDING => 'Pending',
             self::CANCELLED => 'Cancelled',
         };
     }
@@ -35,6 +37,7 @@ enum SaleStatusEnum: string
     {
         return match ($this) {
             self::COMPLETED => 'green',
+            self::PENDING => 'yellow',
             self::CANCELLED => 'red',
         };
     }

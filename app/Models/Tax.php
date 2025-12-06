@@ -10,6 +10,7 @@ use Database\Factories\TaxFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -18,6 +19,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read string $tax_type
  * @property-read float $rate
  * @property-read bool $is_active
+ * @property-read int $created_by
+ * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Collection<int, Product> $products
@@ -33,6 +36,22 @@ final class Tax extends Model
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     /**
@@ -52,18 +71,6 @@ final class Tax extends Model
     }
 
     /**
-     * Calculate tax amount for a given value.
-     */
-    public function calculate(float $value): float
-    {
-        return match ($this->tax_type) {
-            TaxTypeEnum::PERCENTAGE->value => ($value * $this->rate) / 100,
-            TaxTypeEnum::FIXED->value => $this->rate,
-            default => 0,
-        };
-    }
-
-    /**
      * @return array<string, string>
      */
     public function casts(): array
@@ -74,6 +81,8 @@ final class Tax extends Model
             'tax_type' => 'string',
             'rate' => 'decimal:2',
             'is_active' => 'boolean',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

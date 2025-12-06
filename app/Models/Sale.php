@@ -120,6 +120,14 @@ final class Sale extends Model
     }
 
     /**
+     * Check if return is pending.
+     */
+    public function isPending(): bool
+    {
+        return $this->status === SaleStatusEnum::PENDING->value;
+    }
+
+    /**
      * Check if the sale is completed.
      */
     public function isCompleted(): bool
@@ -133,14 +141,6 @@ final class Sale extends Model
     public function isCancelled(): bool
     {
         return $this->status === SaleStatusEnum::CANCELLED->value;
-    }
-
-    /**
-     * Check if the sale is fully paid.
-     */
-    public function isFullyPaid(): bool
-    {
-        return $this->getRemainingAmountAttribute() <= 0;
     }
 
     /**
