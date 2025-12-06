@@ -13,8 +13,8 @@ return new class extends Migration
         Schema::create('purchase_returns', function (Blueprint $table): void {
             $table->id();
             $table->string('reference')->unique();
-            $table->decimal('total', 15, 2)->default(0);
-            $table->decimal('refunded', 15, 2)->default(0);
+            $table->unsignedBigInteger('total');
+            $table->unsignedBigInteger('refunded');
             $table->string('status', 20)->index();
             $table->text('reason')->nullable();
             $table->text('notes')->nullable();

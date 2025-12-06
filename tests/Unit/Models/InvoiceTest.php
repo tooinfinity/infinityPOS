@@ -51,11 +51,17 @@ test('invoice relationships', function (): void {
     $store = Store::factory()->create(['created_by' => $user->id]);
     $sale = Sale::factory()->create(['created_by' => $user->id, 'store_id' => $store->id]);
     $client = Client::factory()->create(['created_by' => $user->id]);
-    $payment = Payment::factory()->create(['type' => PaymentTypeEnum::SALE->value, 'related_id' => $sale->id, 'created_by' => $user->id]);
     $invoice = Invoice::factory()->create([
         'created_by' => $user->id,
         'sale_id' => $sale->id,
         'client_id' => $client->id,
+    ])->refresh();
+    $invoice->update(['updated_by' => $user->id]);
+
+    $payment = Payment::factory()->create([
+        'type' => PaymentTypeEnum::SALE->value,
+        'related_id' => $invoice->id,
+        'created_by' => $user->id,
     ]);
     $invoice->update(['updated_by' => $user->id]);
 

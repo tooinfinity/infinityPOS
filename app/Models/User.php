@@ -14,7 +14,7 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
- * @property-read int $id
+ * @property-read string $id
  * @property-read string $name
  * @property-read string $email
  * @property-read string $password
@@ -145,7 +145,7 @@ final class User extends Authenticatable
     public function casts(): array
     {
         return [
-            'id' => 'integer',
+            'id' => 'string',
             'name' => 'string',
             'email' => 'string',
             'password' => 'hashed',

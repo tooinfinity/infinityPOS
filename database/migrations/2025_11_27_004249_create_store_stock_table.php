@@ -13,7 +13,7 @@ return new class extends Migration
         Schema::create('store_stock', function (Blueprint $table): void {
             $table->foreignId('store_id')->constrained();
             $table->foreignId('product_id')->constrained();
-            $table->decimal('quantity', 15, 2)->default(0);
+            $table->unsignedBigInteger('quantity');
             $table->timestamps();
 
             $table->primary(['store_id', 'product_id']);

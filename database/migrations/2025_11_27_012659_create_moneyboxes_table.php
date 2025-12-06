@@ -15,10 +15,10 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->string('type', 20); // ['cash', 'bank', 'mobile']
             $table->text('description')->nullable();
-            $table->decimal('balance', 15, 2)->default(0)->comment('Current balance');
+            $table->unsignedBigInteger('balance')->comment('Current balance');
             $table->string('bank_name')->nullable();
             $table->string('account_number')->nullable();
-            $table->boolean('is_active')->default(true)->index();
+            $table->boolean('is_active')->index();
 
             $table->foreignId('store_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('created_by')->references('id')->on('users');

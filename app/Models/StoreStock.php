@@ -11,9 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
- * @property-read int $store_id
- * @property-read int $product_id
- * @property-read float $quantity
+ * @property-read string $quantity
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Store $store
@@ -50,9 +48,9 @@ final class StoreStock extends Pivot
     public function casts(): array
     {
         return [
-            'store_id' => 'integer',
-            'product_id' => 'integer',
-            'quantity' => 'decimal:2',
+            'store_id' => 'string',
+            'product_id' => 'string',
+            'quantity' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

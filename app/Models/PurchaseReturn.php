@@ -14,18 +14,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property-read int $id
+ * @property-read string $id
  * @property-read string $reference
- * @property-read int|null $purchase_id
- * @property-read int|null $supplier_id
- * @property-read int $store_id
- * @property-read float $total
- * @property-read float $refunded
+ * @property-read string $total
+ * @property-read string $refunded
  * @property-read string $status
  * @property-read string|null $reason
  * @property-read string|null $notes
- * @property-read int $created_by
- * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Purchase|null $purchase
@@ -138,18 +133,18 @@ final class PurchaseReturn extends Model
     public function casts(): array
     {
         return [
-            'id' => 'integer',
+            'id' => 'string',
             'reference' => 'string',
-            'purchase_id' => 'integer',
-            'supplier_id' => 'integer',
-            'store_id' => 'integer',
-            'total' => 'decimal:2',
-            'refunded' => 'decimal:2',
+            'purchase_id' => 'string',
+            'supplier_id' => 'string',
+            'store_id' => 'string',
+            'total' => 'string',
+            'refunded' => 'string',
             'status' => 'string',
             'reason' => 'string',
             'notes' => 'string',
-            'created_by' => 'integer',
-            'updated_by' => 'integer',
+            'created_by' => 'string',
+            'updated_by' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

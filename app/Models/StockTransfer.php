@@ -14,14 +14,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property-read int $id
+ * @property-read string $id
  * @property-read string $reference
- * @property-read int $from_store_id
- * @property-read int $to_store_id
  * @property-read string $status
  * @property-read string|null $notes
- * @property-read int $created_by
- * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Store $fromStore

@@ -14,14 +14,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property-read int $id
+ * @property-read string $id
  * @property-read string $name
  * @property-read string|null $city
  * @property-read string|null $address
  * @property-read string|null $phone
  * @property-read bool $is_active
- * @property-read int $created_by
- * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read User $creator
@@ -146,14 +144,14 @@ final class Store extends Model
     public function casts(): array
     {
         return [
-            'id' => 'integer',
+            'id' => 'string',
             'name' => 'string',
             'city' => 'string',
             'address' => 'string',
             'phone' => 'string',
             'is_active' => 'boolean',
-            'created_by' => 'integer',
-            'updated_by' => 'integer',
+            'created_by' => 'string',
+            'updated_by' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

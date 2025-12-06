@@ -11,16 +11,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property-read int $id
- * @property-read int $sale_return_id
- * @property-read int $product_id
- * @property-read int|null $sale_item_id
- * @property-read float $quantity
- * @property-read float $price
- * @property-read float $cost
- * @property-read float $discount
- * @property-read float $tax_amount
- * @property-read float $total
+ * @property-read string $id
+ * @property-read string $quantity
+ * @property-read string $price
+ * @property-read string $cost
+ * @property-read string $discount
+ * @property-read string $tax_amount
+ * @property-read string $total
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read SaleReturn $saleReturn
@@ -62,16 +59,16 @@ final class SaleReturnItem extends Model
     public function casts(): array
     {
         return [
-            'id' => 'integer',
-            'sale_return_id' => 'integer',
-            'product_id' => 'integer',
-            'sale_item_id' => 'integer',
-            'quantity' => 'decimal:2',
-            'price' => 'decimal:2',
-            'cost' => 'decimal:2',
-            'discount' => 'decimal:2',
-            'tax_amount' => 'decimal:2',
-            'total' => 'decimal:2',
+            'id' => 'string',
+            'sale_return_id' => 'string',
+            'product_id' => 'string',
+            'sale_item_id' => 'string',
+            'quantity' => 'string',
+            'price' => 'string',
+            'cost' => 'string',
+            'discount' => 'string',
+            'tax_amount' => 'string',
+            'total' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

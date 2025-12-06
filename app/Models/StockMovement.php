@@ -11,16 +11,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property-read int $id
- * @property-read int $product_id
- * @property-read int $store_id
- * @property-read float $quantity
+ * @property-read string $id
+ * @property-read string $quantity
  * @property-read string $type
  * @property-read string|null $reference
  * @property-read string|null $batch_number
  * @property-read string|null $notes
- * @property-read int $created_by
- * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Product $product
@@ -87,16 +83,16 @@ final class StockMovement extends Model
     public function casts(): array
     {
         return [
-            'id' => 'integer',
-            'product_id' => 'integer',
-            'store_id' => 'integer',
-            'quantity' => 'decimal:2',
+            'id' => 'string',
+            'product_id' => 'string',
+            'store_id' => 'string',
+            'quantity' => 'string',
             'type' => 'string',
             'reference' => 'string',
             'batch_number' => 'string',
             'notes' => 'string',
-            'created_by' => 'integer',
-            'updated_by' => 'integer',
+            'created_by' => 'string',
+            'updated_by' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

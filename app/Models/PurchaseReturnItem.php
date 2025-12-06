@@ -11,13 +11,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property-read int $id
- * @property-read int $purchase_return_id
- * @property-read int $product_id
- * @property-read int|null $purchase_item_id
- * @property-read float $quantity
- * @property-read float $cost
- * @property-read float $total
+ * @property-read string $id
+ * @property-read string $quantity
+ * @property-read string $cost
+ * @property-read string $total
  * @property-read string|null $batch_number
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
@@ -60,13 +57,13 @@ final class PurchaseReturnItem extends Model
     public function casts(): array
     {
         return [
-            'id' => 'integer',
-            'purchase_return_id' => 'integer',
-            'product_id' => 'integer',
-            'purchase_item_id' => 'integer',
-            'quantity' => 'decimal:2',
-            'cost' => 'decimal:2',
-            'total' => 'decimal:2',
+            'id' => 'string',
+            'purchase_return_id' => 'string',
+            'product_id' => 'string',
+            'purchase_item_id' => 'string',
+            'quantity' => 'string',
+            'cost' => 'string',
+            'total' => 'string',
             'batch_number' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

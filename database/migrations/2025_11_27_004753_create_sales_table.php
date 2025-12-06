@@ -13,11 +13,11 @@ return new class extends Migration
         Schema::create('sales', function (Blueprint $table): void {
             $table->id();
             $table->string('reference')->unique();
-            $table->decimal('subtotal', 15, 2);
-            $table->decimal('discount', 15, 2)->nullable();
-            $table->decimal('tax', 15, 2)->nullable();
-            $table->decimal('total', 15, 2);
-            $table->decimal('paid', 15, 2);
+            $table->unsignedBigInteger('subtotal');
+            $table->unsignedBigInteger('discount')->nullable();
+            $table->unsignedBigInteger('tax')->nullable();
+            $table->unsignedBigInteger('total');
+            $table->unsignedBigInteger('paid');
             $table->string('status')->index();
             $table->text('notes')->nullable();
 

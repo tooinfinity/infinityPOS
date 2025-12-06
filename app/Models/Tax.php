@@ -14,13 +14,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property-read int $id
+ * @property-read string $id
  * @property-read string $name
  * @property-read string $tax_type
- * @property-read float $rate
+ * @property-read string $rate
  * @property-read bool $is_active
- * @property-read int $created_by
- * @property-read int|null $updated_by
+ * @property-read User $creator
+ * @property-read User|null $updater
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Collection<int, Product> $products
@@ -76,13 +76,13 @@ final class Tax extends Model
     public function casts(): array
     {
         return [
-            'id' => 'integer',
+            'id' => 'string',
             'name' => 'string',
             'tax_type' => 'string',
-            'rate' => 'decimal:2',
+            'rate' => 'string',
             'is_active' => 'boolean',
-            'created_by' => 'integer',
-            'updated_by' => 'integer',
+            'created_by' => 'string',
+            'updated_by' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

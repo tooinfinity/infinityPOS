@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\SaleReturnStatusEnum;
+use App\Enums\StockMovementTypeEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\SaleReturnFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -14,21 +15,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property-read int $id
+ * @property-read string $id
  * @property-read string $reference
- * @property-read int|null $sale_id
- * @property-read int|null $client_id
- * @property-read int $store_id
- * @property-read float $subtotal
- * @property-read float $discount
- * @property-read float $tax
- * @property-read float $total
- * @property-read float $refunded
+ * @property-read string $subtotal
+ * @property-read string $discount
+ * @property-read string $tax
+ * @property-read string $total
+ * @property-read string $refunded
  * @property-read string $status
  * @property-read string|null $reason
  * @property-read string|null $notes
- * @property-read int $created_by
- * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Sale|null $sale
@@ -108,7 +104,7 @@ final class SaleReturn extends Model
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class, 'reference', 'reference')
-            ->where('stock_movements.type', 'return');
+            ->where('stock_movements.type', StockMovementTypeEnum::SALE_RETURN->value);
     }
 
     /**
@@ -141,21 +137,21 @@ final class SaleReturn extends Model
     public function casts(): array
     {
         return [
-            'id' => 'integer',
+            'id' => 'string',
             'reference' => 'string',
-            'sale_id' => 'integer',
-            'client_id' => 'integer',
-            'store_id' => 'integer',
-            'subtotal' => 'decimal:2',
-            'discount' => 'decimal:2',
-            'tax' => 'decimal:2',
-            'total' => 'decimal:2',
-            'refunded' => 'decimal:2',
+            'sale_id' => 'string',
+            'client_id' => 'string',
+            'store_id' => 'string',
+            'subtotal' => 'string',
+            'discount' => 'string',
+            'tax' => 'string',
+            'total' => 'string',
+            'refunded' => 'string',
             'status' => 'string',
             'reason' => 'string',
             'notes' => 'string',
-            'created_by' => 'integer',
-            'updated_by' => 'integer',
+            'created_by' => 'string',
+            'updated_by' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

@@ -12,12 +12,12 @@ return new class extends Migration
     {
         Schema::create('sale_return_items', function (Blueprint $table): void {
             $table->id();
-            $table->decimal('quantity', 15, 2);
-            $table->decimal('price', 15, 2);
-            $table->decimal('cost', 15, 2)->default(0);
-            $table->decimal('discount', 15, 2)->default(0);
-            $table->decimal('tax_amount', 15, 2)->default(0);
-            $table->decimal('total', 15, 2);
+            $table->unsignedBigInteger('quantity');
+            $table->unsignedBigInteger('price');
+            $table->unsignedBigInteger('cost');
+            $table->unsignedBigInteger('discount');
+            $table->unsignedBigInteger('tax_amount');
+            $table->unsignedBigInteger('total');
 
             $table->foreignId('sale_return_id')->constrained();
             $table->foreignId('product_id')->constrained();

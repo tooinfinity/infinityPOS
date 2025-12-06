@@ -12,7 +12,7 @@ return new class extends Migration
     {
         Schema::create('stock_transfer_items', function (Blueprint $table): void {
             $table->id();
-            $table->decimal('quantity', 15, 2);
+            $table->unsignedBigInteger('quantity');
             $table->string('batch_number')->nullable();
 
             $table->foreignId('stock_transfer_id')->constrained();

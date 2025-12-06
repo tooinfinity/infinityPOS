@@ -12,18 +12,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property-read int $id
- * @property-read int $moneybox_id
+ * @property-read string $id
  * @property-read string $type
- * @property-read float $amount
- * @property-read float $balance_after
+ * @property-read string $amount
+ * @property-read string $balance_after
  * @property-read string|null $reference
  * @property-read string|null $notes
- * @property-read int|null $payment_id
- * @property-read int|null $expense_id
- * @property-read int|null $transfer_to_id
- * @property-read int $created_by
- * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Moneybox $moneybox
@@ -116,18 +110,18 @@ final class MoneyboxTransaction extends Model
     public function casts(): array
     {
         return [
-            'id' => 'integer',
-            'moneybox_id' => 'integer',
+            'id' => 'string',
+            'moneybox_id' => 'string',
             'type' => 'string',
-            'amount' => 'decimal:2',
-            'balance_after' => 'decimal:2',
+            'amount' => 'string',
+            'balance_after' => 'string',
             'reference' => 'string',
             'notes' => 'string',
-            'payment_id' => 'integer',
-            'expense_id' => 'integer',
-            'transfer_to_id' => 'integer',
-            'created_by' => 'integer',
-            'updated_by' => 'integer',
+            'payment_id' => 'string',
+            'expense_id' => 'string',
+            'transfer_to_id' => 'string',
+            'created_by' => 'string',
+            'updated_by' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

@@ -13,16 +13,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property-read int $id
+ * @property-read string $id
  * @property-read string $name
  * @property-read string|null $phone
  * @property-read string|null $email
  * @property-read string|null $address
- * @property-read float $balance
+ * @property-read string $balance
  * @property-read bool $is_active
- * @property-read int|null $business_identifier_id
- * @property-read int $created_by
- * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read BusinessIdentifier|null $businessIdentifier
@@ -82,16 +79,16 @@ final class Supplier extends Model
     public function casts(): array
     {
         return [
-            'id' => 'integer',
+            'id' => 'string',
             'name' => 'string',
             'phone' => 'string',
             'email' => 'string',
             'address' => 'string',
-            'balance' => 'decimal:2',
+            'balance' => 'string',
             'is_active' => 'boolean',
-            'business_identifier_id' => 'integer',
-            'created_by' => 'integer',
-            'updated_by' => 'integer',
+            'business_identifier_id' => 'string',
+            'created_by' => 'string',
+            'updated_by' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

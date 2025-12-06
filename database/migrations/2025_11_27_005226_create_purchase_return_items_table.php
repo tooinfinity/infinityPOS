@@ -12,9 +12,9 @@ return new class extends Migration
     {
         Schema::create('purchase_return_items', function (Blueprint $table): void {
             $table->id();
-            $table->decimal('quantity', 15, 2);
-            $table->decimal('cost', 15, 2);
-            $table->decimal('total', 15, 2);
+            $table->unsignedBigInteger('quantity');
+            $table->unsignedBigInteger('cost');
+            $table->unsignedBigInteger('total');
             $table->string('batch_number')->nullable();
 
             $table->foreignId('purchase_return_id')->constrained();

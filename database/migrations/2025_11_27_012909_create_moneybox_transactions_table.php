@@ -14,8 +14,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('moneybox_id')->constrained()->cascadeOnDelete();
             $table->string('type', 20)->index(); // ['in', 'out', 'transfer']
-            $table->decimal('amount', 15, 2);
-            $table->decimal('balance_after', 15, 2)->comment('Balance after transaction');
+            $table->unsignedBigInteger('amount');
+            $table->unsignedBigInteger('balance_after')->comment('Balance after transaction');
             $table->string('reference')->nullable();
             $table->text('notes')->nullable();
 

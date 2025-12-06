@@ -17,9 +17,9 @@ return new class extends Migration
             $table->string('name')->index();
             $table->text('description')->nullable();
             $table->string('image')->nullable();
-            $table->decimal('cost', 15, 2)->default(0);
-            $table->decimal('price', 15, 2)->default(0);
-            $table->decimal('alert_quantity', 15, 2)->default(0);
+            $table->unsignedBigInteger('cost');
+            $table->unsignedBigInteger('price');
+            $table->unsignedBigInteger('alert_quantity');
             // Batch tracking option
             $table->boolean('has_batches');
             $table->boolean('is_active');

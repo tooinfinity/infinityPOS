@@ -12,15 +12,14 @@ return new class extends Migration
     {
         Schema::create('purchase_items', function (Blueprint $table): void {
             $table->id();
-            $table->decimal('quantity', 15, 2);
-            $table->decimal('cost', 15, 2);
-            $table->decimal('discount', 15, 2)->nullable();
-            $table->decimal('tax_amount', 15, 2)->nullable();
-            $table->decimal('total', 15, 2);
-            // Batch/Lot tracking
+            $table->unsignedBigInteger('quantity');
+            $table->unsignedBigInteger('cost');
+            $table->unsignedBigInteger('discount')->nullable();
+            $table->unsignedBigInteger('tax_amount')->nullable();
+            $table->unsignedBigInteger('total');
             $table->string('batch_number')->nullable()->index();
             $table->date('expiry_date')->nullable();
-            $table->decimal('remaining_quantity', 15, 2)->nullable()->comment('For FIFO tracking');
+            $table->unsignedBigInteger('remaining_quantity')->nullable()->comment('For FIFO tracking');
 
             $table->foreignId('purchase_id')->constrained();
             $table->foreignId('product_id')->constrained()->restrictOnDelete();

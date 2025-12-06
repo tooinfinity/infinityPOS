@@ -33,7 +33,7 @@ test('business identifier relationships', function (): void {
     $client = Client::factory()->create(['created_by' => $user->id, 'business_identifier_id' => $businessId->id]);
     $supplier = Supplier::factory()->create(['created_by' => $user->id, 'business_identifier_id' => $businessId->id]);
 
-    expect($businessId->company->id)->tobe($company->id)
-        ->and($businessId->client->id)->tobe($client->id)
-        ->and($businessId->supplier->id)->tobe($supplier->id);
+    expect($businessId->company->id)->toBe($company->id)
+        ->and($businessId->client->id)->toBe($client->id)
+        ->and($businessId->supplier->id)->toBe($supplier->id);
 });

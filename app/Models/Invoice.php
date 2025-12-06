@@ -13,22 +13,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property-read int $id
+ * @property-read string $id
  * @property-read string $reference
- * @property-read int $sale_id
- * @property-read int|null $client_id
  * @property-read CarbonInterface $issued_at
  * @property-read CarbonInterface|null $due_at
  * @property-read CarbonInterface|null $paid_at
- * @property-read float $subtotal
- * @property-read float $discount
- * @property-read float $tax
- * @property-read float $total
- * @property-read float $paid
+ * @property-read string $subtotal
+ * @property-read string $discount
+ * @property-read string $tax
+ * @property-read string $total
+ * @property-read string $paid
  * @property-read string $status
  * @property-read string|null $notes
- * @property-read int $created_by
- * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Sale $sale
@@ -89,22 +85,22 @@ final class Invoice extends Model
     public function casts(): array
     {
         return [
-            'id' => 'integer',
+            'id' => 'string',
             'reference' => 'string',
-            'sale_id' => 'integer',
-            'client_id' => 'integer',
+            'sale_id' => 'string',
+            'client_id' => 'string',
             'issued_at' => 'date',
-            'due_at' => 'date',
-            'paid_at' => 'date',
-            'subtotal' => 'decimal:2',
-            'discount' => 'decimal:2',
-            'tax' => 'decimal:2',
-            'total' => 'decimal:2',
-            'paid' => 'decimal:2',
+            'due_at' => 'datetime',
+            'paid_at' => 'datetime',
+            'subtotal' => 'string',
+            'discount' => 'string',
+            'tax' => 'string',
+            'total' => 'string',
+            'paid' => 'string',
             'status' => 'string',
             'notes' => 'string',
-            'created_by' => 'integer',
-            'updated_by' => 'integer',
+            'created_by' => 'string',
+            'updated_by' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

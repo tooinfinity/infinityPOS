@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
             $table->text('address')->nullable();
-            $table->decimal('balance', 15, 2)->default(0);
+            $table->unsignedBigInteger('balance');
             $table->boolean('is_active')->default(true);
 
             $table->foreignId('created_by')->references('id')->on('users');

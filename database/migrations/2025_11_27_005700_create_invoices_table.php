@@ -16,11 +16,11 @@ return new class extends Migration
             $table->date('issued_at')->index();
             $table->date('due_at')->nullable();
             $table->date('paid_at')->nullable();
-            $table->decimal('subtotal', 15, 2)->default(0);
-            $table->decimal('discount', 15, 2)->default(0);
-            $table->decimal('tax', 15, 2)->default(0);
-            $table->decimal('total', 15, 2)->default(0);
-            $table->decimal('paid', 15, 2)->default(0);
+            $table->unsignedBigInteger('subtotal');
+            $table->unsignedBigInteger('discount');
+            $table->unsignedBigInteger('tax');
+            $table->unsignedBigInteger('total');
+            $table->unsignedBigInteger('paid');
             $table->string('status', 20)->index();
             $table->text('notes')->nullable();
 

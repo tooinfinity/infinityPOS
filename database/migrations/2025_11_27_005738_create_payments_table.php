@@ -13,8 +13,8 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table): void {
             $table->id();
             $table->string('reference')->nullable()->unique();
-            $table->enum('type', ['sale', 'purchase', 'expense', 'other'])->index();
-            $table->decimal('amount', 15, 2);
+            $table->string('type')->index(); //  ['sale', 'purchase', 'expense', 'other']
+            $table->unsignedBigInteger('amount');
             $table->string('method', 20)->index();
             $table->text('notes')->nullable();
 

@@ -24,8 +24,6 @@ test('to array', function (): void {
     expect(array_keys($saleItem->toArray()))
         ->toBe([
             'id',
-            'sale_id',
-            'product_id',
             'quantity',
             'price',
             'cost',
@@ -34,6 +32,8 @@ test('to array', function (): void {
             'total',
             'batch_number',
             'expiry_date',
+            'sale_id',
+            'product_id',
             'created_at',
             'updated_at',
         ]);

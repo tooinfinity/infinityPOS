@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property-read int $id
+ * @property-read string $id
  * @property-read string $name
  * @property-read string|null $email
  * @property-read string|null $phone
@@ -28,7 +28,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read string $currency_symbol
  * @property-read string $timezone
  * @property-read string $date_format
- * @property-read int|null $business_identifier_id
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read BusinessIdentifier|null $businessIdentifier
@@ -52,7 +51,7 @@ final class Company extends Model
     public function casts(): array
     {
         return [
-            'id' => 'integer',
+            'id' => 'string',
             'name' => 'string',
             'email' => 'string',
             'phone' => 'string',
@@ -69,7 +68,7 @@ final class Company extends Model
             'currency_symbol' => 'string',
             'timezone' => 'string',
             'date_format' => 'string',
-            'business_identifier_id' => 'integer',
+            'business_identifier_id' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

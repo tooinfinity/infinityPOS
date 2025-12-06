@@ -12,13 +12,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property-read int $id
+ * @property-read string $id
  * @property-read string $key
  * @property-read string|null $value
  * @property-read SettingTypeEnum $type
  * @property-read string|null $group
  * @property-read string|null $description
- * @property-read int|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read User|null $updater
@@ -42,13 +41,13 @@ final class Setting extends Model
     public function casts(): array
     {
         return [
-            'id' => 'integer',
+            'id' => 'string',
             'key' => 'string',
             'value' => 'string',
             'type' => SettingTypeEnum::class,
             'group' => 'string',
             'description' => 'string',
-            'updated_by' => 'integer',
+            'updated_by' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

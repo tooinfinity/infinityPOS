@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
- * @property-read int $id
+ * @property-read string $id
  * @property-read string|null $article
  * @property-read string|null $nif
  * @property-read string|null $nis
@@ -58,7 +58,7 @@ final class BusinessIdentifier extends Model
     public function casts(): array
     {
         return [
-            'id' => 'integer',
+            'id' => 'string',
             'article' => 'string',
             'nif' => 'string',
             'nis' => 'string',

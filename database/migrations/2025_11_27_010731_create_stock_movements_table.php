@@ -12,7 +12,7 @@ return new class extends Migration
     {
         Schema::create('stock_movements', function (Blueprint $table): void {
             $table->id();
-            $table->decimal('quantity', 15, 2)->comment('Positive = in, Negative = out');
+            $table->BigInteger('quantity')->comment('Positive = in, Negative = out');
             $table->string('type', 20)->index(); //  ['purchase', 'sale', 'return', 'adjustment', 'transfer']
             $table->string('reference')->nullable()->comment('Link to source document');
             $table->string('batch_number')->nullable()->index();

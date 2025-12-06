@@ -13,16 +13,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property-read int $id
+ * @property-read string $id
  * @property-read string|null $reference
  * @property-read PaymentTypeEnum $type
- * @property-read float $amount
+ * @property-read string $amount
  * @property-read string $method
  * @property-read string|null $notes
- * @property-read int|null $related_id
- * @property-read int|null $moneybox_id
- * @property-read int $created_by
- * @property-read int|null $updated_by
+ * @property-read string|null $related_id
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Moneybox|null $moneybox
@@ -88,16 +85,16 @@ final class Payment extends Model
     public function casts(): array
     {
         return [
-            'id' => 'integer',
+            'id' => 'string',
             'reference' => 'string',
             'type' => PaymentTypeEnum::class,
-            'amount' => 'decimal:2',
+            'amount' => 'string',
             'method' => 'string',
             'notes' => 'string',
-            'related_id' => 'integer',
-            'moneybox_id' => 'integer',
-            'created_by' => 'integer',
-            'updated_by' => 'integer',
+            'related_id' => 'string',
+            'moneybox_id' => 'string',
+            'created_by' => 'string',
+            'updated_by' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
