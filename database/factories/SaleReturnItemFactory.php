@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Product;
+use App\Models\SaleItem;
+use App\Models\SaleReturn;
 use App\Models\SaleReturnItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,18 +22,18 @@ final class SaleReturnItemFactory extends Factory
      */
     public function definition(): array
     {
-        $quantity = $this->faker->randomFloat(2, 1, 10);
-        $price = $this->faker->randomFloat(2, 5, 500);
-        $cost = round($price * $this->faker->randomFloat(2, 0.5, 0.9), 2);
-        $discount = $this->faker->optional(0.3, 0.0)->randomFloat(2, 0, $price * $quantity * 0.2);
+        $quantity = $this->faker->randomNumber(2, 20);
+        $price = $this->faker->randomNumber(2, 400);
+        $cost = round($price * $this->faker->randomNumber(2, 9), 2);
+        $discount = $this->faker->optional(3, 0)->randomNumber(2, $price * $quantity * 2);
         $taxBase = max(0, ($price * $quantity) - $discount);
-        $taxAmount = round($taxBase * $this->faker->randomFloat(2, 0.0, 0.2), 2);
+        $taxAmount = round($taxBase * $this->faker->randomNumber(2, 2), 2);
         $total = round($taxBase + $taxAmount, 2);
 
         return [
-            'sale_return_id' => null,
-            'product_id' => null,
-            'sale_item_id' => null,
+            'sale_return_id' => SaleReturn::factory(),
+            'product_id' => Product::factory(),
+            'sale_item_id' => SaleItem::factory(),
             'quantity' => $quantity,
             'price' => $price,
             'cost' => $cost,

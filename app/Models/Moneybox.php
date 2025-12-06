@@ -14,11 +14,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property-read string $id
+ * @property-read int $id
  * @property-read string $name
  * @property-read string $type
  * @property-read string|null $description
- * @property-read string $balance
+ * @property-read int $balance
  * @property-read string|null $bank_name
  * @property-read string|null $account_number
  * @property-read bool $is_active
@@ -109,16 +109,16 @@ final class Moneybox extends Model
     public function casts(): array
     {
         return [
-            'id' => 'string',
+            'id' => 'integer',
             'name' => 'string',
             'type' => 'string',
             'description' => 'string',
-            'balance' => 'string',
+            'balance' => 'integer',
             'bank_name' => 'string',
             'account_number' => 'string',
-            'store_id' => 'string',
-            'created_by' => 'string',
-            'updated_by' => 'string',
+            'store_id' => 'integer',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'is_active' => 'boolean',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

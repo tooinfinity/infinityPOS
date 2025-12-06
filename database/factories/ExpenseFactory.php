@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Category;
 use App\Models\Expense;
+use App\Models\Moneybox;
+use App\Models\Store;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,15 +23,15 @@ final class ExpenseFactory extends Factory
      */
     public function definition(): array
     {
-        $amount = $this->faker->randomFloat(2, 1, 2000);
+        $amount = $this->faker->randomNumber(2, 2000);
 
         return [
             'amount' => $amount,
             'description' => $this->faker->optional()->sentence(),
-            'category_id' => null,
-            'store_id' => null,
-            'moneybox_id' => null,
-            'created_by' => null,
+            'category_id' => Category::factory(),
+            'store_id' => Store::factory(),
+            'moneybox_id' => Moneybox::factory(),
+            'created_by' => User::factory(),
             'updated_by' => null,
         ];
     }

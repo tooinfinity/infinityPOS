@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property-read string $id
+ * @property-read int $id
  * @property-read string $key
  * @property-read string|null $value
  * @property-read SettingTypeEnum $type
@@ -41,7 +41,7 @@ final class Setting extends Model
     public function casts(): array
     {
         return [
-            'id' => 'string',
+            'id' => 'integer',
             'key' => 'string',
             'value' => 'string',
             'type' => SettingTypeEnum::class,

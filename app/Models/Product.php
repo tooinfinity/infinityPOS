@@ -14,19 +14,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property-read string $id
+ * @property-read int $id
  * @property-read string|null $sku
  * @property-read string|null $barcode
  * @property-read string $name
  * @property-read string|null $description
  * @property-read string|null $image
- * @property-read string $cost
- * @property-read string $price
- * @property-read string $alert_quantity
+ * @property-read int $cost
+ * @property-read int $price
+ * @property-read int $alert_quantity
  * @property-read bool $has_batches
  * @property-read bool $is_active
- * @property-read string $created_by
- * @property-read string|null $updated_by
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Category|null $category
@@ -124,23 +122,23 @@ final class Product extends Model
     public function casts(): array
     {
         return [
-            'id' => 'string',
+            'id' => 'integer',
             'sku' => 'string',
             'barcode' => 'string',
             'name' => 'string',
             'description' => 'string',
             'image' => 'string',
-            'category_id' => 'string',
-            'brand_id' => 'string',
-            'unit_id' => 'string',
-            'tax_id' => 'string',
-            'cost' => 'string',
-            'price' => 'string',
-            'alert_quantity' => 'string',
+            'category_id' => 'integer',
+            'brand_id' => 'integer',
+            'unit_id' => 'integer',
+            'tax_id' => 'integer',
+            'cost' => 'integer',
+            'price' => 'integer',
+            'alert_quantity' => 'integer',
             'has_batches' => 'boolean',
             'is_active' => 'boolean',
-            'created_by' => 'string',
-            'updated_by' => 'string',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

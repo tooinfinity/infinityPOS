@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Client;
 use App\Models\Invoice;
+use App\Models\Sale;
+use App\Models\User;
 use DateMalformedStringException;
 use DateTimeImmutable;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -26,14 +29,14 @@ final class InvoiceFactory extends Factory
      */
     public function definition(): array
     {
-        $subtotal = $this->faker->randomFloat(2, 10, 2000);
-        $discount = $this->faker->randomFloat(2, 0, $subtotal * 0.2);
-        $tax = $this->faker->randomFloat(2, 0, ($subtotal - $discount) * 0.2);
+        $subtotal = $this->faker->randomNumber(2, 2000);
+        $discount = $this->faker->randomNumber(2, $subtotal * 0.2);
+        $tax = $this->faker->randomNumber(2, ($subtotal - $discount) * 0.2);
         $total = round($subtotal - $discount + $tax, 2);
         $paid = $this->faker->randomElement([
-            0.0,
+            0,
             round($total, 2),
-            round($total * $this->faker->randomFloat(2, 0.1, 0.9), 2),
+            round($total * $this->faker->randomNumber(2, 0.9), 2),
         ]);
 
         $issuedAt = $this->faker->dateTimeBetween('-2 months', 'now');
@@ -41,8 +44,8 @@ final class InvoiceFactory extends Factory
 
         return [
             'reference' => mb_strtoupper(Str::random(10)),
-            'sale_id' => null,
-            'client_id' => null,
+            'sale_id' => Sale::factory(),
+            'client_id' => Client::factory(),
             'issued_at' => $issuedAt,
             'due_at' => $dueAt,
             'paid_at' => $paid >= $total ? $this->faker->dateTimeBetween($issuedAt, $dueAt) : null,
@@ -55,7 +58,7 @@ final class InvoiceFactory extends Factory
                 ? 'paid'
                 : ($dueAt < new DateTimeImmutable('now') ? 'overdue' : 'sent'),
             'notes' => $this->faker->optional()->sentence(8),
-            'created_by' => null,
+            'created_by' => User::factory(),
             'updated_by' => null,
         ];
     }
@@ -80,7 +83,7 @@ final class InvoiceFactory extends Factory
     public function overdue(): self
     {
         return $this->state(function (array $attributes): array {
-            $attributes['paid'] ??= 0.0;
+            $attributes['paid'] ??= 0;
             $attributes['status'] = 'overdue';
             $attributes['due_at'] = now()->subDays(random_int(1, 30));
 
@@ -94,8 +97,8 @@ final class InvoiceFactory extends Factory
     public function partial(): self
     {
         return $this->state(function (array $attributes): array {
-            $total = (float) ($attributes['total'] ?? 100.0);
-            $attributes['paid'] = round($total * 0.5, 2);
+            $total = (float) ($attributes['total'] ?? 100);
+            $attributes['paid'] = round($total * 2, 2);
             $attributes['status'] = 'sent';
 
             return $attributes;

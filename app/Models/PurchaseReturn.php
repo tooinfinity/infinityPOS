@@ -14,10 +14,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property-read string $id
+ * @property-read int $id
  * @property-read string $reference
- * @property-read string $total
- * @property-read string $refunded
+ * @property-read int $total
+ * @property-read int $refunded
  * @property-read string $status
  * @property-read string|null $reason
  * @property-read string|null $notes
@@ -133,18 +133,18 @@ final class PurchaseReturn extends Model
     public function casts(): array
     {
         return [
-            'id' => 'string',
+            'id' => 'integer',
             'reference' => 'string',
-            'purchase_id' => 'string',
-            'supplier_id' => 'string',
-            'store_id' => 'string',
-            'total' => 'string',
-            'refunded' => 'string',
+            'purchase_id' => 'integer',
+            'supplier_id' => 'integer',
+            'store_id' => 'integer',
+            'total' => 'integer',
+            'refunded' => 'integer',
             'status' => 'string',
             'reason' => 'string',
             'notes' => 'string',
-            'created_by' => 'string',
-            'updated_by' => 'string',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

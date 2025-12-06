@@ -23,8 +23,8 @@ final class TaxFactory extends Factory
     {
         $type = $this->faker->randomElement(TaxTypeEnum::cases());
         $rate = match ($type) {
-            TaxTypeEnum::PERCENTAGE => $this->faker->randomFloat(2, 1, 30),
-            TaxTypeEnum::FIXED => $this->faker->randomFloat(2, 0.1, 50),
+            TaxTypeEnum::PERCENTAGE => $this->faker->randomNumber(2, 30),
+            TaxTypeEnum::FIXED => $this->faker->randomNumber(2, 50),
         };
 
         return [
@@ -42,7 +42,7 @@ final class TaxFactory extends Factory
         return $this->state(fn (array $attrs): array => [
             ...$attrs,
             'tax_type' => TaxTypeEnum::PERCENTAGE->value,
-            'rate' => $rate ?? $this->faker->randomFloat(2, 1, 30),
+            'rate' => $rate ?? $this->faker->randomNumber(2, 30),
         ]);
     }
 
@@ -51,7 +51,7 @@ final class TaxFactory extends Factory
         return $this->state(fn (array $attrs): array => [
             ...$attrs,
             'tax_type' => TaxTypeEnum::FIXED->value,
-            'rate' => $amount ?? $this->faker->randomFloat(2, 0.1, 50),
+            'rate' => $amount ?? $this->faker->randomNumber(2, 50),
         ]);
     }
 

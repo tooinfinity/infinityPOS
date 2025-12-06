@@ -15,8 +15,8 @@ return new class extends Migration
             $table->unsignedBigInteger('quantity');
             $table->unsignedBigInteger('price');
             $table->unsignedBigInteger('cost');
-            $table->unsignedBigInteger('discount');
-            $table->unsignedBigInteger('tax_amount');
+            $table->unsignedBigInteger('discount')->nullable();
+            $table->unsignedBigInteger('tax_amount')->nullable();
             $table->unsignedBigInteger('total');
 
             $table->foreignId('sale_return_id')->constrained();

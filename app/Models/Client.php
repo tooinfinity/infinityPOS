@@ -13,12 +13,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property-read string $id
+ * @property-read int $id
  * @property-read string $name
  * @property-read string|null $phone
  * @property-read string|null $email
  * @property-read string|null $address
- * @property-read string $balance
+ * @property-read int $balance
  * @property-read bool $is_active
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
@@ -88,16 +88,16 @@ final class Client extends Model
     public function casts(): array
     {
         return [
-            'id' => 'string',
+            'id' => 'integer',
             'name' => 'string',
             'phone' => 'string',
             'email' => 'string',
             'address' => 'string',
             'balance' => 'string',
             'is_active' => 'boolean',
-            'business_identifier_id' => 'string',
-            'created_by' => 'string',
-            'updated_by' => 'string',
+            'business_identifier_id' => 'integer',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

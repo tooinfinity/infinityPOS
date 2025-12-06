@@ -11,8 +11,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property-read string $id
- * @property-read string $quantity
+ * @property-read int $id
+ * @property-read int $quantity
  * @property-read string|null $batch_number
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
@@ -46,10 +46,10 @@ final class StockTransferItem extends Model
     public function casts(): array
     {
         return [
-            'id' => 'string',
-            'stock_transfer_id' => 'string',
-            'product_id' => 'string',
-            'quantity' => 'string',
+            'id' => 'integer',
+            'stock_transfer_id' => 'integer',
+            'product_id' => 'integer',
+            'quantity' => 'integer',
             'batch_number' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

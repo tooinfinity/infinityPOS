@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Product;
+use App\Models\Tax;
+use App\Models\Unit;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -20,8 +25,8 @@ final class ProductFactory extends Factory
      */
     public function definition(): array
     {
-        $cost = $this->faker->randomFloat(2, 1, 500);
-        $price = round($cost * $this->faker->randomFloat(2, 1.05, 1.8), 2);
+        $cost = $this->faker->randomNumber(2, 500);
+        $price = round($cost * $this->faker->randomNumber(2, 10), 2);
 
         return [
             'sku' => mb_strtoupper(Str::random(8)),
@@ -29,16 +34,16 @@ final class ProductFactory extends Factory
             'name' => $this->faker->unique()->words(asText: true),
             'description' => $this->faker->optional()->sentence(),
             'image' => null,
-            'category_id' => null,
-            'brand_id' => null,
-            'unit_id' => null,
-            'tax_id' => null,
+            'category_id' => Category::factory(),
+            'brand_id' => Brand::factory(),
+            'unit_id' => Unit::factory(),
+            'tax_id' => Tax::factory(),
             'cost' => $cost,
             'price' => $price,
             'alert_quantity' => $this->faker->numberBetween(0, 10),
             'has_batches' => $this->faker->boolean(20),
             'is_active' => true,
-            'created_by' => null,
+            'created_by' => User::factory(),
             'updated_by' => null,
         ];
     }

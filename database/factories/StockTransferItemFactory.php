@@ -24,7 +24,7 @@ final class StockTransferItemFactory extends Factory
         return [
             'stock_transfer_id' => StockTransfer::factory(),
             'product_id' => Product::factory(),
-            'quantity' => $this->faker->randomFloat(2, 1, 50),
+            'quantity' => $this->faker->randomNumber(2, 50),
             'batch_number' => $this->faker->optional(0.2)->bothify('BATCH-#####'),
         ];
     }

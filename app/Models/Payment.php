@@ -85,16 +85,16 @@ final class Payment extends Model
     public function casts(): array
     {
         return [
-            'id' => 'string',
+            'id' => 'integer',
             'reference' => 'string',
             'type' => PaymentTypeEnum::class,
-            'amount' => 'string',
+            'amount' => 'integer',
             'method' => 'string',
             'notes' => 'string',
-            'related_id' => 'string',
-            'moneybox_id' => 'string',
-            'created_by' => 'string',
-            'updated_by' => 'string',
+            'related_id' => 'integer',
+            'moneybox_id' => 'integer',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

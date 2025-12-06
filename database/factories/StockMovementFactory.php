@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\StockMovementTypeEnum;
+use App\Models\Product;
 use App\Models\StockMovement;
+use App\Models\Store;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,17 +24,17 @@ final class StockMovementFactory extends Factory
     public function definition(): array
     {
         $type = $this->faker->randomElement(array_map(fn (StockMovementTypeEnum $e) => $e->value, StockMovementTypeEnum::cases()));
-        $qty = $this->faker->randomFloat(2, 1, 50);
+        $qty = $this->faker->randomNumber(2, 50);
 
         return [
-            'product_id' => null,
-            'store_id' => null,
+            'product_id' => Product::factory(),
+            'store_id' => Store::factory(),
             'quantity' => $qty,
             'type' => $type,
             'reference' => $this->faker->optional()->bothify('REF-#####'),
             'batch_number' => $this->faker->optional(0.2)->bothify('BATCH-#####'),
             'notes' => $this->faker->optional()->sentence(6),
-            'created_by' => null,
+            'created_by' => User::factory(),
             'updated_by' => null,
         ];
     }

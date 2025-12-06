@@ -6,6 +6,8 @@ namespace Database\Factories;
 
 use App\Enums\MoneyboxTypeEnum;
 use App\Models\Moneybox;
+use App\Models\Store;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -26,11 +28,11 @@ final class MoneyboxFactory extends Factory
             'name' => ucfirst($this->faker->unique()->words(2, true)),
             'type' => $type->value,
             'description' => $this->faker->optional()->sentence(),
-            'balance' => $this->faker->randomFloat(2, 0, 10000),
+            'balance' => $this->faker->randomNumber(2, 10000),
             'bank_name' => $type === MoneyboxTypeEnum::BANK_ACCOUNT ? $this->faker->optional()->company() : null,
-            'account_number' => $type === MoneyboxTypeEnum::BANK_ACCOUNT ? $this->faker->optional()->bankAccountNumber() : null,
-            'store_id' => null,
-            'created_by' => null,
+            'account_number' => $type === MoneyboxTypeEnum::BANK_ACCOUNT ? $this->faker->optional()->iban() : null,
+            'store_id' => Store::factory(),
+            'created_by' => User::factory(),
             'updated_by' => null,
             'is_active' => $this->faker->boolean(95),
         ];

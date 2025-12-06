@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property-read string $id
+ * @property-read int $id
  * @property-read string $name
  * @property-read string|null $email
  * @property-read string|null $phone
@@ -51,7 +51,7 @@ final class Company extends Model
     public function casts(): array
     {
         return [
-            'id' => 'string',
+            'id' => 'integer',
             'name' => 'string',
             'email' => 'string',
             'phone' => 'string',
@@ -68,7 +68,7 @@ final class Company extends Model
             'currency_symbol' => 'string',
             'timezone' => 'string',
             'date_format' => 'string',
-            'business_identifier_id' => 'string',
+            'business_identifier_id' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

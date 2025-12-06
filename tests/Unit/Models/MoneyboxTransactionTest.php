@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\MoneyboxTransactionTypeEnum;
 use App\Models\Expense;
 use App\Models\Moneybox;
 use App\Models\MoneyboxTransaction;
@@ -64,7 +65,7 @@ test('transaction type', function (): void {
     $transaction = MoneyboxTransaction::factory()->create([
         'created_by' => $user->id,
         'moneybox_id' => $moneybox->id,
-        'type' => 'in',
+        'type' => MoneyboxTransactionTypeEnum::IN->value,
     ]);
     expect($transaction->isIncoming())->toBeTrue()
         ->and($transaction->isOutgoing())->toBeFalse()

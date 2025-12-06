@@ -14,8 +14,8 @@ return new class extends Migration
             $table->id();
             $table->string('reference')->unique();
             $table->unsignedBigInteger('subtotal');
-            $table->unsignedBigInteger('discount');
-            $table->unsignedBigInteger('tax');
+            $table->unsignedBigInteger('discount')->nullable();
+            $table->unsignedBigInteger('tax')->nullable();
             $table->unsignedBigInteger('total');
             $table->unsignedBigInteger('refunded');
             $table->string('status', 20)->index();

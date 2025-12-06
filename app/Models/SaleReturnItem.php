@@ -11,13 +11,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property-read string $id
- * @property-read string $quantity
- * @property-read string $price
- * @property-read string $cost
- * @property-read string $discount
- * @property-read string $tax_amount
- * @property-read string $total
+ * @property-read int $id
+ * @property-read int $quantity
+ * @property-read int $price
+ * @property-read int $cost
+ * @property-read int|null $discount
+ * @property-read int|null $tax_amount
+ * @property-read int $total
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read SaleReturn $saleReturn
@@ -59,16 +59,16 @@ final class SaleReturnItem extends Model
     public function casts(): array
     {
         return [
-            'id' => 'string',
-            'sale_return_id' => 'string',
-            'product_id' => 'string',
-            'sale_item_id' => 'string',
-            'quantity' => 'string',
-            'price' => 'string',
-            'cost' => 'string',
-            'discount' => 'string',
-            'tax_amount' => 'string',
-            'total' => 'string',
+            'id' => 'integer',
+            'sale_return_id' => 'integer',
+            'product_id' => 'integer',
+            'sale_item_id' => 'integer',
+            'quantity' => 'integer',
+            'price' => 'integer',
+            'cost' => 'integer',
+            'discount' => 'integer',
+            'tax_amount' => 'integer',
+            'total' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

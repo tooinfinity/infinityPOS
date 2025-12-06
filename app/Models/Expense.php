@@ -13,8 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property-read string $id
- * @property-read string $amount
+ * @property-read int $id
+ * @property-read int $amount
  * @property-read string|null $description
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
@@ -84,14 +84,14 @@ final class Expense extends Model
     public function casts(): array
     {
         return [
-            'id' => 'string',
-            'amount' => 'string',
+            'id' => 'integer',
+            'amount' => 'integer',
             'description' => 'string',
-            'category_id' => 'string',
-            'store_id' => 'string',
-            'moneybox_id' => 'string',
-            'created_by' => 'string',
-            'updated_by' => 'string',
+            'category_id' => 'integer',
+            'store_id' => 'integer',
+            'moneybox_id' => 'integer',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

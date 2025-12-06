@@ -14,13 +14,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property-read string $id
+ * @property-read int $id
  * @property-read string $reference
- * @property-read string $subtotal
- * @property-read string|null $discount
- * @property-read string|null $tax
- * @property-read string $total
- * @property-read string $paid
+ * @property-read int $subtotal
+ * @property-read int|null $discount
+ * @property-read int|null $tax
+ * @property-read int $total
+ * @property-read int $paid
  * @property-read string $status
  * @property-read string|null $notes
  * @property-read CarbonInterface $created_at
@@ -139,11 +139,11 @@ final class Purchase extends Model
             'reference' => 'string',
             'supplier_id' => 'integer',
             'store_id' => 'integer',
-            'subtotal' => 'decimal:2',
-            'discount' => 'decimal:2',
-            'tax' => 'decimal:2',
-            'total' => 'decimal:2',
-            'paid' => 'decimal:2',
+            'subtotal' => 'integer',
+            'discount' => 'integer',
+            'tax' => 'integer',
+            'total' => 'integer',
+            'paid' => 'integer',
             'status' => 'string',
             'notes' => 'string',
             'created_by' => 'integer',

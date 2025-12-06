@@ -13,16 +13,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property-read string $id
+ * @property-read int $id
  * @property-read string $reference
  * @property-read CarbonInterface $issued_at
  * @property-read CarbonInterface|null $due_at
  * @property-read CarbonInterface|null $paid_at
- * @property-read string $subtotal
- * @property-read string $discount
- * @property-read string $tax
- * @property-read string $total
- * @property-read string $paid
+ * @property-read int $subtotal
+ * @property-read int|null $discount
+ * @property-read int|null $tax
+ * @property-read int $total
+ * @property-read int $paid
  * @property-read string $status
  * @property-read string|null $notes
  * @property-read CarbonInterface $created_at
@@ -85,22 +85,22 @@ final class Invoice extends Model
     public function casts(): array
     {
         return [
-            'id' => 'string',
+            'id' => 'integer',
             'reference' => 'string',
-            'sale_id' => 'string',
-            'client_id' => 'string',
-            'issued_at' => 'date',
+            'sale_id' => 'integer',
+            'client_id' => 'integer',
+            'issued_at' => 'datetime',
             'due_at' => 'datetime',
             'paid_at' => 'datetime',
-            'subtotal' => 'string',
-            'discount' => 'string',
-            'tax' => 'string',
-            'total' => 'string',
-            'paid' => 'string',
+            'subtotal' => 'integer',
+            'discount' => 'integer',
+            'tax' => 'integer',
+            'total' => 'integer',
+            'paid' => 'integer',
             'status' => 'string',
             'notes' => 'string',
-            'created_by' => 'string',
-            'updated_by' => 'string',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

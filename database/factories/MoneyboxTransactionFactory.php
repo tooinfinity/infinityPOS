@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\MoneyboxTransactionTypeEnum;
+use App\Models\Expense;
 use App\Models\Moneybox;
 use App\Models\MoneyboxTransaction;
+use App\Models\Payment;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,9 +24,9 @@ final class MoneyboxTransactionFactory extends Factory
      */
     public function definition(): array
     {
-        $amount = $this->faker->randomFloat(2, 1, 5000);
+        $amount = $this->faker->randomNumber(2, 5000);
         $type = $this->faker->randomElement(MoneyboxTransactionTypeEnum::cases());
-        $balanceAfter = $this->faker->randomFloat(2, 0, 20000);
+        $balanceAfter = $this->faker->randomNumber(2, 20000);
 
         return [
             'moneybox_id' => Moneybox::factory(),
@@ -32,10 +35,10 @@ final class MoneyboxTransactionFactory extends Factory
             'balance_after' => $balanceAfter,
             'reference' => $this->faker->optional()->bothify('TRX-#####'),
             'notes' => $this->faker->optional()->sentence(),
-            'payment_id' => null,
-            'expense_id' => null,
-            'transfer_to_id' => null,
-            'created_by' => null,
+            'payment_id' => Payment::factory(),
+            'expense_id' => Expense::factory(),
+            'transfer_to_id' => Moneybox::factory(),
+            'created_by' => User::factory(),
             'updated_by' => null,
         ];
     }

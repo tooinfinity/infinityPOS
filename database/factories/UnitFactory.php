@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\Unit;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -41,7 +42,7 @@ final class UnitFactory extends Factory
             'name' => $name,
             'short_name' => $this->faker->optional()->randomElement([$short, mb_strtoupper($short)]),
             'is_active' => $this->faker->boolean(95),
-            'created_by' => null,
+            'created_by' => User::factory(),
             'updated_by' => null,
         ];
     }

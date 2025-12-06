@@ -67,8 +67,6 @@ test('product relationships', function (): void {
     $purchaseItems = PurchaseItem::factory()->create(['purchase_id' => $purchase->id, 'product_id' => $product->id]);
     $product->update(['updated_by' => $user->id]);
 
-    // todo: stores stoke relationship test
-
     expect($product->creator->id)->toBe($user->id)
         ->and($product->updater->id)->toBe($user->id)
         ->and($product->category->id)->toBe($category->id)

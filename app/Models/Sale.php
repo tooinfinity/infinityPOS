@@ -15,13 +15,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
- * @property-read string $id
+ * @property-read int $id
  * @property-read string $reference
- * @property-read string $subtotal
- * @property-read string|null $discount
- * @property-read string|null $tax
- * @property-read string $total
- * @property-read string $paid
+ * @property-read int $subtotal
+ * @property-read int|null $discount
+ * @property-read int|null $tax
+ * @property-read int $total
+ * @property-read int $paid
  * @property-read string $status
  * @property-read string|null $notes
  * @property-read CarbonInterface $created_at
@@ -145,19 +145,19 @@ final class Sale extends Model
     public function casts(): array
     {
         return [
-            'id' => 'string',
+            'id' => 'integer',
             'reference' => 'string',
-            'client_id' => 'string',
-            'store_id' => 'string',
-            'subtotal' => 'string',
-            'discount' => 'string',
-            'tax' => 'string',
-            'total' => 'string',
-            'paid' => 'string',
+            'client_id' => 'integer',
+            'store_id' => 'integer',
+            'subtotal' => 'integer',
+            'discount' => 'integer',
+            'tax' => 'integer',
+            'total' => 'integer',
+            'paid' => 'integer',
             'status' => 'string',
             'notes' => 'string',
-            'created_by' => 'string',
-            'updated_by' => 'string',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

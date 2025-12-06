@@ -12,10 +12,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property-read string $id
+ * @property-read int $id
  * @property-read string $type
- * @property-read string $amount
- * @property-read string $balance_after
+ * @property-read int $amount
+ * @property-read int $balance_after
  * @property-read string|null $reference
  * @property-read string|null $notes
  * @property-read CarbonInterface $created_at
@@ -110,18 +110,18 @@ final class MoneyboxTransaction extends Model
     public function casts(): array
     {
         return [
-            'id' => 'string',
-            'moneybox_id' => 'string',
+            'id' => 'integer',
+            'moneybox_id' => 'integer',
             'type' => 'string',
-            'amount' => 'string',
-            'balance_after' => 'string',
+            'amount' => 'integer',
+            'balance_after' => 'integer',
             'reference' => 'string',
             'notes' => 'string',
-            'payment_id' => 'string',
-            'expense_id' => 'string',
-            'transfer_to_id' => 'string',
-            'created_by' => 'string',
-            'updated_by' => 'string',
+            'payment_id' => 'integer',
+            'expense_id' => 'integer',
+            'transfer_to_id' => 'integer',
+            'created_by' => 'integer',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

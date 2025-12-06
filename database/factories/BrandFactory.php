@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\Brand;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,16 +23,18 @@ final class BrandFactory extends Factory
         return [
             'name' => $this->faker->unique()->company(),
             'is_active' => $this->faker->boolean(90),
-            'created_by' => null,
+            'created_by' => User::factory(),
             'updated_by' => null,
         ];
     }
 
-    /**
-     * Mark the brand inactive.
-     */
     public function inactive(): self
     {
         return $this->state(fn (): array => ['is_active' => false]);
+    }
+
+    public function active(): self
+    {
+        return $this->state(fn (): array => ['is_active' => true]);
     }
 }

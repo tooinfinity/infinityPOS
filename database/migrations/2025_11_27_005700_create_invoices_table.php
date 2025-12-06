@@ -17,8 +17,8 @@ return new class extends Migration
             $table->date('due_at')->nullable();
             $table->date('paid_at')->nullable();
             $table->unsignedBigInteger('subtotal');
-            $table->unsignedBigInteger('discount');
-            $table->unsignedBigInteger('tax');
+            $table->unsignedBigInteger('discount')->nullable();
+            $table->unsignedBigInteger('tax')->nullable();
             $table->unsignedBigInteger('total');
             $table->unsignedBigInteger('paid');
             $table->string('status', 20)->index();

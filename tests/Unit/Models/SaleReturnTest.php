@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\PaymentTypeEnum;
 use App\Enums\SaleReturnStatusEnum;
 use App\Enums\StockMovementTypeEnum;
 use App\Models\Client;
@@ -68,7 +69,7 @@ test('sale return relationships', function (): void {
         'sale_item_id' => $saleItem->id,
     ]);
 
-    $payment = Payment::factory()->create(['type' => 'sale', 'related_id' => $saleReturn->id, 'created_by' => $user->id]);
+    $payment = Payment::factory()->create(['type' => PaymentTypeEnum::SALE->value, 'related_id' => $saleReturn->id, 'created_by' => $user->id]);
     $stockMovement = StockMovement::factory()->create([
         'type' => StockMovementTypeEnum::SALE_RETURN->value,
         'reference' => $saleReturn->reference,

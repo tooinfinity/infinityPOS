@@ -35,12 +35,12 @@ test('store stock relationships', function (): void {
     $storeStock = StoreStock::factory()->create([
         'store_id' => $store->id,
         'product_id' => $product->id,
-        'quantity' => 7.5,
+        'quantity' => 7,
     ]);
 
     expect($storeStock->store()->first()->id)->toBe($store->id)
         ->and($storeStock->product()->withoutGlobalScopes()->first()->id)->toBe($product->id)
-        ->and((float) $storeStock->quantity)->toBe(7.5);
+        ->and((int) $storeStock->quantity)->toBe(7);
 });
 
 test('store stock factory states', function (): void {
@@ -48,7 +48,7 @@ test('store stock factory states', function (): void {
     $store = Store::factory()->create(['created_by' => $user->id]);
     $product = Product::factory()->create(['created_by' => $user->id]);
 
-    $withStock = StoreStock::factory()->withStock(12.0)->create([
+    $withStock = StoreStock::factory()->withStock(12)->create([
         'store_id' => $store->id,
         'product_id' => $product->id,
     ]);
@@ -60,6 +60,6 @@ test('store stock factory states', function (): void {
         'product_id' => $anotherProduct->id,
     ]);
 
-    expect((float) $withStock->quantity)->toBe(12.0)
-        ->and((float) $empty->quantity)->toBe(0.0);
+    expect((int) $withStock->quantity)->toBe(12)
+        ->and((int) $empty->quantity)->toBe(0);
 });

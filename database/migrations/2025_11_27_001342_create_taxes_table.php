@@ -14,7 +14,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('tax_type');
-            $table->decimal('rate', 8, 2);
+            $table->unsignedBigInteger('rate');
             $table->boolean('is_active')->index();
 
             $table->foreignId('created_by')->references('id')->on('users');

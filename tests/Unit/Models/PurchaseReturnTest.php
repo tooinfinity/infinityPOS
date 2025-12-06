@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\PaymentTypeEnum;
 use App\Enums\PurchaseReturnStatusEnum;
 use App\Models\Payment;
 use App\Models\Product;
@@ -64,10 +65,10 @@ test('purchase return relationships', function (): void {
         'purchase_item_id' => $purchaseItem->id,
     ]);
 
-    $payment = Payment::factory()->create(['type' => 'purchase', 'related_id' => $purchaseReturn->id, 'created_by' => $user->id]);
+    $payment = Payment::factory()->create(['type' => PaymentTypeEnum::PURCHASE->value, 'related_id' => $purchaseReturn->id, 'created_by' => $user->id]);
     $stockMovement = StockMovement::factory()->create([
-        'type' => 'return',
         'reference' => $purchaseReturn->reference,
+        'type' => 'return',
         'product_id' => $product->id,
         'store_id' => $store->id,
         'created_by' => $user->id,

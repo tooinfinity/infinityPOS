@@ -145,7 +145,7 @@ final class User extends Authenticatable
     public function casts(): array
     {
         return [
-            'id' => 'string',
+            'id' => 'integer',
             'name' => 'string',
             'email' => 'string',
             'password' => 'hashed',

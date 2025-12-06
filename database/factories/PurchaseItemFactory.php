@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Product;
+use App\Models\Purchase;
 use App\Models\PurchaseItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,16 +21,16 @@ final class PurchaseItemFactory extends Factory
      */
     public function definition(): array
     {
-        $quantity = $this->faker->randomFloat(2, 1, 25);
-        $cost = $this->faker->randomFloat(2, 1, 500);
-        $discount = $this->faker->optional(0.3, 0.0)->randomFloat(2, 0, $cost * $quantity * 0.2);
+        $quantity = $this->faker->randomNumber(2, 25);
+        $cost = $this->faker->randomNumber(2, 500);
+        $discount = $this->faker->optional(3, 0)->randomNumber(2, $cost * $quantity * 2);
         $taxBase = max(0, ($cost * $quantity) - $discount);
-        $taxAmount = round($taxBase * $this->faker->randomFloat(2, 0.0, 0.2), 2);
+        $taxAmount = round($taxBase * $this->faker->randomNumber(2, 2), 2);
         $total = round($taxBase + $taxAmount, 2);
 
         return [
-            'purchase_id' => null,
-            'product_id' => null,
+            'purchase_id' => Purchase::factory(),
+            'product_id' => Product::factory(),
             'quantity' => $quantity,
             'cost' => $cost,
             'discount' => $discount,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\BusinessIdentifier;
 use App\Models\Company;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -36,7 +37,7 @@ final class CompanyFactory extends Factory
             'currency_symbol' => '$',
             'timezone' => 'UTC',
             'date_format' => 'Y-m-d',
-            'business_identifier_id' => null,
+            'business_identifier_id' => BusinessIdentifier::factory(),
         ];
     }
 }

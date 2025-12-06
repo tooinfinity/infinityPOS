@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Product;
+use App\Models\Store;
 use App\Models\StoreStock;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -20,9 +22,9 @@ final class StoreStockFactory extends Factory
     public function definition(): array
     {
         return [
-            'store_id' => null,
-            'product_id' => null,
-            'quantity' => $this->faker->randomFloat(2, 0, 100),
+            'store_id' => Store::factory(),
+            'product_id' => Product::factory(),
+            'quantity' => $this->faker->randomNumber(2, 100),
         ];
     }
 
@@ -33,6 +35,6 @@ final class StoreStockFactory extends Factory
 
     public function empty(): self
     {
-        return $this->state(fn (): array => ['quantity' => 0.0]);
+        return $this->state(fn (): array => ['quantity' => 0]);
     }
 }

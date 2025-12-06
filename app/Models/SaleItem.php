@@ -13,13 +13,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property-read string $id
- * @property-read string $quantity
- * @property-read string $price
- * @property-read string $cost
- * @property-read string|null $discount
- * @property-read string|null $tax_amount
- * @property-read string $totalstring
+ * @property-read int $id
+ * @property-read int $quantity
+ * @property-read int $price
+ * @property-read int $cost
+ * @property-read int|null $discount
+ * @property-read int|null $tax_amount
+ * @property-read int $total
  * @property-read string|null $batch_number
  * @property-read CarbonInterface|null $expiry_date
  * @property-read CarbonInterface $created_at
@@ -63,15 +63,15 @@ final class SaleItem extends Model
     public function casts(): array
     {
         return [
-            'id' => 'string',
-            'sale_id' => 'string',
-            'product_id' => 'string',
-            'quantity' => 'string',
-            'price' => 'string',
-            'cost' => 'string',
-            'discount' => 'string',
-            'tax_amount' => 'string',
-            'total' => 'string',
+            'id' => 'integer',
+            'sale_id' => 'integer',
+            'product_id' => 'integer',
+            'quantity' => 'integer',
+            'price' => 'integer',
+            'cost' => 'integer',
+            'discount' => 'integer',
+            'tax_amount' => 'integer',
+            'total' => 'integer',
             'batch_number' => 'string',
             'expiry_date' => 'datetime',
             'created_at' => 'datetime',

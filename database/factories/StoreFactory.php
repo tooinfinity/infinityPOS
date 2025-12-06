@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\Store;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -25,7 +26,7 @@ final class StoreFactory extends Factory
             'address' => $this->faker->optional()->streetAddress(),
             'phone' => $this->faker->optional()->phoneNumber(),
             'is_active' => $this->faker->boolean(95),
-            'created_by' => null,
+            'created_by' => User::factory(),
             'updated_by' => null,
         ];
     }

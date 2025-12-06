@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Product;
+use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,17 +21,17 @@ final class SaleItemFactory extends Factory
      */
     public function definition(): array
     {
-        $quantity = $this->faker->randomFloat(2, 1, 10);
-        $price = $this->faker->randomFloat(2, 5, 500);
-        $cost = round($price * $this->faker->randomFloat(2, 0.5, 0.9), 2);
-        $discount = $this->faker->optional(0.3, 0.0)->randomFloat(2, 0, $price * $quantity * 0.2);
+        $quantity = $this->faker->randomNumber(2, 10);
+        $price = $this->faker->randomNumber(2, 500);
+        $cost = round($price * $this->faker->randomNumber(2, 9), 2);
+        $discount = $this->faker->optional(3, 0)->randomNumber(2, $price * $quantity * 2);
         $taxBase = max(0, ($price * $quantity) - $discount);
-        $taxAmount = round($taxBase * $this->faker->randomFloat(2, 0.0, 0.2), 2);
+        $taxAmount = round($taxBase * $this->faker->randomNumber(2, 2), 2);
         $total = round($taxBase + $taxAmount, 2);
 
         return [
-            'sale_id' => null,
-            'product_id' => null,
+            'sale_id' => Sale::factory(),
+            'product_id' => Product::factory(),
             'quantity' => $quantity,
             'price' => $price,
             'cost' => $cost,

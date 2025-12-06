@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\Category;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -25,7 +26,7 @@ final class CategoryFactory extends Factory
             'code' => mb_strtoupper(Str::random(6)),
             'type' => $this->faker->randomElement(['product', 'expense']),
             'is_active' => $this->faker->boolean(90),
-            'created_by' => null,
+            'created_by' => User::factory(),
             'updated_by' => null,
         ];
     }

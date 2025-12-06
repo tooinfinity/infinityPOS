@@ -7,6 +7,7 @@ namespace Database\Factories;
 use App\Enums\StockTransferStatusEnum;
 use App\Models\StockTransfer;
 use App\Models\Store;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -31,7 +32,7 @@ final class StockTransferFactory extends Factory
                 StockTransferStatusEnum::CANCELLED->value,
             ]),
             'notes' => $this->faker->optional()->sentence(),
-            'created_by' => null,
+            'created_by' => User::factory(),
             'updated_by' => null,
         ];
     }

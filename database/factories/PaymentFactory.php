@@ -6,7 +6,9 @@ namespace Database\Factories;
 
 use App\Enums\PaymentMethodEnum;
 use App\Enums\PaymentTypeEnum;
+use App\Models\Moneybox;
 use App\Models\Payment;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -25,12 +27,12 @@ final class PaymentFactory extends Factory
         return [
             'reference' => mb_strtoupper(Str::random(12)),
             'type' => $this->faker->randomElement(array_map(fn (PaymentTypeEnum $e) => $e->value, PaymentTypeEnum::cases())),
-            'amount' => $this->faker->randomFloat(2, 5, 2000),
+            'amount' => $this->faker->randomNumber(2, 2000),
             'method' => $this->faker->randomElement(array_map(fn (PaymentMethodEnum $e) => $e->value, PaymentMethodEnum::cases())),
             'related_id' => null,
-            'moneybox_id' => null,
+            'moneybox_id' => Moneybox::factory(),
             'notes' => $this->faker->optional()->sentence(6),
-            'created_by' => null,
+            'created_by' => User::factory(),
             'updated_by' => null,
         ];
     }
