@@ -1,0 +1,29 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('suppliers', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name')->index();
+            $table->string('phone')->nullable();
+            $table->string('email')->nullable();
+            $table->text('address')->nullable();
+            $table->unsignedBigInteger('balance');
+            $table->boolean('is_active')->default(true);
+
+            $table->foreignId('created_by')->references('id')->on('users');
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
+            $table->foreignId('business_identifier_id')->nullable()->constrained();
+
+            $table->timestamps();
+        });
+    }
+};
