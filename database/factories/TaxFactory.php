@@ -37,7 +37,7 @@ final class TaxFactory extends Factory
         ];
     }
 
-    public function percentage(?float $rate = null): self
+    public function percentage(?int $rate = null): self
     {
         return $this->state(fn (array $attrs): array => [
             ...$attrs,
@@ -46,7 +46,7 @@ final class TaxFactory extends Factory
         ]);
     }
 
-    public function fixed(?float $amount = null): self
+    public function fixed(?int $amount = null): self
     {
         return $this->state(fn (array $attrs): array => [
             ...$attrs,

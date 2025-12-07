@@ -22,9 +22,9 @@ final class PurchaseReturnItemFactory extends Factory
      */
     public function definition(): array
     {
-        $quantity = $this->faker->randomNumber(2, 20);
-        $cost = $this->faker->randomNumber(2, 400);
-        $total = round($cost * $quantity, 2);
+        $quantity = $this->faker->numberBetween(1, 20);
+        $cost = $this->faker->numberBetween(1, 400);
+        $total = $cost * $quantity;
 
         return [
             'purchase_return_id' => PurchaseReturn::factory(),

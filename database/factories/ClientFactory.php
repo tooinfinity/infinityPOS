@@ -26,7 +26,7 @@ final class ClientFactory extends Factory
             'phone' => $this->faker->optional()->phoneNumber(),
             'email' => $this->faker->optional()->safeEmail(),
             'address' => $this->faker->optional()->address(),
-            'balance' => $this->faker->randomNumber(4, 2000),
+            'balance' => $this->faker->numberBetween(1, 20000),
             'is_active' => $this->faker->boolean(95),
             'business_identifier_id' => BusinessIdentifier::factory(),
             'created_by' => User::factory(),

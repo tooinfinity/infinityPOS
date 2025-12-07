@@ -93,7 +93,7 @@ final class Client extends Model
             'phone' => 'string',
             'email' => 'string',
             'address' => 'string',
-            'balance' => 'string',
+            'balance' => 'integer',
             'is_active' => 'boolean',
             'business_identifier_id' => 'integer',
             'created_by' => 'integer',

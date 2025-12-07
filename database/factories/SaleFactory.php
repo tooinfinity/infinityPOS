@@ -24,14 +24,14 @@ final class SaleFactory extends Factory
      */
     public function definition(): array
     {
-        $subtotal = $this->faker->randomNumber(2, 3000);
-        $discount = $this->faker->randomNumber(2, $subtotal * 2);
-        $tax = $this->faker->randomNumber(2, ($subtotal - $discount) * 2);
-        $total = round($subtotal - $discount + $tax, 2);
+        $subtotal = $this->faker->numberBetween(10000, 300000); // cents
+        $discount = $this->faker->numberBetween(0, (int) ($subtotal * 0.2));
+        $tax = (int) (($subtotal - $discount) * 0.2);
+        $total = $subtotal - $discount + $tax;
         $paid = $this->faker->randomElement([
             0,
-            round($total, 2),
-            round($total * $this->faker->randomNumber(2, 9), 2),
+            $total,
+            (int) ($total * 0.9),
         ]);
 
         return [

@@ -21,13 +21,14 @@ final class SaleItemFactory extends Factory
      */
     public function definition(): array
     {
-        $quantity = $this->faker->randomNumber(2, 10);
-        $price = $this->faker->randomNumber(2, 500);
+        $quantity = $this->faker->numberBetween(1, 10);
+        $price = $this->faker->numberBetween(1, 500);
         $cost = round($price * $this->faker->randomNumber(2, 9), 2);
-        $discount = $this->faker->optional(3, 0)->randomNumber(2, $price * $quantity * 2);
+        $price = $this->faker->randomNumber(2, 500);
+        $discount = $this->faker->optional(0.3)->numberBetween(0, (int) ($price * $quantity * 2));
         $taxBase = max(0, ($price * $quantity) - $discount);
-        $taxAmount = round($taxBase * $this->faker->randomNumber(2, 2), 2);
-        $total = round($taxBase + $taxAmount, 2);
+        $taxAmount = $taxBase * $this->faker->numberBetween(1, 2);
+        $total = $taxBase + $taxAmount;
 
         return [
             'sale_id' => Sale::factory(),

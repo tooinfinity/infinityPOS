@@ -23,7 +23,7 @@ final class ExpenseFactory extends Factory
      */
     public function definition(): array
     {
-        $amount = $this->faker->randomNumber(2, 2000);
+        $amount = $this->faker->numberBetween(1, 2000);
 
         return [
             'amount' => $amount,

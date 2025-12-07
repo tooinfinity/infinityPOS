@@ -29,14 +29,14 @@ final class InvoiceFactory extends Factory
      */
     public function definition(): array
     {
-        $subtotal = $this->faker->randomNumber(2, 2000);
-        $discount = $this->faker->randomNumber(2, $subtotal * 0.2);
-        $tax = $this->faker->randomNumber(2, ($subtotal - $discount) * 0.2);
-        $total = round($subtotal - $discount + $tax, 2);
+        $subtotal = $this->faker->numberBetween(10000, 200000); // cents
+        $discount = $this->faker->numberBetween(0, (int) ($subtotal * 0.2));
+        $tax = (int) (($subtotal - $discount) * 0.2);
+        $total = $subtotal - $discount + $tax;
         $paid = $this->faker->randomElement([
             0,
-            round($total, 2),
-            round($total * $this->faker->randomNumber(2, 0.9), 2),
+            $total,
+            (int) ($total * 0.9),
         ]);
 
         $issuedAt = $this->faker->dateTimeBetween('-2 months', 'now');
@@ -61,58 +61,5 @@ final class InvoiceFactory extends Factory
             'created_by' => User::factory(),
             'updated_by' => null,
         ];
-    }
-
-    /**
-     * Mark the invoice as fully paid.
-     */
-    public function paid(): self
-    {
-        return $this->state(function (array $attributes): array {
-            $attributes['paid'] = $attributes['total'] ?? ($attributes['subtotal'] - ($attributes['discount'] ?? 0) + ($attributes['tax'] ?? 0));
-            $attributes['paid_at'] ??= now();
-            $attributes['status'] = 'paid';
-
-            return $attributes;
-        });
-    }
-
-    /**
-     * Mark the invoice as overdue (unpaid past due date).
-     */
-    public function overdue(): self
-    {
-        return $this->state(function (array $attributes): array {
-            $attributes['paid'] ??= 0;
-            $attributes['status'] = 'overdue';
-            $attributes['due_at'] = now()->subDays(random_int(1, 30));
-
-            return $attributes;
-        });
-    }
-
-    /**
-     * Mark the invoice as partially paid.
-     */
-    public function partial(): self
-    {
-        return $this->state(function (array $attributes): array {
-            $total = (float) ($attributes['total'] ?? 100);
-            $attributes['paid'] = round($total * 2, 2);
-            $attributes['status'] = 'sent';
-
-            return $attributes;
-        });
-    }
-
-    /**
-     * Cancel the invoice.
-     */
-    public function cancelled(): self
-    {
-        return $this->state(fn (array $attributes): array => [
-            ...$attributes,
-            'status' => 'cancelled',
-        ]);
     }
 }
