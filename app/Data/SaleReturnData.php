@@ -6,6 +6,7 @@ namespace App\Data;
 
 use App\Models\SaleReturn;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
@@ -28,11 +29,11 @@ final class SaleReturnData extends Data
         public Lazy|StoreData $store,
         public Lazy|UserData $creator,
         public Lazy|UserData|null $updater,
-        /** @var Lazy|DataCollection<SaleReturnItemData> */
+        /** @var Lazy|DataCollection<int|string, SaleReturnItemData> */
         public Lazy|DataCollection $items,
-        /** @var Lazy|DataCollection<PaymentData> */
+        /** @var Lazy|DataCollection<int|string, PaymentData> */
         public Lazy|DataCollection $payments,
-        /** @var Lazy|DataCollection<StockMovementData> */
+        /** @var Lazy|DataCollection<int|string, StockMovementData> */
         public Lazy|DataCollection $stockMovements,
         public CarbonInterface $created_at,
         public CarbonInterface $updated_at,
@@ -61,11 +62,23 @@ final class SaleReturnData extends Data
             ),
             updater: Lazy::whenLoaded('updater', $return, fn (): ?UserData => $return->updater ? UserData::from($return->updater) : null
             ),
-            items: Lazy::whenLoaded('items', $return, fn (): DataCollection => SaleReturnItemData::collect($return->items)
+            items: Lazy::whenLoaded('items', $return,
+                /**
+                 * @return Collection<int|string, SaleReturnItemData>
+                 */
+                fn (): Collection => SaleReturnItemData::collect($return->items)
             ),
-            payments: Lazy::whenLoaded('payments', $return, fn (): DataCollection => PaymentData::collect($return->payments)
+            payments: Lazy::whenLoaded('payments', $return,
+                /**
+                 * @return Collection<int|string, PaymentData>
+                 */
+                fn (): Collection => PaymentData::collect($return->payments)
             ),
-            stockMovements: Lazy::whenLoaded('stockMovements', $return, fn (): DataCollection => StockMovementData::collect($return->stockMovements)
+            stockMovements: Lazy::whenLoaded('stockMovements', $return,
+                /**
+                 * @return Collection<int|string, StockMovementData>
+                 */
+                fn (): Collection => StockMovementData::collect($return->stockMovements)
             ),
             created_at: $return->created_at,
             updated_at: $return->updated_at,

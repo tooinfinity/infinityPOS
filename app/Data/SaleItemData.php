@@ -6,6 +6,7 @@ namespace App\Data;
 
 use App\Models\SaleItem;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
@@ -23,7 +24,7 @@ final class SaleItemData extends Data
         public ?string $batch_number,
         public ?CarbonInterface $expiry_date,
         public Lazy|ProductData $product,
-        /** @var Lazy|DataCollection<SaleReturnItemData> */
+        /** @var Lazy|DataCollection<int|string, SaleReturnItemData> */
         public Lazy|DataCollection $returnItems,
         public CarbonInterface $created_at,
         public CarbonInterface $updated_at,
@@ -43,7 +44,12 @@ final class SaleItemData extends Data
             expiry_date: $item->expiry_date,
             product: Lazy::whenLoaded('product', $item, fn (): ProductData => ProductData::from($item->product)
             ),
-            returnItems: Lazy::whenLoaded('returnItems', $item, fn (): DataCollection => SaleReturnItemData::collect($item->returnItems)),
+            returnItems: Lazy::whenLoaded('returnItems', $item,
+                /**
+                 * @return Collection<int|string, SaleReturnItemData>
+                 */
+                fn (): Collection => SaleReturnItemData::collect($item->returnItems)
+            ),
             created_at: $item->created_at,
             updated_at: $item->updated_at,
         );

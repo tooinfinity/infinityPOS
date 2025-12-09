@@ -6,6 +6,7 @@ namespace App\Data;
 
 use App\Models\Store;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
@@ -21,25 +22,25 @@ final class StoreData extends Data
         public bool $is_active,
         public Lazy|UserData $creator,
         public Lazy|UserData|null $updater,
-        /** @var Lazy|DataCollection<ProductData> */
+        /** @var Lazy|DataCollection<int|string, ProductData> */
         public Lazy|DataCollection $products,
-        /** @var Lazy|DataCollection<SaleData> */
+        /** @var Lazy|DataCollection<int|string, SaleData> */
         public Lazy|DataCollection $sales,
-        /** @var Lazy|DataCollection<PurchaseData> */
+        /** @var Lazy|DataCollection<int|string, PurchaseData> */
         public Lazy|DataCollection $purchases,
-        /** @var Lazy|DataCollection<SaleReturnData> */
+        /** @var Lazy|DataCollection<int|string, SaleReturnData> */
         public Lazy|DataCollection $saleReturns,
-        /** @var Lazy|DataCollection<PurchaseReturnData> */
+        /** @var Lazy|DataCollection<int|string, PurchaseReturnData> */
         public Lazy|DataCollection $purchaseReturns,
-        /** @var Lazy|DataCollection<MoneyboxData> */
+        /** @var Lazy|DataCollection<int|string, MoneyboxData> */
         public Lazy|DataCollection $moneyboxes,
-        /** @var Lazy|DataCollection<ExpenseData> */
+        /** @var Lazy|DataCollection<int|string, ExpenseData> */
         public Lazy|DataCollection $expenses,
-        /** @var Lazy|DataCollection<StockMovementData> */
+        /** @var Lazy|DataCollection<int|string, StockMovementData> */
         public Lazy|DataCollection $stockMovements,
-        /** @var Lazy|DataCollection<StockTransferData> */
+        /** @var Lazy|DataCollection<int|string, StockTransferData> */
         public Lazy|DataCollection $outgoingTransfers,
-        /** @var Lazy|DataCollection<StockTransferData> */
+        /** @var Lazy|DataCollection<int|string, StockTransferData> */
         public Lazy|DataCollection $incomingTransfers,
         public CarbonInterface $created_at,
         public CarbonInterface $updated_at,
@@ -57,25 +58,65 @@ final class StoreData extends Data
             creator: Lazy::whenLoaded('creator', $store, fn (): UserData => UserData::from($store->creator)
             ),
             updater: Lazy::whenLoaded('updater', $store, fn (): ?UserData => $store->updater ? UserData::from($store->updater) : null),
-            products: Lazy::whenLoaded('products', $store, fn (): DataCollection => ProductData::collect($store->products)
+            products: Lazy::whenLoaded('products', $store,
+                /**
+                 * @return Collection<int|string, ProductData>
+                 */
+                fn (): Collection => ProductData::collect($store->products)
             ),
-            sales: Lazy::whenLoaded('sales', $store, fn (): DataCollection => SaleData::collect($store->sales)
+            sales: Lazy::whenLoaded('sales', $store,
+                /**
+                 * @return Collection<int|string, SaleData>
+                 */
+                fn (): Collection => SaleData::collect($store->sales)
             ),
-            purchases: Lazy::whenLoaded('purchases', $store, fn (): DataCollection => PurchaseData::collect($store->purchases)
+            purchases: Lazy::whenLoaded('purchases', $store,
+                /**
+                 * @return Collection<int|string, PurchaseData>
+                 */
+                fn (): Collection => PurchaseData::collect($store->purchases)
             ),
-            saleReturns: Lazy::whenLoaded('saleReturns', $store, fn (): DataCollection => SaleReturnData::collect($store->saleReturns)
+            saleReturns: Lazy::whenLoaded('saleReturns', $store,
+                /**
+                 * @return Collection<int|string, SaleReturnData>
+                 */
+                fn (): Collection => SaleReturnData::collect($store->saleReturns)
             ),
-            purchaseReturns: Lazy::whenLoaded('purchaseReturns', $store, fn (): DataCollection => PurchaseReturnData::collect($store->purchaseReturns)
+            purchaseReturns: Lazy::whenLoaded('purchaseReturns', $store,
+                /**
+                 * @return Collection<int|string, PurchaseReturnData>
+                 */
+                fn (): Collection => PurchaseReturnData::collect($store->purchaseReturns)
             ),
-            moneyboxes: Lazy::whenLoaded('moneyboxes', $store, fn (): DataCollection => MoneyboxData::collect($store->moneyboxes)
+            moneyboxes: Lazy::whenLoaded('moneyboxes', $store,
+                /**
+                 * @return Collection<int|string, MoneyboxData>
+                 */
+                fn (): Collection => MoneyboxData::collect($store->moneyboxes)
             ),
-            expenses: Lazy::whenLoaded('expenses', $store, fn (): DataCollection => ExpenseData::collect($store->expenses)
+            expenses: Lazy::whenLoaded('expenses', $store,
+                /**
+                 * @return Collection<int|string, ExpenseData>
+                 */
+                fn (): Collection => ExpenseData::collect($store->expenses)
             ),
-            stockMovements: Lazy::whenLoaded('stockMovements', $store, fn (): DataCollection => StockMovementData::collect($store->stockMovements)
+            stockMovements: Lazy::whenLoaded('stockMovements', $store,
+                /**
+                 * @return Collection<int|string, StockMovementData>
+                 */
+                fn (): Collection => StockMovementData::collect($store->stockMovements)
             ),
-            outgoingTransfers: Lazy::whenLoaded('outgoingTransfers', $store, fn (): DataCollection => StockTransferData::collect($store->outgoingTransfers)
+            outgoingTransfers: Lazy::whenLoaded('outgoingTransfers', $store,
+                /**
+                 * @return Collection<int|string, StockTransferData>
+                 */
+                fn (): Collection => StockTransferData::collect($store->outgoingTransfers)
             ),
-            incomingTransfers: Lazy::whenLoaded('incomingTransfers', $store, fn (): DataCollection => StockTransferData::collect($store->incomingTransfers)
+            incomingTransfers: Lazy::whenLoaded('incomingTransfers', $store,
+                /**
+                 * @return Collection<int|string, StockTransferData>
+                 */
+                fn (): Collection => StockTransferData::collect($store->incomingTransfers)
             ),
             created_at: $store->created_at,
             updated_at: $store->updated_at,

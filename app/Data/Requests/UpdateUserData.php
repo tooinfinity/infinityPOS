@@ -14,13 +14,14 @@ use Spatie\LaravelData\Attributes\Validation\Sometimes;
 use Spatie\LaravelData\Attributes\Validation\StringType;
 use Spatie\LaravelData\Attributes\Validation\Unique;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Support\Validation\References\AuthenticatedUserReference;
 
 final class UpdateUserData extends Data
 {
     public function __construct(
         #[Required, StringType, Max(255)]
         public string $name,
-        #[Required, StringType, Max(255), Rule(new ValidEmail), Unique('users', 'email')]
+        #[Required, StringType, Max(255), Rule(new ValidEmail), Unique('users', 'email', ignore: new AuthenticatedUserReference())]
         public string $email,
         #[Sometimes, StringType, Enum(RoleEnum::class)]
         public ?RoleEnum $role = null,

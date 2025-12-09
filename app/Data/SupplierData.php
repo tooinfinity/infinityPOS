@@ -6,6 +6,7 @@ namespace App\Data;
 
 use App\Models\Supplier;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
@@ -23,9 +24,9 @@ final class SupplierData extends Data
         public Lazy|BusinessIdentifierData|null $businessIdentifier,
         public Lazy|UserData $creator,
         public Lazy|UserData|null $updater,
-        /** @var Lazy|DataCollection<PurchaseData> */
+        /** @var Lazy|DataCollection<int|string, PurchaseData> */
         public Lazy|DataCollection $purchases,
-        /** @var Lazy|DataCollection<PurchaseReturnData> */
+        /** @var Lazy|DataCollection<int|string, PurchaseReturnData> */
         public Lazy|DataCollection $purchaseReturns,
         public CarbonInterface $created_at,
         public CarbonInterface $updated_at,
@@ -45,9 +46,17 @@ final class SupplierData extends Data
             creator: Lazy::whenLoaded('creator', $supplier, fn (): UserData => UserData::from($supplier->creator)
             ),
             updater: Lazy::whenLoaded('updater', $supplier, fn (): ?UserData => $supplier->updater ? UserData::from($supplier->updater) : null),
-            purchases: Lazy::whenLoaded('purchases', $supplier, fn (): DataCollection => PurchaseData::collect($supplier->purchases)
+            purchases: Lazy::whenLoaded('purchases', $supplier,
+                /**
+                 * @return Collection<int|string, PurchaseData>
+                 */
+                fn (): Collection => PurchaseData::collect($supplier->purchases)
             ),
-            purchaseReturns: Lazy::whenLoaded('purchaseReturns', $supplier, fn (): DataCollection => PurchaseReturnData::collect($supplier->purchaseReturns)
+            purchaseReturns: Lazy::whenLoaded('purchaseReturns', $supplier,
+                /**
+                 * @return Collection<int|string, PurchaseReturnData>
+                 */
+                fn (): Collection => PurchaseReturnData::collect($supplier->purchaseReturns)
             ),
             created_at: $supplier->created_at,
             updated_at: $supplier->updated_at,

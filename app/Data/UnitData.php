@@ -6,6 +6,7 @@ namespace App\Data;
 
 use App\Models\Unit;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
@@ -19,7 +20,7 @@ final class UnitData extends Data
         public bool $is_active,
         public Lazy|UserData $creator,
         public Lazy|UserData|null $updater,
-        /** @var Lazy|DataCollection<ProductData> */
+        /** @var Lazy|DataCollection<int|string, ProductData> */
         public Lazy|DataCollection $products,
         public CarbonInterface $created_at,
         public CarbonInterface $updated_at,
@@ -35,7 +36,11 @@ final class UnitData extends Data
             creator: Lazy::whenLoaded('creator', $unit, fn (): UserData => UserData::from($unit->creator)
             ),
             updater: Lazy::whenLoaded('updater', $unit, fn (): ?UserData => $unit->updater ? UserData::from($unit->updater) : null),
-            products: Lazy::whenLoaded('products', $unit, fn (): DataCollection => ProductData::collect($unit->products)
+            products: Lazy::whenLoaded('products', $unit,
+                /**
+                 * @return Collection<int|string, ProductData>
+                 */
+                fn (): Collection => ProductData::collect($unit->products)
             ),
             created_at: $unit->created_at,
             updated_at: $unit->updated_at,

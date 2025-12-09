@@ -39,13 +39,13 @@ final class CategoryData extends Data
             is_active: $category->is_active,
             products: Lazy::whenLoaded('products', $category,
                 /**
-                 * @retrun collection<int|string, ProductData>
+                 * @return Collection<int|string, ProductData>
                  */
                 fn (): Collection => ProductData::collect($category->products)
             ),
             expenses: Lazy::whenLoaded('expenses', $category,
                 /**
-                 * @retrun collection<int|string, ExpenseData>
+                 * @return Collection<int|string, ExpenseData>
                  */
                 fn (): Collection => ExpenseData::collect($category->expenses)
             ),

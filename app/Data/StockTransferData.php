@@ -6,6 +6,7 @@ namespace App\Data;
 
 use App\Models\StockTransfer;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
@@ -21,9 +22,9 @@ final class StockTransferData extends Data
         public Lazy|StoreData $toStore,
         public Lazy|UserData $creator,
         public Lazy|UserData|null $updater,
-        /** @var Lazy|DataCollection<StockTransferItemData> */
+        /** @var Lazy|DataCollection<int|string, StockTransferItemData> */
         public Lazy|DataCollection $items,
-        /** @var Lazy|DataCollection<StockMovementData> */
+        /** @var Lazy|DataCollection<int|string, StockMovementData> */
         public Lazy|DataCollection $stockMovements,
         public CarbonInterface $created_at,
         public CarbonInterface $updated_at,
@@ -44,9 +45,18 @@ final class StockTransferData extends Data
             ),
             updater: Lazy::whenLoaded('updater', $transfer, fn (): ?UserData => $transfer->updater ? UserData::from($transfer->updater) : null
             ),
-            items: Lazy::whenLoaded('items', $transfer, fn (): DataCollection => StockTransferItemData::collect($transfer->items)
+            items: Lazy::whenLoaded('items', $transfer,
+                /**
+                 * @return Collection<int|string, StockTransferItemData>
+                 */
+                fn (): Collection => StockTransferItemData::collect($transfer->items)
             ),
-            stockMovements: Lazy::whenLoaded('stockMovements', $transfer, fn (): DataCollection => StockMovementData::collect($transfer->stockMovements)),
+            stockMovements: Lazy::whenLoaded('stockMovements', $transfer,
+                /**
+                 * @return Collection<int|string, StockMovementData>
+                 */
+                fn (): Collection => StockMovementData::collect($transfer->stockMovements)
+            ),
             created_at: $transfer->created_at,
             updated_at: $transfer->updated_at,
         );

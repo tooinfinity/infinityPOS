@@ -6,6 +6,7 @@ namespace App\Data;
 
 use App\Models\Purchase;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
@@ -26,13 +27,13 @@ final class PurchaseData extends Data
         public Lazy|StoreData $store,
         public Lazy|UserData $creator,
         public Lazy|UserData|null $updater,
-        /** @var Lazy|DataCollection<PurchaseItemData> */
+        /** @var Lazy|DataCollection<int|string, PurchaseItemData> */
         public Lazy|DataCollection $items,
-        /** @var Lazy|DataCollection<PurchaseReturnData> */
+        /** @var Lazy|DataCollection<int|string, PurchaseReturnData> */
         public Lazy|DataCollection $returns,
-        /** @var Lazy|DataCollection<PaymentData> */
+        /** @var Lazy|DataCollection<int|string, PaymentData> */
         public Lazy|DataCollection $payments,
-        /** @var Lazy|DataCollection<StockMovementData> */
+        /** @var Lazy|DataCollection<int|string, StockMovementData> */
         public Lazy|DataCollection $stockMovements,
         public CarbonInterface $created_at,
         public CarbonInterface $updated_at,
@@ -58,13 +59,26 @@ final class PurchaseData extends Data
             ),
             updater: Lazy::whenLoaded('updater', $purchase, fn (): ?UserData => $purchase->updater ? UserData::from($purchase->updater) : null
             ),
-            items: Lazy::whenLoaded('items', $purchase, fn (): DataCollection => PurchaseItemData::collect($purchase->items)
+            items: Lazy::whenLoaded('items', $purchase,
+                fn (): Collection => PurchaseItemData::collect($purchase->items)
             ),
-            returns: Lazy::whenLoaded('returns', $purchase, fn (): DataCollection => PurchaseReturnData::collect($purchase->returns)
+            returns: Lazy::whenLoaded('returns', $purchase,
+                /**
+                 * @return Collection<int|string, PurchaseReturnData>
+                 */
+                fn (): Collection => PurchaseReturnData::collect($purchase->returns)
             ),
-            payments: Lazy::whenLoaded('payments', $purchase, fn (): DataCollection => PaymentData::collect($purchase->payments)
+            payments: Lazy::whenLoaded('payments', $purchase,
+                /**
+                 * @return Collection<int|string, PaymentData>
+                 */
+                fn (): Collection => PaymentData::collect($purchase->payments)
             ),
-            stockMovements: Lazy::whenLoaded('stockMovements', $purchase, fn (): DataCollection => StockMovementData::collect($purchase->stockMovements)
+            stockMovements: Lazy::whenLoaded('stockMovements', $purchase,
+                /**
+                 * @return Collection<int|string, StockMovementData>
+                 */
+                fn (): Collection => StockMovementData::collect($purchase->stockMovements)
             ),
             created_at: $purchase->created_at,
             updated_at: $purchase->updated_at,

@@ -6,6 +6,7 @@ namespace App\Data;
 
 use App\Models\Moneybox;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
@@ -24,15 +25,15 @@ final class MoneyboxData extends Data
         public Lazy|StoreData|null $store,
         public Lazy|UserData $creator,
         public Lazy|UserData|null $updater,
-        /** @var Lazy|DataCollection<MoneyboxTransactionData> */
+        /** @var Lazy|DataCollection<int|string, MoneyboxTransactionData> */
         public Lazy|DataCollection $transactions,
-        /** @var Lazy|DataCollection<PaymentData> */
+        /** @var Lazy|DataCollection<int|string, PaymentData> */
         public Lazy|DataCollection $payments,
-        /** @var Lazy|DataCollection<ExpenseData> */
+        /** @var Lazy|DataCollection<int|string, ExpenseData> */
         public Lazy|DataCollection $expenses,
-        /** @var Lazy|DataCollection<MoneyboxTransactionData> */
+        /** @var Lazy|DataCollection<int|string, MoneyboxTransactionData> */
         public Lazy|DataCollection $incomingTransfers,
-        /** @var Lazy|DataCollection<MoneyboxTransactionData> */
+        /** @var Lazy|DataCollection<int|string, MoneyboxTransactionData> */
         public Lazy|DataCollection $outgoingTransfers,
         public CarbonInterface $created_at,
         public CarbonInterface $updated_at,
@@ -55,11 +56,31 @@ final class MoneyboxData extends Data
             ),
             updater: Lazy::whenLoaded('updater', $moneybox, fn (): ?UserData => $moneybox->updater ? UserData::from($moneybox->updater) : null
             ),
-            transactions: Lazy::whenLoaded('transactions', $moneybox, fn (): DataCollection => MoneyboxTransactionData::collect($moneybox->transactions)),
-            payments: Lazy::whenLoaded('payments', $moneybox, fn (): DataCollection => PaymentData::collect($moneybox->payments)),
-            expenses: Lazy::whenLoaded('expenses', $moneybox, fn (): DataCollection => ExpenseData::collect($moneybox->expenses)),
-            incomingTransfers: Lazy::whenLoaded('incomingTransfers', $moneybox, fn (): DataCollection => MoneyboxTransactionData::collect($moneybox->incomingTransfers)),
-            outgoingTransfers: Lazy::whenLoaded('outgoingTransfers', $moneybox, fn (): DataCollection => MoneyboxTransactionData::collect($moneybox->outgoingTransfers)),
+            transactions: Lazy::whenLoaded('transactions', $moneybox,
+                /**
+                 * @return Collection<int|string, MoneyboxTransactionData>
+                 */
+                fn (): Collection => MoneyboxTransactionData::collect($moneybox->transactions)),
+            payments: Lazy::whenLoaded('payments', $moneybox,
+                /**
+                 * @return Collection<int|string, PaymentData>
+                 */
+                fn (): Collection => PaymentData::collect($moneybox->payments)),
+            expenses: Lazy::whenLoaded('expenses', $moneybox,
+                /**
+                 * @return Collection<int|string, ExpenseData>
+                 */
+                fn (): Collection => ExpenseData::collect($moneybox->expenses)),
+            incomingTransfers: Lazy::whenLoaded('incomingTransfers', $moneybox,
+                /**
+                 * @retrun Collection<int|string, MoneyboxTransactionData>
+                 */
+                fn (): Collection => MoneyboxTransactionData::collect($moneybox->incomingTransfers)),
+            outgoingTransfers: Lazy::whenLoaded('outgoingTransfers', $moneybox,
+                /**
+                 * @return Collection<int|string, MoneyboxTransactionData>
+                 */
+                fn (): Collection => MoneyboxTransactionData::collect($moneybox->outgoingTransfers)),
             created_at: $moneybox->created_at,
             updated_at: $moneybox->updated_at,
         );

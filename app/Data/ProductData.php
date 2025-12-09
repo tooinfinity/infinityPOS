@@ -6,6 +6,7 @@ namespace App\Data;
 
 use App\Models\Product;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
@@ -30,11 +31,11 @@ final class ProductData extends Data
         public Lazy|TaxData|null $tax,
         public Lazy|UserData $creator,
         public Lazy|UserData|null $updater,
-        /** @var Lazy|DataCollection<SaleItemData> */
+        /** @var Lazy|DataCollection<int|string, SaleItemData> */
         public Lazy|DataCollection $saleItems,
-        /** @var Lazy|DataCollection<PurchaseItemData> */
+        /** @var Lazy|DataCollection<int|string, PurchaseItemData> */
         public Lazy|DataCollection $purchaseItems,
-        /** @var Lazy|DataCollection<StoreData> */
+        /** @var Lazy|DataCollection<int|string, StoreData> */
         public Lazy|DataCollection $stores,
         public CarbonInterface $created_at,
         public CarbonInterface $updated_at,
@@ -66,9 +67,21 @@ final class ProductData extends Data
             ),
             updater: Lazy::whenLoaded('updater', $product, fn (): ?UserData => $product->updater ? UserData::from($product->updater) : null
             ),
-            saleItems: Lazy::whenLoaded('saleItems', $product, fn (): DataCollection => SaleItemData::collect($product->saleItems)),
-            purchaseItems: Lazy::whenLoaded('purchaseItems', $product, fn (): DataCollection => PurchaseItemData::collect($product->purchaseItems)),
-            stores: Lazy::whenLoaded('stores', $product, fn (): DataCollection => StoreData::collect($product->stores)),
+            saleItems: Lazy::whenLoaded('saleItems', $product,
+                /**
+                 * @return Collection<int|string, SaleItemData>
+                 */
+                fn (): Collection => SaleItemData::collect($product->saleItems)),
+            purchaseItems: Lazy::whenLoaded('purchaseItems', $product,
+                /**
+                 * @return Collection<int|string, PurchaseItemData>
+                 */
+                fn (): Collection => PurchaseItemData::collect($product->purchaseItems)),
+            stores: Lazy::whenLoaded('stores', $product,
+                /**
+                 * @return Collection<int|string, StoreData>
+                 */
+                fn (): Collection => StoreData::collect($product->stores)),
             created_at: $product->created_at,
             updated_at: $product->updated_at,
         );

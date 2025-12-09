@@ -25,7 +25,7 @@ final class CreateUserData extends Data
         public string $email,
         #[Required, Confirmed, Password]
         public string $password,
-        #[Required, StringType, Enum(RoleEnum::class)]
+        #[Required, Enum(RoleEnum::class)]
         public RoleEnum $role,
     ) {}
 }
