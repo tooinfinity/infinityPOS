@@ -6,6 +6,7 @@ namespace App\Data;
 
 use App\Models\Category;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
@@ -18,9 +19,9 @@ final class CategoryData extends Data
         public string $code,
         public string $type,
         public bool $is_active,
-        /** @var Lazy|DataCollection<ProductData> */
+        /** @var Lazy|DataCollection<int|string, ProductData> */
         public Lazy|DataCollection $products,
-        /** @var Lazy|DataCollection<ExpenseData> */
+        /** @var Lazy|DataCollection<int|string, ExpenseData> */
         public Lazy|DataCollection $expenses,
         public Lazy|UserData $creator,
         public Lazy|UserData|null $updater,
@@ -36,8 +37,18 @@ final class CategoryData extends Data
             code: $category->code,
             type: $category->type,
             is_active: $category->is_active,
-            products: Lazy::whenLoaded('products', $category, fn (): DataCollection => ProductData::collect($category->products)),
-            expenses: Lazy::whenLoaded('expenses', $category, fn (): DataCollection => ExpenseData::collect($category->expenses)),
+            products: Lazy::whenLoaded('products', $category,
+                /**
+                 * @retrun collection<int|string, ProductData>
+                 */
+                fn (): Collection => ProductData::collect($category->products)
+            ),
+            expenses: Lazy::whenLoaded('expenses', $category,
+                /**
+                 * @retrun collection<int|string, ExpenseData>
+                 */
+                fn (): Collection => ExpenseData::collect($category->expenses)
+            ),
             creator: Lazy::whenLoaded('creator', $category, fn (): UserData => UserData::from($category->creator)
             ),
             updater: Lazy::whenLoaded('updater', $category, fn (): ?UserData => $category->updater ? UserData::from($category->updater) : null

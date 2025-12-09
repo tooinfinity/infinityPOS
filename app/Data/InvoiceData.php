@@ -6,6 +6,7 @@ namespace App\Data;
 
 use App\Models\Invoice;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
@@ -29,7 +30,7 @@ final class InvoiceData extends Data
         public Lazy|ClientData|null $client,
         public Lazy|UserData $creator,
         public Lazy|UserData|null $updater,
-        /** @var Lazy|DataCollection<PaymentData> */
+        /** @var Lazy|DataCollection<int|string, PaymentData> */
         public Lazy|DataCollection $payments,
         public CarbonInterface $created_at,
         public CarbonInterface $updated_at,
@@ -58,7 +59,12 @@ final class InvoiceData extends Data
             ),
             updater: Lazy::whenLoaded('updater', $invoice, fn (): ?UserData => $invoice->updater ? UserData::from($invoice->updater) : null
             ),
-            payments: Lazy::whenLoaded('payments', $invoice, fn (): DataCollection => PaymentData::collect($invoice->payments)),
+            payments: Lazy::whenLoaded('payments', $invoice,
+                /**
+                 * @return Collection<int|string, PaymentData>
+                 */
+                fn (): Collection => PaymentData::collect($invoice->payments)
+            ),
             created_at: $invoice->created_at,
             updated_at: $invoice->updated_at,
         );

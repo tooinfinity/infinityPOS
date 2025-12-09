@@ -6,6 +6,7 @@ namespace App\Data;
 
 use App\Models\Client;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
@@ -23,11 +24,11 @@ final class ClientData extends Data
         public Lazy|BusinessIdentifierData|null $businessIdentifier,
         public Lazy|UserData $creator,
         public Lazy|UserData|null $updater,
-        /** @var Lazy|DataCollection<SaleData> */
+        /** @var Lazy|DataCollection<int|string, SaleData> */
         public Lazy|DataCollection $sales,
-        /** @var Lazy|DataCollection<SaleReturnData> */
+        /** @var Lazy|DataCollection<int|string, SaleReturnData> */
         public Lazy|DataCollection $saleReturns,
-        /** @var Lazy|DataCollection<InvoiceData> */
+        /** @var Lazy|DataCollection<int|string, InvoiceData> */
         public Lazy|DataCollection $invoices,
         public CarbonInterface $created_at,
         public CarbonInterface $updated_at,
@@ -48,9 +49,24 @@ final class ClientData extends Data
             ),
             updater: Lazy::whenLoaded('updater', $client, fn (): ?UserData => $client->updater ? UserData::from($client->updater) : null
             ),
-            sales: Lazy::whenLoaded('sales', $client, fn (): DataCollection => SaleData::collect($client->sales)),
-            saleReturns: Lazy::whenLoaded('saleReturns', $client, fn (): DataCollection => SaleReturnData::collect($client->saleReturns)),
-            invoices: Lazy::whenLoaded('invoices', $client, fn (): DataCollection => InvoiceData::collect($client->invoices)),
+            sales: Lazy::whenLoaded('sales', $client,
+                /**
+                 * @return Collection<int|string, SaleData>
+                 */
+                fn (): Collection => SaleData::collect($client->sales)
+            ),
+            saleReturns: Lazy::whenLoaded('saleReturns', $client,
+                /**
+                 * @return Collection<int|string, SaleReturnData>
+                 */
+                fn (): Collection => SaleReturnData::collect($client->saleReturns)
+            ),
+            invoices: Lazy::whenLoaded('invoices', $client,
+                /**
+                 * @return Collection<int|string, InvoiceData>
+                 */
+                fn (): Collection => InvoiceData::collect($client->invoices)
+            ),
             created_at: $client->created_at,
             updated_at: $client->updated_at,
         );
