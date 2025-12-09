@@ -7,6 +7,7 @@ namespace App\Enums;
 enum PaymentTypeEnum: string
 {
     case SALE = 'sale';
+    case INVOICE = 'invoice';
     case PURCHASE = 'purchase';
     case EXPENSE = 'expense';
     case OTHER = 'other';
@@ -29,6 +30,7 @@ enum PaymentTypeEnum: string
     {
         return match ($this) {
             self::SALE => 'Sale',
+            self::INVOICE => 'Invoice',
             self::PURCHASE => 'Purchase',
             self::EXPENSE => 'Expense',
             self::OTHER => 'Other',

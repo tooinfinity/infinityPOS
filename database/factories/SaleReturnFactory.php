@@ -9,6 +9,7 @@ use App\Models\Client;
 use App\Models\Sale;
 use App\Models\SaleReturn;
 use App\Models\Store;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -51,7 +52,7 @@ final class SaleReturnFactory extends Factory
             ]),
             'reason' => $this->faker->optional()->sentence(6),
             'notes' => $this->faker->optional()->sentence(8),
-            'created_by' => null,
+            'created_by' => User::factory(),
             'updated_by' => null,
         ];
     }

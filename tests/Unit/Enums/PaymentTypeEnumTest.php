@@ -10,13 +10,15 @@ it('return all payment types', function (): void {
 
 it('payment type label', function (): void {
     $value1 = 'Sale';
-    $value2 = 'Purchase';
-    $value3 = 'Expense';
-    $value4 = 'Other';
+    $value2 = 'Invoice';
+    $value3 = 'Purchase';
+    $value4 = 'Expense';
+    $value5 = 'Other';
     expect(PaymentTypeEnum::SALE->label())->toBe($value1)
-        ->and(PaymentTypeEnum::PURCHASE->label())->toBe($value2)
-        ->and(PaymentTypeEnum::EXPENSE->label())->toBe($value3)
-        ->and(PaymentTypeEnum::OTHER->label())->toBe($value4);
+        ->and(PaymentTypeEnum::INVOICE->label())->toBe($value2)
+        ->and(PaymentTypeEnum::PURCHASE->label())->toBe($value3)
+        ->and(PaymentTypeEnum::EXPENSE->label())->toBe($value4)
+        ->and(PaymentTypeEnum::OTHER->label())->toBe($value5);
 });
 
 it('payment type to array', function (): void {
