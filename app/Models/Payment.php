@@ -13,13 +13,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property-read string $id
+ * @property-read int $id
  * @property-read string|null $reference
  * @property-read PaymentTypeEnum $type
- * @property-read string $amount
+ * @property-read int $amount
  * @property-read string $method
  * @property-read string|null $notes
- * @property-read string|null $related_id
+ * @property-read int|null $related_id
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Moneybox|null $moneybox

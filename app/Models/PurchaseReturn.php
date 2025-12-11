@@ -100,7 +100,7 @@ final class PurchaseReturn extends Model
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class, 'reference', 'reference')
-            ->where('stock_movements.type', 'return');
+            ->where('stock_movements.type', \App\Enums\StockMovementTypeEnum::PURCHASE_RETURN->value);
     }
 
     /**
