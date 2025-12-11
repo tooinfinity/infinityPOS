@@ -17,7 +17,7 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\DataCollection;
 
-it('transforms an moneybox model into MoneyboxData', function () {
+it('transforms an moneybox model into MoneyboxData', function (): void {
 
     $creator = User::factory()->create();
     $updater = User::factory()->create();

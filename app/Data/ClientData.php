@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Models\Client;
-use Carbon\CarbonInterface;
-use Illuminate\Support\Collection;
+use Spatie\LaravelData\Attributes\WithCast;
+use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Data;
-use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
 
 final class ClientData extends Data
@@ -21,17 +20,13 @@ final class ClientData extends Data
         public ?string $address,
         public int $balance,
         public bool $is_active,
-        public Lazy|BusinessIdentifierData|null $businessIdentifier,
-        public Lazy|UserData $creator,
-        public Lazy|UserData|null $updater,
-        /** @var Lazy|DataCollection<int|string, SaleData> */
-        public Lazy|DataCollection $sales,
-        /** @var Lazy|DataCollection<int|string, SaleReturnData> */
-        public Lazy|DataCollection $saleReturns,
-        /** @var Lazy|DataCollection<int|string, InvoiceData> */
-        public Lazy|DataCollection $invoices,
-        public CarbonInterface $created_at,
-        public CarbonInterface $updated_at,
+        #[Lazy] public ?BusinessIdentifierData $businessIdentifier,
+        #[Lazy] public ?UserData $creator,
+        #[Lazy] public ?UserData $updater,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $created_at,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $updated_at,
     ) {}
 
     public static function fromModel(Client $client): self
@@ -44,31 +39,11 @@ final class ClientData extends Data
             address: $client->address,
             balance: $client->balance,
             is_active: $client->is_active,
-            businessIdentifier: Lazy::whenLoaded('businessIdentifier', $client, fn (): ?BusinessIdentifierData => $client->businessIdentifier ? BusinessIdentifierData::from($client->businessIdentifier) : null),
-            creator: Lazy::whenLoaded('creator', $client, fn (): UserData => UserData::from($client->creator)
-            ),
-            updater: Lazy::whenLoaded('updater', $client, fn (): ?UserData => $client->updater ? UserData::from($client->updater) : null
-            ),
-            sales: Lazy::whenLoaded('sales', $client,
-                /**
-                 * @return Collection<int|string, SaleData>
-                 */
-                fn (): Collection => SaleData::collect($client->sales)
-            ),
-            saleReturns: Lazy::whenLoaded('saleReturns', $client,
-                /**
-                 * @return Collection<int|string, SaleReturnData>
-                 */
-                fn (): Collection => SaleReturnData::collect($client->saleReturns)
-            ),
-            invoices: Lazy::whenLoaded('invoices', $client,
-                /**
-                 * @return Collection<int|string, InvoiceData>
-                 */
-                fn (): Collection => InvoiceData::collect($client->invoices)
-            ),
-            created_at: $client->created_at,
-            updated_at: $client->updated_at,
+            businessIdentifier: $client->businessIdentifier ? BusinessIdentifierData::from($client->businessIdentifier) : null,
+            creator: $client->creator ? UserData::from($client->creator) : null,
+            updater: $client->updater ? UserData::from($client->updater) : null,
+            created_at: $client->created_at?->toDayDateTimeString(),
+            updated_at: $client->updated_at?->toDayDateTimeString(),
         );
     }
 }

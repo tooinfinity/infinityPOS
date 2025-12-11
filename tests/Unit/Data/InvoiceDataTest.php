@@ -15,7 +15,7 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\DataCollection;
 
-it('transforms an invoice model into InvoiceData', function () {
+it('transforms an invoice model into InvoiceData', function (): void {
 
     $creator = User::factory()->create();
     $updater = User::factory()->create();

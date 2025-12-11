@@ -17,7 +17,7 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\DataCollection;
 
-it('transforms an expense model into ExpenseData', function () {
+it('transforms an expense model into ExpenseData', function (): void {
 
     $creator = User::factory()->create();
     $updater = User::factory()->create();
@@ -94,4 +94,3 @@ it('transforms an expense model into ExpenseData', function () {
         ->and($data->updated_at->toDateTimeString())
         ->toBe($expense->updated_at->toDateTimeString());
 });
-

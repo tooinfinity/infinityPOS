@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Models\Purchase;
-use Carbon\CarbonInterface;
-use Illuminate\Support\Collection;
+use Spatie\LaravelData\Attributes\WithCast;
+use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Data;
-use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
 
 final class PurchaseData extends Data
@@ -23,20 +22,14 @@ final class PurchaseData extends Data
         public int $paid,
         public string $status,
         public ?string $notes,
-        public Lazy|SupplierData|null $supplier,
-        public Lazy|StoreData $store,
-        public Lazy|UserData $creator,
-        public Lazy|UserData|null $updater,
-        /** @var Lazy|DataCollection<int|string, PurchaseItemData> */
-        public Lazy|DataCollection $items,
-        /** @var Lazy|DataCollection<int|string, PurchaseReturnData> */
-        public Lazy|DataCollection $returns,
-        /** @var Lazy|DataCollection<int|string, PaymentData> */
-        public Lazy|DataCollection $payments,
-        /** @var Lazy|DataCollection<int|string, StockMovementData> */
-        public Lazy|DataCollection $stockMovements,
-        public CarbonInterface $created_at,
-        public CarbonInterface $updated_at,
+        #[Lazy] public ?SupplierData $supplier,
+        #[Lazy] public ?StoreData $store,
+        #[Lazy] public ?UserData $creator,
+        #[Lazy] public ?UserData $updater,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $created_at,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $updated_at,
     ) {}
 
     public static function fromModel(Purchase $purchase): self
@@ -51,35 +44,10 @@ final class PurchaseData extends Data
             paid: $purchase->paid,
             status: $purchase->status,
             notes: $purchase->notes,
-            supplier: Lazy::whenLoaded('supplier', $purchase, fn (): ?SupplierData => $purchase->supplier ? SupplierData::from($purchase->supplier) : null
-            ),
-            store: Lazy::whenLoaded('store', $purchase, fn (): StoreData => StoreData::from($purchase->store)
-            ),
-            creator: Lazy::whenLoaded('creator', $purchase, fn (): UserData => UserData::from($purchase->creator)
-            ),
-            updater: Lazy::whenLoaded('updater', $purchase, fn (): ?UserData => $purchase->updater ? UserData::from($purchase->updater) : null
-            ),
-            items: Lazy::whenLoaded('items', $purchase,
-                fn (): Collection => PurchaseItemData::collect($purchase->items)
-            ),
-            returns: Lazy::whenLoaded('returns', $purchase,
-                /**
-                 * @return Collection<int|string, PurchaseReturnData>
-                 */
-                fn (): Collection => PurchaseReturnData::collect($purchase->returns)
-            ),
-            payments: Lazy::whenLoaded('payments', $purchase,
-                /**
-                 * @return Collection<int|string, PaymentData>
-                 */
-                fn (): Collection => PaymentData::collect($purchase->payments)
-            ),
-            stockMovements: Lazy::whenLoaded('stockMovements', $purchase,
-                /**
-                 * @return Collection<int|string, StockMovementData>
-                 */
-                fn (): Collection => StockMovementData::collect($purchase->stockMovements)
-            ),
+            supplier: $purchase->supplier ? SupplierData::from($purchase->supplier) : null,
+            store: $purchase->store ? StoreData::from($purchase->store) : null,
+            creator: $purchase->creator ? UserData::from($purchase->creator) : null,
+            updater: $purchase->updater ? UserData::from($purchase->updater) : null,
             created_at: $purchase->created_at,
             updated_at: $purchase->updated_at,
         );

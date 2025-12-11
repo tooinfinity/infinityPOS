@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Models\Company;
-use Carbon\CarbonInterface;
+use Spatie\LaravelData\Attributes\WithCast;
+use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Lazy;
 
@@ -29,9 +30,11 @@ final class CompanyData extends Data
         public string $currency_symbol,
         public string $timezone,
         public string $date_format,
-        public Lazy|BusinessIdentifierData|null $businessIdentifier,
-        public CarbonInterface $created_at,
-        public CarbonInterface $updated_at,
+        #[Lazy] public ?BusinessIdentifierData $businessIdentifier,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $created_at,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $updated_at,
     ) {}
 
     public static function fromModel(Company $company): self
@@ -54,12 +57,9 @@ final class CompanyData extends Data
             currency_symbol: $company->currency_symbol,
             timezone: $company->timezone,
             date_format: $company->date_format,
-            businessIdentifier: Lazy::whenLoaded('businessIdentifier', $company, fn (): ?BusinessIdentifierData => $company->businessIdentifier
-                ? BusinessIdentifierData::from($company->businessIdentifier)
-                : null
-            ),
-            created_at: $company->created_at,
-            updated_at: $company->updated_at,
+            businessIdentifier: $company->businessIdentifier ? BusinessIdentifierData::from($company->businessIdentifier) : null,
+            created_at: $company->created_at?->toDayDateTimeString(),
+            updated_at: $company->updated_at?->toDayDateTimeString(),
         );
     }
 }

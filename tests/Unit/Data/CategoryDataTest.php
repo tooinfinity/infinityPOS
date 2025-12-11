@@ -13,7 +13,7 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\DataCollection;
 
-it('transforms a category model into CategoryData', function () {
+it('transforms a category model into CategoryData', function (): void {
 
     $creator = User::factory()->create();
     $updater = User::factory()->create();

@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Data\BusinessIdentifierData;
 use App\Models\BusinessIdentifier;
 
-it('transforms a business identifier model into BusinessIdentifierData', function () {
+it('transforms a business identifier model into BusinessIdentifierData', function (): void {
 
     /** @var BusinessIdentifier $identifier */
     $identifier = BusinessIdentifier::factory()->create([

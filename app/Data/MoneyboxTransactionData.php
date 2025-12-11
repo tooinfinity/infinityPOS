@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Models\MoneyboxTransaction;
-use Carbon\CarbonInterface;
+use Spatie\LaravelData\Attributes\WithCast;
+use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Lazy;
 
@@ -18,14 +19,16 @@ final class MoneyboxTransactionData extends Data
         public int $balance_after,
         public ?string $reference,
         public ?string $notes,
-        public Lazy|MoneyboxData $moneybox,
-        public Lazy|PaymentData|null $payment,
-        public Lazy|ExpenseData|null $expense,
-        public Lazy|MoneyboxData|null $transferTo,
-        public Lazy|UserData $creator,
-        public Lazy|UserData|null $updater,
-        public CarbonInterface $created_at,
-        public CarbonInterface $updated_at,
+        #[Lazy] public ?MoneyboxData $moneybox,
+        #[Lazy] public ?PaymentData $payment,
+        #[Lazy] public ?ExpenseData $expense,
+        #[Lazy] public ?MoneyboxData $transferTo,
+        #[Lazy] public ?UserData $creator,
+        #[Lazy] public ?UserData $updater,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $created_at,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $updated_at,
     ) {}
 
     public static function fromModel(MoneyboxTransaction $transaction): self
@@ -37,20 +40,14 @@ final class MoneyboxTransactionData extends Data
             balance_after: $transaction->balance_after,
             reference: $transaction->reference,
             notes: $transaction->notes,
-            moneybox: Lazy::whenLoaded('moneybox', $transaction, fn (): MoneyboxData => MoneyboxData::from($transaction->moneybox)
-            ),
-            payment: Lazy::whenLoaded('payment', $transaction, fn (): ?PaymentData => $transaction->payment ? PaymentData::from($transaction->payment) : null
-            ),
-            expense: Lazy::whenLoaded('expense', $transaction, fn (): ?ExpenseData => $transaction->expense ? ExpenseData::from($transaction->expense) : null
-            ),
-            transferTo: Lazy::whenLoaded('transferTo', $transaction, fn (): ?MoneyboxData => $transaction->transferTo ? MoneyboxData::from($transaction->transferTo) : null
-            ),
-            creator: Lazy::whenLoaded('creator', $transaction, fn (): UserData => UserData::from($transaction->creator)
-            ),
-            updater: Lazy::whenLoaded('updater', $transaction, fn (): ?UserData => $transaction->updater ? UserData::from($transaction->updater) : null
-            ),
-            created_at: $transaction->created_at,
-            updated_at: $transaction->updated_at,
+            moneybox: $transaction->moneybox ? MoneyboxData::from($transaction->moneybox) : null,
+            payment: $transaction->payment ? PaymentData::from($transaction->payment) : null,
+            expense: $transaction->expense ? ExpenseData::from($transaction->expense) : null,
+            transferTo: $transaction->transferTo ? MoneyboxData::from($transaction->transferTo) : null,
+            creator: $transaction->creator ? UserData::from($transaction->creator) : null,
+            updater: $transaction->updater ? UserData::from($transaction->updater) : null,
+            created_at: $transaction->created_at?->toDayDateTimeString(),
+            updated_at: $transaction->updated_at?->toDayDateTimeString(),
         );
     }
 }

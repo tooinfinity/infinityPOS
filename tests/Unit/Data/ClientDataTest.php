@@ -17,7 +17,7 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\DataCollection;
 
-it('transforms a client model into ClientData', function () {
+it('transforms a client model into ClientData', function (): void {
 
     $creator = User::factory()->create();
     $updater = User::factory()->create();

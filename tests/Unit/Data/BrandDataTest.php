@@ -11,7 +11,7 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\DataCollection;
 
-it('transforms a brand model into BrandData', function () {
+it('transforms a brand model into BrandData', function (): void {
 
     $creator = User::factory()->create();
     $updater = User::factory()->create();

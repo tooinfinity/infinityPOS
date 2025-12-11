@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Models\BusinessIdentifier;
-use Carbon\CarbonInterface;
+use Spatie\LaravelData\Attributes\WithCast;
+use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Data;
 
 final class BusinessIdentifierData extends Data
@@ -17,8 +18,10 @@ final class BusinessIdentifierData extends Data
         public ?string $nis,
         public ?string $rc,
         public ?string $rib,
-        public CarbonInterface $created_at,
-        public CarbonInterface $updated_at,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $created_at,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $updated_at,
     ) {}
 
     public static function fromModel(BusinessIdentifier $identifier): self
@@ -30,8 +33,8 @@ final class BusinessIdentifierData extends Data
             nis: $identifier->nis,
             rc: $identifier->rc,
             rib: $identifier->rib,
-            created_at: $identifier->created_at,
-            updated_at: $identifier->updated_at,
+            created_at: $identifier->created_at?->toDayDateTimeString(),
+            updated_at: $identifier->updated_at?->toDayDateTimeString(),
         );
     }
 }

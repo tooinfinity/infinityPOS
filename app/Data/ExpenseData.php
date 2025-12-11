@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Models\Expense;
-use Carbon\CarbonInterface;
-use Illuminate\Support\Collection;
+use Spatie\LaravelData\Attributes\WithCast;
+use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Data;
-use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
 
 final class ExpenseData extends Data
@@ -17,15 +16,15 @@ final class ExpenseData extends Data
         public int $id,
         public int $amount,
         public ?string $description,
-        public Lazy|CategoryData|null $category,
-        public Lazy|StoreData|null $store,
-        public Lazy|MoneyboxData|null $moneybox,
-        /** @var Lazy|DataCollection<int|string, MoneyboxTransactionData> */
-        public Lazy|DataCollection $moneyboxTransactions,
-        public Lazy|UserData $creator,
-        public Lazy|UserData|null $updater,
-        public CarbonInterface $created_at,
-        public CarbonInterface $updated_at,
+        #[Lazy] public ?CategoryData $category,
+        #[Lazy] public ?StoreData $store,
+        #[Lazy] public ?MoneyboxData $moneybox,
+        #[Lazy] public ?UserData $creator,
+        #[Lazy] public ?UserData $updater,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $created_at,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $updated_at,
     ) {}
 
     public static function fromModel(Expense $expense): self
@@ -34,24 +33,13 @@ final class ExpenseData extends Data
             id: $expense->id,
             amount: $expense->amount,
             description: $expense->description,
-            category: Lazy::whenLoaded('category', $expense, fn (): ?CategoryData => $expense->category ? CategoryData::from($expense->category) : null
-            ),
-            store: Lazy::whenLoaded('store', $expense, fn (): ?StoreData => $expense->store ? StoreData::from($expense->store) : null
-            ),
-            moneybox: Lazy::whenLoaded('moneybox', $expense, fn (): ?MoneyboxData => $expense->moneybox ? MoneyboxData::from($expense->moneybox) : null
-            ),
-            moneyboxTransactions: Lazy::whenLoaded('moneyboxTransactions', $expense,
-                /**
-                 * @return Collection<int|string, MoneyboxTransactionData>
-                 */
-                fn (): Collection => MoneyboxTransactionData::collect($expense->moneyboxTransactions)
-            ),
-            creator: Lazy::whenLoaded('creator', $expense, fn (): UserData => UserData::from($expense->creator)
-            ),
-            updater: Lazy::whenLoaded('updater', $expense, fn (): ?UserData => $expense->updater ? UserData::from($expense->updater) : null
-            ),
-            created_at: $expense->created_at,
-            updated_at: $expense->updated_at,
+            category: $expense->category ? CategoryData::from($expense->category) : null,
+            store: $expense->store ? StoreData::from($expense->store) : null,
+            moneybox: $expense->moneybox ? MoneyboxData::from($expense->moneybox) : null,
+            creator: $expense->creator ? UserData::from($expense->creator) : null,
+            updater: $expense->updater ? UserData::from($expense->updater) : null,
+            created_at: $expense->created_at?->toDayDateTimeString(),
+            updated_at: $expense->updated_at?->toDayDateTimeString(),
         );
     }
 }

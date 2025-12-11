@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Models\PurchaseReturnItem;
-use Carbon\CarbonInterface;
+use Spatie\LaravelData\Attributes\WithCast;
+use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Lazy;
 
@@ -17,11 +18,13 @@ final class PurchaseReturnItemData extends Data
         public int $cost,
         public int $total,
         public ?string $batch_number,
-        public Lazy|PurchaseReturnData $purchaseReturn,
-        public Lazy|ProductData $product,
-        public Lazy|PurchaseItemData|null $purchaseItem,
-        public CarbonInterface $created_at,
-        public CarbonInterface $updated_at,
+        #[Lazy] public ?PurchaseReturnData $purchaseReturn,
+        #[Lazy] public ?ProductData $product,
+        #[Lazy] public ?PurchaseItemData $purchaseItem,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $created_at,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $updated_at,
     ) {}
 
     public static function fromModel(PurchaseReturnItem $item): self
@@ -32,14 +35,11 @@ final class PurchaseReturnItemData extends Data
             cost: $item->cost,
             total: $item->total,
             batch_number: $item->batch_number,
-            purchaseReturn: Lazy::whenLoaded('purchaseReturn', $item, fn (): PurchaseReturnData => PurchaseReturnData::from($item->purchaseReturn)
-            ),
-            product: Lazy::whenLoaded('product', $item, fn (): ProductData => ProductData::from($item->product)
-            ),
-            purchaseItem: Lazy::whenLoaded('purchaseItem', $item, fn (): ?PurchaseItemData => $item->purchaseItem ? PurchaseItemData::from($item->purchaseItem) : null
-            ),
-            created_at: $item->created_at,
-            updated_at: $item->updated_at,
+            purchaseReturn: $item->purchaseReturn ? PurchaseReturnData::from($item->purchaseReturn) : null,
+            product: $item->product ? ProductData::from($item->product) : null,
+            purchaseItem: $item->purchaseItem ? PurchaseItemData::from($item->purchaseItem) : null,
+            created_at: $item->created_at?->toDayDateTimeString(),
+            updated_at: $item->updated_at?->toDayDateTimeString(),
         );
     }
 }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Data\PermissionData;
 use App\Models\Permission;
 
-it('transforms a permission model into PermissionData', function () {
+it('transforms a permission model into PermissionData', function (): void {
     $permission = Permission::factory()->create();
 
     $data = PermissionData::from($permission);

@@ -7,7 +7,7 @@ use App\Data\CompanyData;
 use App\Models\BusinessIdentifier;
 use App\Models\Company;
 
-it('transforms a company model into CompanyData', function () {
+it('transforms a company model into CompanyData', function (): void {
 
     $identifier = BusinessIdentifier::factory()->create();
 

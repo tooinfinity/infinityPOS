@@ -7,7 +7,7 @@ use App\Models\Moneybox;
 use App\Models\Payment;
 use App\Models\User;
 
-it('transforms a payment model into PaymentData', function () {
+it('transforms a payment model into PaymentData', function (): void {
     $creator = User::factory()->create();
     $updater = User::factory()->create();
     $moneyBox = Moneybox::factory()->create();

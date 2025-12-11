@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Models\Invoice;
-use Carbon\CarbonInterface;
-use Illuminate\Support\Collection;
+use Spatie\LaravelData\Attributes\WithCast;
+use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Data;
-use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
 
 final class InvoiceData extends Data
@@ -16,9 +15,9 @@ final class InvoiceData extends Data
     public function __construct(
         public int $id,
         public string $reference,
-        public CarbonInterface $issued_at,
-        public ?CarbonInterface $due_at,
-        public ?CarbonInterface $paid_at,
+        public string $issued_at,
+        public ?string $due_at,
+        public ?string $paid_at,
         public int $subtotal,
         public ?int $discount,
         public ?int $tax,
@@ -26,14 +25,14 @@ final class InvoiceData extends Data
         public int $paid,
         public string $status,
         public ?string $notes,
-        public Lazy|SaleData $sale,
-        public Lazy|ClientData|null $client,
-        public Lazy|UserData $creator,
-        public Lazy|UserData|null $updater,
-        /** @var Lazy|DataCollection<int|string, PaymentData> */
-        public Lazy|DataCollection $payments,
-        public CarbonInterface $created_at,
-        public CarbonInterface $updated_at,
+        #[Lazy] public ?SaleData $sale,
+        #[Lazy] public ?ClientData $client,
+        #[Lazy] public ?UserData $creator,
+        #[Lazy] public ?UserData $updater,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $created_at,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $updated_at,
     ) {}
 
     public static function fromModel(Invoice $invoice): self
@@ -41,9 +40,9 @@ final class InvoiceData extends Data
         return new self(
             id: $invoice->id,
             reference: $invoice->reference,
-            issued_at: $invoice->issued_at,
-            due_at: $invoice->due_at,
-            paid_at: $invoice->paid_at,
+            issued_at: $invoice->issued_at->toDayDateTimeString(),
+            due_at: $invoice->due_at?->toDayDateTimeString(),
+            paid_at: $invoice->paid_at?->toDayDateTimeString(),
             subtotal: $invoice->subtotal,
             discount: $invoice->discount,
             tax: $invoice->tax,
@@ -51,22 +50,12 @@ final class InvoiceData extends Data
             paid: $invoice->paid,
             status: $invoice->status,
             notes: $invoice->notes,
-            sale: Lazy::whenLoaded('sale', $invoice, fn (): SaleData => SaleData::from($invoice->sale)
-            ),
-            client: Lazy::whenLoaded('client', $invoice, fn (): ?ClientData => $invoice->client ? ClientData::from($invoice->client) : null
-            ),
-            creator: Lazy::whenLoaded('creator', $invoice, fn (): UserData => UserData::from($invoice->creator)
-            ),
-            updater: Lazy::whenLoaded('updater', $invoice, fn (): ?UserData => $invoice->updater ? UserData::from($invoice->updater) : null
-            ),
-            payments: Lazy::whenLoaded('payments', $invoice,
-                /**
-                 * @return Collection<int|string, PaymentData>
-                 */
-                fn (): Collection => PaymentData::collect($invoice->payments)
-            ),
-            created_at: $invoice->created_at,
-            updated_at: $invoice->updated_at,
+            sale: $invoice->sale ? SaleData::from($invoice->sale) : null,
+            client: $invoice->client ? ClientData::from($invoice->client) : null,
+            creator: $invoice->creator ? UserData::from($invoice->creator) : null,
+            updater: $invoice->updater ? UserData::from($invoice->updater) : null,
+            created_at: $invoice->created_at?->toDayDateTimeString(),
+            updated_at: $invoice->updated_at?->toDayDateTimeString(),
         );
     }
 }

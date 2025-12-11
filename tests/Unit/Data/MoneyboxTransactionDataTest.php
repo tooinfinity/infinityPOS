@@ -9,7 +9,7 @@ use App\Models\MoneyboxTransaction;
 use App\Models\Payment;
 use App\Models\User;
 
-it('transforms an moneybox transaction model into MoneyboxTransactionData', function () {
+it('transforms an moneybox transaction model into MoneyboxTransactionData', function (): void {
     $creator = User::factory()->create();
     $updater = User::factory()->create();
     $moneybox = Moneybox::factory()->create();
