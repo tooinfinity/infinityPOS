@@ -11,7 +11,7 @@ it('may update a user', function (): void {
         'email' => 'old@email.com',
     ]);
 
-    $action = app(UpdateUser::class);
+    $action = resolve(UpdateUser::class);
 
     $action->handle($user, [
         'name' => 'New Name',
