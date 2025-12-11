@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use App\Enums\TaxTypeEnum;
 use Carbon\CarbonInterface;
-use App\\Enums\\TaxTypeEnum;
 use Spatie\LaravelData\Data;
-use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
 
 final class TaxData extends Data

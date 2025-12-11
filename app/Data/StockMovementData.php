@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use App\Enums\StockMovementTypeEnum;
 use Carbon\CarbonInterface;
-use App\\Enums\\StockMovementTypeEnum;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Lazy;
 

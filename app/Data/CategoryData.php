@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use App\Enums\CategoryTypeEnum;
 use Carbon\CarbonInterface;
-use App\\Enums\\CategoryTypeEnum;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Lazy;
 

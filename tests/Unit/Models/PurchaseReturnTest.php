@@ -68,7 +68,7 @@ test('purchase return relationships', function (): void {
     $payment = Payment::factory()->create(['type' => PaymentTypeEnum::PURCHASE->value, 'related_id' => $purchaseReturn->id, 'created_by' => $user->id]);
     $stockMovement = StockMovement::factory()->create([
         'reference' => $purchaseReturn->reference,
-        'type' => 'return',
+        'type' => App\Enums\StockMovementTypeEnum::PURCHASE_RETURN->value,
         'product_id' => $product->id,
         'store_id' => $store->id,
         'created_by' => $user->id,

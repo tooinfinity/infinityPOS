@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Data;
 
-use Carbon\CarbonInterface;
 use App\Enums\PaymentTypeEnum;
+use Carbon\CarbonInterface;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Lazy;
 
