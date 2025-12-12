@@ -5,17 +5,13 @@ declare(strict_types=1);
 use App\Data\CategoryData;
 use App\Data\ExpenseData;
 use App\Data\MoneyboxData;
-use App\Data\MoneyboxTransactionData;
 use App\Data\StoreData;
 use App\Data\UserData;
 use App\Models\Category;
 use App\Models\Expense;
 use App\Models\Moneybox;
-use App\Models\MoneyboxTransaction;
 use App\Models\Store;
 use App\Models\User;
-use Illuminate\Support\Collection;
-use Spatie\LaravelData\DataCollection;
 
 it('transforms an expense model into ExpenseData', function (): void {
 
@@ -33,20 +29,18 @@ it('transforms an expense model into ExpenseData', function (): void {
         ->for($category, 'category')
         ->for($store, 'store')
         ->for($moneybox, 'moneybox')
-        ->has(MoneyboxTransaction::factory()->count(3), 'moneyboxTransactions')
         ->create([
             'amount' => 1200,
             'description' => 'Office supplies',
         ]);
 
-    $data = ExpenseData::fromModel(
+    $data = ExpenseData::from(
         $expense->load([
             'creator',
             'updater',
             'category',
             'store',
             'moneybox',
-            'moneyboxTransactions',
         ])
     );
 
@@ -69,28 +63,10 @@ it('transforms an expense model into ExpenseData', function (): void {
         ->id->toBe($creator->id)
         ->and($data->updater->resolve())
         ->toBeInstanceOf(UserData::class)
-        ->id->toBe($updater->id);
-
-    $transactions = $data->moneyboxTransactions->resolve();
-
-    if ($transactions instanceof DataCollection) {
-        expect($transactions)->toBeInstanceOf(DataCollection::class)
-            ->and($transactions->count())->toBe(3);
-
-        foreach ($transactions->all() as $tx) {
-            expect($tx)->toBeInstanceOf(MoneyboxTransactionData::class);
-        }
-    } else {
-        expect($transactions)->toBeInstanceOf(Collection::class)
-            ->and($transactions->count())->toBe(3);
-
-        foreach ($transactions as $tx) {
-            expect($tx)->toBeInstanceOf(MoneyboxTransactionData::class);
-        }
-    }
-
-    expect($data->created_at->toDateTimeString())
+        ->id->toBe($updater->id)
+        ->and($data->created_at)
         ->toBe($expense->created_at->toDateTimeString())
-        ->and($data->updated_at->toDateTimeString())
+        ->and($data->updated_at)
         ->toBe($expense->updated_at->toDateTimeString());
+
 });

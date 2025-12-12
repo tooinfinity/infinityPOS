@@ -2,37 +2,34 @@
 
 declare(strict_types=1);
 
-use App\Data\CategoryData;
+use App\Data\UnitData;
 use App\Data\UserData;
-use App\Models\Category;
+use App\Models\Unit;
 use App\Models\User;
 
-it('transforms a category model into CategoryData', function (): void {
-
+it('transforms a unit model into UnitData', function (): void {
     $creator = User::factory()->create();
     $updater = User::factory()->create();
 
-    /** @var Category $category */
-    $category = Category::factory()
+    /** @var Unit $unit */
+    $unit = Unit::factory()
         ->for($creator, 'creator')
         ->for($updater, 'updater')
         ->create([
-            'name' => 'Food',
-            'code' => 'F01',
-            'type' => 'goods',
+            'name' => 'Kilogram',
+            'short_name' => 'kg',
             'is_active' => true,
         ]);
 
-    $data = CategoryData::from(
-        $category->load(['creator', 'updater'])
+    $data = UnitData::from(
+        $unit->load(['creator', 'updater'])
     );
 
     expect($data)
-        ->toBeInstanceOf(CategoryData::class)
-        ->id->toBe($category->id)
-        ->name->toBe('Food')
-        ->code->toBe('F01')
-        ->type->toBe('goods')
+        ->toBeInstanceOf(UnitData::class)
+        ->id->toBe($unit->id)
+        ->name->toBe('Kilogram')
+        ->short_name->toBe('kg')
         ->is_active->toBeTrue()
         ->and($data->creator->resolve())
         ->toBeInstanceOf(UserData::class)
@@ -41,8 +38,7 @@ it('transforms a category model into CategoryData', function (): void {
         ->toBeInstanceOf(UserData::class)
         ->id->toBe($updater->id)
         ->and($data->created_at)
-        ->toBe($category->created_at->toDateTimeString())
+        ->toBe($unit->created_at->toDateTimeString())
         ->and($data->updated_at)
-        ->toBe($category->updated_at->toDateTimeString());
-
+        ->toBe($unit->updated_at->toDateTimeString());
 });

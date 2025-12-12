@@ -2,37 +2,36 @@
 
 declare(strict_types=1);
 
-use App\Data\CategoryData;
+use App\Data\TaxData;
 use App\Data\UserData;
-use App\Models\Category;
+use App\Models\Tax;
 use App\Models\User;
 
-it('transforms a category model into CategoryData', function (): void {
-
+it('transforms a tax model into TaxData', function (): void {
     $creator = User::factory()->create();
     $updater = User::factory()->create();
 
-    /** @var Category $category */
-    $category = Category::factory()
+    /** @var Tax $tax */
+    $tax = Tax::factory()
         ->for($creator, 'creator')
         ->for($updater, 'updater')
         ->create([
-            'name' => 'Food',
-            'code' => 'F01',
-            'type' => 'goods',
+            'name' => 'VAT',
+            'tax_type' => 'percentage',
+            'rate' => 17,
             'is_active' => true,
         ]);
 
-    $data = CategoryData::from(
-        $category->load(['creator', 'updater'])
+    $data = TaxData::from(
+        $tax->load(['creator', 'updater'])
     );
 
     expect($data)
-        ->toBeInstanceOf(CategoryData::class)
-        ->id->toBe($category->id)
-        ->name->toBe('Food')
-        ->code->toBe('F01')
-        ->type->toBe('goods')
+        ->toBeInstanceOf(TaxData::class)
+        ->id->toBe($tax->id)
+        ->name->toBe('VAT')
+        ->tax_type->toBe('percentage')
+        ->rate->toBe(17)
         ->is_active->toBeTrue()
         ->and($data->creator->resolve())
         ->toBeInstanceOf(UserData::class)
@@ -41,8 +40,7 @@ it('transforms a category model into CategoryData', function (): void {
         ->toBeInstanceOf(UserData::class)
         ->id->toBe($updater->id)
         ->and($data->created_at)
-        ->toBe($category->created_at->toDateTimeString())
+        ->toBe($tax->created_at->toDateTimeString())
         ->and($data->updated_at)
-        ->toBe($category->updated_at->toDateTimeString());
-
+        ->toBe($tax->updated_at->toDateTimeString());
 });

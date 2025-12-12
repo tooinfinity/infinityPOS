@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Data;
 
-use App\Models\SaleItem;
-use Carbon\CarbonInterface;
-use Illuminate\Support\Collection;
+use Spatie\LaravelData\Attributes\AutoLazy;
+use Spatie\LaravelData\Attributes\WithCast;
+use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Data;
-use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
 
+#[AutoLazy]
 final class SaleItemData extends Data
 {
     public function __construct(
@@ -22,36 +22,11 @@ final class SaleItemData extends Data
         public ?int $tax_amount,
         public int $total,
         public ?string $batch_number,
-        public ?CarbonInterface $expiry_date,
-        public Lazy|ProductData $product,
-        /** @var Lazy|DataCollection<int|string, SaleReturnItemData> */
-        public Lazy|DataCollection $returnItems,
-        public CarbonInterface $created_at,
-        public CarbonInterface $updated_at,
+        public ?string $expiry_date,
+        public Lazy|ProductData|null $product,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $created_at,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $updated_at,
     ) {}
-
-    public static function fromModel(SaleItem $item): self
-    {
-        return new self(
-            id: $item->id,
-            quantity: $item->quantity,
-            price: $item->price,
-            cost: $item->cost,
-            discount: $item->discount,
-            tax_amount: $item->tax_amount,
-            total: $item->total,
-            batch_number: $item->batch_number,
-            expiry_date: $item->expiry_date,
-            product: Lazy::whenLoaded('product', $item, fn (): ProductData => ProductData::from($item->product)
-            ),
-            returnItems: Lazy::whenLoaded('returnItems', $item,
-                /**
-                 * @return Collection<int|string, SaleReturnItemData>
-                 */
-                fn (): Collection => SaleReturnItemData::collect($item->returnItems)
-            ),
-            created_at: $item->created_at,
-            updated_at: $item->updated_at,
-        );
-    }
 }

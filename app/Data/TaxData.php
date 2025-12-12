@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Data;
 
-use App\Models\Tax;
-use Carbon\CarbonInterface;
-use Illuminate\Support\Collection;
+use Spatie\LaravelData\Attributes\AutoLazy;
+use Spatie\LaravelData\Attributes\WithCast;
+use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Data;
-use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Lazy;
 
+#[AutoLazy]
 final class TaxData extends Data
 {
     public function __construct(
@@ -19,33 +19,11 @@ final class TaxData extends Data
         public string $tax_type,
         public int $rate,
         public bool $is_active,
-        public Lazy|UserData $creator,
+        public Lazy|UserData|null $creator,
         public Lazy|UserData|null $updater,
-        /** @var Lazy|DataCollection<int|string, ProductData> */
-        public Lazy|DataCollection $products,
-        public CarbonInterface $created_at,
-        public CarbonInterface $updated_at,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $created_at,
+        #[WithCast(DateTimeInterfaceCast::class)]
+        public ?string $updated_at,
     ) {}
-
-    public static function fromModel(Tax $tax): self
-    {
-        return new self(
-            id: $tax->id,
-            name: $tax->name,
-            tax_type: $tax->tax_type,
-            rate: $tax->rate,
-            is_active: $tax->is_active,
-            creator: Lazy::whenLoaded('creator', $tax, fn (): UserData => UserData::from($tax->creator)
-            ),
-            updater: Lazy::whenLoaded('updater', $tax, fn (): ?UserData => $tax->updater ? UserData::from($tax->updater) : null),
-            products: Lazy::whenLoaded('products', $tax,
-                /**
-                 * @return Collection<int|string, ProductData>
-                 */
-                fn (): Collection => ProductData::collect($tax->products)
-            ),
-            created_at: $tax->created_at,
-            updated_at: $tax->updated_at,
-        );
-    }
 }

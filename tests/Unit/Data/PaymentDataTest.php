@@ -18,9 +18,9 @@ it('transforms a payment model into PaymentData', function (): void {
         ->for($moneyBox, 'moneybox')
         ->create();
 
-    $payment->load(['creator', 'updater', 'moneybox']);
-
-    $data = PaymentData::fromModel($payment);
+    $data = PaymentData::from(
+        $payment->load(['creator', 'updater', 'moneybox'])
+    );
 
     expect($data)
         ->toBeInstanceOf(PaymentData::class)
@@ -28,6 +28,8 @@ it('transforms a payment model into PaymentData', function (): void {
         ->amount->toBe($payment->amount)
         ->and($data->creator->id)->toBe($creator->id)
         ->and($data->updater->id)->toBe($updater->id)
-        ->and($data->moneybox->id)->toBe($moneyBox->id);
+        ->and($data->moneybox->id)->toBe($moneyBox->id)
+        ->and($data->created_at)->toBe($payment->created_at->toDateTimeString())
+        ->and($data->updated_at)->toBe($payment->updated_at->toDateTimeString());
 
 });

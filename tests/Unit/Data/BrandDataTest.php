@@ -3,16 +3,11 @@
 declare(strict_types=1);
 
 use App\Data\BrandData;
-use App\Data\ProductData;
 use App\Data\UserData;
 use App\Models\Brand;
-use App\Models\Product;
 use App\Models\User;
-use Illuminate\Support\Collection;
-use Spatie\LaravelData\DataCollection;
 
 it('transforms a brand model into BrandData', function (): void {
-
     $creator = User::factory()->create();
     $updater = User::factory()->create();
 
@@ -20,11 +15,10 @@ it('transforms a brand model into BrandData', function (): void {
     $brand = Brand::factory()
         ->for($creator, 'creator')
         ->for($updater, 'updater')
-        ->has(Product::factory()->count(2), 'products')
         ->create();
 
-    $data = BrandData::fromModel(
-        $brand->load(['creator', 'updater', 'products'])
+    $data = BrandData::from(
+        $brand->load(['creator', 'updater'])
     );
 
     expect($data)
@@ -37,29 +31,10 @@ it('transforms a brand model into BrandData', function (): void {
         ->id->toBe($creator->id)
         ->and($data->updater->resolve())
         ->toBeInstanceOf(UserData::class)
-        ->id->toBe($updater->id);
-
-    $products = $data->products->resolve();
-
-    if ($products instanceof DataCollection) {
-        expect($products)->toBeInstanceOf(DataCollection::class)
-            ->and($products->count())->toBe(2);
-
-        foreach ($products->all() as $p) {
-            expect($p)->toBeInstanceOf(ProductData::class);
-        }
-    } else {
-        expect($products)->toBeInstanceOf(Collection::class)
-            ->and($products->count())->toBe(2);
-
-        foreach ($products as $p) {
-            expect($p)->toBeInstanceOf(ProductData::class);
-        }
-    }
-
-    expect($data->created_at->toDateTimeString())
+        ->id->toBe($updater->id)
+        ->and($data->created_at)
         ->toBe($brand->created_at->toDateTimeString())
-        ->and($data->updated_at->toDateTimeString())
+        ->and($data->updated_at)
         ->toBe($brand->updated_at->toDateTimeString());
 
 });

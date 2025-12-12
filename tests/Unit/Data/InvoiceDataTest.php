@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 use App\Data\ClientData;
 use App\Data\InvoiceData;
-use App\Data\PaymentData;
 use App\Data\SaleData;
 use App\Data\UserData;
 use App\Models\Client;
 use App\Models\Invoice;
-use App\Models\Payment;
 use App\Models\Sale;
 use App\Models\User;
-use Illuminate\Support\Collection;
-use Spatie\LaravelData\DataCollection;
 
 it('transforms an invoice model into InvoiceData', function (): void {
 
@@ -28,9 +24,6 @@ it('transforms an invoice model into InvoiceData', function (): void {
         ->for($updater, 'updater')
         ->for($client, 'client')
         ->for($sale, 'sale')
-        ->has(Payment::factory(
-            ['type' => 'sale', 'related_id' => $sale->id]
-        )->count(3), 'payments')
         ->create([
             'reference' => 'INV-2025-001',
             'issued_at' => now(),
@@ -45,15 +38,14 @@ it('transforms an invoice model into InvoiceData', function (): void {
             'notes' => 'Pay remaining before due date.',
         ]);
 
-    $invoice->load([
-        'creator',
-        'updater',
-        'client',
-        'sale',
-        'payments',
-    ]);
-
-    $data = InvoiceData::fromModel($invoice);
+    $data = InvoiceData::from(
+        $invoice->load([
+            'creator',
+            'updater',
+            'client',
+            'sale',
+        ])
+    );
 
     expect($data)
         ->toBeInstanceOf(InvoiceData::class)
@@ -77,34 +69,16 @@ it('transforms an invoice model into InvoiceData', function (): void {
         ->id->toBe($creator->id)
         ->and($data->updater->resolve())
         ->toBeInstanceOf(UserData::class)
-        ->id->toBe($updater->id);
-
-    $payments = $data->payments->resolve();
-
-    if ($payments instanceof DataCollection) {
-        expect($payments)->toBeInstanceOf(DataCollection::class)
-            ->and($payments->count())->toBe(3);
-
-        foreach ($payments->all() as $payment) {
-            expect($payment)->toBeInstanceOf(PaymentData::class);
-        }
-    } else {
-        expect($payments)->toBeInstanceOf(Collection::class)
-            ->and($payments->count())->toBe(3);
-
-        foreach ($payments as $payment) {
-            expect($payment)->toBeInstanceOf(PaymentData::class);
-        }
-    }
-
-    expect($data->issued_at->toDateTimeString())
+        ->id->toBe($updater->id)
+        ->and($data->issued_at)
         ->toBe($invoice->issued_at->toDateTimeString())
-        ->and($data->due_at?->toDateTimeString())
+        ->and($data->due_at)
         ->toBe($invoice->due_at?->toDateTimeString())
-        ->and($data->paid_at?->toDateTimeString())
+        ->and($data->paid_at)
         ->toBe($invoice->paid_at?->toDateTimeString())
-        ->and($data->created_at->toDateTimeString())
+        ->and($data->created_at)
         ->toBe($invoice->created_at->toDateTimeString())
-        ->and($data->updated_at->toDateTimeString())
+        ->and($data->updated_at)
         ->toBe($invoice->updated_at->toDateTimeString());
+
 });

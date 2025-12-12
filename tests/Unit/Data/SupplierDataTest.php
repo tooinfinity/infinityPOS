@@ -3,48 +3,43 @@
 declare(strict_types=1);
 
 use App\Data\BusinessIdentifierData;
-use App\Data\ClientData;
+use App\Data\SupplierData;
 use App\Data\UserData;
 use App\Models\BusinessIdentifier;
-use App\Models\Client;
+use App\Models\Supplier;
 use App\Models\User;
 
-it('transforms a client model into ClientData', function (): void {
-
+it('transforms a supplier model into SupplierData', function (): void {
     $creator = User::factory()->create();
     $updater = User::factory()->create();
     $identifier = BusinessIdentifier::factory()->create();
 
-    /** @var Client $client */
-    $client = Client::factory()
+    /** @var Supplier $supplier */
+    $supplier = Supplier::factory()
         ->for($creator, 'creator')
         ->for($updater, 'updater')
         ->for($identifier, 'businessIdentifier')
         ->create([
-            'name' => 'John Doe',
-            'phone' => '123456789',
-            'email' => 'john@example.com',
-            'address' => 'Main street 1',
-            'balance' => 4500,
+            'name' => 'ACME Supplies',
+            'phone' => '555-1234',
+            'email' => 'contact@acme.test',
+            'address' => '42 Supplier St',
+            'balance' => 25000,
             'is_active' => true,
         ]);
 
-    $data = ClientData::from(
-        $client->load([
-            'creator',
-            'updater',
-            'businessIdentifier',
-        ])
+    $data = SupplierData::from(
+        $supplier->load(['creator', 'updater', 'businessIdentifier'])
     );
 
     expect($data)
-        ->toBeInstanceOf(ClientData::class)
-        ->id->toBe($client->id)
-        ->name->toBe('John Doe')
-        ->phone->toBe('123456789')
-        ->email->toBe('john@example.com')
-        ->address->toBe('Main street 1')
-        ->balance->toBe(4500)
+        ->toBeInstanceOf(SupplierData::class)
+        ->id->toBe($supplier->id)
+        ->name->toBe('ACME Supplies')
+        ->phone->toBe('555-1234')
+        ->email->toBe('contact@acme.test')
+        ->address->toBe('42 Supplier St')
+        ->balance->toBe(25000)
         ->is_active->toBeTrue()
         ->and($data->businessIdentifier->resolve())
         ->toBeInstanceOf(BusinessIdentifierData::class)
@@ -56,8 +51,7 @@ it('transforms a client model into ClientData', function (): void {
         ->toBeInstanceOf(UserData::class)
         ->id->toBe($updater->id)
         ->and($data->created_at)
-        ->toBe($client->created_at->toDateTimeString())
+        ->toBe($supplier->created_at->toDateTimeString())
         ->and($data->updated_at)
-        ->toBe($client->updated_at->toDateTimeString());
-
+        ->toBe($supplier->updated_at->toDateTimeString());
 });

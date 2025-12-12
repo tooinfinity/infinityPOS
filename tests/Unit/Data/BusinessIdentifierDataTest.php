@@ -16,7 +16,7 @@ it('transforms a business identifier model into BusinessIdentifierData', functio
         'rib' => 'RIB-222',
     ]);
 
-    $data = BusinessIdentifierData::fromModel($identifier);
+    $data = BusinessIdentifierData::from($identifier);
 
     expect($data)
         ->toBeInstanceOf(BusinessIdentifierData::class)
@@ -26,8 +26,8 @@ it('transforms a business identifier model into BusinessIdentifierData', functio
         ->nis->toBe('NIS-789')
         ->rc->toBe('RC-111')
         ->rib->toBe('RIB-222')
-        ->and($data->created_at->toDateTimeString())
+        ->and($data->created_at)
         ->toBe($identifier->created_at->toDateTimeString())
-        ->and($data->updated_at->toDateTimeString())
+        ->and($data->updated_at)
         ->toBe($identifier->updated_at->toDateTimeString());
 });

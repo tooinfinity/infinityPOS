@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\RoleEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -150,6 +151,7 @@ final class User extends Authenticatable
             'email' => 'string',
             'password' => 'hashed',
             'remember_token' => 'string',
+            'role' => RoleEnum::class,
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

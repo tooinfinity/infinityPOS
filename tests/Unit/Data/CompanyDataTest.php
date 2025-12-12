@@ -33,7 +33,7 @@ it('transforms a company model into CompanyData', function (): void {
             'date_format' => 'Y-m-d',
         ]);
 
-    $data = CompanyData::fromModel(
+    $data = CompanyData::from(
         $company->load([
             'businessIdentifier',
         ])
@@ -61,8 +61,8 @@ it('transforms a company model into CompanyData', function (): void {
         ->and($data->businessIdentifier->resolve())
         ->toBeInstanceOf(BusinessIdentifierData::class)
         ->id->toBe($identifier->id)
-        ->and($data->created_at->toDateTimeString())
+        ->and($data->created_at)
         ->toBe($company->created_at->toDateTimeString())
-        ->and($data->updated_at->toDateTimeString())
+        ->and($data->updated_at)
         ->toBe($company->updated_at->toDateTimeString());
 });
