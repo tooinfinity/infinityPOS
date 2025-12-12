@@ -22,6 +22,7 @@ final class SaleItemData extends Data
         public ?int $tax_amount,
         public int $total,
         public ?string $batch_number,
+        #[WithCast(DateTimeInterfaceCast::class)]
         public ?string $expiry_date,
         public Lazy|ProductData|null $product,
         #[WithCast(DateTimeInterfaceCast::class)]

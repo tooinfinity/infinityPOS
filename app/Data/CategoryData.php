@@ -17,7 +17,7 @@ final class CategoryData extends Data
         public int $id,
         public string $name,
         public string $code,
-        public string $type,
+        public \App\Enums\CategoryTypeEnum $type,
         public bool $is_active,
         public Lazy|UserData|null $creator,
         public Lazy|UserData|null $updater,

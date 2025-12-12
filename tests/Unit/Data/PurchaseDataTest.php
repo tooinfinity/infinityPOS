@@ -30,7 +30,7 @@ it('transforms a purchase model into PurchaseData', function (): void {
             'tax' => 1500,
             'total' => 9200,
             'paid' => 4000,
-            'status' => 'received',
+            'status' => App\Enums\PurchaseStatusEnum::RECEIVED->value,
             'notes' => 'Delivered on time',
         ]);
 
@@ -47,7 +47,7 @@ it('transforms a purchase model into PurchaseData', function (): void {
         ->tax->toBe(1500)
         ->total->toBe(9200)
         ->paid->toBe(4000)
-        ->status->toBe('received')
+        ->status->toBe(App\Enums\PurchaseStatusEnum::RECEIVED)
         ->notes->toBe('Delivered on time')
         ->and($data->supplier->resolve())
         ->toBeInstanceOf(SupplierData::class)

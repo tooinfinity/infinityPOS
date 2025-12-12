@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Enums\PaymentTypeEnum;
-use App\Enums\SaleReturnStatusEnum;
 use App\Enums\StockMovementTypeEnum;
 use App\Models\Client;
 use App\Models\Payment;
@@ -89,31 +88,4 @@ test('sale return relationships', function (): void {
         ->and($saleReturn->payments->first()->id)->toBe($payment->id)
         ->and($saleReturn->stockMovements->count())->toBe(1)
         ->and($saleReturn->stockMovements->first()->id)->toBe($stockMovement->id);
-});
-
-test('sale return status', function (): void {
-    $user = User::factory()->create()->refresh();
-    $store = Store::factory()->create(['created_by' => $user->id]);
-    $client = Client::factory()->create(['created_by' => $user->id]);
-    $sale = Sale::factory()->create(['created_by' => $user->id, 'store_id' => $store->id, 'client_id' => $client->id]);
-    $saleReturn = SaleReturn::factory()->create([
-        'created_by' => $user->id,
-        'store_id' => $store->id,
-        'client_id' => $client->id,
-        'sale_id' => $sale->id,
-        'status' => SaleReturnStatusEnum::PENDING->value,
-    ])->refresh();
-    expect($saleReturn->isPending())->toBeTrue()
-        ->and($saleReturn->isCompleted())->toBeFalse()
-        ->and($saleReturn->isCancelled())->toBeFalse();
-
-    $saleReturn->update(['status' => SaleReturnStatusEnum::COMPLETED->value]);
-    expect($saleReturn->isPending())->toBeFalse()
-        ->and($saleReturn->isCompleted())->toBeTrue()
-        ->and($saleReturn->isCancelled())->toBeFalse();
-
-    $saleReturn->update(['status' => SaleReturnStatusEnum::CANCELLED->value]);
-    expect($saleReturn->isPending())->toBeFalse()
-        ->and($saleReturn->isCompleted())->toBeFalse()
-        ->and($saleReturn->isCancelled())->toBeTrue();
 });

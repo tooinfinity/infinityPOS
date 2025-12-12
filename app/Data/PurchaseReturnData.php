@@ -21,7 +21,7 @@ final class PurchaseReturnData extends Data
         public ?int $tax,
         public int $total,
         public int $refunded,
-        public string $status,
+        public \App\Enums\PurchaseReturnStatusEnum $status,
         public ?string $reason,
         public ?string $notes,
         public Lazy|PurchaseData|null $purchase,

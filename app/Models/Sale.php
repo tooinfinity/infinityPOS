@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\SaleStatusEnum;
+use App\Enums\StockMovementTypeEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\SaleFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -103,7 +104,7 @@ final class Sale extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class, 'related_id')
-            ->where('payments.type', 'sale');
+            ->where('payments.type', \App\Enums\PaymentTypeEnum::SALE->value);
     }
 
     /**
@@ -112,31 +113,7 @@ final class Sale extends Model
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class, 'reference', 'reference')
-            ->where('stock_movements.type', 'sale');
-    }
-
-    /**
-     * Check if return is pending.
-     */
-    public function isPending(): bool
-    {
-        return $this->status === SaleStatusEnum::PENDING->value;
-    }
-
-    /**
-     * Check if the sale is completed.
-     */
-    public function isCompleted(): bool
-    {
-        return $this->status === SaleStatusEnum::COMPLETED->value;
-    }
-
-    /**
-     * Check if the sale is cancelled.
-     */
-    public function isCancelled(): bool
-    {
-        return $this->status === SaleStatusEnum::CANCELLED->value;
+            ->where('stock_movements.type', StockMovementTypeEnum::SALE->value);
     }
 
     /**
@@ -154,7 +131,7 @@ final class Sale extends Model
             'tax' => 'integer',
             'total' => 'integer',
             'paid' => 'integer',
-            'status' => 'string',
+            'status' => SaleStatusEnum::class,
             'notes' => 'string',
             'created_by' => 'integer',
             'updated_by' => 'integer',

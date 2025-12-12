@@ -40,14 +40,3 @@ test('tax relationships', function (): void {
         ->and($tax->products->first()->id)->toBe($products->id)
         ->and($tax->products->first()->tax->id)->toBe($tax->id);
 });
-
-test('tax type', function (): void {
-    $user = User::factory()->create()->refresh();
-    $tax = Tax::factory()->create([
-        'created_by' => $user->id,
-        'tax_type' => 'fixed',
-    ]);
-
-    expect($tax->isPercentage())->toBeFalse()
-        ->and($tax->isFixed())->toBeTrue();
-});

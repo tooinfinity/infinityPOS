@@ -59,7 +59,7 @@ test('invoice relationships', function (): void {
     $invoice->update(['updated_by' => $user->id]);
 
     $payment = Payment::factory()->create([
-        'type' => PaymentTypeEnum::SALE->value,
+        'type' => PaymentTypeEnum::INVOICE,
         'related_id' => $invoice->id,
         'created_by' => $user->id,
     ]);

@@ -22,7 +22,7 @@ it('transforms an moneybox model into MoneyboxData', function (): void {
         ->for($store, 'store')
         ->create([
             'name' => 'Cash',
-            'type' => 'cash',
+            'type' => App\Enums\MoneyboxTypeEnum::CASH_REGISTER->value,
             'description' => 'Cash in hand',
             'balance' => 50000,
             'bank_name' => 'Cash',
@@ -42,7 +42,7 @@ it('transforms an moneybox model into MoneyboxData', function (): void {
         ->toBeInstanceOf(MoneyboxData::class)
         ->id->toBe($moneybox->id)
         ->name->toBe('Cash')
-        ->type->toBe('cash')
+        ->type->toBe(App\Enums\MoneyboxTypeEnum::CASH_REGISTER)
         ->description->toBe('Cash in hand')
         ->balance->toBe(50000)
         ->bank_name->toBe('Cash')

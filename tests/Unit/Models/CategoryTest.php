@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Enums\CategoryTypeEnum;
 use App\Models\Category;
 use App\Models\Expense;
 use App\Models\Product;
@@ -41,18 +40,4 @@ test('category relationships', function (): void {
         ->and($category->products->first()->id)->toBe($product->id)
         ->and($category->creator->id)->toBe($user->id)
         ->and($category->updater->id)->toBe($user->id);
-});
-
-test('is product category', function (): void {
-    $user = User::factory()->create()->refresh();
-    $category = Category::factory()->create(['type' => CategoryTypeEnum::PRODUCT->value, 'created_by' => $user->id]);
-
-    expect($category->isProductCategory())->toBeTrue();
-});
-
-test('is expense category', function (): void {
-    $user = User::factory()->create()->refresh();
-    $category = Category::factory()->create(['type' => CategoryTypeEnum::EXPENSE->value, 'created_by' => $user->id]);
-
-    expect($category->isExpenseCategory())->toBeTrue();
 });

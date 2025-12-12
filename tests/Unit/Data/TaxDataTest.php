@@ -17,7 +17,7 @@ it('transforms a tax model into TaxData', function (): void {
         ->for($updater, 'updater')
         ->create([
             'name' => 'VAT',
-            'tax_type' => 'percentage',
+            'tax_type' => App\Enums\TaxTypeEnum::PERCENTAGE->value,
             'rate' => 17,
             'is_active' => true,
         ]);
@@ -30,7 +30,7 @@ it('transforms a tax model into TaxData', function (): void {
         ->toBeInstanceOf(TaxData::class)
         ->id->toBe($tax->id)
         ->name->toBe('VAT')
-        ->tax_type->toBe('percentage')
+        ->tax_type->toBe(App\Enums\TaxTypeEnum::PERCENTAGE)
         ->rate->toBe(17)
         ->is_active->toBeTrue()
         ->and($data->creator->resolve())

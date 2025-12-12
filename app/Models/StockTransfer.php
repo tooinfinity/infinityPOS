@@ -78,7 +78,7 @@ final class StockTransfer extends Model
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class, 'reference', 'reference')
-            ->where('stock_movements.type', 'transfer');
+            ->where('stock_movements.type', \App\Enums\StockMovementTypeEnum::TRANSFER->value);
     }
 
     /**

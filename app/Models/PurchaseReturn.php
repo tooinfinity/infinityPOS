@@ -103,31 +103,7 @@ final class PurchaseReturn extends Model
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class, 'reference', 'reference')
-            ->where('stock_movements.type', 'return');
-    }
-
-    /**
-     * Check if return is pending.
-     */
-    public function isPending(): bool
-    {
-        return $this->status === PurchaseReturnStatusEnum::PENDING->value;
-    }
-
-    /**
-     * Check if return is completed.
-     */
-    public function isCompleted(): bool
-    {
-        return $this->status === PurchaseReturnStatusEnum::COMPLETED->value;
-    }
-
-    /**
-     * Check if return is cancelled.
-     */
-    public function isCancelled(): bool
-    {
-        return $this->status === PurchaseReturnStatusEnum::CANCELLED->value;
+            ->where('stock_movements.type', \App\Enums\StockMovementTypeEnum::PURCHASE_RETURN->value);
     }
 
     /**
@@ -146,7 +122,7 @@ final class PurchaseReturn extends Model
             'tax' => 'integer',
             'total' => 'integer',
             'refunded' => 'integer',
-            'status' => 'string',
+            'status' => PurchaseReturnStatusEnum::class,
             'reason' => 'string',
             'notes' => 'string',
             'created_by' => 'integer',

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use App\Enums\PaymentMethodEnum;
 use App\Enums\PaymentTypeEnum;
 use Spatie\LaravelData\Attributes\AutoLazy;
 use Spatie\LaravelData\Attributes\WithCast;
@@ -19,7 +20,7 @@ final class PaymentData extends Data
         public ?string $reference,
         public PaymentTypeEnum $type,
         public int $amount,
-        public string $method,
+        public PaymentMethodEnum $method,
         public ?string $notes,
         public ?int $related_id,
         public Lazy|MoneyboxData|null $moneybox,

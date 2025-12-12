@@ -76,7 +76,7 @@ final class Invoice extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class, 'related_id')
-            ->where('payments.type', 'sale');
+            ->where('payments.type', \App\Enums\PaymentTypeEnum::INVOICE->value);
     }
 
     /**

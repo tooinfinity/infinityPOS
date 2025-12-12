@@ -21,7 +21,7 @@ final class SaleData extends Data
         public ?int $tax,
         public int $total,
         public int $paid,
-        public string $status,
+        public \App\Enums\SaleStatusEnum $status,
         public ?string $notes,
         public Lazy|ClientData|null $client,
         public Lazy|StoreData|null $store,

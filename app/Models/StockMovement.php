@@ -87,7 +87,7 @@ final class StockMovement extends Model
             'product_id' => 'integer',
             'store_id' => 'integer',
             'quantity' => 'integer',
-            'type' => 'string',
+            'type' => \App\Enums\StockMovementTypeEnum::class,
             'reference' => 'string',
             'batch_number' => 'string',
             'notes' => 'string',

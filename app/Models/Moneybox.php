@@ -111,7 +111,7 @@ final class Moneybox extends Model
         return [
             'id' => 'integer',
             'name' => 'string',
-            'type' => 'string',
+            'type' => \App\Enums\MoneyboxTypeEnum::class,
             'description' => 'string',
             'balance' => 'integer',
             'bank_name' => 'string',

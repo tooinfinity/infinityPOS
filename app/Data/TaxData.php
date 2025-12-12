@@ -16,7 +16,7 @@ final class TaxData extends Data
     public function __construct(
         public int $id,
         public string $name,
-        public string $tax_type,
+        public \App\Enums\TaxTypeEnum $tax_type,
         public int $rate,
         public bool $is_active,
         public Lazy|UserData|null $creator,

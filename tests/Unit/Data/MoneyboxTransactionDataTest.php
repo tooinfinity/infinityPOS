@@ -34,6 +34,7 @@ it('transforms an moneybox transaction model into MoneyboxTransactionData', func
     expect($data)
         ->toBeInstanceOf(MoneyboxTransactionData::class)
         ->id->toBe($moneyboxTransaction->id)
+        ->and($data->type)->toBe($moneyboxTransaction->type)
         ->and($data->creator->id)->toBe($creator->id)
         ->and($data->updater->id)->toBe($updater->id)
         ->and($data->moneybox->id)->toBe($moneybox->id)

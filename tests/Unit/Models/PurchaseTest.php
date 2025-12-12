@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Enums\PaymentTypeEnum;
-use App\Enums\PurchaseStatusEnum;
 use App\Enums\StockMovementTypeEnum;
 use App\Models\Payment;
 use App\Models\Product;
@@ -75,20 +74,4 @@ test('purchase relationships', function (): void {
         ->and($purchase->stockMovements->count())->toBe(1)
         ->and($purchase->stockMovements->first()->id)->toBe($stockMovement->id);
 
-});
-
-test('purchase status type', function (): void {
-    $user = User::factory()->create()->refresh();
-    $store = Store::factory()->create(['created_by' => $user->id]);
-    $supplier = Supplier::factory()->create(['created_by' => $user->id]);
-    $purchase = Purchase::factory()->create([
-        'created_by' => $user->id,
-        'store_id' => $store->id,
-        'supplier_id' => $supplier->id,
-        'status' => PurchaseStatusEnum::PENDING->value,
-    ]);
-
-    expect($purchase->isPending())->toBeTrue()
-        ->and($purchase->isReceived())->toBeFalse()
-        ->and($purchase->isCancelled())->toBeFalse();
 });

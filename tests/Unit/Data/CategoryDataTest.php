@@ -19,7 +19,7 @@ it('transforms a category model into CategoryData', function (): void {
         ->create([
             'name' => 'Food',
             'code' => 'F01',
-            'type' => 'goods',
+            'type' => App\Enums\CategoryTypeEnum::PRODUCT->value,
             'is_active' => true,
         ]);
 
@@ -32,7 +32,7 @@ it('transforms a category model into CategoryData', function (): void {
         ->id->toBe($category->id)
         ->name->toBe('Food')
         ->code->toBe('F01')
-        ->type->toBe('goods')
+        ->type->toBe(App\Enums\CategoryTypeEnum::PRODUCT)
         ->is_active->toBeTrue()
         ->and($data->creator->resolve())
         ->toBeInstanceOf(UserData::class)
