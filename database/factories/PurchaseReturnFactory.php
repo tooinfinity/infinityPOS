@@ -37,6 +37,9 @@ final class PurchaseReturnFactory extends Factory
             'purchase_id' => Purchase::factory(),
             'supplier_id' => Supplier::factory(),
             'store_id' => Store::factory(),
+            'subtotal' => $this->faker->randomNumber(4, 1500),
+            'discount' => $this->faker->optional()->randomNumber(4, 1500),
+            'tax' => $this->faker->optional()->randomNumber(4, 1500),
             'total' => $total,
             'refunded' => $refunded,
             'status' => $this->faker->randomElement([

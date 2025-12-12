@@ -16,6 +16,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property-read int $id
  * @property-read string $reference
+ * @property-read int $subtotal
+ * @property-read int|null $discount
+ * @property-read int|null $tax
  * @property-read int $total
  * @property-read int $refunded
  * @property-read string $status
@@ -138,6 +141,9 @@ final class PurchaseReturn extends Model
             'purchase_id' => 'integer',
             'supplier_id' => 'integer',
             'store_id' => 'integer',
+            'subtotal' => 'integer',
+            'discount' => 'integer',
+            'tax' => 'integer',
             'total' => 'integer',
             'refunded' => 'integer',
             'status' => 'string',

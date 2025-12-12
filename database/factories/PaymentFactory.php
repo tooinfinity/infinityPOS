@@ -78,4 +78,13 @@ final class PaymentFactory extends Factory
             'related_id' => $expenseId,
         ]);
     }
+
+    public function forInvoice(int $invoiceId): self
+    {
+        return $this->state(fn (array $attrs): array => [
+            ...$attrs,
+            'type' => PaymentTypeEnum::INVOICE->value,
+            'related_id' => $invoiceId,
+        ]);
+    }
 }

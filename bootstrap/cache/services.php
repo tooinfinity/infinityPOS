@@ -38,8 +38,10 @@
     34 => 'NunoMaduro\\Essentials\\EssentialsServiceProvider',
     35 => 'Termwind\\Laravel\\TermwindServiceProvider',
     36 => 'Pest\\Laravel\\PestServiceProvider',
-    37 => 'Spatie\\Permission\\PermissionServiceProvider',
-    38 => 'App\\Providers\\AppServiceProvider',
+    37 => 'Spatie\\LaravelData\\LaravelDataServiceProvider',
+    38 => 'Spatie\\Permission\\PermissionServiceProvider',
+    39 => 'Spatie\\StructureDiscoverer\\StructureDiscovererServiceProvider',
+    40 => 'App\\Providers\\AppServiceProvider',
   ),
   'eager' => 
   array (
@@ -66,8 +68,10 @@
     20 => 'NunoMaduro\\Essentials\\EssentialsServiceProvider',
     21 => 'Termwind\\Laravel\\TermwindServiceProvider',
     22 => 'Pest\\Laravel\\PestServiceProvider',
-    23 => 'Spatie\\Permission\\PermissionServiceProvider',
-    24 => 'App\\Providers\\AppServiceProvider',
+    23 => 'Spatie\\LaravelData\\LaravelDataServiceProvider',
+    24 => 'Spatie\\Permission\\PermissionServiceProvider',
+    25 => 'Spatie\\StructureDiscoverer\\StructureDiscovererServiceProvider',
+    26 => 'App\\Providers\\AppServiceProvider',
   ),
   'deferred' => 
   array (

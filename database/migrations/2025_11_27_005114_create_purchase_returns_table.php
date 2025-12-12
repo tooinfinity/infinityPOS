@@ -13,6 +13,9 @@ return new class extends Migration
         Schema::create('purchase_returns', function (Blueprint $table): void {
             $table->id();
             $table->string('reference')->unique();
+            $table->unsignedBigInteger('subtotal');
+            $table->unsignedBigInteger('discount')->nullable();
+            $table->unsignedBigInteger('tax')->nullable();
             $table->unsignedBigInteger('total');
             $table->unsignedBigInteger('refunded');
             $table->string('status', 20)->index();
