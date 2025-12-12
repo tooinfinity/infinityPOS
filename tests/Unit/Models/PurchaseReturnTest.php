@@ -28,6 +28,9 @@ test('to array', function (): void {
         ->toBe([
             'id',
             'reference',
+            'subtotal',
+            'discount',
+            'tax',
             'total',
             'refunded',
             'status',

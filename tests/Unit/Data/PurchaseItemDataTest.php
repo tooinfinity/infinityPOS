@@ -40,6 +40,7 @@ it('transforms a purchase item model into PurchaseItemData', function (): void {
         ->tax_amount->toBe(100)
         ->total->toBe(1550)
         ->batch_number->toBe('PB-001')
+        ->expiry_date->toBeNull()
         ->remaining_quantity->toBe(6)
         ->and($data->product->resolve())
         ->toBeInstanceOf(ProductData::class)

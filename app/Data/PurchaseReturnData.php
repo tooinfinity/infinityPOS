@@ -16,6 +16,9 @@ final class PurchaseReturnData extends Data
     public function __construct(
         public int $id,
         public string $reference,
+        public int $subtotal,
+        public ?int $discount,
+        public ?int $tax,
         public int $total,
         public int $refunded,
         public string $status,
