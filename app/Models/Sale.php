@@ -103,7 +103,7 @@ final class Sale extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class, 'related_id')
-            ->where('payments.type', 'sale');
+            ->where('payments.type', \App\Enums\PaymentTypeEnum::SALE->value);
     }
 
     /**
@@ -112,7 +112,7 @@ final class Sale extends Model
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class, 'reference', 'reference')
-            ->where('stock_movements.type', 'sale');
+            ->where('stock_movements.type', \App\Enums\StockMovementTypeEnum::SALE->value);
     }
 
     /**
@@ -154,7 +154,7 @@ final class Sale extends Model
             'tax' => 'integer',
             'total' => 'integer',
             'paid' => 'integer',
-            'status' => 'string',
+            'status' => \App\Enums\SaleStatusEnum::class,
             'notes' => 'string',
             'created_by' => 'integer',
             'updated_by' => 'integer',

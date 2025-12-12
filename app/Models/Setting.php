@@ -47,7 +47,7 @@ final class Setting extends Model
             'type' => SettingTypeEnum::class,
             'group' => 'string',
             'description' => 'string',
-            'updated_by' => 'string',
+            'updated_by' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

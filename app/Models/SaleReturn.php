@@ -147,7 +147,7 @@ final class SaleReturn extends Model
             'tax' => 'integer',
             'total' => 'integer',
             'refunded' => 'integer',
-            'status' => 'string',
+            'status' => \App\Enums\SaleReturnStatusEnum::class,
             'reason' => 'string',
             'notes' => 'string',
             'created_by' => 'integer',

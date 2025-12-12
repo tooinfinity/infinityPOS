@@ -88,7 +88,7 @@ final class Category extends Model
             'id' => 'integer',
             'name' => 'string',
             'code' => 'string',
-            'type' => 'string',
+            'type' => \App\Enums\CategoryTypeEnum::class,
             'is_active' => 'boolean',
             'created_by' => 'integer',
             'updated_by' => 'integer',

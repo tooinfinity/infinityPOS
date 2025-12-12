@@ -31,7 +31,7 @@ final class CompanyData extends Data
         public string $currency_symbol,
         public string $timezone,
         public string $date_format,
-        public Lazy|BusinessIdentifierData $businessIdentifier,
+        public Lazy|BusinessIdentifierData|null $businessIdentifier,
         #[WithCast(DateTimeInterfaceCast::class)]
         public ?string $created_at,
         #[WithCast(DateTimeInterfaceCast::class)]

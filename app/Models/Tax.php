@@ -78,7 +78,7 @@ final class Tax extends Model
         return [
             'id' => 'integer',
             'name' => 'string',
-            'tax_type' => 'string',
+            'tax_type' => \App\Enums\TaxTypeEnum::class,
             'rate' => 'integer',
             'is_active' => 'boolean',
             'created_by' => 'integer',

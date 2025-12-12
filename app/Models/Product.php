@@ -96,6 +96,7 @@ final class Product extends Model
     public function stores(): BelongsToMany
     {
         return $this->belongsToMany(Store::class, 'store_stock')
+            ->using(StoreStock::class)
             ->withPivot('quantity')
             ->withTimestamps();
     }

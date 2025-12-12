@@ -89,7 +89,7 @@ final class Payment extends Model
             'reference' => 'string',
             'type' => PaymentTypeEnum::class,
             'amount' => 'integer',
-            'method' => 'string',
+            'method' => \App\Enums\PaymentMethodEnum::class,
             'notes' => 'string',
             'related_id' => 'integer',
             'moneybox_id' => 'integer',
