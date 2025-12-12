@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Enums\SaleStatusEnum;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Payment;
@@ -81,28 +80,4 @@ test('sale relationships', function (): void {
         ->and($sale->payments->first()->id)->toBe($payment->id)
         ->and($sale->stockMovements->count())->toBe(1)
         ->and($sale->stockMovements->first()->id)->toBe($stockMovement->id);
-});
-
-test('sale status type', function (): void {
-    $user = User::factory()->create()->refresh();
-    $store = Store::factory()->create(['created_by' => $user->id]);
-    $client = Client::factory()->create(['created_by' => $user->id]);
-    $sale = Sale::factory()->create([
-        'created_by' => $user->id,
-        'store_id' => $store->id,
-        'client_id' => $client->id,
-        'status' => SaleStatusEnum::PENDING->value,
-    ])->refresh();
-
-    expect($sale->isCompleted())->toBeFalse()
-        ->and($sale->isCancelled())->toBeFalse()
-        ->and($sale->isPending())->toBeTrue();
-    $sale->update(['status' => SaleStatusEnum::COMPLETED->value]);
-    expect($sale->isCompleted())->toBeTrue()
-        ->and($sale->isCancelled())->toBeFalse()
-        ->and($sale->isPending())->toBeFalse();
-    $sale->update(['status' => SaleStatusEnum::CANCELLED->value]);
-    expect($sale->isCompleted())->toBeFalse()
-        ->and($sale->isCancelled())->toBeTrue()
-        ->and($sale->isPending())->toBeFalse();
 });

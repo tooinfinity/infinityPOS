@@ -25,7 +25,7 @@ it('transforms a stock movement model into StockMovementData', function (): void
         ->for($product, 'product')
         ->create([
             'quantity' => 10,
-            'type' => 'purchase',
+            'type' => App\Enums\StockMovementTypeEnum::PURCHASE->value,
             'reference' => 'REF-100',
             'batch_number' => 'BATCH-1',
             'notes' => 'Initial stock',
@@ -39,7 +39,7 @@ it('transforms a stock movement model into StockMovementData', function (): void
         ->toBeInstanceOf(StockMovementData::class)
         ->id->toBe($movement->id)
         ->quantity->toBe(10)
-        ->type->toBe('purchase')
+        ->type->toBe(App\Enums\StockMovementTypeEnum::PURCHASE)
         ->reference->toBe('REF-100')
         ->batch_number->toBe('BATCH-1')
         ->notes->toBe('Initial stock')

@@ -34,7 +34,7 @@ it('transforms a sale return model into SaleReturnData', function (): void {
             'tax' => 0,
             'total' => 5000,
             'refunded' => 3000,
-            'status' => 'pending',
+            'status' => App\Enums\SaleReturnStatusEnum::PENDING->value,
             'reason' => 'Damaged',
             'notes' => 'Process refund',
         ]);
@@ -52,7 +52,7 @@ it('transforms a sale return model into SaleReturnData', function (): void {
         ->tax->toBe(0)
         ->total->toBe(5000)
         ->refunded->toBe(3000)
-        ->status->toBe('pending')
+        ->status->toBe(App\Enums\SaleReturnStatusEnum::PENDING)
         ->reason->toBe('Damaged')
         ->notes->toBe('Process refund')
         ->and($data->sale->resolve())

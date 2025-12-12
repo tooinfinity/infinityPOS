@@ -91,7 +91,7 @@ final class Product extends Model
     }
 
     /**
-     * @return BelongsToMany<Store, $this>
+     * @return BelongsToMany<Store, $this, StoreStock>
      */
     public function stores(): BelongsToMany
     {

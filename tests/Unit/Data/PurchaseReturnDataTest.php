@@ -31,7 +31,7 @@ it('transforms a purchase return model into PurchaseReturnData', function (): vo
             'reference' => 'PR-0001',
             'total' => 3000,
             'refunded' => 1000,
-            'status' => 'pending',
+            'status' => App\Enums\PurchaseReturnStatusEnum::PENDING->value,
             'reason' => 'Defective',
             'notes' => 'Awaiting supplier approval',
         ]);
@@ -46,7 +46,7 @@ it('transforms a purchase return model into PurchaseReturnData', function (): vo
         ->reference->toBe('PR-0001')
         ->total->toBe(3000)
         ->refunded->toBe(1000)
-        ->status->toBe('pending')
+        ->status->toBe(App\Enums\PurchaseReturnStatusEnum::PENDING)
         ->reason->toBe('Defective')
         ->notes->toBe('Awaiting supplier approval')
         ->and($data->purchase->resolve())

@@ -44,7 +44,7 @@ test('payment relationships', function (): void {
 test('payment type', function (): void {
     $user = User::factory()->create()->refresh();
     $moneybox = Moneybox::factory()->create(['created_by' => $user->id]);
-    $payment = Payment::factory()->create(['method' => PaymentMethodEnum::CASH->value, 'moneybox_id' => $moneybox->id, 'created_by' => $user->id]);
+    $payment = Payment::factory()->create(['method' => PaymentMethodEnum::CASH, 'moneybox_id' => $moneybox->id, 'created_by' => $user->id]);
 
     expect($payment->isCash())->toBeTrue()
         ->and($payment->isCard())->toBeFalse()

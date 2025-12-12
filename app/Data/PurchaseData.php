@@ -21,7 +21,7 @@ final class PurchaseData extends Data
         public ?int $tax,
         public int $total,
         public int $paid,
-        public string $status,
+        public \App\Enums\PurchaseStatusEnum $status,
         public ?string $notes,
         public Lazy|SupplierData|null $supplier,
         public Lazy|StoreData|null $store,

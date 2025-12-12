@@ -106,30 +106,6 @@ final class Purchase extends Model
     }
 
     /**
-     * Check if the purchase is pending.
-     */
-    public function isPending(): bool
-    {
-        return $this->status === PurchaseStatusEnum::PENDING->value;
-    }
-
-    /**
-     * Check if the purchase is received.
-     */
-    public function isReceived(): bool
-    {
-        return $this->status === PurchaseStatusEnum::RECEIVED->value;
-    }
-
-    /**
-     * Check if the purchase is cancelled.
-     */
-    public function isCancelled(): bool
-    {
-        return $this->status === PurchaseStatusEnum::CANCELLED->value;
-    }
-
-    /**
      * @return array<string, string>
      */
     public function casts(): array
@@ -144,7 +120,7 @@ final class Purchase extends Model
             'tax' => 'integer',
             'total' => 'integer',
             'paid' => 'integer',
-            'status' => \App\Enums\PurchaseStatusEnum::class,
+            'status' => PurchaseStatusEnum::class,
             'notes' => 'string',
             'created_by' => 'integer',
             'updated_by' => 'integer',

@@ -30,7 +30,7 @@ it('transforms a sale model into SaleData', function (): void {
             'tax' => 1900,
             'total' => 11400,
             'paid' => 5000,
-            'status' => 'completed',
+            'status' => App\Enums\SaleStatusEnum::COMPLETED->value,
             'notes' => 'Thanks for your purchase',
         ]);
 
@@ -47,7 +47,7 @@ it('transforms a sale model into SaleData', function (): void {
         ->tax->toBe(1900)
         ->total->toBe(11400)
         ->paid->toBe(5000)
-        ->status->toBe('completed')
+        ->status->toBe(App\Enums\SaleStatusEnum::COMPLETED)
         ->notes->toBe('Thanks for your purchase')
         ->and($data->client->resolve())
         ->toBeInstanceOf(ClientData::class)

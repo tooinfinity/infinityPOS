@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Enums\PaymentTypeEnum;
-use App\Enums\PurchaseReturnStatusEnum;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Purchase;
@@ -71,7 +70,7 @@ test('purchase return relationships', function (): void {
     $payment = Payment::factory()->create(['type' => PaymentTypeEnum::PURCHASE->value, 'related_id' => $purchaseReturn->id, 'created_by' => $user->id]);
     $stockMovement = StockMovement::factory()->create([
         'reference' => $purchaseReturn->reference,
-        'type' => 'return',
+        'type' => App\Enums\StockMovementTypeEnum::PURCHASE_RETURN->value,
         'product_id' => $product->id,
         'store_id' => $store->id,
         'created_by' => $user->id,
@@ -88,32 +87,4 @@ test('purchase return relationships', function (): void {
         ->and($purchaseReturn->payments->first()->id)->toBe($payment->id)
         ->and($purchaseReturn->stockMovements->count())->toBe(1)
         ->and($purchaseReturn->stockMovements->first()->id)->toBe($stockMovement->id);
-});
-
-test('purchase return status', function (): void {
-    $user = User::factory()->create()->refresh();
-    $store = Store::factory()->create(['created_by' => $user->id]);
-    $supplier = Supplier::factory()->create(['created_by' => $user->id]);
-    $purchase = Purchase::factory()->create(['created_by' => $user->id, 'store_id' => $store->id, 'supplier_id' => $supplier->id]);
-    $purchaseReturn = PurchaseReturn::factory()->create([
-        'created_by' => $user->id,
-        'store_id' => $store->id,
-        'supplier_id' => $supplier->id,
-        'purchase_id' => $purchase->id,
-        'status' => PurchaseReturnStatusEnum::PENDING->value,
-    ])->refresh();
-
-    expect($purchaseReturn->isPending())->toBeTrue()
-        ->and($purchaseReturn->isCompleted())->toBeFalse()
-        ->and($purchaseReturn->isCancelled())->toBeFalse();
-
-    $purchaseReturn->update(['status' => PurchaseReturnStatusEnum::COMPLETED->value]);
-    expect($purchaseReturn->isPending())->toBeFalse()
-        ->and($purchaseReturn->isCompleted())->toBeTrue()
-        ->and($purchaseReturn->isCancelled())->toBeFalse();
-
-    $purchaseReturn->update(['status' => PurchaseReturnStatusEnum::CANCELLED->value]);
-    expect($purchaseReturn->isPending())->toBeFalse()
-        ->and($purchaseReturn->isCompleted())->toBeFalse()
-        ->and($purchaseReturn->isCancelled())->toBeTrue();
 });

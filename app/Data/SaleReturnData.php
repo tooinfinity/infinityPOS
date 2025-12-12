@@ -21,7 +21,7 @@ final class SaleReturnData extends Data
         public ?int $tax,
         public int $total,
         public int $refunded,
-        public string $status,
+        public \App\Enums\SaleReturnStatusEnum $status,
         public ?string $reason,
         public ?string $notes,
         public Lazy|SaleData|null $sale,

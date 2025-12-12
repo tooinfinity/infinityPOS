@@ -107,30 +107,6 @@ final class PurchaseReturn extends Model
     }
 
     /**
-     * Check if return is pending.
-     */
-    public function isPending(): bool
-    {
-        return $this->status === PurchaseReturnStatusEnum::PENDING->value;
-    }
-
-    /**
-     * Check if return is completed.
-     */
-    public function isCompleted(): bool
-    {
-        return $this->status === PurchaseReturnStatusEnum::COMPLETED->value;
-    }
-
-    /**
-     * Check if return is cancelled.
-     */
-    public function isCancelled(): bool
-    {
-        return $this->status === PurchaseReturnStatusEnum::CANCELLED->value;
-    }
-
-    /**
      * @return array<string, string>
      */
     public function casts(): array
@@ -146,7 +122,7 @@ final class PurchaseReturn extends Model
             'tax' => 'integer',
             'total' => 'integer',
             'refunded' => 'integer',
-            'status' => \App\Enums\PurchaseReturnStatusEnum::class,
+            'status' => PurchaseReturnStatusEnum::class,
             'reason' => 'string',
             'notes' => 'string',
             'created_by' => 'integer',

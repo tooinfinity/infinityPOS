@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read string|null $reference
  * @property-read PaymentTypeEnum $type
  * @property-read int $amount
- * @property-read string $method
+ * @property-read PaymentMethodEnum $method
  * @property-read string|null $notes
  * @property-read int|null $related_id
  * @property-read CarbonInterface $created_at
@@ -60,7 +60,7 @@ final class Payment extends Model
      */
     public function isCash(): bool
     {
-        return $this->method === PaymentMethodEnum::CASH->value;
+        return $this->method === PaymentMethodEnum::CASH;
     }
 
     /**
@@ -68,7 +68,7 @@ final class Payment extends Model
      */
     public function isCard(): bool
     {
-        return $this->method === PaymentMethodEnum::CARD->value;
+        return $this->method === PaymentMethodEnum::CARD;
     }
 
     /**
@@ -76,7 +76,7 @@ final class Payment extends Model
      */
     public function isTransfer(): bool
     {
-        return $this->method === PaymentMethodEnum::TRANSFER->value;
+        return $this->method === PaymentMethodEnum::TRANSFER;
     }
 
     /**
@@ -89,7 +89,7 @@ final class Payment extends Model
             'reference' => 'string',
             'type' => PaymentTypeEnum::class,
             'amount' => 'integer',
-            'method' => \App\Enums\PaymentMethodEnum::class,
+            'method' => PaymentMethodEnum::class,
             'notes' => 'string',
             'related_id' => 'integer',
             'moneybox_id' => 'integer',

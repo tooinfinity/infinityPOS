@@ -55,22 +55,6 @@ final class Tax extends Model
     }
 
     /**
-     * Check if tax is percentage type.
-     */
-    public function isPercentage(): bool
-    {
-        return $this->tax_type === TaxTypeEnum::PERCENTAGE->value;
-    }
-
-    /**
-     * Check if tax is fixed type.
-     */
-    public function isFixed(): bool
-    {
-        return $this->tax_type === TaxTypeEnum::FIXED->value;
-    }
-
-    /**
      * @return array<string, string>
      */
     public function casts(): array
@@ -78,7 +62,7 @@ final class Tax extends Model
         return [
             'id' => 'integer',
             'name' => 'string',
-            'tax_type' => \App\Enums\TaxTypeEnum::class,
+            'tax_type' => TaxTypeEnum::class,
             'rate' => 'integer',
             'is_active' => 'boolean',
             'created_by' => 'integer',
