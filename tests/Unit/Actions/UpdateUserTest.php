@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\UpdateUser;
+use App\Data\UpdateUserData;
 use App\Models\User;
 
 it('may update a user', function (): void {
@@ -13,9 +14,12 @@ it('may update a user', function (): void {
 
     $action = resolve(UpdateUser::class);
 
-    $action->handle($user, [
+    $data = UpdateUserData::from([
         'name' => 'New Name',
+        'email' => 'old@email.com',
     ]);
+
+    $action->handle($user, $data);
 
     expect($user->refresh()->name)->toBe('New Name')
         ->and($user->email)->toBe('old@email.com');

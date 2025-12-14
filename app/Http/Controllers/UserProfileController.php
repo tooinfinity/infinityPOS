@@ -6,8 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Actions\DeleteUser;
 use App\Actions\UpdateUser;
-use App\Http\Requests\DeleteUserRequest;
-use App\Http\Requests\UpdateUserRequest;
+use App\Data\DeleteUserData;
+use App\Data\UpdateUserData;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
@@ -25,21 +25,21 @@ final readonly class UserProfileController
         ]);
     }
 
-    public function update(UpdateUserRequest $request, #[CurrentUser] User $user, UpdateUser $action): RedirectResponse
+    public function update(UpdateUserData $data, #[CurrentUser] User $user, UpdateUser $action): RedirectResponse
     {
-        $action->handle($user, $request->validated());
+        $action->handle($user, $data);
 
         return to_route('user-profile.edit');
     }
 
-    public function destroy(DeleteUserRequest $request, #[CurrentUser] User $user, DeleteUser $action): RedirectResponse
+    public function destroy(DeleteUserData $data, #[CurrentUser] User $user, DeleteUser $action): RedirectResponse
     {
         Auth::logout();
 
         $action->handle($user);
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
 
         return to_route('login');
     }

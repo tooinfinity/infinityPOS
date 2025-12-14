@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Actions\CreateUser;
+use App\Data\CreateSetupData;
+use App\Data\CreateUserData;
 use App\Enums\PermissionEnum;
 use App\Enums\RoleEnum;
-use App\Http\Requests\CreateUserRequest;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Throwable;
@@ -284,35 +285,35 @@ final class AppSetupCommand extends Command
         string $password,
         string $passwordConfirmation
     ): bool {
-        $validator = $this->validateCredentials($name, $email, $password, $passwordConfirmation);
-
-        if ($validator->fails()) {
-            $this->showValidationErrors(array_values($validator->errors()->all()));
-
-            return false;
-        }
-
         try {
-            $admin = $this->createAndAssignRole($createUser, $name, $email, $password);
+            $setupData = CreateSetupData::validateAndCreate([
+                'name' => $name,
+                'email' => $email,
+                'password' => $password,
+                'password_confirmation' => $passwordConfirmation,
+                'role' => RoleEnum::ADMIN,
+            ]);
+
+            $userData = CreateUserData::from([
+                'name' => $setupData->name,
+                'email' => $setupData->email,
+                'password' => $setupData->password,
+                'role' => $setupData->role,
+            ]);
+
+            $admin = $this->createAndAssignRole($createUser, $userData);
             $this->showUserCreatedSuccess($admin);
 
             return true;
+        } catch (ValidationException $e) {
+            $this->showValidationErrors(array_values($e->validator->errors()->all()));
+
+            return false;
         } catch (Throwable $throwable) {
             $this->error('   ❌ Failed to create admin user: '.$throwable->getMessage());
 
             return false;
         }
-    }
-
-    private function validateCredentials(string $name, string $email, string $password, string $confirmation): \Illuminate\Validation\Validator
-    {
-        return Validator::make([
-            'name' => $name,
-            'email' => $email,
-            'password' => $password,
-            'password_confirmation' => $confirmation,
-            'role' => RoleEnum::ADMIN->value,
-        ], (new CreateUserRequest)->rules());
     }
 
     /**
@@ -326,9 +327,9 @@ final class AppSetupCommand extends Command
         }
     }
 
-    private function createAndAssignRole(CreateUser $createUser, string $name, string $email, string $password): User
+    private function createAndAssignRole(CreateUser $createUser, CreateUserData $data): User
     {
-        $admin = $createUser->handle(['name' => $name, 'email' => $email], $password);
+        $admin = $createUser->handle($data);
         $admin->assignRole(RoleEnum::ADMIN->value);
 
         return $admin;

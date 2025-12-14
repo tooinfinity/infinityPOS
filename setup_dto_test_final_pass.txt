@@ -1,0 +1,26 @@
+
+   PASS  Tests\Unit\Data\CreateSetupDataTest
+  ✓ it validates setup data                                              0.22s  
+  ✓ it throws exception when passwords do not match                      0.03s  
+
+   PASS  Tests\Unit\Console\Commands\AppSetupCommandTest
+  ✓ basic setup → it runs setup command successfully                     0.30s  
+  ✓ basic setup → it creates all roles during setup                      0.30s  
+  ✓ basic setup → it syncs permissions during setup                      0.56s  
+  ✓ basic setup → it removes obsolete permissions and shows warning      0.29s  
+  ✓ admin user creation → it creates admin user with command options     0.30s  
+  ✓ admin user creation → it creates admin user with interactive prompt… 0.31s  
+  ✓ admin user creation → it skips user creation when skip-user option…  0.30s  
+  ✓ password validation → it handles password mismatch with retry        0.32s  
+  ✓ password validation → it handles password mismatch without retry     0.30s  
+  ✓ password validation → it handles weak password validation with retr… 0.31s  
+  ✓ password validation → it handles weak password validation without r… 0.31s  
+  ✓ error handling → it handles user creation failure with exception     0.31s  
+  ✓ fresh setup → it cleans up existing roles and permissions when fres… 0.30s  
+  ✓ fresh setup → it cancels setup when fresh confirmation is denied     0.03s  
+  ✓ fresh setup → it handles command with all options                    0.31s  
+  ✓ fresh setup → it prevents running fresh command in production        0.03s  
+
+  Tests:    18 passed (111 assertions)
+  Duration: 4.88s
+

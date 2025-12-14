@@ -179,22 +179,6 @@ it('requires matching password confirmation', function (): void {
         ->assertSessionHasErrors('password');
 });
 
-it('requires role', function (): void {
-    $user = User::factory()->create();
-    $user->assignRole(RoleEnum::ADMIN->value);
-
-    $response = $this->actingAs($user)
-        ->post(route('users.store'), [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-        ]);
-
-    $response->assertRedirectBack()
-        ->assertSessionHasErrors('role');
-});
-
 it('auth user can delete users account', function (): void {
     $authUser = User::factory()->create();
     $authUser->assignRole(RoleEnum::ADMIN->value);

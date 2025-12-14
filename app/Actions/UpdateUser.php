@@ -4,19 +4,16 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Data\UpdateUserData;
 use App\Models\User;
 
 final readonly class UpdateUser
 {
-    /**
-     * @param  array<string, mixed>  $attributes
-     */
-    public function handle(User $user, array $attributes): void
+    public function handle(User $user, UpdateUserData $data): void
     {
-        // $email = $attributes['email'] ?? null;
-
         $user->update([
-            ...$attributes,
+            'name' => $data->name,
+            'email' => $data->email,
         ]);
     }
 }

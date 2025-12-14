@@ -70,14 +70,14 @@ You’re on a solid architectural path: strong type safety, DTOs via Spatie Data
 - [ ] Concurrency: row locks on StoreStock (and InventoryLayers once added).
 
 ### Schema changes
-- [ ] Payments: add related_type, related_id (polymorphic); backfill from existing fields; drop legacy type fields.
-- [ ] StockMovements: add source_type, source_id (polymorphic); migrate references.
-- [ ] Introduce inventory_layers/product_batches:
+- [x] Payments: add related_type, related_id (polymorphic); backfill from existing fields; drop legacy type fields.
+- [x] StockMovements: add source_type, source_id (polymorphic); migrate references.
+- [x] Introduce inventory_layers/product_batches:
       product_id, store_id, batch_number, expiry_date, unit_cost, received_qty, remaining_qty, received_at
       unique(product_id, store_id, batch_number, expiry_date)
-- [ ] Remove remaining_quantity from PurchaseItem once layers adopted; migrate data.
-- [ ] Align FK onDelete policies; make user FKs nullable if user deletion is allowed; otherwise restrict.
-- [ ] Add/verify supporting indexes on frequent filters and orderings.
+- [x] Remove remaining_quantity from PurchaseItem once layers adopted; migrate data.
+- [x] Align FK onDelete policies; make user FKs nullable if user deletion is allowed; otherwise restrict.
+- [x] Add/verify supporting indexes on frequent filters and orderings.
 
 ### Models and domain services
 - [ ] Choose guarded = [] vs fillable and apply uniformly.

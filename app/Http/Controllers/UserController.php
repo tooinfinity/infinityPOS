@@ -7,10 +7,10 @@ namespace App\Http\Controllers;
 use App\Actions\CreateUser;
 use App\Actions\DeleteUser;
 use App\Actions\UpdateUser;
+use App\Data\CreateUserData;
+use App\Data\UpdateUserData;
+use App\Data\UserData;
 use App\Enums\RoleEnum;
-use App\Http\Requests\CreateUserRequest;
-use App\Http\Requests\UpdateUserRequest;
-use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -26,40 +26,31 @@ final readonly class UserController
             ->paginate(20);
 
         return Inertia::render('user/index', [
-            'users' => UserResource::collection($users),
+            'users' => UserData::collect($users),
             'available_roles' => RoleEnum::toArray(),
         ]);
     }
 
-    public function store(CreateUserRequest $request, CreateUser $action): RedirectResponse
+    public function store(CreateUserData $data, CreateUser $action): RedirectResponse
     {
-        /** @var array<string, mixed> $attributes */
-        $attributes = $request->safe()->except(['password', 'role']);
+        $user = $action->handle($data);
 
-        $user = $action->handle(
-            $attributes,
-            $request->string('password')->value(),
-        );
-
-        if ($request->has('role')) {
-            $user->assignRole($request->string('role')->value());
+        if ($data->role instanceof RoleEnum) {
+            $user->assignRole($data->role->value);
         }
 
         return back();
     }
 
-    public function update(UpdateUserRequest $request, User $user, UpdateUser $action): RedirectResponse
+    public function update(UpdateUserData $data, User $user, UpdateUser $action): RedirectResponse
     {
-        /** @var array<string, mixed> $attributes */
-        $attributes = $request->safe()->except(['role']);
-
         $action->handle(
             $user,
-            $attributes,
+            $data,
         );
 
-        if ($request->has('role')) {
-            $user->syncRoles([$request->string('role')->value()]);
+        if ($data->role instanceof RoleEnum) {
+            $user->syncRoles([$data->role->value]);
         }
 
         return back();
