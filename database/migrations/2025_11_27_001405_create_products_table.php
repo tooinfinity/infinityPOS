@@ -28,8 +28,8 @@ return new class extends Migration
             $table->foreignId('brand_id')->nullable()->constrained();
             $table->foreignId('unit_id')->nullable()->constrained();
             $table->foreignId('tax_id')->nullable()->constrained();
-            $table->foreignId('created_by')->references('id')->on('users');
-            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
+            $table->foreignId('created_by')->nullable()->references('id')->on('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users')->nullOnDelete();
 
             $table->timestamps();
 

@@ -19,9 +19,9 @@ return new class extends Migration
             $table->unsignedBigInteger('balance');
             $table->boolean('is_active')->default(true);
 
-            $table->foreignId('created_by')->references('id')->on('users');
-            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
             $table->foreignId('business_identifier_id')->nullable()->constrained();
+            $table->foreignId('created_by')->nullable()->references('id')->on('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users')->nullOnDelete();
 
             $table->timestamps();
         });

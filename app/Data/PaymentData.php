@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Enums\PaymentMethodEnum;
-use App\Enums\PaymentTypeEnum;
 use Spatie\LaravelData\Attributes\AutoLazy;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
@@ -18,7 +17,7 @@ final class PaymentData extends Data
     public function __construct(
         public int $id,
         public ?string $reference,
-        public PaymentTypeEnum $type,
+        public ?string $related_type,
         public int $amount,
         public PaymentMethodEnum $method,
         public ?string $notes,

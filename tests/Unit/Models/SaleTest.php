@@ -58,10 +58,10 @@ test('sale relationships', function (): void {
     $item = SaleItem::factory()->create(['sale_id' => $sale->id, 'product_id' => $product->id]);
     $return = SaleReturn::factory()->create(['sale_id' => $sale->id, 'store_id' => $store->id, 'created_by' => $user->id]);
     $invoice = Invoice::factory()->create(['sale_id' => $sale->id, 'created_by' => $user->id]);
-    $payment = Payment::factory()->create(['type' => 'sale', 'related_id' => $sale->id, 'created_by' => $user->id]);
+    $payment = Payment::factory()->forSale($sale->id)->create(['created_by' => $user->id]);
     $stockMovement = StockMovement::factory()->create([
-        'type' => 'sale',
-        'reference' => $sale->reference,
+        'source_type' => Sale::class,
+        'source_id' => $sale->id,
         'product_id' => $product->id,
         'store_id' => $store->id,
         'created_by' => $user->id,

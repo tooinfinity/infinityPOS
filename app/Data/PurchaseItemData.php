@@ -23,7 +23,7 @@ final class PurchaseItemData extends Data
         public ?string $batch_number,
         #[WithCast(DateTimeInterfaceCast::class)]
         public ?string $expiry_date,
-        public ?int $remaining_quantity,
+
         public Lazy|ProductData|null $product,
         #[WithCast(DateTimeInterfaceCast::class)]
         public ?string $created_at,

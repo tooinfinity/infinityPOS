@@ -22,8 +22,8 @@ return new class extends Migration
             $table->foreignId('payment_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('expense_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('transfer_to_id')->nullable()->constrained('moneyboxes')->nullOnDelete();
-            $table->foreignId('created_by')->references('id')->on('users');
-            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
+            $table->foreignId('created_by')->nullable()->references('id')->on('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users')->nullOnDelete();
 
             $table->timestamps();
 

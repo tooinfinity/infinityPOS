@@ -38,18 +38,18 @@ final class PurchaseItemFactory extends Factory
             'total' => $total,
             'batch_number' => $this->faker->optional(0.2)->bothify('BATCH-#####'),
             'expiry_date' => null,
-            'remaining_quantity' => $quantity,
+            // 'remaining_quantity' removed (inventory tracked via layers)
         ];
     }
 
     public function ordered(): self
     {
-        return $this->state(fn (array $attributes): array => [...$attributes, 'remaining_quantity' => 0]);
+        return $this->state(fn (array $attributes): array => $attributes);
     }
 
     public function unordered(): self
     {
-        return $this->state(fn (array $attributes): array => [...$attributes, 'remaining_quantity' => $attributes['quantity']]);
+        return $this->state(fn (array $attributes): array => $attributes);
     }
 
     public function forPurchase(int $purchaseId): self

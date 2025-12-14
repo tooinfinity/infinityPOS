@@ -23,15 +23,15 @@ final class StockMovementFactory extends Factory
      */
     public function definition(): array
     {
-        $type = $this->faker->randomElement(array_map(fn (StockMovementTypeEnum $e) => $e->value, StockMovementTypeEnum::cases()));
+        // type removed; using polymorphic source instead
         $qty = $this->faker->randomNumber(2, 50);
 
         return [
             'product_id' => Product::factory(),
             'store_id' => Store::factory(),
             'quantity' => $qty,
-            'type' => $type,
-            'reference' => $this->faker->optional()->bothify('REF-#####'),
+            'source_type' => null,
+            'source_id' => null,
             'batch_number' => $this->faker->optional(0.2)->bothify('BATCH-#####'),
             'notes' => $this->faker->optional()->sentence(6),
             'created_by' => User::factory(),

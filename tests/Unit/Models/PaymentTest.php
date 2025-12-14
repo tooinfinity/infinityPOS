@@ -16,10 +16,10 @@ test('to array', function (): void {
         ->toBe([
             'id',
             'reference',
-            'type',
             'amount',
             'method',
             'notes',
+            'related_type',
             'related_id',
             'moneybox_id',
             'created_by',

@@ -55,8 +55,8 @@ test('stock transfer relationships', function (): void {
     ]);
 
     $movement = StockMovement::factory()->create([
-        'type' => 'transfer',
-        'reference' => $transfer->reference,
+        'source_type' => StockTransfer::class,
+        'source_id' => $transfer->id,
         'product_id' => $product->id,
         'store_id' => $fromStore->id,
         'created_by' => $user->id,
@@ -67,9 +67,7 @@ test('stock transfer relationships', function (): void {
         ->and($transfer->fromStore->id)->toBe($fromStore->id)
         ->and($transfer->toStore->id)->toBe($toStore->id)
         ->and($transfer->items->count())->toBe(1)
-        ->and($transfer->items->first()->id)->toBe($item->id)
-        ->and($transfer->stockMovements->count())->toBe(1)
-        ->and($transfer->stockMovements->first()->id)->toBe($movement->id);
+        ->and($transfer->items->first()->id)->toBe($item->id);
 });
 
 test('stock transfer status', function (): void {

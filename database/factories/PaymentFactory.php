@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\PaymentMethodEnum;
-use App\Enums\PaymentTypeEnum;
+// use App\Enums\PaymentTypeEnum;
+use App\Models\Expense;
+use App\Models\Invoice;
 use App\Models\Moneybox;
 use App\Models\Payment;
+use App\Models\Purchase;
+use App\Models\Sale;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -26,7 +30,7 @@ final class PaymentFactory extends Factory
     {
         return [
             'reference' => mb_strtoupper(Str::random(12)),
-            'type' => $this->faker->randomElement(array_map(fn (PaymentTypeEnum $e) => $e->value, PaymentTypeEnum::cases())),
+            'related_type' => null,
             'amount' => $this->faker->randomNumber(2, 2000),
             'method' => $this->faker->randomElement(array_map(fn (PaymentMethodEnum $e) => $e->value, PaymentMethodEnum::cases())),
             'related_id' => null,
@@ -56,7 +60,7 @@ final class PaymentFactory extends Factory
     {
         return $this->state(fn (array $attrs): array => [
             ...$attrs,
-            'type' => PaymentTypeEnum::SALE->value,
+            'related_type' => Sale::class,
             'related_id' => $saleId,
         ]);
     }
@@ -65,7 +69,7 @@ final class PaymentFactory extends Factory
     {
         return $this->state(fn (array $attrs): array => [
             ...$attrs,
-            'type' => PaymentTypeEnum::PURCHASE->value,
+            'related_type' => Purchase::class,
             'related_id' => $purchaseId,
         ]);
     }
@@ -74,7 +78,7 @@ final class PaymentFactory extends Factory
     {
         return $this->state(fn (array $attrs): array => [
             ...$attrs,
-            'type' => PaymentTypeEnum::EXPENSE->value,
+            'related_type' => Expense::class,
             'related_id' => $expenseId,
         ]);
     }
@@ -83,7 +87,7 @@ final class PaymentFactory extends Factory
     {
         return $this->state(fn (array $attrs): array => [
             ...$attrs,
-            'type' => PaymentTypeEnum::INVOICE->value,
+            'related_type' => Invoice::class,
             'related_id' => $invoiceId,
         ]);
     }

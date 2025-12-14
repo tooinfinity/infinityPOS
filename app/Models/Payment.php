@@ -5,20 +5,20 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\PaymentMethodEnum;
-use App\Enums\PaymentTypeEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\PaymentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * @property-read int $id
  * @property-read string|null $reference
- * @property-read PaymentTypeEnum $type
  * @property-read int $amount
  * @property-read PaymentMethodEnum $method
  * @property-read string|null $notes
+ * @property-read string|null $related_type
  * @property-read int|null $related_id
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
@@ -56,6 +56,14 @@ final class Payment extends Model
     }
 
     /**
+     * Polymorphic related model (sale, purchase, invoice, expense, etc.).
+     */
+    public function related(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    /**
      * Check if payment is cash.
      */
     public function isCash(): bool
@@ -87,10 +95,10 @@ final class Payment extends Model
         return [
             'id' => 'integer',
             'reference' => 'string',
-            'type' => PaymentTypeEnum::class,
             'amount' => 'integer',
             'method' => PaymentMethodEnum::class,
             'notes' => 'string',
+            'related_type' => 'string',
             'related_id' => 'integer',
             'moneybox_id' => 'integer',
             'created_by' => 'integer',

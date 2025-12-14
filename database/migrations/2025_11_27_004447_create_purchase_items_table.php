@@ -17,9 +17,8 @@ return new class extends Migration
             $table->unsignedBigInteger('discount')->nullable();
             $table->unsignedBigInteger('tax_amount')->nullable();
             $table->unsignedBigInteger('total');
-            $table->string('batch_number')->nullable()->index();
+            $table->string('batch_number')->nullable();
             $table->date('expiry_date')->nullable();
-            $table->unsignedBigInteger('remaining_quantity')->nullable()->comment('For FIFO tracking');
 
             $table->foreignId('purchase_id')->constrained();
             $table->foreignId('product_id')->constrained()->restrictOnDelete();

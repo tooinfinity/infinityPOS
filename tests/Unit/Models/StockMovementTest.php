@@ -22,14 +22,14 @@ test('to array', function (): void {
         ->toBe([
             'id',
             'quantity',
-            'type',
-            'reference',
+            'source_type',
+            'source_id',
             'batch_number',
             'notes',
-            'created_by',
-            'updated_by',
             'product_id',
             'store_id',
+            'created_by',
+            'updated_by',
             'created_at',
             'updated_at',
         ]);
@@ -46,7 +46,7 @@ test('stock movement relationships and helpers', function (): void {
         'store_id' => $store->id,
         'product_id' => $product->id,
         'quantity' => 5,
-        'type' => 'purchase',
+
     ])->refresh();
 
     $outgoing = StockMovement::factory()->create([
@@ -54,7 +54,7 @@ test('stock movement relationships and helpers', function (): void {
         'store_id' => $store->id,
         'product_id' => $product->id,
         'quantity' => -2,
-        'type' => 'sale',
+
     ])->refresh();
 
     expect($incoming->creator->id)->toBe($user->id)

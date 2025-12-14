@@ -28,7 +28,6 @@ test('to array', function (): void {
             'total',
             'batch_number',
             'expiry_date',
-            'remaining_quantity',
             'purchase_id',
             'product_id',
             'created_at',

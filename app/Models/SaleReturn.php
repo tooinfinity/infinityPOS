@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\SaleReturnStatusEnum;
-use App\Enums\StockMovementTypeEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\SaleReturnFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -13,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * @property-read int $id
@@ -90,21 +90,19 @@ final class SaleReturn extends Model
     }
 
     /**
-     * @return HasMany<Payment, $this>
+     * @return MorphMany<Payment, $this>
      */
-    public function payments(): HasMany
+    public function payments(): MorphMany
     {
-        return $this->hasMany(Payment::class, 'related_id')
-            ->where('payments.type', 'sale');
+        return $this->morphMany(Payment::class, 'related');
     }
 
     /**
-     * @return HasMany<StockMovement, $this>
+     * @return MorphMany<StockMovement, $this>
      */
-    public function stockMovements(): HasMany
+    public function stockMovements(): MorphMany
     {
-        return $this->hasMany(StockMovement::class, 'reference', 'reference')
-            ->where('stock_movements.type', StockMovementTypeEnum::SALE_RETURN->value);
+        return $this->morphMany(StockMovement::class, 'source');
     }
 
     /**

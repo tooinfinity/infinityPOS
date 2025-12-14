@@ -12,21 +12,22 @@ return new class extends Migration
     {
         Schema::create('stock_movements', function (Blueprint $table): void {
             $table->id();
-            $table->BigInteger('quantity')->comment('Positive = in, Negative = out');
-            $table->string('type', 40)->index(); //  ['purchase', 'sale', 'return', 'adjustment', 'transfer']
-            $table->string('reference')->nullable()->comment('Link to source document');
+            $table->bigInteger('quantity')->comment('Positive = in, Negative = out');
+            $table->string('source_type')->nullable();
+            $table->unsignedBigInteger('source_id')->nullable();
             $table->string('batch_number')->nullable()->index();
             $table->text('notes')->nullable();
 
-            $table->foreignId('created_by')->references('id')->on('users');
-            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
             $table->foreignId('product_id')->constrained()->restrictOnDelete();
             $table->foreignId('store_id')->constrained()->restrictOnDelete();
+            $table->foreignId('created_by')->nullable()->references('id')->on('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users')->nullOnDelete();
 
             $table->timestamps();
 
-            $table->index(['product_id', 'store_id', 'created_at']);
-            $table->index(['type', 'created_at']);
+            $table->index(['source_type', 'source_id'], 'stock_movements_source_morph_index');
+            $table->index(['product_id', 'store_id', 'created_at'], 'stock_movements_product_store_created_at');
+            $table->index(['source_type', 'source_id', 'created_at'], 'stock_movements_source_created_at');
         });
     }
 };

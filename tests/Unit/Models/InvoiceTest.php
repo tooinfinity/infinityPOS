@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Enums\PaymentTypeEnum;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Payment;
@@ -59,7 +58,7 @@ test('invoice relationships', function (): void {
     $invoice->update(['updated_by' => $user->id]);
 
     $payment = Payment::factory()->create([
-        'type' => PaymentTypeEnum::INVOICE,
+        'related_type' => Invoice::class,
         'related_id' => $invoice->id,
         'created_by' => $user->id,
     ]);

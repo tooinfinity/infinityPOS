@@ -16,8 +16,8 @@ final class StockMovementData extends Data
     public function __construct(
         public int $id,
         public int $quantity,
-        public \App\Enums\StockMovementTypeEnum $type,
-        public ?string $reference,
+        public ?string $source_type,
+        public ?int $source_id,
         public ?string $batch_number,
         public ?string $notes,
         public Lazy|ProductData|null $product,

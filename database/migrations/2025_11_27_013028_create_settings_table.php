@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('group')->nullable();
             $table->text('description')->nullable();
 
-            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users')->nullOnDelete();
 
             $table->timestamps();
         });

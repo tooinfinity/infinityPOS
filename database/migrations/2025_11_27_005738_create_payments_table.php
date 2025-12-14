@@ -13,19 +13,22 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table): void {
             $table->id();
             $table->string('reference')->nullable()->unique();
-            $table->string('type')->index(); //  ['sale', 'purchase', 'expense', 'other']
             $table->unsignedBigInteger('amount');
             $table->string('method', 20)->index();
             $table->text('notes')->nullable();
+            $table->string('related_type')->nullable();
+            $table->unsignedBigInteger('related_id')->nullable();
 
-            $table->foreignId('related_id')->nullable()->comment('ID of sale/purchase/expense');
             $table->foreignId('moneybox_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('created_by')->references('id')->on('users');
-            $table->foreignId('updated_by')->nullable()->references('id')->on('users');
+            $table->foreignId('created_by')->nullable()->references('id')->on('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users')->nullOnDelete();
 
             $table->timestamps();
 
-            $table->index(['type', 'related_id']);
+            $table->index(['related_type', 'related_id'], 'payments_related_morph_index');
+            $table->index(['related_type', 'related_id', 'created_at'], 'payments_related_type_related_id_created_at');
+            $table->index(['method', 'created_at'], 'payments_method_created_at');
+            $table->index(['moneybox_id', 'created_at'], 'payments_moneybox_created_at');
         });
     }
 };

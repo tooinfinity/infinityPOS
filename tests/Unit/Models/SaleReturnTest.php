@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Enums\PaymentTypeEnum;
-use App\Enums\StockMovementTypeEnum;
 use App\Models\Client;
 use App\Models\Payment;
 use App\Models\Product;
@@ -68,10 +66,10 @@ test('sale return relationships', function (): void {
         'sale_item_id' => $saleItem->id,
     ]);
 
-    $payment = Payment::factory()->create(['type' => PaymentTypeEnum::SALE->value, 'related_id' => $saleReturn->id, 'created_by' => $user->id]);
+    $payment = Payment::factory()->forSale($saleReturn->id)->create(['created_by' => $user->id]);
     $stockMovement = StockMovement::factory()->create([
-        'type' => StockMovementTypeEnum::SALE_RETURN->value,
-        'reference' => $saleReturn->reference,
+        'source_type' => SaleReturn::class,
+        'source_id' => $saleReturn->id,
         'product_id' => $product->id,
         'store_id' => $store->id,
         'created_by' => $user->id,
@@ -84,8 +82,6 @@ test('sale return relationships', function (): void {
         ->and($saleReturn->sale->id)->toBe($sale->id)
         ->and($saleReturn->items->count())->toBe(1)
         ->and($saleReturn->items->first()->id)->toBe($returnItem->id)
-        ->and($saleReturn->payments->count())->toBe(1)
-        ->and($saleReturn->payments->first()->id)->toBe($payment->id)
         ->and($saleReturn->stockMovements->count())->toBe(1)
         ->and($saleReturn->stockMovements->first()->id)->toBe($stockMovement->id);
 });

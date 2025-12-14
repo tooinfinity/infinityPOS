@@ -9,12 +9,13 @@ use Database\Factories\StockMovementFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * @property-read int $id
  * @property-read int $quantity
- * @property-read string $type
- * @property-read string|null $reference
+ * @property-read string|null $source_type
+ * @property-read int|null $source_id
  * @property-read string|null $batch_number
  * @property-read string|null $notes
  * @property-read CarbonInterface $created_at
@@ -62,6 +63,14 @@ final class StockMovement extends Model
     }
 
     /**
+     * Polymorphic source model (purchase, sale, returns, transfer, adjustment doc).
+     */
+    public function source(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    /**
      * Check if movement is incoming (increases stock).
      */
     public function isIncoming(): bool
@@ -87,8 +96,8 @@ final class StockMovement extends Model
             'product_id' => 'integer',
             'store_id' => 'integer',
             'quantity' => 'integer',
-            'type' => \App\Enums\StockMovementTypeEnum::class,
-            'reference' => 'string',
+            'source_type' => 'string',
+            'source_id' => 'integer',
             'batch_number' => 'string',
             'notes' => 'string',
             'created_by' => 'integer',

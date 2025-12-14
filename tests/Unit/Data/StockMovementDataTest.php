@@ -7,6 +7,7 @@ use App\Data\StockMovementData;
 use App\Data\StoreData;
 use App\Data\UserData;
 use App\Models\Product;
+use App\Models\Purchase;
 use App\Models\StockMovement;
 use App\Models\Store;
 use App\Models\User;
@@ -15,6 +16,7 @@ it('transforms a stock movement model into StockMovementData', function (): void
     $creator = User::factory()->create();
     $updater = User::factory()->create();
     $store = Store::factory()->create();
+    $purchase = Purchase::factory()->create();
     $product = Product::factory()->create();
 
     /** @var StockMovement $movement */
@@ -25,8 +27,8 @@ it('transforms a stock movement model into StockMovementData', function (): void
         ->for($product, 'product')
         ->create([
             'quantity' => 10,
-            'type' => App\Enums\StockMovementTypeEnum::PURCHASE->value,
-            'reference' => 'REF-100',
+            'source_type' => Purchase::class,
+            'source_id' => $purchase->id,
             'batch_number' => 'BATCH-1',
             'notes' => 'Initial stock',
         ]);
@@ -39,8 +41,8 @@ it('transforms a stock movement model into StockMovementData', function (): void
         ->toBeInstanceOf(StockMovementData::class)
         ->id->toBe($movement->id)
         ->quantity->toBe(10)
-        ->type->toBe(App\Enums\StockMovementTypeEnum::PURCHASE)
-        ->reference->toBe('REF-100')
+        ->source_type->toBe(Purchase::class)
+        ->source_id->toBe($purchase->id)
         ->batch_number->toBe('BATCH-1')
         ->notes->toBe('Initial stock')
         ->and($data->store->resolve())

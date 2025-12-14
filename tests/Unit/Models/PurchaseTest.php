@@ -34,10 +34,10 @@ test('to array', function (): void {
             'paid',
             'status',
             'notes',
-            'created_by',
-            'updated_by',
             'supplier_id',
             'store_id',
+            'created_by',
+            'updated_by',
             'created_at',
             'updated_at',
         ]);
@@ -58,8 +58,8 @@ test('purchase relationships', function (): void {
     $items = PurchaseItem::factory()->create(['product_id' => $product->id, 'purchase_id' => $purchase->id]);
     $returns = PurchaseReturn::factory()->create(['store_id' => $store->id, 'supplier_id' => $supplier->id, 'purchase_id' => $purchase->id, 'created_by' => $user->id]);
 
-    $payment = Payment::factory()->create(['type' => PaymentTypeEnum::PURCHASE->value, 'related_id' => $purchase->id, 'created_by' => $user->id]);
-    $stockMovement = StockMovement::factory()->create(['type' => StockMovementTypeEnum::PURCHASE->value, 'reference' => $purchase->reference, 'product_id' => $product->id, 'store_id' => $store->id, 'created_by' => $user->id]);
+    $payment = Payment::factory()->forPurchase($purchase->id)->create(['created_by' => $user->id]);
+    $stockMovement = StockMovement::factory()->create(['source_type' => Purchase::class, 'source_id' => $purchase->id, 'product_id' => $product->id, 'store_id' => $store->id, 'created_by' => $user->id]);
 
     expect($purchase->creator->id)->toBe($user->id)
         ->and($purchase->updater->id)->toBe($user->id)

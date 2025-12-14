@@ -21,7 +21,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read int $total
  * @property-read string|null $batch_number
  * @property-read CarbonInterface|null $expiry_date
- * @property-read int|null $remaining_quantity
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Purchase $purchase
@@ -73,7 +72,6 @@ final class PurchaseItem extends Model
             'total' => 'integer',
             'batch_number' => 'string',
             'expiry_date' => 'datetime',
-            'remaining_quantity' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

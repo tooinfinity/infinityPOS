@@ -23,9 +23,9 @@ test('to array', function (): void {
             'address',
             'balance',
             'is_active',
+            'business_identifier_id',
             'created_by',
             'updated_by',
-            'business_identifier_id',
             'created_at',
             'updated_at',
         ]);
