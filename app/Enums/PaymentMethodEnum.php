@@ -50,4 +50,19 @@ enum PaymentMethodEnum: string
             self::TRANSFER => 'Bank transfer or wire',
         };
     }
+
+    public function isCash(): bool
+    {
+        return $this === self::CASH;
+    }
+
+    public function isCard(): bool
+    {
+        return $this === self::CARD;
+    }
+
+    public function isTransfer(): bool
+    {
+        return $this === self::TRANSFER;
+    }
 }

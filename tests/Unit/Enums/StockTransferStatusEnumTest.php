@@ -31,3 +31,15 @@ it('stock transfer status color', function (): void {
 it('stock transfer status to array', function (): void {
     expect(StockTransferStatusEnum::toArray())->toBeArray();
 });
+
+it('stock transfer status helpers', function (): void {
+    expect(StockTransferStatusEnum::PENDING->isPending())->toBeTrue()
+        ->and(StockTransferStatusEnum::PENDING->isCompleted())->toBeFalse()
+        ->and(StockTransferStatusEnum::PENDING->isCancelled())->toBeFalse()
+        ->and(StockTransferStatusEnum::COMPLETED->isCompleted())->toBeTrue()
+        ->and(StockTransferStatusEnum::COMPLETED->isPending())->toBeFalse()
+        ->and(StockTransferStatusEnum::COMPLETED->isCancelled())->toBeFalse()
+        ->and(StockTransferStatusEnum::CANCELLED->isCancelled())->toBeTrue()
+        ->and(StockTransferStatusEnum::CANCELLED->isPending())->toBeFalse()
+        ->and(StockTransferStatusEnum::CANCELLED->isCompleted())->toBeFalse();
+});

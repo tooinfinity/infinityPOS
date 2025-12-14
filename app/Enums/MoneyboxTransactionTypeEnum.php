@@ -50,4 +50,19 @@ enum MoneyboxTransactionTypeEnum: string
             self::TRANSFER => 'arrow-right-left',
         };
     }
+
+    public function isIn(): bool
+    {
+        return $this === self::IN;
+    }
+
+    public function isOut(): bool
+    {
+        return $this === self::OUT;
+    }
+
+    public function isTransfer(): bool
+    {
+        return $this === self::TRANSFER;
+    }
 }

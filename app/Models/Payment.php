@@ -70,7 +70,7 @@ final class Payment extends Model
      */
     public function isCash(): bool
     {
-        return $this->method === PaymentMethodEnum::CASH;
+        return $this->method->isCash();
     }
 
     /**
@@ -78,7 +78,7 @@ final class Payment extends Model
      */
     public function isCard(): bool
     {
-        return $this->method === PaymentMethodEnum::CARD;
+        return $this->method->isCard();
     }
 
     /**
@@ -86,7 +86,7 @@ final class Payment extends Model
      */
     public function isTransfer(): bool
     {
-        return $this->method === PaymentMethodEnum::TRANSFER;
+        return $this->method->isTransfer();
     }
 
     /**

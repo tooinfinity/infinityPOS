@@ -11,7 +11,9 @@ use App\Models\Invoice;
 use App\Models\Moneybox;
 use App\Models\Payment;
 use App\Models\Purchase;
+use App\Models\PurchaseReturn;
 use App\Models\Sale;
+use App\Models\SaleReturn;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -65,12 +67,30 @@ final class PaymentFactory extends Factory
         ]);
     }
 
+    public function forSaleReturn(int $saleReturnId): self
+    {
+        return $this->state(fn (array $attrs): array => [
+            ...$attrs,
+            'related_type' => SaleReturn::class,
+            'related_id' => $saleReturnId,
+        ]);
+    }
+
     public function forPurchase(int $purchaseId): self
     {
         return $this->state(fn (array $attrs): array => [
             ...$attrs,
             'related_type' => Purchase::class,
             'related_id' => $purchaseId,
+        ]);
+    }
+
+    public function forPurchaseReturn(int $purchaseReturnId): self
+    {
+        return $this->state(fn (array $attrs): array => [
+            ...$attrs,
+            'related_type' => PurchaseReturn::class,
+            'related_id' => $purchaseReturnId,
         ]);
     }
 

@@ -31,3 +31,15 @@ it('purchase return status color', function (): void {
 it('purchase return status to array', function (): void {
     expect(PurchaseReturnStatusEnum::toArray())->toBeArray();
 });
+
+it('purchase return status helpers', function (): void {
+    expect(PurchaseReturnStatusEnum::PENDING->isPending())->toBeTrue()
+        ->and(PurchaseReturnStatusEnum::PENDING->isCompleted())->toBeFalse()
+        ->and(PurchaseReturnStatusEnum::PENDING->isCancelled())->toBeFalse()
+        ->and(PurchaseReturnStatusEnum::COMPLETED->isCompleted())->toBeTrue()
+        ->and(PurchaseReturnStatusEnum::COMPLETED->isPending())->toBeFalse()
+        ->and(PurchaseReturnStatusEnum::COMPLETED->isCancelled())->toBeFalse()
+        ->and(PurchaseReturnStatusEnum::CANCELLED->isCancelled())->toBeTrue()
+        ->and(PurchaseReturnStatusEnum::CANCELLED->isPending())->toBeFalse()
+        ->and(PurchaseReturnStatusEnum::CANCELLED->isCompleted())->toBeFalse();
+});

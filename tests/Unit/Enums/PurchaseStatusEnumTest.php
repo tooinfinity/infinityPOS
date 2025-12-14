@@ -31,3 +31,15 @@ it('purchase status color', function (): void {
 it('purchase status to array', function (): void {
     expect(PurchaseStatusEnum::toArray())->toBeArray();
 });
+
+it('purchase status helpers', function (): void {
+    expect(PurchaseStatusEnum::PENDING->isPending())->toBeTrue()
+        ->and(PurchaseStatusEnum::PENDING->isCompleted())->toBeFalse()
+        ->and(PurchaseStatusEnum::PENDING->isCancelled())->toBeFalse()
+        ->and(PurchaseStatusEnum::RECEIVED->isCompleted())->toBeTrue()
+        ->and(PurchaseStatusEnum::RECEIVED->isPending())->toBeFalse()
+        ->and(PurchaseStatusEnum::RECEIVED->isCancelled())->toBeFalse()
+        ->and(PurchaseStatusEnum::CANCELLED->isCancelled())->toBeTrue()
+        ->and(PurchaseStatusEnum::CANCELLED->isPending())->toBeFalse()
+        ->and(PurchaseStatusEnum::CANCELLED->isCompleted())->toBeFalse();
+});

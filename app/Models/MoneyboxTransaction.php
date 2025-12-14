@@ -85,7 +85,7 @@ final class MoneyboxTransaction extends Model
      */
     public function isIncoming(): bool
     {
-        return $this->type === MoneyboxTransactionTypeEnum::IN;
+        return $this->type->isIn();
     }
 
     /**
@@ -93,7 +93,7 @@ final class MoneyboxTransaction extends Model
      */
     public function isOutgoing(): bool
     {
-        return $this->type === MoneyboxTransactionTypeEnum::OUT;
+        return $this->type->isOut();
     }
 
     /**
@@ -101,7 +101,7 @@ final class MoneyboxTransaction extends Model
      */
     public function isTransfer(): bool
     {
-        return $this->type === MoneyboxTransactionTypeEnum::TRANSFER;
+        return $this->type->isTransfer();
     }
 
     /**

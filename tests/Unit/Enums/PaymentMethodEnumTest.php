@@ -40,3 +40,15 @@ it('payment method description', function (): void {
 it('payment method to array', function (): void {
     expect(PaymentMethodEnum::toArray())->toBeArray();
 });
+
+it('payment method helpers', function (): void {
+    expect(PaymentMethodEnum::CASH->isCash())->toBeTrue()
+        ->and(PaymentMethodEnum::CASH->isCard())->toBeFalse()
+        ->and(PaymentMethodEnum::CASH->isTransfer())->toBeFalse()
+        ->and(PaymentMethodEnum::CARD->isCard())->toBeTrue()
+        ->and(PaymentMethodEnum::CARD->isCash())->toBeFalse()
+        ->and(PaymentMethodEnum::CARD->isTransfer())->toBeFalse()
+        ->and(PaymentMethodEnum::TRANSFER->isTransfer())->toBeTrue()
+        ->and(PaymentMethodEnum::TRANSFER->isCash())->toBeFalse()
+        ->and(PaymentMethodEnum::TRANSFER->isCard())->toBeFalse();
+});

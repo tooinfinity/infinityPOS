@@ -38,3 +38,15 @@ it('moneybox transaction type icon', function (): void {
 it('moneybox transaction type to array', function (): void {
     expect(MoneyboxTransactionTypeEnum::toArray())->toBeArray();
 });
+
+it('moneybox transaction type helpers', function (): void {
+    expect(MoneyboxTransactionTypeEnum::IN->isIn())->toBeTrue()
+        ->and(MoneyboxTransactionTypeEnum::IN->isOut())->toBeFalse()
+        ->and(MoneyboxTransactionTypeEnum::IN->isTransfer())->toBeFalse()
+        ->and(MoneyboxTransactionTypeEnum::OUT->isOut())->toBeTrue()
+        ->and(MoneyboxTransactionTypeEnum::OUT->isIn())->toBeFalse()
+        ->and(MoneyboxTransactionTypeEnum::OUT->isTransfer())->toBeFalse()
+        ->and(MoneyboxTransactionTypeEnum::TRANSFER->isTransfer())->toBeTrue()
+        ->and(MoneyboxTransactionTypeEnum::TRANSFER->isIn())->toBeFalse()
+        ->and(MoneyboxTransactionTypeEnum::TRANSFER->isOut())->toBeFalse();
+});

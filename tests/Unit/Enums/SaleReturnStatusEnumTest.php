@@ -31,3 +31,15 @@ it('sale return status color', function (): void {
 it('sale return status to array', function (): void {
     expect(SaleReturnStatusEnum::toArray())->toBeArray();
 });
+
+it('sale return status helpers', function (): void {
+    expect(SaleReturnStatusEnum::PENDING->isPending())->toBeTrue()
+        ->and(SaleReturnStatusEnum::PENDING->isCompleted())->toBeFalse()
+        ->and(SaleReturnStatusEnum::PENDING->isCancelled())->toBeFalse()
+        ->and(SaleReturnStatusEnum::COMPLETED->isCompleted())->toBeTrue()
+        ->and(SaleReturnStatusEnum::COMPLETED->isPending())->toBeFalse()
+        ->and(SaleReturnStatusEnum::COMPLETED->isCancelled())->toBeFalse()
+        ->and(SaleReturnStatusEnum::CANCELLED->isCancelled())->toBeTrue()
+        ->and(SaleReturnStatusEnum::CANCELLED->isPending())->toBeFalse()
+        ->and(SaleReturnStatusEnum::CANCELLED->isCompleted())->toBeFalse();
+});

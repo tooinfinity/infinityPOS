@@ -41,6 +41,32 @@ final class SaleReturn extends Model
     /** @use HasFactory<SaleReturnFactory> */
     use HasFactory;
 
+    public function getTotal(): int
+    {
+        return (int) $this->total;
+    }
+
+    public function getPaid(): int
+    {
+        return (int) $this->payments()->sum('amount');
+    }
+
+    public function getDue(): int
+    {
+        // Returns usually indicate money owed back to the client (negative due means we owe them).
+        return $this->getTotal() - $this->getPaid();
+    }
+
+    public function isDue(): bool
+    {
+        return $this->getDue() > 0;
+    }
+
+    public function isOverpaid(): bool
+    {
+        return $this->getDue() < 0;
+    }
+
     /**
      * @return BelongsTo<Sale, $this>
      */

@@ -20,7 +20,7 @@ it('invoice status label', function (): void {
 });
 
 it('invoice status color', function (): void {
-    $value1 = 'blue';
+    $value1 = 'yellow';
     $value2 = 'green';
     $value3 = 'red';
     $value4 = 'gray';
@@ -40,10 +40,21 @@ it('invoice status is paid', function (): void {
 it('invoice status is pending', function (): void {
     expect(InvoiceStatusEnum::PENDING->isPending())->toBeTrue()
         ->and(InvoiceStatusEnum::PAID->isPending())->toBeFalse()
-        ->and(InvoiceStatusEnum::CANCELLED->isPending())->toBeTrue()
+        ->and(InvoiceStatusEnum::CANCELLED->isPending())->toBeFalse()
         ->and(InvoiceStatusEnum::DRAFT->isPending())->toBeTrue();
 });
 
 it('invoice status to array', function (): void {
     expect(InvoiceStatusEnum::toArray())->toBeArray();
+});
+
+it('invoice status helpers', function (): void {
+    expect(InvoiceStatusEnum::PAID->isCompleted())->toBeTrue()
+        ->and(InvoiceStatusEnum::PAID->isCancelled())->toBeFalse()
+        ->and(InvoiceStatusEnum::PAID->isPending())->toBeFalse()
+        ->and(InvoiceStatusEnum::PENDING->isPending())->toBeTrue()
+        ->and(InvoiceStatusEnum::DRAFT->isPending())->toBeTrue()
+        ->and(InvoiceStatusEnum::CANCELLED->isCancelled())->toBeTrue()
+        ->and(InvoiceStatusEnum::CANCELLED->isPending())->toBeFalse()
+        ->and(InvoiceStatusEnum::CANCELLED->isCompleted())->toBeFalse();
 });

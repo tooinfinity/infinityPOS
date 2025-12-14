@@ -31,3 +31,15 @@ it('sale status color', function (): void {
 it('sale status to array', function (): void {
     expect(SaleStatusEnum::toArray())->toBeArray();
 });
+
+it('sale status helpers', function (): void {
+    expect(SaleStatusEnum::PENDING->isPending())->toBeTrue()
+        ->and(SaleStatusEnum::PENDING->isCompleted())->toBeFalse()
+        ->and(SaleStatusEnum::PENDING->isCancelled())->toBeFalse()
+        ->and(SaleStatusEnum::COMPLETED->isCompleted())->toBeTrue()
+        ->and(SaleStatusEnum::COMPLETED->isPending())->toBeFalse()
+        ->and(SaleStatusEnum::COMPLETED->isCancelled())->toBeFalse()
+        ->and(SaleStatusEnum::CANCELLED->isCancelled())->toBeTrue()
+        ->and(SaleStatusEnum::CANCELLED->isPending())->toBeFalse()
+        ->and(SaleStatusEnum::CANCELLED->isCompleted())->toBeFalse();
+});

@@ -39,7 +39,7 @@ enum InvoiceStatusEnum: string
     {
         return match ($this) {
             self::DRAFT => 'gray',
-            self::PENDING => 'blue',
+            self::PENDING => 'yellow',
             self::PAID => 'green',
             self::CANCELLED => 'red',
         };
@@ -50,8 +50,18 @@ enum InvoiceStatusEnum: string
         return $this === self::PAID;
     }
 
+    public function isCompleted(): bool
+    {
+        return $this === self::PAID;
+    }
+
     public function isPending(): bool
     {
-        return in_array($this, [self::DRAFT, self::PENDING, self::CANCELLED], true);
+        return in_array($this, [self::DRAFT, self::PENDING], true);
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this === self::CANCELLED;
     }
 }

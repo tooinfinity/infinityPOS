@@ -41,6 +41,32 @@ final class PurchaseReturn extends Model
     /** @use HasFactory<PurchaseReturnFactory> */
     use HasFactory;
 
+    public function getTotal(): int
+    {
+        return (int) $this->total;
+    }
+
+    public function getPaid(): int
+    {
+        return (int) $this->payments()->sum('amount');
+    }
+
+    public function getDue(): int
+    {
+        // For purchase returns, positive due means supplier owes us.
+        return $this->getTotal() - $this->getPaid();
+    }
+
+    public function isDue(): bool
+    {
+        return $this->getDue() > 0;
+    }
+
+    public function isOverpaid(): bool
+    {
+        return $this->getDue() < 0;
+    }
+
     /**
      * @return BelongsTo<Purchase, $this>
      */

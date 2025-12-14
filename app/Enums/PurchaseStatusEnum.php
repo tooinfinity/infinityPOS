@@ -41,4 +41,19 @@ enum PurchaseStatusEnum: string
             self::CANCELLED => 'red',
         };
     }
+
+    public function isCompleted(): bool
+    {
+        return $this === self::RECEIVED;
+    }
+
+    public function isPending(): bool
+    {
+        return $this === self::PENDING;
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this === self::CANCELLED;
+    }
 }
