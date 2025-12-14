@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property-read int $id
- * @property-read string $type
+ * @property-read MoneyboxTransactionTypeEnum $type
  * @property-read int $amount
  * @property-read int $balance_after
  * @property-read string|null $reference
@@ -85,7 +85,7 @@ final class MoneyboxTransaction extends Model
      */
     public function isIncoming(): bool
     {
-        return $this->type === MoneyboxTransactionTypeEnum::IN->value;
+        return $this->type === MoneyboxTransactionTypeEnum::IN;
     }
 
     /**
@@ -93,7 +93,7 @@ final class MoneyboxTransaction extends Model
      */
     public function isOutgoing(): bool
     {
-        return $this->type === MoneyboxTransactionTypeEnum::OUT->value;
+        return $this->type === MoneyboxTransactionTypeEnum::OUT;
     }
 
     /**
@@ -101,7 +101,7 @@ final class MoneyboxTransaction extends Model
      */
     public function isTransfer(): bool
     {
-        return $this->type === MoneyboxTransactionTypeEnum::TRANSFER->value;
+        return $this->type === MoneyboxTransactionTypeEnum::TRANSFER;
     }
 
     /**
@@ -112,7 +112,7 @@ final class MoneyboxTransaction extends Model
         return [
             'id' => 'integer',
             'moneybox_id' => 'integer',
-            'type' => 'string',
+            'type' => MoneyboxTransactionTypeEnum::class,
             'amount' => 'integer',
             'balance_after' => 'integer',
             'reference' => 'string',

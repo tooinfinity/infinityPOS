@@ -6,6 +6,7 @@ use App\Data\ClientData;
 use App\Data\InvoiceData;
 use App\Data\SaleData;
 use App\Data\UserData;
+use App\Enums\InvoiceStatusEnum;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Sale;
@@ -34,7 +35,7 @@ it('transforms an invoice model into InvoiceData', function (): void {
             'tax' => 200,
             'total' => 9700,
             'paid' => 5000,
-            'status' => 'partial',
+            'status' => InvoiceStatusEnum::PENDING->value,
             'notes' => 'Pay remaining before due date.',
         ]);
 
@@ -56,7 +57,7 @@ it('transforms an invoice model into InvoiceData', function (): void {
         ->tax->toBe(200)
         ->total->toBe(9700)
         ->paid->toBe(5000)
-        ->status->toBe('partial')
+        ->status->toBe(InvoiceStatusEnum::PENDING)
         ->notes->toBe('Pay remaining before due date.')
         ->and($data->sale->resolve())
         ->toBeInstanceOf(SaleData::class)

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\MoneyboxTransactionTypeEnum;
+use App\Enums\MoneyboxTypeEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\MoneyboxFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property-read int $id
  * @property-read string $name
- * @property-read string $type
+ * @property-read MoneyboxTypeEnum $type
  * @property-read string|null $description
  * @property-read int $balance
  * @property-read string|null $bank_name
@@ -111,7 +112,7 @@ final class Moneybox extends Model
         return [
             'id' => 'integer',
             'name' => 'string',
-            'type' => \App\Enums\MoneyboxTypeEnum::class,
+            'type' => MoneyboxTypeEnum::class,
             'description' => 'string',
             'balance' => 'integer',
             'bank_name' => 'string',

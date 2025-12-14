@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read int|null $tax
  * @property-read int $total
  * @property-read int $paid
- * @property-read string $status
+ * @property-read SaleStatusEnum $status
  * @property-read string|null $notes
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at

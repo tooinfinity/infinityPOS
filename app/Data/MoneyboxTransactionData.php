@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use App\Enums\MoneyboxTransactionTypeEnum;
 use Spatie\LaravelData\Attributes\AutoLazy;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
@@ -15,7 +16,7 @@ final class MoneyboxTransactionData extends Data
 {
     public function __construct(
         public int $id,
-        public string $type,
+        public MoneyboxTransactionTypeEnum $type,
         public int $amount,
         public int $balance_after,
         public ?string $reference,

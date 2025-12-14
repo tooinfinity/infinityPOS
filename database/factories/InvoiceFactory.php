@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\InvoiceStatusEnum;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Sale;
@@ -55,8 +56,8 @@ final class InvoiceFactory extends Factory
             'total' => $total,
             'paid' => $paid,
             'status' => $paid >= $total
-                ? 'paid'
-                : ($dueAt < new DateTimeImmutable('now') ? 'overdue' : 'sent'),
+                ? InvoiceStatusEnum::PAID
+                : ($dueAt < new DateTimeImmutable('now') ? InvoiceStatusEnum::PENDING : InvoiceStatusEnum::DRAFT),
             'notes' => $this->faker->optional()->sentence(8),
             'created_by' => User::factory(),
             'updated_by' => null,

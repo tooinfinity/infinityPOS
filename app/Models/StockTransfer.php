@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 /**
  * @property-read int $id
  * @property-read string $reference
- * @property-read string $status
+ * @property-read StockTransferStatusEnum $status
  * @property-read string|null $notes
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
@@ -86,7 +86,7 @@ final class StockTransfer extends Model
      */
     public function isPending(): bool
     {
-        return $this->status === StockTransferStatusEnum::PENDING->value;
+        return $this->status === StockTransferStatusEnum::PENDING;
     }
 
     /**
@@ -94,7 +94,7 @@ final class StockTransfer extends Model
      */
     public function isCompleted(): bool
     {
-        return $this->status === StockTransferStatusEnum::COMPLETED->value;
+        return $this->status === StockTransferStatusEnum::COMPLETED;
     }
 
     /**
@@ -102,7 +102,7 @@ final class StockTransfer extends Model
      */
     public function isCancelled(): bool
     {
-        return $this->status === StockTransferStatusEnum::CANCELLED->value;
+        return $this->status === StockTransferStatusEnum::CANCELLED;
     }
 
     /**
@@ -115,7 +115,7 @@ final class StockTransfer extends Model
             'reference' => 'string',
             'from_store_id' => 'integer',
             'to_store_id' => 'integer',
-            'status' => 'string',
+            'status' => StockTransferStatusEnum::class,
             'notes' => 'string',
             'created_by' => 'integer',
             'updated_by' => 'integer',

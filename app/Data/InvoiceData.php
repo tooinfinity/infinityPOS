@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use App\Enums\InvoiceStatusEnum;
 use Spatie\LaravelData\Attributes\AutoLazy;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
@@ -24,7 +25,7 @@ final class InvoiceData extends Data
         public ?int $tax,
         public int $total,
         public int $paid,
-        public string $status,
+        public InvoiceStatusEnum $status,
         public ?string $notes,
         public Lazy|SaleData|null $sale,
         public Lazy|ClientData|null $client,

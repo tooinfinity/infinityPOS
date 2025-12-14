@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Data\StockTransferData;
 use App\Data\StoreData;
 use App\Data\UserData;
+use App\Enums\StockTransferStatusEnum;
 use App\Models\StockTransfer;
 use App\Models\Store;
 use App\Models\User;
@@ -35,7 +36,7 @@ it('transforms a stock transfer model into StockTransferData', function (): void
         ->toBeInstanceOf(StockTransferData::class)
         ->id->toBe($transfer->id)
         ->reference->toBe('TR-12345')
-        ->status->toBe('pending')
+        ->status->toBe(StockTransferStatusEnum::PENDING)
         ->notes->toBe('Restock branch')
         ->and($data->fromStore->resolve())
         ->toBeInstanceOf(StoreData::class)

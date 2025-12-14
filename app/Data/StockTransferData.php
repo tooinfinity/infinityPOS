@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use App\Enums\StockTransferStatusEnum;
 use Spatie\LaravelData\Attributes\AutoLazy;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
@@ -16,7 +17,7 @@ final class StockTransferData extends Data
     public function __construct(
         public int $id,
         public string $reference,
-        public string $status,
+        public StockTransferStatusEnum $status,
         public ?string $notes,
         public Lazy|StoreData|null $fromStore,
         public Lazy|StoreData|null $toStore,

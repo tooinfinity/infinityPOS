@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property-read int $id
  * @property-read string $name
- * @property-read string $tax_type
+ * @property-read TaxTypeEnum $tax_type
  * @property-read int $rate
  * @property-read bool $is_active
  * @property-read User $creator

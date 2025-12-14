@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\InvoiceStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\InvoiceFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -23,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read int|null $tax
  * @property-read int $total
  * @property-read int $paid
- * @property-read string $status
+ * @property-read InvoiceStatusEnum $status
  * @property-read string|null $notes
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
@@ -96,7 +97,7 @@ final class Invoice extends Model
             'tax' => 'integer',
             'total' => 'integer',
             'paid' => 'integer',
-            'status' => 'string',
+            'status' => InvoiceStatusEnum::class,
             'notes' => 'string',
             'created_by' => 'integer',
             'updated_by' => 'integer',
