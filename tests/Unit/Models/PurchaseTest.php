@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Enums\PaymentTypeEnum;
-use App\Enums\StockMovementTypeEnum;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Purchase;

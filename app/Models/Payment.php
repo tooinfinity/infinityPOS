@@ -57,6 +57,8 @@ final class Payment extends Model
 
     /**
      * Polymorphic related model (sale, purchase, invoice, expense, etc.).
+     *
+     * @return MorphTo<Model, $this>
      */
     public function related(): MorphTo
     {

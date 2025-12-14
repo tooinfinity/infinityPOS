@@ -24,7 +24,7 @@ it('transforms a purchase item model into PurchaseItemData', function (): void {
             'total' => 1550,
             'batch_number' => 'PB-001',
             'expiry_date' => null,
-            
+
         ]);
 
     $data = PurchaseItemData::from(
@@ -41,7 +41,7 @@ it('transforms a purchase item model into PurchaseItemData', function (): void {
         ->total->toBe(1550)
         ->batch_number->toBe('PB-001')
         ->expiry_date->toBeNull()
-                ->and($data->product->resolve())
+        ->and($data->product->resolve())
         ->toBeInstanceOf(ProductData::class)
         ->id->toBe($product->id)
         ->and($data->created_at)

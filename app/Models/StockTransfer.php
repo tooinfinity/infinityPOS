@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * @property-read int $id
@@ -73,12 +74,11 @@ final class StockTransfer extends Model
     }
 
     /**
-     * @return HasMany<StockMovement, $this>
+     * @return MorphMany<StockMovement, $this>
      */
-    public function stockMovements(): HasMany
+    public function stockMovements(): MorphMany
     {
-        return $this->hasMany(StockMovement::class, 'reference', 'reference')
-            ->where('stock_movements.type', \App\Enums\StockMovementTypeEnum::TRANSFER->value);
+        return $this->morphMany(StockMovement::class, 'source');
     }
 
     /**

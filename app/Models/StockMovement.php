@@ -64,6 +64,8 @@ final class StockMovement extends Model
 
     /**
      * Polymorphic source model (purchase, sale, returns, transfer, adjustment doc).
+     *
+     * @return MorphTo<Model, $this>
      */
     public function source(): MorphTo
     {

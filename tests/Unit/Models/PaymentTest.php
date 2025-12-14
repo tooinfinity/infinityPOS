@@ -41,6 +41,20 @@ test('payment relationships', function (): void {
         ->and($payment->moneybox->id)->toBe($moneybox->id);
 });
 
+test('polymorphic related', function (): void {
+    $user = User::factory()->create()->refresh();
+    $sale = App\Models\Sale::factory()->create(['created_by' => $user->id]);
+
+    $payment = Payment::factory()->create([
+        'related_type' => App\Models\Sale::class,
+        'related_id' => $sale->id,
+        'created_by' => $user->id,
+    ])->refresh();
+
+    expect($payment->related?->id)->toBe($sale->id)
+        ->and($payment->related?->getMorphClass())->toBe(new App\Models\Sale()->getMorphClass());
+});
+
 test('payment type', function (): void {
     $user = User::factory()->create()->refresh();
     $moneybox = Moneybox::factory()->create(['created_by' => $user->id]);

@@ -67,7 +67,9 @@ test('stock transfer relationships', function (): void {
         ->and($transfer->fromStore->id)->toBe($fromStore->id)
         ->and($transfer->toStore->id)->toBe($toStore->id)
         ->and($transfer->items->count())->toBe(1)
-        ->and($transfer->items->first()->id)->toBe($item->id);
+        ->and($transfer->items->first()->id)->toBe($item->id)
+        ->and($transfer->stockMovements->count())->toBe(1)
+        ->and($transfer->stockMovements->first()->id)->toBe($movement->id);
 });
 
 test('stock transfer status', function (): void {

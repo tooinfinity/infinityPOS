@@ -66,7 +66,11 @@ test('purchase return relationships', function (): void {
         'purchase_item_id' => $purchaseItem->id,
     ]);
 
-    $payment = Payment::factory()->forPurchase($purchaseReturn->id)->create(['created_by' => $user->id]);
+    $payment = Payment::factory()->create([
+        'related_type' => PurchaseReturn::class,
+        'related_id' => $purchaseReturn->id,
+        'created_by' => $user->id,
+    ]);
     $stockMovement = StockMovement::factory()->create([
 
         'source_type' => PurchaseReturn::class,
@@ -83,6 +87,8 @@ test('purchase return relationships', function (): void {
         ->and($purchaseReturn->purchase->id)->toBe($purchase->id)
         ->and($purchaseReturn->items->count())->toBe(1)
         ->and($purchaseReturn->items->first()->id)->toBe($returnItem->id)
+        ->and($purchaseReturn->payments->count())->toBe(1)
+        ->and($purchaseReturn->payments->first()->id)->toBe($payment->id)
         ->and($purchaseReturn->stockMovements->count())->toBe(1)
         ->and($purchaseReturn->stockMovements->first()->id)->toBe($stockMovement->id);
 });

@@ -35,10 +35,16 @@ test('to array', function (): void {
         ]);
 });
 
-test('stock movement relationships and helpers', function (): void {
+test('stock movement relationships and helpers and source morph', function (): void {
     $user = User::factory()->create()->refresh();
     $store = Store::factory()->create(['created_by' => $user->id]);
     $product = Product::factory()->create(['created_by' => $user->id]);
+
+    $transfer = App\Models\StockTransfer::factory()->create([
+        'created_by' => $user->id,
+        'from_store_id' => $store->id,
+        'to_store_id' => $store->id,
+    ])->refresh();
 
     $incoming = StockMovement::factory()->create([
         'created_by' => $user->id,
@@ -46,6 +52,8 @@ test('stock movement relationships and helpers', function (): void {
         'store_id' => $store->id,
         'product_id' => $product->id,
         'quantity' => 5,
+        'source_type' => App\Models\StockTransfer::class,
+        'source_id' => $transfer->id,
 
     ])->refresh();
 
@@ -64,5 +72,7 @@ test('stock movement relationships and helpers', function (): void {
         ->and($incoming->isIncoming())->toBeTrue()
         ->and($incoming->isOutgoing())->toBeFalse()
         ->and($outgoing->isIncoming())->toBeFalse()
-        ->and($outgoing->isOutgoing())->toBeTrue();
+        ->and($outgoing->isOutgoing())->toBeTrue()
+        ->and($incoming->source?->id)->toBe($transfer->id)
+        ->and($incoming->source?->getMorphClass())->toBe(new App\Models\StockTransfer()->getMorphClass());
 });
