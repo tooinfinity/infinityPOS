@@ -25,7 +25,9 @@ final readonly class SessionController
 
     public function store(CreateSessionData $data, Request $request, AuthenticateUser $action): RedirectResponse
     {
-        $user = $action->handle($data, $request->ip());
+        /** @var string $ip */
+        $ip = $request->ip();
+        $user = $action->handle($data, $ip);
 
         Auth::login($user, $data->remember);
 

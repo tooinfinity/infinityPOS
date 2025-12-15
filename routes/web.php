@@ -8,12 +8,10 @@ use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserPasswordController;
 use App\Http\Controllers\UserProfileController;
-use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-/* @phpstan-ignore-next-line */
-Route::get('/', fn (): Redirector|\Illuminate\Http\RedirectResponse => redirect('login'));
+Route::redirect('/', 'login');
 
 Route::middleware(['auth'])->group(function (): void {
     Route::get('dashboard', fn () => Inertia::render('dashboard'))->name('dashboard');
@@ -37,8 +35,12 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('permission:'.PermissionEnum::DELETE_USERS->value)
         ->name('users.destroy');
 
+    // Generic Settings...
+    Route::get('/setting', [App\Http\Controllers\SettingController::class, 'index'])->name('setting.index');
+    Route::put('/setting', [App\Http\Controllers\SettingController::class, 'update'])->name('setting.update');
+
     // User Profile...
-    Route::redirect('settings', '/settings/profile');
+    Route::redirect('settings', '/settings/profile'); // Removed to use actual settings index
     Route::get('settings/profile', [UserProfileController::class, 'edit'])->name('user-profile.edit');
     Route::patch('settings/profile', [UserProfileController::class, 'update'])->name('user-profile.update');
     Route::delete('settings/profile', [UserProfileController::class, 'destroy'])->name('user-profile.destroy');

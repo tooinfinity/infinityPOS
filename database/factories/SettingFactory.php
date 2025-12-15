@@ -41,6 +41,7 @@ final class SettingFactory extends Factory
             'type' => $type->value,
             'group' => $this->faker->optional()->word(),
             'description' => $this->faker->optional()->sentence(),
+            'is_public' => $this->faker->boolean(),
             'updated_by' => null,
         ];
     }

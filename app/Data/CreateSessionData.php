@@ -14,6 +14,9 @@ final class CreateSessionData extends Data
         public bool $remember = false,
     ) {}
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function rules(): array
     {
         return [

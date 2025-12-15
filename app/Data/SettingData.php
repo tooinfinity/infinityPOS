@@ -5,26 +5,43 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Enums\SettingTypeEnum;
-use Spatie\LaravelData\Attributes\AutoLazy;
-use Spatie\LaravelData\Attributes\WithCast;
-use Spatie\LaravelData\Casts\DateTimeInterfaceCast;
 use Spatie\LaravelData\Data;
-use Spatie\LaravelData\Lazy;
 
-#[AutoLazy]
 final class SettingData extends Data
 {
     public function __construct(
-        public int $id,
         public string $key,
-        public ?string $value,
-        public SettingTypeEnum $type,
-        public ?string $group,
-        public ?string $description,
-        public Lazy|UserData|null $updater,
-        #[WithCast(DateTimeInterfaceCast::class)]
-        public ?string $created_at,
-        #[WithCast(DateTimeInterfaceCast::class)]
-        public ?string $updated_at,
+        public mixed $value,
+        public SettingTypeEnum $type = SettingTypeEnum::STRING,
+        public string $group = 'general',
+        public bool $is_public = false,
     ) {}
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            key: is_scalar($data['key'] ?? '') ? (string) ($data['key'] ?? '') : '',
+            value: $data['value'] ?? null,
+            type: isset($data['type']) && (is_string($data['type']) || is_int($data['type'])) ? SettingTypeEnum::from((string) $data['type']) : SettingTypeEnum::STRING,
+            group: is_scalar($data['group'] ?? 'general') ? (string) ($data['group'] ?? 'general') : 'general',
+            is_public: (bool) ($data['is_public'] ?? false),
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return [
+            'key' => $this->key,
+            'value' => $this->value,
+            'type' => $this->type->value,
+            'group' => $this->group,
+            'is_public' => $this->is_public,
+        ];
+    }
 }

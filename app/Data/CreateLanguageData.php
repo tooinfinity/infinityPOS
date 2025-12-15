@@ -12,6 +12,9 @@ final class CreateLanguageData extends Data
         public string $locale,
     ) {}
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function rules(): array
     {
         return [

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Enums;
 
 use JsonException;
+use Stringable;
 
 enum SettingTypeEnum: string
 {
@@ -42,19 +43,18 @@ enum SettingTypeEnum: string
     }
 
     /**
-     * @param  string|int|float|bool|array<mixed>|null  $value
      * @return string|float|bool|array<mixed>
      *
      * @throws JsonException
      */
-    public function castValue(string|int|float|bool|array|null $value): string|float|bool|array
+    public function castValue(mixed $value): string|float|bool|array
     {
         return match ($this) {
             self::STRING => is_string($value)
                 ? $value
                 : (is_array($value)
                     ? json_encode($value, JSON_THROW_ON_ERROR)
-                    : (string) ($value ?? '')),
+                    : (is_scalar($value) || $value instanceof Stringable ? (string) $value : '')),
             self::NUMBER => is_int($value) || is_float($value) || (is_string($value) && is_numeric($value))
                 ? (float) $value
                 : 0.0,

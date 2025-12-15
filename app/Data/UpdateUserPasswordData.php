@@ -15,6 +15,9 @@ final class UpdateUserPasswordData extends Data
         public string $password_confirmation,
     ) {}
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function rules(): array
     {
         return [

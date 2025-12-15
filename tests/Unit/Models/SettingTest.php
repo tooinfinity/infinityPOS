@@ -17,6 +17,7 @@ test('to array', function (): void {
             'type',
             'group',
             'description',
+            'is_public',
             'updated_by',
             'created_at',
             'updated_at',

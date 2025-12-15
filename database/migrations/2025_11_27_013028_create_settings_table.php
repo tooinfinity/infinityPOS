@@ -17,6 +17,7 @@ return new class extends Migration
             $table->enum('type', ['string', 'number', 'boolean', 'json', 'array', 'file'])->default('string');
             $table->string('group')->nullable();
             $table->text('description')->nullable();
+            $table->boolean('is_public')->default(false);
 
             $table->foreignId('updated_by')->nullable()->references('id')->on('users')->nullOnDelete();
 
