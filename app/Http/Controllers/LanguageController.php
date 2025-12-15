@@ -4,22 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CreateLanguageRequest;
+use App\Data\CreateLanguageData;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cookie;
 
 final class LanguageController
 {
-    public function store(CreateLanguageRequest $request): RedirectResponse
+    public function store(CreateLanguageData $data): RedirectResponse
     {
-        /** @var string $locale */
-        $locale = $request->validated('locale');
+        session(['locale' => $data->locale]);
 
-        session(['locale' => $locale]);
+        app()->setLocale($data->locale);
 
-        app()->setLocale($locale);
-
-        Cookie::queue('locale', $locale, 525600);
+        Cookie::queue('locale', $data->locale, 525600);
 
         return back();
     }

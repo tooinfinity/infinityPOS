@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CreateSessionRequest;
+use App\Actions\AuthenticateUser;
+use App\Data\CreateSessionData;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,11 +23,11 @@ final readonly class SessionController
         ]);
     }
 
-    public function store(CreateSessionRequest $request): RedirectResponse
+    public function store(CreateSessionData $data, Request $request, AuthenticateUser $action): RedirectResponse
     {
-        $user = $request->validateCredentials();
+        $user = $action->handle($data, $request->ip());
 
-        Auth::login($user, $request->boolean('remember'));
+        Auth::login($user, $data->remember);
 
         $request->session()->regenerate();
 

@@ -6,8 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Actions\CreateUserPassword;
 use App\Actions\UpdateUserPassword;
-use App\Http\Requests\CreateUserPasswordRequest;
-use App\Http\Requests\UpdateUserPasswordRequest;
+use App\Data\CreateUserPasswordData;
+use App\Data\UpdateUserPasswordData;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
@@ -27,14 +27,19 @@ final readonly class UserPasswordController
         ]);
     }
 
-    public function store(CreateUserPasswordRequest $request, CreateUserPassword $action): RedirectResponse
+    public function store(CreateUserPasswordData $data, CreateUserPassword $action): RedirectResponse
     {
         /** @var array<string, mixed> $credentials */
-        $credentials = $request->only('email', 'password', 'password_confirmation', 'token');
+        $credentials = [
+            'email' => $data->email,
+            'password' => $data->password,
+            'password_confirmation' => $data->password_confirmation,
+            'token' => $data->token,
+        ];
 
         $status = $action->handle(
             $credentials,
-            $request->string('password')->value()
+            $data->password
         );
 
         throw_if($status !== Password::PASSWORD_RESET, ValidationException::withMessages([
@@ -49,9 +54,9 @@ final readonly class UserPasswordController
         return Inertia::render('user-password/edit');
     }
 
-    public function update(UpdateUserPasswordRequest $request, #[CurrentUser] User $user, UpdateUserPassword $action): RedirectResponse
+    public function update(UpdateUserPasswordData $data, #[CurrentUser] User $user, UpdateUserPassword $action): RedirectResponse
     {
-        $action->handle($user, $request->string('password')->value());
+        $action->handle($user, $data->password);
 
         return back();
     }
