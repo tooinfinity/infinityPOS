@@ -40,8 +40,9 @@
     36 => 'Pest\\Laravel\\PestServiceProvider',
     37 => 'Spatie\\LaravelData\\LaravelDataServiceProvider',
     38 => 'Spatie\\Permission\\PermissionServiceProvider',
-    39 => 'Spatie\\StructureDiscoverer\\StructureDiscovererServiceProvider',
-    40 => 'App\\Providers\\AppServiceProvider',
+    39 => 'Spatie\\LaravelSettings\\LaravelSettingsServiceProvider',
+    40 => 'Spatie\\StructureDiscoverer\\StructureDiscovererServiceProvider',
+    41 => 'App\\Providers\\AppServiceProvider',
   ),
   'eager' => 
   array (
@@ -70,8 +71,9 @@
     22 => 'Pest\\Laravel\\PestServiceProvider',
     23 => 'Spatie\\LaravelData\\LaravelDataServiceProvider',
     24 => 'Spatie\\Permission\\PermissionServiceProvider',
-    25 => 'Spatie\\StructureDiscoverer\\StructureDiscovererServiceProvider',
-    26 => 'App\\Providers\\AppServiceProvider',
+    25 => 'Spatie\\LaravelSettings\\LaravelSettingsServiceProvider',
+    26 => 'Spatie\\StructureDiscoverer\\StructureDiscovererServiceProvider',
+    27 => 'App\\Providers\\AppServiceProvider',
   ),
   'deferred' => 
   array (

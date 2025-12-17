@@ -47,7 +47,6 @@ final class AppSetupCommand extends Command
             $this->warn('⏭️  Step 4: User creation skipped');
         }
 
-        $this->seedSettings();
         $this->clearPermissionCache();
         $this->showSummary();
 
@@ -346,21 +345,10 @@ final class AppSetupCommand extends Command
         $this->line('   ✓ Role: '.RoleEnum::ADMIN->value);
     }
 
-    private function seedSettings(): void
-    {
-        $this->info('⚙️ Step 5: Setting up application settings...');
-
-        $this->call('settings:seed', [
-            '--force' => $this->shouldRunFresh(),
-        ]);
-
-        $this->newLine();
-    }
-
     private function clearPermissionCache(): void
     {
         $this->newLine();
-        $this->info('🧹 Step 6: Clearing permission cache...');
+        $this->info('🧹 Step 5: Clearing permission cache...');
         $this->call('permission:cache-reset');
         $this->newLine();
     }

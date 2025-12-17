@@ -35,12 +35,23 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('permission:'.PermissionEnum::DELETE_USERS->value)
         ->name('users.destroy');
 
-    // Generic Settings...
-    Route::get('/setting', [App\Http\Controllers\SettingController::class, 'index'])->name('setting.index');
-    Route::put('/setting', [App\Http\Controllers\SettingController::class, 'update'])->name('setting.update');
+    // Settings Index and Group Updates...
+    Route::redirect('settings', '/settings/general');
+    Route::get('/settings/general', [App\Http\Controllers\Settings\GeneralSettingController::class, 'edit'])->name('settings.general.edit');
+    Route::put('/settings/general', [App\Http\Controllers\Settings\GeneralSettingController::class, 'update'])->name('settings.general.update');
+    Route::get('/settings/pos', [App\Http\Controllers\Settings\PosSettingController::class, 'edit'])->name('settings.pos.edit');
+    Route::put('/settings/pos', [App\Http\Controllers\Settings\PosSettingController::class, 'update'])->name('settings.pos.update');
+    Route::get('/settings/inventory', [App\Http\Controllers\Settings\InventorySettingController::class, 'edit'])->name('settings.inventory.edit');
+    Route::put('/settings/inventory', [App\Http\Controllers\Settings\InventorySettingController::class, 'update'])->name('settings.inventory.update');
+    Route::get('/settings/sales', [App\Http\Controllers\Settings\SalesSettingController::class, 'edit'])->name('settings.sales.edit');
+    Route::put('/settings/sales', [App\Http\Controllers\Settings\SalesSettingController::class, 'update'])->name('settings.sales.update');
+    Route::get('/settings/purchase', [App\Http\Controllers\Settings\PurchaseSettingController::class, 'edit'])->name('settings.purchase.edit');
+    Route::put('/settings/purchase', [App\Http\Controllers\Settings\PurchaseSettingController::class, 'update'])->name('settings.purchase.update');
+    Route::get('/settings/reporting', [App\Http\Controllers\Settings\ReportingSettingController::class, 'edit'])->name('settings.reporting.edit');
+    Route::put('/settings/reporting', [App\Http\Controllers\Settings\ReportingSettingController::class, 'update'])->name('settings.reporting.update');
 
     // User Profile...
-    Route::redirect('settings', '/settings/profile'); // Removed to use actual settings index
+    // Removed to use actual settings index
     Route::get('settings/profile', [UserProfileController::class, 'edit'])->name('user-profile.edit');
     Route::patch('settings/profile', [UserProfileController::class, 'update'])->name('user-profile.update');
     Route::delete('settings/profile', [UserProfileController::class, 'destroy'])->name('user-profile.destroy');

@@ -119,6 +119,13 @@
       0 => 'Spatie\\Permission\\PermissionServiceProvider',
     ),
   ),
+  'spatie/laravel-settings' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Spatie\\LaravelSettings\\LaravelSettingsServiceProvider',
+    ),
+  ),
   'spatie/php-structure-discoverer' => 
   array (
     'providers' => 

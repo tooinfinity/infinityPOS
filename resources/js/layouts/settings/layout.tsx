@@ -6,6 +6,7 @@ import { usePermissions } from '@/hooks/use-permissions';
 import { cn } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit as editPassword } from '@/routes/password';
+import settingsRoutes from '@/routes/settings';
 import { edit } from '@/routes/user-profile';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
@@ -32,6 +33,36 @@ export default function SettingsLayout({
     }
 
     const sidebarNavItems: NavItem[] = [
+        {
+            title: __('General'),
+            href: settingsRoutes.general.edit().url,
+            icon: null,
+        },
+        {
+            title: __('Sales'),
+            href: settingsRoutes.sales.edit().url,
+            icon: null,
+        },
+        {
+            title: __('Purchase'),
+            href: settingsRoutes.purchase.edit().url,
+            icon: null,
+        },
+        {
+            title: __('Inventory'),
+            href: settingsRoutes.inventory.edit().url,
+            icon: null,
+        },
+        {
+            title: __('Pos'),
+            href: settingsRoutes.pos.edit().url,
+            icon: null,
+        },
+        {
+            title: __('Reporting'),
+            href: settingsRoutes.reporting.edit().url,
+            icon: null,
+        },
         ...(can('edit_profile')
             ? [
                   {
