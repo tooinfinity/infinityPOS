@@ -24,7 +24,6 @@ final class MoneyboxTransactionData extends Data
         public Lazy|MoneyboxData|null $moneybox,
         public Lazy|PaymentData|null $payment,
         public Lazy|ExpenseData|null $expense,
-        public Lazy|MoneyboxData|null $transferTo,
         public Lazy|UserData|null $creator,
         public Lazy|UserData|null $updater,
         #[WithCast(DateTimeInterfaceCast::class)]

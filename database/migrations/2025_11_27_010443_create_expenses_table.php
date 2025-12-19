@@ -22,6 +22,9 @@ return new class extends Migration
             $table->foreignId('updated_by')->nullable()->references('id')->on('users')->nullOnDelete();
 
             $table->timestamps();
+
+            $table->index(['store_id', 'created_at']);
+            $table->index(['moneybox_id', 'created_at']);
         });
     }
 };

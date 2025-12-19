@@ -22,7 +22,6 @@ test('to array', function (): void {
             'phone',
             'email',
             'address',
-            'balance',
             'is_active',
             'business_identifier_id',
             'created_by',

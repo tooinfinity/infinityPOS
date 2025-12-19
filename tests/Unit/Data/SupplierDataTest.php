@@ -24,7 +24,6 @@ it('transforms a supplier model into SupplierData', function (): void {
             'phone' => '555-1234',
             'email' => 'contact@acme.test',
             'address' => '42 Supplier St',
-            'balance' => 25000,
             'is_active' => true,
         ]);
 
@@ -39,7 +38,6 @@ it('transforms a supplier model into SupplierData', function (): void {
         ->phone->toBe('555-1234')
         ->email->toBe('contact@acme.test')
         ->address->toBe('42 Supplier St')
-        ->balance->toBe(25000)
         ->is_active->toBeTrue()
         ->and($data->businessIdentifier->resolve())
         ->toBeInstanceOf(BusinessIdentifierData::class)

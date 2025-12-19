@@ -30,6 +30,7 @@ return new class extends Migration
 
             $table->index(['store_id', 'status', 'created_at']);
             $table->index(['supplier_id', 'created_at']);
+
         });
     }
 };

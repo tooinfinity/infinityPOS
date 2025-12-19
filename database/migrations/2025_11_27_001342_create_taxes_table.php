@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreignId('updated_by')->nullable()->references('id')->on('users')->nullOnDelete();
 
             $table->timestamps();
+
         });
     }
 };

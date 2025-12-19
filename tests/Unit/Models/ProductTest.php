@@ -84,9 +84,9 @@ test('has stores relationship through pivot', function (): void {
     $product = Product::factory()->create(['created_by' => $user->id]);
     $store = Store::factory()->create(['created_by' => $user->id]);
 
-    $product->stores()->attach($store->id, ['quantity' => 50]);
+    App\Models\InventoryLayer::factory()->forProductStore($product, $store)->create(['remaining_qty' => 50]);
 
     expect($product->stores)->toHaveCount(1)
         ->and($product->stores->first()->id)->toBe($store->id)
-        ->and($product->stores->first()->pivot->quantity)->toBe(50);
+        ->and($product->stores->first()->pivot->remaining_qty)->toBe(50);
 });

@@ -26,7 +26,6 @@ final class SupplierFactory extends Factory
             'phone' => $this->faker->optional()->phoneNumber(),
             'email' => $this->faker->optional()->companyEmail(),
             'address' => $this->faker->optional()->address(),
-            'balance' => $this->faker->numberBetween(1, 10000),
             'is_active' => $this->faker->boolean(95),
             'business_identifier_id' => BusinessIdentifier::factory(),
             'created_by' => User::factory(),

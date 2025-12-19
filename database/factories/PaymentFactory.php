@@ -8,7 +8,6 @@ use App\Enums\PaymentMethodEnum;
 // use App\Enums\PaymentTypeEnum;
 use App\Models\Expense;
 use App\Models\Invoice;
-use App\Models\Moneybox;
 use App\Models\Payment;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
@@ -36,7 +35,6 @@ final class PaymentFactory extends Factory
             'amount' => $this->faker->randomNumber(2, 2000),
             'method' => $this->faker->randomElement(array_map(fn (PaymentMethodEnum $e) => $e->value, PaymentMethodEnum::cases())),
             'related_id' => null,
-            'moneybox_id' => Moneybox::factory(),
             'notes' => $this->faker->optional()->sentence(6),
             'created_by' => User::factory(),
             'updated_by' => null,

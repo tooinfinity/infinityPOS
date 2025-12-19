@@ -25,6 +25,7 @@ return new class extends Migration
             $table->index(['product_id', 'store_id', 'batch_number', 'expiry_date'], 'inventory_layers_lookup');
             $table->index(['product_id', 'store_id', 'remaining_qty', 'received_at', 'id'], 'inventory_layers_fifo');
             $table->index(['product_id', 'store_id', 'received_at']);
+
         });
     }
 };

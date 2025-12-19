@@ -36,6 +36,7 @@ return new class extends Migration
             $table->index('price');
             $table->index(['category_id', 'brand_id', 'is_active']);
             $table->index(['has_batches', 'is_active']);
+
         });
     }
 };

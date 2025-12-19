@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('related_type')->nullable();
             $table->unsignedBigInteger('related_id')->nullable();
 
-            $table->foreignId('moneybox_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('created_by')->nullable()->references('id')->on('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->references('id')->on('users')->nullOnDelete();
 
@@ -28,7 +27,7 @@ return new class extends Migration
             $table->index(['related_type', 'related_id'], 'payments_related_morph_index');
             $table->index(['related_type', 'related_id', 'created_at'], 'payments_related_type_related_id_created_at');
             $table->index(['method', 'created_at'], 'payments_method_created_at');
-            $table->index(['moneybox_id', 'created_at'], 'payments_moneybox_created_at');
+
         });
     }
 };

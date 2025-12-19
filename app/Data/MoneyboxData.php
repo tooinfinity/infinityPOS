@@ -19,7 +19,6 @@ final class MoneyboxData extends Data
         public string $name,
         public MoneyboxTypeEnum $type,
         public ?string $description,
-        public int $balance,
         public ?string $bank_name,
         public ?string $account_number,
         public bool $is_active,

@@ -59,11 +59,6 @@ final class MoneyboxTransaction extends Model
     /**
      * @return BelongsTo<Moneybox, $this>
      */
-    public function transferTo(): BelongsTo
-    {
-        return $this->belongsTo(Moneybox::class, 'transfer_to_id');
-    }
-
     /**
      * @return BelongsTo<User, $this>
      */
@@ -107,7 +102,7 @@ final class MoneyboxTransaction extends Model
     /**
      * @return array<string, string>
      */
-    public function casts(): array
+    protected function casts(): array
     {
         return [
             'id' => 'integer',
@@ -119,7 +114,6 @@ final class MoneyboxTransaction extends Model
             'notes' => 'string',
             'payment_id' => 'integer',
             'expense_id' => 'integer',
-            'transfer_to_id' => 'integer',
             'created_by' => 'integer',
             'updated_by' => 'integer',
             'created_at' => 'datetime',

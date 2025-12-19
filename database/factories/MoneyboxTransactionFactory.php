@@ -37,7 +37,6 @@ final class MoneyboxTransactionFactory extends Factory
             'notes' => $this->faker->optional()->sentence(),
             'payment_id' => Payment::factory(),
             'expense_id' => Expense::factory(),
-            'transfer_to_id' => Moneybox::factory(),
             'created_by' => User::factory(),
             'updated_by' => null,
         ];
@@ -61,11 +60,6 @@ final class MoneyboxTransactionFactory extends Factory
     public function forMoneybox(Moneybox $moneybox): self
     {
         return $this->state(fn (array $attrs): array => [...$attrs, 'moneybox_id' => $moneybox->id]);
-    }
-
-    public function forTransferTo(Moneybox $moneybox): self
-    {
-        return $this->state(fn (array $attrs): array => [...$attrs, 'transfer_to_id' => $moneybox->id]);
     }
 
     public function forPayment(int $paymentId): self

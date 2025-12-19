@@ -74,11 +74,6 @@ final class Moneybox extends Model
     /**
      * @return HasMany<Payment, $this>
      */
-    public function payments(): HasMany
-    {
-        return $this->hasMany(Payment::class);
-    }
-
     /**
      * @return HasMany<Expense, $this>
      */
@@ -90,11 +85,6 @@ final class Moneybox extends Model
     /**
      * @return HasMany<MoneyboxTransaction, $this>
      */
-    public function incomingTransfers(): HasMany
-    {
-        return $this->hasMany(MoneyboxTransaction::class, 'transfer_to_id');
-    }
-
     /**
      * @return HasMany<MoneyboxTransaction, $this>
      */
@@ -107,14 +97,13 @@ final class Moneybox extends Model
     /**
      * @return array<string, string>
      */
-    public function casts(): array
+    protected function casts(): array
     {
         return [
             'id' => 'integer',
             'name' => 'string',
             'type' => MoneyboxTypeEnum::class,
             'description' => 'string',
-            'balance' => 'integer',
             'bank_name' => 'string',
             'account_number' => 'string',
             'store_id' => 'integer',

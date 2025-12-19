@@ -91,14 +91,12 @@ final class Product extends Model
     }
 
     /**
-     * @return BelongsToMany<Store, $this, StoreStock>
+     * @return BelongsToMany<Store, $this>
      */
     public function stores(): BelongsToMany
     {
-        return $this->belongsToMany(Store::class, 'store_stock')
-            ->using(StoreStock::class)
-            ->withPivot('quantity')
-            ->withTimestamps();
+        return $this->belongsToMany(Store::class, 'inventory_layers', 'product_id', 'store_id')
+            ->withPivot('unit_cost', 'received_qty', 'remaining_qty', 'batch_number', 'expiry_date', 'received_at');
     }
 
     /**
@@ -120,7 +118,7 @@ final class Product extends Model
     /**
      * @return array<string, string>
      */
-    public function casts(): array
+    protected function casts(): array
     {
         return [
             'id' => 'integer',

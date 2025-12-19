@@ -15,7 +15,6 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->string('type', 20); // ['cash', 'bank', 'mobile']
             $table->text('description')->nullable();
-            $table->unsignedBigInteger('balance')->comment('Current balance');
             $table->string('bank_name')->nullable();
             $table->string('account_number')->nullable();
             $table->boolean('is_active')->index();
@@ -27,6 +26,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['type', 'is_active']);
+
+            $table->index(['store_id', 'is_active']);
         });
     }
 };

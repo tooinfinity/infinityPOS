@@ -19,7 +19,6 @@ final class SupplierData extends Data
         public ?string $phone,
         public ?string $email,
         public ?string $address,
-        public int $balance,
         public bool $is_active,
         public Lazy|BusinessIdentifierData|null $businessIdentifier,
         public Lazy|UserData|null $creator,

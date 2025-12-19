@@ -54,7 +54,7 @@ final class Brand extends Model
     /**
      * @return array<string, string>
      */
-    public function casts(): array
+    protected function casts(): array
     {
         return [
             'id' => 'integer',

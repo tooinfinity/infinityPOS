@@ -13,7 +13,7 @@ return new class extends Migration
         Schema::create('units', function (Blueprint $table): void {
             $table->id();
             $table->string('name')->unique()->comment('kg, piece, meter, liter, etc');
-            $table->string('short_name', 10)->nullable();
+            $table->string('short_name', 10)->nullable()->unique();
             $table->boolean('is_active')->index();
 
             $table->foreignId('created_by')->nullable()->references('id')->on('users')->nullOnDelete();

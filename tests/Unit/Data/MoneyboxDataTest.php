@@ -24,7 +24,6 @@ it('transforms an moneybox model into MoneyboxData', function (): void {
             'name' => 'Cash',
             'type' => App\Enums\MoneyboxTypeEnum::CASH_REGISTER->value,
             'description' => 'Cash in hand',
-            'balance' => 50000,
             'bank_name' => 'Cash',
             'account_number' => '123456789',
             'is_active' => true,
@@ -44,7 +43,6 @@ it('transforms an moneybox model into MoneyboxData', function (): void {
         ->name->toBe('Cash')
         ->type->toBe(App\Enums\MoneyboxTypeEnum::CASH_REGISTER)
         ->description->toBe('Cash in hand')
-        ->balance->toBe(50000)
         ->bank_name->toBe('Cash')
         ->account_number->toBe('123456789')
         ->is_active->toBeTrue()

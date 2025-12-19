@@ -28,7 +28,6 @@ final class MoneyboxFactory extends Factory
             'name' => ucfirst($this->faker->unique()->words(2, true)),
             'type' => $type->value,
             'description' => $this->faker->optional()->sentence(),
-            'balance' => $this->faker->randomNumber(2, 10000),
             'bank_name' => $type === MoneyboxTypeEnum::BANK_ACCOUNT ? $this->faker->optional()->company() : null,
             'account_number' => $type === MoneyboxTypeEnum::BANK_ACCOUNT ? $this->faker->optional()->iban() : null,
             'store_id' => Store::factory(),

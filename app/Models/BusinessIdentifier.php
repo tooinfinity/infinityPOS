@@ -19,7 +19,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property-read string|null $rib
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
- * @property-read Company|null $company
  * @property-read Client|null $client
  * @property-read Supplier|null $supplier
  */
@@ -27,14 +26,6 @@ final class BusinessIdentifier extends Model
 {
     /** @use HasFactory<BusinessIdentifierFactory> */
     use HasFactory;
-
-    /**
-     * @return HasOne<Company, $this>
-     */
-    public function company(): HasOne
-    {
-        return $this->hasOne(Company::class);
-    }
 
     /**
      * @return HasOne<Supplier, $this>
@@ -55,7 +46,7 @@ final class BusinessIdentifier extends Model
     /**
      * @return array<string, string>
      */
-    public function casts(): array
+    protected function casts(): array
     {
         return [
             'id' => 'integer',

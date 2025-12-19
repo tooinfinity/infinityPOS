@@ -22,12 +22,12 @@ final class PaymentData extends Data
         public PaymentMethodEnum $method,
         public ?string $notes,
         public ?int $related_id,
-        public Lazy|MoneyboxData|null $moneybox,
-        public Lazy|UserData|null $creator,
-        public Lazy|UserData|null $updater,
+        public Lazy|MoneyboxData|null $moneybox = null,
+        public Lazy|UserData|null $creator = null,
+        public Lazy|UserData|null $updater = null,
         #[WithCast(DateTimeInterfaceCast::class)]
-        public ?string $created_at,
+        public ?string $created_at = null,
         #[WithCast(DateTimeInterfaceCast::class)]
-        public ?string $updated_at,
+        public ?string $updated_at = null,
     ) {}
 }

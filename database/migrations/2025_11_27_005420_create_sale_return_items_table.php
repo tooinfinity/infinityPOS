@@ -24,6 +24,7 @@ return new class extends Migration
             $table->foreignId('sale_item_id')->nullable()->constrained();
 
             $table->timestamps();
+
         });
     }
 };

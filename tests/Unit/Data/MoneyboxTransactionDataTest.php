@@ -15,8 +15,6 @@ it('transforms an moneybox transaction model into MoneyboxTransactionData', func
     $moneybox = Moneybox::factory()->create();
     $payment = Payment::factory()->create();
     $expense = Expense::factory()->create();
-    $transferTo = Moneybox::factory()->create();
-
     /** @var MoneyboxTransaction $moneyboxTransaction */
     $moneyboxTransaction = MoneyboxTransaction::factory()
         ->for($creator, 'creator')
@@ -24,11 +22,10 @@ it('transforms an moneybox transaction model into MoneyboxTransactionData', func
         ->for($moneybox, 'moneybox')
         ->for($payment, 'payment')
         ->for($expense, 'expense')
-        ->for($transferTo, 'transferTo')
         ->create();
 
     $data = MoneyboxTransactionData::from(
-        $moneyboxTransaction->load(['creator', 'updater', 'moneybox', 'payment', 'expense', 'transferTo'])
+        $moneyboxTransaction->load(['creator', 'updater', 'moneybox', 'payment', 'expense'])
     );
 
     expect($data)
@@ -40,7 +37,6 @@ it('transforms an moneybox transaction model into MoneyboxTransactionData', func
         ->and($data->moneybox->id)->toBe($moneybox->id)
         ->and($data->payment->id)->toBe($payment->id)
         ->and($data->expense->id)->toBe($expense->id)
-        ->and($data->transferTo->id)->toBe($transferTo->id)
         ->and($data->created_at)->toBe($moneyboxTransaction->created_at->toDateTimeString())
         ->and($data->updated_at)->toBe($moneyboxTransaction->updated_at->toDateTimeString());
 });

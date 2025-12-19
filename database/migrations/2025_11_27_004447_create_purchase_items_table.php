@@ -26,6 +26,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['batch_number', 'expiry_date']);
+
         });
     }
 };

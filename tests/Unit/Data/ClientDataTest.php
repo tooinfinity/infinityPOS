@@ -25,7 +25,6 @@ it('transforms a client model into ClientData', function (): void {
             'phone' => '123456789',
             'email' => 'john@example.com',
             'address' => 'Main street 1',
-            'balance' => 4500,
             'is_active' => true,
         ]);
 
@@ -44,7 +43,6 @@ it('transforms a client model into ClientData', function (): void {
         ->phone->toBe('123456789')
         ->email->toBe('john@example.com')
         ->address->toBe('Main street 1')
-        ->balance->toBe(4500)
         ->is_active->toBeTrue()
         ->and($data->businessIdentifier->resolve())
         ->toBeInstanceOf(BusinessIdentifierData::class)

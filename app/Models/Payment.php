@@ -32,14 +32,6 @@ final class Payment extends Model
     use HasFactory;
 
     /**
-     * @return BelongsTo<Moneybox, $this>
-     */
-    public function moneybox(): BelongsTo
-    {
-        return $this->belongsTo(Moneybox::class);
-    }
-
-    /**
      * @return BelongsTo<User, $this>
      */
     public function creator(): BelongsTo
@@ -92,7 +84,7 @@ final class Payment extends Model
     /**
      * @return array<string, string>
      */
-    public function casts(): array
+    protected function casts(): array
     {
         return [
             'id' => 'integer',
@@ -102,7 +94,6 @@ final class Payment extends Model
             'notes' => 'string',
             'related_type' => 'string',
             'related_id' => 'integer',
-            'moneybox_id' => 'integer',
             'created_by' => 'integer',
             'updated_by' => 'integer',
             'created_at' => 'datetime',

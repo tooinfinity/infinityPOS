@@ -33,6 +33,8 @@ return new class extends Migration
 
             $table->index(['client_id', 'status']);
             $table->index(['due_at', 'status']);
+
+            $table->index(['sale_id', 'created_at']);
         });
     }
 };

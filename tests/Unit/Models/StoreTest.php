@@ -41,9 +41,9 @@ test('store relationships', function (): void {
 
     $storeB = Store::factory()->create(['created_by' => $user->id]);
 
-    // products pivot
+    // inventory layer creates product-store availability
     $product = Product::factory()->create(['created_by' => $user->id]);
-    $storeA->products()->attach($product->id, ['quantity' => 5]);
+    App\Models\InventoryLayer::factory()->forProductStore($product, $storeA)->create(['remaining_qty' => 5]);
 
     // direct hasMany relations
     $sale = Sale::factory()->create(['store_id' => $storeA->id, 'created_by' => $user->id]);
@@ -60,9 +60,9 @@ test('store relationships', function (): void {
 
     expect($storeA->creator->id)->toBe($user->id)
         ->and($storeA->updater->id)->toBe($user->id)
-        // ensure we fetch the latest pivoted product row from DB
+        // ensure we fetch a product from inventory layers pivot
         ->and($storeA->products()->withoutGlobalScopes()->first()->id)->toBe($product->id)
-        ->and((int) $storeA->products()->withoutGlobalScopes()->first()->pivot->quantity)->toBe(5)
+        ->and((int) $storeA->products()->withoutGlobalScopes()->first()->pivot->remaining_qty)->toBe(5)
         ->and($storeA->sales->first()->id)->toBe($sale->id)
         ->and($storeA->purchases->first()->id)->toBe($purchase->id)
         ->and($storeA->saleReturns->first()->id)->toBe($saleReturn->id)
