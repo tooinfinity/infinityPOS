@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Data\TaxData;
-use App\Data\UserData;
+use App\Data\Taxes\TaxData;
+use App\Data\Users\UserData;
 use App\Models\Tax;
 use App\Models\User;
 

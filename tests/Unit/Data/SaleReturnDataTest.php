@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Data\ClientData;
+use App\Data\Clients\ClientData;
 use App\Data\SaleData;
 use App\Data\SaleReturnData;
-use App\Data\StoreData;
-use App\Data\UserData;
+use App\Data\Stores\StoreData;
+use App\Data\Users\UserData;
 use App\Models\Client;
 use App\Models\Sale;
 use App\Models\SaleReturn;

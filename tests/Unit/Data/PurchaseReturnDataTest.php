@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 use App\Data\PurchaseData;
 use App\Data\PurchaseReturnData;
-use App\Data\StoreData;
-use App\Data\SupplierData;
-use App\Data\UserData;
+use App\Data\Stores\StoreData;
+use App\Data\Suppliers\SupplierData;
+use App\Data\Users\UserData;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
 use App\Models\Store;

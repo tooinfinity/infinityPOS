@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Data\CategoryData;
-use App\Data\ExpenseData;
+use App\Data\Categories\CategoryData;
+use App\Data\Expenses\ExpenseData;
 use App\Data\MoneyboxData;
-use App\Data\StoreData;
-use App\Data\UserData;
+use App\Data\Stores\StoreData;
+use App\Data\Users\UserData;
 use App\Models\Category;
 use App\Models\Expense;
 use App\Models\Moneybox;

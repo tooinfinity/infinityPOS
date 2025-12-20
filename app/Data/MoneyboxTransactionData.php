@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use App\Data\Expenses\ExpenseData;
+use App\Data\Users\UserData;
 use App\Enums\MoneyboxTransactionTypeEnum;
 use Spatie\LaravelData\Attributes\AutoLazy;
 use Spatie\LaravelData\Attributes\WithCast;

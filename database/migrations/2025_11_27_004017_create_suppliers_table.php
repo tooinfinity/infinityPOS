@@ -16,9 +16,13 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
             $table->text('address')->nullable();
+            $table->string('article')->unique()->nullable();
+            $table->string('nif')->unique()->nullable();
+            $table->string('nis')->unique()->nullable();
+            $table->string('rc')->unique()->nullable();
+            $table->string('rib')->unique()->nullable();
             $table->boolean('is_active')->default(true);
 
-            $table->foreignId('business_identifier_id')->nullable()->constrained();
             $table->foreignId('created_by')->nullable()->references('id')->on('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->references('id')->on('users')->nullOnDelete();
 

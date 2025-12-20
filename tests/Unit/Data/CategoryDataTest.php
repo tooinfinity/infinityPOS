@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Data\CategoryData;
-use App\Data\UserData;
+use App\Data\Categories\CategoryData;
+use App\Data\Users\UserData;
 use App\Models\Category;
 use App\Models\User;
 

@@ -22,8 +22,12 @@ test('to array', function (): void {
             'phone',
             'email',
             'address',
+            'article',
+            'nif',
+            'nis',
+            'rc',
+            'rib',
             'is_active',
-            'business_identifier_id',
             'created_by',
             'updated_by',
             'created_at',
@@ -32,9 +36,8 @@ test('to array', function (): void {
 });
 
 test('client relationships', function (): void {
-    $businessIdentifier = BusinessIdentifier::factory()->create();
     $user = User::factory()->create()->refresh();
-    $client = Client::factory()->create(['business_identifier_id' => $businessIdentifier->id, 'created_by' => $user->id]);
+    $client = Client::factory()->create(['created_by' => $user->id]);
     $store = Store::factory()->create(['created_by' => $user->id]);
     $sale = Sale::factory()->create(['client_id' => $client->id, 'store_id' => $store->id, 'created_by' => $user->id]);
     $saleReturn = SaleReturn::factory()->create(['client_id' => $client->id, 'store_id' => $store->id, 'created_by' => $user->id]);
@@ -42,8 +45,7 @@ test('client relationships', function (): void {
 
     $client->update(['updated_by' => $user->id]);
 
-    expect($client->businessIdentifier->id)->toBe($businessIdentifier->id)
-        ->and($client->sales->count())->toBe(1)
+    expect($client->sales->count())->toBe(1)
         ->and($client->sales->first()->id)->toBe($sale->id)
         ->and($client->saleReturns->count())->toBe(1)
         ->and($client->saleReturns->first()->id)->toBe($saleReturn->id)

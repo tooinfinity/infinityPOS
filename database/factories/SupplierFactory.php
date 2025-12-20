@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\BusinessIdentifier;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -26,8 +25,12 @@ final class SupplierFactory extends Factory
             'phone' => $this->faker->optional()->phoneNumber(),
             'email' => $this->faker->optional()->companyEmail(),
             'address' => $this->faker->optional()->address(),
+            'article' => $this->faker->optional()->bothify('ARTICLE-#####'),
+            'nif' => $this->faker->optional()->bothify('NIF-#####'),
+            'nis' => $this->faker->optional()->bothify('NIS-#####'),
+            'rc' => $this->faker->optional()->bothify('RC-#####'),
+            'rib' => $this->faker->optional()->bothify('RIB-#####'),
             'is_active' => $this->faker->boolean(95),
-            'business_identifier_id' => BusinessIdentifier::factory(),
             'created_by' => User::factory(),
             'updated_by' => null,
         ];

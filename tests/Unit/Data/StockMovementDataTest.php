@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Data\ProductData;
+use App\Data\Products\ProductData;
 use App\Data\StockMovementData;
-use App\Data\StoreData;
-use App\Data\UserData;
+use App\Data\Stores\StoreData;
+use App\Data\Users\UserData;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\StockMovement;

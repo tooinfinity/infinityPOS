@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Actions\UpdateUser;
-use App\Data\UpdateUserData;
+use App\Actions\Users\UpdateUser;
+use App\Data\Users\UpdateUserData;
 use App\Models\User;
 
 it('may update a user', function (): void {

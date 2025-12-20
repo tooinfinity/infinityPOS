@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Data\BrandData;
-use App\Data\UserData;
+use App\Data\Brands\BrandData;
+use App\Data\Users\UserData;
 use App\Models\Brand;
 use App\Models\User;
 

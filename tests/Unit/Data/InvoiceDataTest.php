@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Data\ClientData;
+use App\Data\Clients\ClientData;
 use App\Data\InvoiceData;
 use App\Data\SaleData;
-use App\Data\UserData;
+use App\Data\Users\UserData;
 use App\Enums\InvoiceStatusEnum;
 use App\Models\Client;
 use App\Models\Invoice;

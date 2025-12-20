@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Data\ProductData;
+use App\Data\Products\ProductData;
 use App\Data\SaleItemData;
 use App\Data\SaleReturnData;
 use App\Data\SaleReturnItemData;

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\CreateUserPassword;
-use App\Actions\UpdateUserPassword;
-use App\Data\CreateUserPasswordData;
-use App\Data\UpdateUserPasswordData;
+use App\Actions\Authentication\CreateUserPassword;
+use App\Actions\Authentication\UpdateUserPassword;
+use App\Data\Authentication\CreateUserPasswordData;
+use App\Data\Authentication\UpdateUserPasswordData;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;

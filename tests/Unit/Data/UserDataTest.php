@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Data\UserData;
+use App\Data\Users\UserData;
 use App\Models\Role;
 use App\Models\User;
 

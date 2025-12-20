@@ -26,6 +26,16 @@ final class GeneralSettings extends Settings
 
     public int $decimal_places;
 
+    public string $article_number;
+
+    public string $tax_identification_number;
+
+    public string $business_register_number;
+
+    public string $statistical_identification_number;
+
+    public string $bank_account_details;
+
     public static function group(): string
     {
         return 'general';

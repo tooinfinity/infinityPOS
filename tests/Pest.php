@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Process;
@@ -12,6 +14,11 @@ use Tests\TestCase;
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->beforeEach(function (): void {
+        $this->withoutMiddleware([
+            ValidateCsrfToken::class,
+            VerifyCsrfToken::class,
+        ]);
+
         Str::createRandomStringsNormally();
         Str::createUuidsNormally();
         Process::preventStrayProcesses();

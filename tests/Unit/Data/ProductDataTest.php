@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Data\BrandData;
-use App\Data\CategoryData;
-use App\Data\ProductData;
-use App\Data\TaxData;
-use App\Data\UnitData;
-use App\Data\UserData;
+use App\Data\Brands\BrandData;
+use App\Data\Categories\CategoryData;
+use App\Data\Products\ProductData;
+use App\Data\Taxes\TaxData;
+use App\Data\Units\UnitData;
+use App\Data\Users\UserData;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;

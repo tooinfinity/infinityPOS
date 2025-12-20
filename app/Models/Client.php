@@ -18,11 +18,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read string|null $phone
  * @property-read string|null $email
  * @property-read string|null $address
- * @property-read int $balance
+ * @property-read string|null $article
+ * @property-read string|null $nif
+ * @property-read string|null $nis
+ * @property-read string|null $rc
+ * @property-read string|null $rib
  * @property-read bool $is_active
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
- * @property-read BusinessIdentifier|null $businessIdentifier
  * @property-read User $creator
  * @property-read User|null $updater
  * @property-read Collection<int, Sale> $sales
@@ -33,14 +36,6 @@ final class Client extends Model
 {
     /** @use HasFactory<ClientFactory> */
     use HasFactory;
-
-    /**
-     * @return BelongsTo<BusinessIdentifier, $this>
-     */
-    public function businessIdentifier(): BelongsTo
-    {
-        return $this->belongsTo(BusinessIdentifier::class);
-    }
 
     /**
      * @return BelongsTo<User, $this>
@@ -93,9 +88,12 @@ final class Client extends Model
             'phone' => 'string',
             'email' => 'string',
             'address' => 'string',
-            'balance' => 'integer',
+            'article' => 'string',
+            'nif' => 'string',
+            'nis' => 'string',
+            'rc' => 'string',
+            'rib' => 'string',
             'is_active' => 'boolean',
-            'business_identifier_id' => 'integer',
             'created_by' => 'integer',
             'updated_by' => 'integer',
             'created_at' => 'datetime',

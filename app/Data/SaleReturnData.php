@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use App\Data\Clients\ClientData;
+use App\Data\Stores\StoreData;
+use App\Data\Users\UserData;
 use Spatie\LaravelData\Attributes\AutoLazy;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Casts\DateTimeInterfaceCast;

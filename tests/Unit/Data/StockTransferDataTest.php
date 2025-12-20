@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Data\StockTransferData;
-use App\Data\StoreData;
-use App\Data\UserData;
+use App\Data\Stores\StoreData;
+use App\Data\Users\UserData;
 use App\Enums\StockTransferStatusEnum;
 use App\Models\StockTransfer;
 use App\Models\Store;

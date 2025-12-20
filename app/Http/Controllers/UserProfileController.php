@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\DeleteUser;
-use App\Actions\UpdateUser;
-use App\Data\DeleteUserData;
-use App\Data\UpdateUserData;
+use App\Actions\Users\DeleteUser;
+use App\Actions\Users\UpdateUser;
+use App\Data\Users\DeleteUserData;
+use App\Data\Users\UpdateUserData;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;

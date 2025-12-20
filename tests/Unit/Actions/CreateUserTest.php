@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Actions\CreateUser;
-use App\Data\CreateUserData;
+use App\Actions\Users\CreateUser;
+use App\Data\Users\CreateUserData;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Event;

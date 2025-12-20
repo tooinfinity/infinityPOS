@@ -21,8 +21,12 @@ test('to array', function (): void {
             'phone',
             'email',
             'address',
+            'article',
+            'nif',
+            'nis',
+            'rc',
+            'rib',
             'is_active',
-            'business_identifier_id',
             'created_by',
             'updated_by',
             'created_at',
@@ -32,9 +36,8 @@ test('to array', function (): void {
 
 test('supplier relationships', function (): void {
     $user = User::factory()->create()->refresh();
-    $businessIdentifier = BusinessIdentifier::factory()->create();
     $store = Store::factory()->create(['created_by' => $user->id]);
-    $supplier = Supplier::factory()->create(['business_identifier_id' => $businessIdentifier->id, 'created_by' => $user->id]);
+    $supplier = Supplier::factory()->create(['created_by' => $user->id]);
     $supplier->update(['updated_by' => $user->id]);
 
     $purchases = Purchase::factory()->create([
@@ -51,6 +54,5 @@ test('supplier relationships', function (): void {
     expect($supplier->creator->id)->toBe($user->id)
         ->and($supplier->updater->id)->toBe($user->id)
         ->and($supplier->purchases->first()->id)->toBe($purchases->id)
-        ->and($supplier->purchaseReturns->first()->id)->toBe($purchaseReturns->id)
-        ->and($supplier->businessIdentifier->id)->toBe($businessIdentifier->id);
+        ->and($supplier->purchaseReturns->first()->id)->toBe($purchaseReturns->id);
 });

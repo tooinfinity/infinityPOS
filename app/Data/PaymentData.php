@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use App\Data\Users\UserData;
 use App\Enums\PaymentMethodEnum;
 use Spatie\LaravelData\Attributes\AutoLazy;
 use Spatie\LaravelData\Attributes\WithCast;

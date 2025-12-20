@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\CreateUser;
-use App\Actions\DeleteUser;
-use App\Actions\UpdateUser;
-use App\Data\CreateUserData;
-use App\Data\UpdateUserData;
-use App\Data\UserData;
+use App\Actions\Users\CreateUser;
+use App\Actions\Users\DeleteUser;
+use App\Actions\Users\UpdateUser;
+use App\Data\Users\CreateUserData;
+use App\Data\Users\UpdateUserData;
+use App\Data\Users\UserData;
 use App\Enums\RoleEnum;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;

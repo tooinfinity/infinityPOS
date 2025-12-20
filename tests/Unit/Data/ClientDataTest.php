@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Data\BusinessIdentifierData;
-use App\Data\ClientData;
-use App\Data\UserData;
+use App\Data\Clients\ClientData;
+use App\Data\Users\UserData;
 use App\Models\BusinessIdentifier;
 use App\Models\Client;
 use App\Models\User;
@@ -13,13 +13,11 @@ it('transforms a client model into ClientData', function (): void {
 
     $creator = User::factory()->create();
     $updater = User::factory()->create();
-    $identifier = BusinessIdentifier::factory()->create();
 
     /** @var Client $client */
     $client = Client::factory()
         ->for($creator, 'creator')
         ->for($updater, 'updater')
-        ->for($identifier, 'businessIdentifier')
         ->create([
             'name' => 'John Doe',
             'phone' => '123456789',
@@ -32,7 +30,6 @@ it('transforms a client model into ClientData', function (): void {
         $client->load([
             'creator',
             'updater',
-            'businessIdentifier',
         ])
     );
 
@@ -44,9 +41,6 @@ it('transforms a client model into ClientData', function (): void {
         ->email->toBe('john@example.com')
         ->address->toBe('Main street 1')
         ->is_active->toBeTrue()
-        ->and($data->businessIdentifier->resolve())
-        ->toBeInstanceOf(BusinessIdentifierData::class)
-        ->id->toBe($identifier->id)
         ->and($data->creator->resolve())
         ->toBeInstanceOf(UserData::class)
         ->id->toBe($creator->id)

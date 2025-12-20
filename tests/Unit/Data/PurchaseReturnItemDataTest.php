@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Data\ProductData;
+use App\Data\Products\ProductData;
 use App\Data\PurchaseItemData;
 use App\Data\PurchaseReturnData;
 use App\Data\PurchaseReturnItemData;

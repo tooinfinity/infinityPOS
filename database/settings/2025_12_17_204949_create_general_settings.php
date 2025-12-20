@@ -17,5 +17,10 @@ return new class extends SettingsMigration
         $this->migrator->add('general.decimal_separator', '.');
         $this->migrator->add('general.thousand_separator', ',');
         $this->migrator->add('general.decimal_places', 2);
+        $this->migrator->add('general.article_number', 'ART');
+        $this->migrator->add('general.tax_identification_number', 'NIF');
+        $this->migrator->add('general.business_register_number', 'RC');
+        $this->migrator->add('general.statistical_identification_number', 'NIS');
+        $this->migrator->add('general.bank_account_details', 'RIB');
     }
 };

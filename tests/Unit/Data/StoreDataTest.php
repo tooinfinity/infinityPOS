@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Data\StoreData;
-use App\Data\UserData;
+use App\Data\Stores\StoreData;
+use App\Data\Users\UserData;
 use App\Models\Store;
 use App\Models\User;
 

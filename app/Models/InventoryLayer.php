@@ -4,11 +4,25 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Database\Factories\InventoryLayerFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property-read int $id
+ * @property-read int $product_id
+ * @property-read int $store_id
+ * @property-read string|null $batch_number
+ * @property-read CarbonInterface|null $expiry_date
+ * @property-read int $unit_cost
+ * @property-read int $received_qty
+ * @property int $remaining_qty
+ * @property-read CarbonInterface $received_at
+ * @property-read CarbonInterface $created_at
+ * @property-read CarbonInterface $updated_at
+ */
 final class InventoryLayer extends Model
 {
     /** @use HasFactory<InventoryLayerFactory> */

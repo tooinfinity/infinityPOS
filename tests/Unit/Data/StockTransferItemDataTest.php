@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Data\ProductData;
+use App\Data\Products\ProductData;
 use App\Data\StockTransferData;
 use App\Data\StockTransferItemData;
 use App\Models\Product;

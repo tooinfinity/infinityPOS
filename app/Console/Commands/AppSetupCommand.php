@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Actions\CreateUser;
+use App\Actions\Users\CreateUser;
 use App\Data\CreateSetupData;
-use App\Data\CreateUserData;
+use App\Data\Users\CreateUserData;
 use App\Enums\PermissionEnum;
 use App\Enums\RoleEnum;
 use App\Models\User;

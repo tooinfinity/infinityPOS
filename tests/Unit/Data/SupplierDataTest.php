@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Data\BusinessIdentifierData;
-use App\Data\SupplierData;
-use App\Data\UserData;
+use App\Data\Suppliers\SupplierData;
+use App\Data\Users\UserData;
 use App\Models\BusinessIdentifier;
 use App\Models\Supplier;
 use App\Models\User;
@@ -12,13 +12,11 @@ use App\Models\User;
 it('transforms a supplier model into SupplierData', function (): void {
     $creator = User::factory()->create();
     $updater = User::factory()->create();
-    $identifier = BusinessIdentifier::factory()->create();
 
     /** @var Supplier $supplier */
     $supplier = Supplier::factory()
         ->for($creator, 'creator')
         ->for($updater, 'updater')
-        ->for($identifier, 'businessIdentifier')
         ->create([
             'name' => 'ACME Supplies',
             'phone' => '555-1234',
@@ -28,7 +26,7 @@ it('transforms a supplier model into SupplierData', function (): void {
         ]);
 
     $data = SupplierData::from(
-        $supplier->load(['creator', 'updater', 'businessIdentifier'])
+        $supplier->load(['creator', 'updater'])
     );
 
     expect($data)
@@ -39,9 +37,6 @@ it('transforms a supplier model into SupplierData', function (): void {
         ->email->toBe('contact@acme.test')
         ->address->toBe('42 Supplier St')
         ->is_active->toBeTrue()
-        ->and($data->businessIdentifier->resolve())
-        ->toBeInstanceOf(BusinessIdentifierData::class)
-        ->id->toBe($identifier->id)
         ->and($data->creator->resolve())
         ->toBeInstanceOf(UserData::class)
         ->id->toBe($creator->id)

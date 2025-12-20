@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\AuthenticateUser;
-use App\Data\CreateSessionData;
+use App\Actions\Authentication\AuthenticateUser;
+use App\Data\Authentication\CreateSessionData;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
