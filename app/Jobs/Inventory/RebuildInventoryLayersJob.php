@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Collection;
 
 final class RebuildInventoryLayersJob implements ShouldQueue
 {
@@ -52,7 +53,7 @@ final class RebuildInventoryLayersJob implements ShouldQueue
         $layerQuery->delete();
 
         // Process all stock movements in chronological order
-        $query->chunk(500, function ($movements): void {
+        $query->chunk(500, function (Collection $movements): void {
             foreach ($movements as $movement) {
                 $this->processMovement($movement);
             }
