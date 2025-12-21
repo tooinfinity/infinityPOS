@@ -4,6 +4,15 @@ declare(strict_types=1);
 
 use App\Enums\PermissionEnum;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\Sales\CancelSaleController;
+use App\Http\Controllers\Sales\CancelSaleReturnController;
+use App\Http\Controllers\Sales\CompleteSaleController;
+use App\Http\Controllers\Sales\CompleteSaleReturnController;
+use App\Http\Controllers\Sales\SaleController;
+use App\Http\Controllers\Sales\SaleInvoiceController;
+use App\Http\Controllers\Sales\SaleItemController;
+use App\Http\Controllers\Sales\SalePaymentController;
+use App\Http\Controllers\Sales\SaleReturnController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserPasswordController;
@@ -64,6 +73,36 @@ Route::middleware('auth')->group(function (): void {
 
     // Appearance...
     Route::get('settings/appearance', fn () => Inertia::render('appearance/update'))->name('appearance.edit');
+
+    // Sales Management...
+    Route::get('sales', [SaleController::class, 'index'])->name('sales.index');
+    Route::get('sales/create', [SaleController::class, 'create'])->name('sales.create');
+    Route::post('sales', [SaleController::class, 'store'])->name('sales.store');
+    Route::get('sales/{sale}', [SaleController::class, 'show'])->name('sales.show');
+    Route::get('sales/{sale}/edit', [SaleController::class, 'edit'])->name('sales.edit');
+    Route::patch('sales/{sale}', [SaleController::class, 'update'])->name('sales.update');
+    Route::delete('sales/{sale}', [SaleController::class, 'destroy'])->name('sales.destroy');
+    Route::post('sales/{sale}/complete', CompleteSaleController::class)->name('sales.complete');
+    Route::post('sales/{sale}/cancel', CancelSaleController::class)->name('sales.cancel');
+
+    // Sale Items...
+    Route::post('sales/{sale}/items', [SaleItemController::class, 'store'])->name('sales.items.store');
+    Route::patch('sales/{sale}/items/{item}', [SaleItemController::class, 'update'])->name('sales.items.update');
+    Route::delete('sales/{sale}/items/{item}', [SaleItemController::class, 'destroy'])->name('sales.items.destroy');
+
+    // Sale Payments...
+    Route::post('sales/{sale}/payments', [SalePaymentController::class, 'store'])->name('sales.payments.store');
+
+    // Sale Invoices...
+    Route::post('sales/{sale}/invoices', [SaleInvoiceController::class, 'store'])->name('sales.invoices.store');
+
+    // Sale Returns...
+    Route::get('sale-returns', [SaleReturnController::class, 'index'])->name('sale-returns.index');
+    Route::get('sale-returns/create', [SaleReturnController::class, 'create'])->name('sale-returns.create');
+    Route::post('sale-returns', [SaleReturnController::class, 'store'])->name('sale-returns.store');
+    Route::get('sale-returns/{saleReturn}', [SaleReturnController::class, 'show'])->name('sale-returns.show');
+    Route::post('sale-returns/{saleReturn}/complete', CompleteSaleReturnController::class)->name('sale-returns.complete');
+    Route::post('sale-returns/{saleReturn}/cancel', CancelSaleReturnController::class)->name('sale-returns.cancel');
 
 });
 
