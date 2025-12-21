@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\Suppliers\CreateSupplier;
 use App\Data\Suppliers\CreateSupplierData;
-use App\Models\BusinessIdentifier;
 use App\Models\Supplier;
 use App\Models\User;
 

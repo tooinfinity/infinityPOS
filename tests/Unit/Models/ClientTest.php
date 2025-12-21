@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Models\BusinessIdentifier;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Sale;

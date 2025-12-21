@@ -2,10 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Data\BusinessIdentifierData;
 use App\Data\Suppliers\SupplierData;
 use App\Data\Users\UserData;
-use App\Models\BusinessIdentifier;
 use App\Models\Supplier;
 use App\Models\User;
 

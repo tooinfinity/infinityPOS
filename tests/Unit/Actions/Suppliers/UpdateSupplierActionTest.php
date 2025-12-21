@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\Suppliers\UpdateSupplier;
 use App\Data\Suppliers\UpdateSupplierData;
-use App\Models\BusinessIdentifier;
 use App\Models\Supplier;
 use App\Models\User;
 

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\Clients\CreateClient;
 use App\Data\Clients\CreateClientData;
-use App\Models\BusinessIdentifier;
 use App\Models\Client;
 use App\Models\User;
 
