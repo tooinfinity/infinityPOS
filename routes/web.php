@@ -3,7 +3,23 @@
 declare(strict_types=1);
 
 use App\Enums\PermissionEnum;
+use App\Http\Controllers\Inventory\BulkStockAdjustmentController;
+use App\Http\Controllers\Inventory\CancelStockTransferController;
+use App\Http\Controllers\Inventory\CompleteStockTransferController;
+use App\Http\Controllers\Inventory\InventoryLevelController;
+use App\Http\Controllers\Inventory\RecalculateStockLevelController;
+use App\Http\Controllers\Inventory\StockAdjustmentController;
+use App\Http\Controllers\Inventory\StockMovementController;
+use App\Http\Controllers\Inventory\StockTransferController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\Purchases\CancelPurchaseController;
+use App\Http\Controllers\Purchases\CancelPurchaseReturnController;
+use App\Http\Controllers\Purchases\CompletePurchaseReturnController;
+use App\Http\Controllers\Purchases\PurchaseController;
+use App\Http\Controllers\Purchases\PurchaseItemController;
+use App\Http\Controllers\Purchases\PurchasePaymentController;
+use App\Http\Controllers\Purchases\PurchaseReturnController;
+use App\Http\Controllers\Purchases\ReceivePurchaseController;
 use App\Http\Controllers\Sales\CancelSaleController;
 use App\Http\Controllers\Sales\CancelSaleReturnController;
 use App\Http\Controllers\Sales\CompleteSaleController;
@@ -96,13 +112,66 @@ Route::middleware('auth')->group(function (): void {
     // Sale Invoices...
     Route::post('sales/{sale}/invoices', [SaleInvoiceController::class, 'store'])->name('sales.invoices.store');
 
-    // Sale Returns...
+    // Sale Returns..
     Route::get('sale-returns', [SaleReturnController::class, 'index'])->name('sale-returns.index');
     Route::get('sale-returns/create', [SaleReturnController::class, 'create'])->name('sale-returns.create');
     Route::post('sale-returns', [SaleReturnController::class, 'store'])->name('sale-returns.store');
     Route::get('sale-returns/{saleReturn}', [SaleReturnController::class, 'show'])->name('sale-returns.show');
     Route::post('sale-returns/{saleReturn}/complete', CompleteSaleReturnController::class)->name('sale-returns.complete');
     Route::post('sale-returns/{saleReturn}/cancel', CancelSaleReturnController::class)->name('sale-returns.cancel');
+
+    // Purchase Management..
+    Route::get('purchases', [PurchaseController::class, 'index'])->name('purchases.index');
+    Route::get('purchases/create', [PurchaseController::class, 'create'])->name('purchases.create');
+    Route::post('purchases', [PurchaseController::class, 'store'])->name('purchases.store');
+    Route::get('purchases/{purchase}', [PurchaseController::class, 'show'])->name('purchases.show');
+    Route::get('purchases/{purchase}/edit', [PurchaseController::class, 'edit'])->name('purchases.edit');
+    Route::patch('purchases/{purchase}', [PurchaseController::class, 'update'])->name('purchases.update');
+    Route::delete('purchases/{purchase}', [PurchaseController::class, 'destroy'])->name('purchases.destroy');
+    Route::post('purchases/{purchase}/receive', ReceivePurchaseController::class)->name('purchases.receive');
+    Route::post('purchases/{purchase}/cancel', CancelPurchaseController::class)->name('purchases.cancel');
+
+    // Purchase Items..
+    Route::post('purchases/{purchase}/items', [PurchaseItemController::class, 'store'])->name('purchases.items.store');
+    Route::patch('purchases/{purchase}/items/{item}', [PurchaseItemController::class, 'update'])->name('purchases.items.update');
+    Route::delete('purchases/{purchase}/items/{item}', [PurchaseItemController::class, 'destroy'])->name('purchases.items.destroy');
+
+    // Purchase Payments..
+    Route::post('purchases/{purchase}/payments', [PurchasePaymentController::class, 'store'])->name('purchases.payments.store');
+
+    // Purchase Returns..
+    Route::get('purchase-returns', [PurchaseReturnController::class, 'index'])->name('purchase-returns.index');
+    Route::get('purchase-returns/create', [PurchaseReturnController::class, 'create'])->name('purchase-returns.create');
+    Route::post('purchase-returns', [PurchaseReturnController::class, 'store'])->name('purchase-returns.store');
+    Route::get('purchase-returns/{purchaseReturn}', [PurchaseReturnController::class, 'show'])->name('purchase-returns.show');
+    Route::post('purchase-returns/{purchaseReturn}/complete', CompletePurchaseReturnController::class)->name('purchase-returns.complete');
+    Route::post('purchase-returns/{purchaseReturn}/cancel', CancelPurchaseReturnController::class)->name('purchase-returns.cancel');
+
+    // Inventory - Stock Transfers..
+    Route::get('inventory/stock-transfers', [StockTransferController::class, 'index'])->name('inventory.stock-transfers.index');
+    Route::get('inventory/stock-transfers/create', [StockTransferController::class, 'create'])->name('inventory.stock-transfers.create');
+    Route::post('inventory/stock-transfers', [StockTransferController::class, 'store'])->name('inventory.stock-transfers.store');
+    Route::get('inventory/stock-transfers/{stockTransfer}', [StockTransferController::class, 'show'])->name('inventory.stock-transfers.show');
+    Route::post('inventory/stock-transfers/{stockTransfer}/complete', CompleteStockTransferController::class)->name('inventory.stock-transfers.complete');
+    Route::post('inventory/stock-transfers/{stockTransfer}/cancel', CancelStockTransferController::class)->name('inventory.stock-transfers.cancel');
+
+    // Inventory - Stock Adjustments..
+    Route::get('inventory/adjustments', [StockAdjustmentController::class, 'index'])->name('inventory.adjustments.index');
+    Route::get('inventory/adjustments/create', [StockAdjustmentController::class, 'create'])->name('inventory.adjustments.create');
+    Route::post('inventory/adjustments', [StockAdjustmentController::class, 'store'])->name('inventory.adjustments.store');
+
+    // Inventory - Bulk Adjustments..
+    Route::get('inventory/bulk-adjustments/create', [BulkStockAdjustmentController::class, 'create'])->name('inventory.bulk-adjustments.create');
+    Route::post('inventory/bulk-adjustments', [BulkStockAdjustmentController::class, 'store'])->name('inventory.bulk-adjustments.store');
+
+    // Inventory - Stock Levels..
+    Route::get('inventory/levels', [InventoryLevelController::class, 'index'])->name('inventory.levels.index');
+    Route::get('inventory/levels/{product}/{store}', [InventoryLevelController::class, 'show'])->name('inventory.levels.show');
+    Route::post('inventory/levels/{product}/{store}/recalculate', RecalculateStockLevelController::class)->name('inventory.levels.recalculate');
+
+    // Inventory - Stock Movements..
+    Route::get('inventory/movements', [StockMovementController::class, 'index'])->name('inventory.movements.index');
+    Route::get('inventory/movements/{product}', [StockMovementController::class, 'show'])->name('inventory.movements.show');
 
 });
 
