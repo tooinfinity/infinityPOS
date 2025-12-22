@@ -11,12 +11,15 @@ final readonly class UpdateCategory
 {
     public function handle(Category $category, UpdateCategoryData $data): void
     {
-        $category->update([
+        $updateData = array_filter([
             'name' => $data->name,
             'code' => $data->code,
             'type' => $data->type,
             'is_active' => $data->is_active,
-            'updated_by' => $data->updated_by,
-        ]);
+        ], static fn (mixed $value): bool => $value !== null);
+
+        $updateData['updated_by'] = $data->updated_by;
+
+        $category->update($updateData);
     }
 }

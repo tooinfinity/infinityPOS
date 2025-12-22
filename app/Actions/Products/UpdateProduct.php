@@ -11,7 +11,7 @@ final readonly class UpdateProduct
 {
     public function handle(Product $product, UpdateProductData $data): void
     {
-        $product->update([
+        $updateData = array_filter([
             'sku' => $data->sku,
             'barcode' => $data->barcode,
             'name' => $data->name,
@@ -26,7 +26,10 @@ final readonly class UpdateProduct
             'alert_quantity' => $data->alert_quantity,
             'has_batches' => $data->has_batches,
             'is_active' => $data->is_active,
-            'updated_by' => $data->updated_by,
-        ]);
+        ], static fn (mixed $value): bool => $value !== null);
+
+        $updateData['updated_by'] = $data->updated_by;
+
+        $product->update($updateData);
     }
 }

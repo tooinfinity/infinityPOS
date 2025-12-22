@@ -3,6 +3,10 @@
 declare(strict_types=1);
 
 use App\Enums\PermissionEnum;
+use App\Http\Controllers\Brands\BrandController;
+use App\Http\Controllers\Categories\CategoryController;
+use App\Http\Controllers\Clients\ClientController;
+use App\Http\Controllers\Expenses\ExpenseController;
 use App\Http\Controllers\Inventory\BulkStockAdjustmentController;
 use App\Http\Controllers\Inventory\CancelStockTransferController;
 use App\Http\Controllers\Inventory\CompleteStockTransferController;
@@ -21,6 +25,7 @@ use App\Http\Controllers\Moneyboxes\MoneyboxTransactionController;
 use App\Http\Controllers\Payments\PaymentController;
 use App\Http\Controllers\Payments\RefundPaymentController;
 use App\Http\Controllers\Payments\VoidPaymentController;
+use App\Http\Controllers\Products\ProductController;
 use App\Http\Controllers\Purchases\CancelPurchaseController;
 use App\Http\Controllers\Purchases\CancelPurchaseReturnController;
 use App\Http\Controllers\Purchases\CompletePurchaseReturnController;
@@ -39,6 +44,10 @@ use App\Http\Controllers\Sales\SaleItemController;
 use App\Http\Controllers\Sales\SalePaymentController;
 use App\Http\Controllers\Sales\SaleReturnController;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\Stores\StoreController;
+use App\Http\Controllers\Suppliers\SupplierController;
+use App\Http\Controllers\Taxes\TaxController;
+use App\Http\Controllers\Units\UnitController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserPasswordController;
 use App\Http\Controllers\UserProfileController;
@@ -199,6 +208,82 @@ Route::middleware('auth')->group(function (): void {
     Route::post('invoices/{invoice}/cancel', CancelInvoiceController::class)->name('invoices.cancel');
     Route::post('invoices/{invoice}/mark-as-paid', MarkInvoiceAsPaidController::class)->name('invoices.mark-as-paid');
     Route::post('invoices/{invoice}/send-email', SendInvoiceEmailController::class)->name('invoices.send-email');
+
+    // Catalog..
+    Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::get('categories/create', [CategoryController::class, 'create'])->name('categories.create');
+    Route::post('categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::get('categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+    Route::get('categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
+    Route::patch('categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+    Route::get('brands', [BrandController::class, 'index'])->name('brands.index');
+    Route::get('brands/create', [BrandController::class, 'create'])->name('brands.create');
+    Route::post('brands', [BrandController::class, 'store'])->name('brands.store');
+    Route::get('brands/{brand}', [BrandController::class, 'show'])->name('brands.show');
+    Route::get('brands/{brand}/edit', [BrandController::class, 'edit'])->name('brands.edit');
+    Route::patch('brands/{brand}', [BrandController::class, 'update'])->name('brands.update');
+    Route::delete('brands/{brand}', [BrandController::class, 'destroy'])->name('brands.destroy');
+
+    Route::get('units', [UnitController::class, 'index'])->name('units.index');
+    Route::get('units/create', [UnitController::class, 'create'])->name('units.create');
+    Route::post('units', [UnitController::class, 'store'])->name('units.store');
+    Route::get('units/{unit}', [UnitController::class, 'show'])->name('units.show');
+    Route::get('units/{unit}/edit', [UnitController::class, 'edit'])->name('units.edit');
+    Route::patch('units/{unit}', [UnitController::class, 'update'])->name('units.update');
+    Route::delete('units/{unit}', [UnitController::class, 'destroy'])->name('units.destroy');
+
+    Route::get('taxes', [TaxController::class, 'index'])->name('taxes.index');
+    Route::get('taxes/create', [TaxController::class, 'create'])->name('taxes.create');
+    Route::post('taxes', [TaxController::class, 'store'])->name('taxes.store');
+    Route::get('taxes/{tax}', [TaxController::class, 'show'])->name('taxes.show');
+    Route::get('taxes/{tax}/edit', [TaxController::class, 'edit'])->name('taxes.edit');
+    Route::patch('taxes/{tax}', [TaxController::class, 'update'])->name('taxes.update');
+    Route::delete('taxes/{tax}', [TaxController::class, 'destroy'])->name('taxes.destroy');
+
+    Route::get('products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('products/create', [ProductController::class, 'create'])->name('products.create');
+    Route::post('products', [ProductController::class, 'store'])->name('products.store');
+    Route::get('products/{product}', [ProductController::class, 'show'])->name('products.show');
+    Route::get('products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    Route::patch('products/{product}', [ProductController::class, 'update'])->name('products.update');
+    Route::delete('products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+
+    // Clients & Suppliers..
+    Route::get('clients', [ClientController::class, 'index'])->name('clients.index');
+    Route::get('clients/create', [ClientController::class, 'create'])->name('clients.create');
+    Route::post('clients', [ClientController::class, 'store'])->name('clients.store');
+    Route::get('clients/{client}', [ClientController::class, 'show'])->name('clients.show');
+    Route::get('clients/{client}/edit', [ClientController::class, 'edit'])->name('clients.edit');
+    Route::patch('clients/{client}', [ClientController::class, 'update'])->name('clients.update');
+    Route::delete('clients/{client}', [ClientController::class, 'destroy'])->name('clients.destroy');
+
+    Route::get('suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
+    Route::get('suppliers/create', [SupplierController::class, 'create'])->name('suppliers.create');
+    Route::post('suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
+    Route::get('suppliers/{supplier}', [SupplierController::class, 'show'])->name('suppliers.show');
+    Route::get('suppliers/{supplier}/edit', [SupplierController::class, 'edit'])->name('suppliers.edit');
+    Route::patch('suppliers/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');
+    Route::delete('suppliers/{supplier}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
+
+    // Stores..
+    Route::get('stores', [StoreController::class, 'index'])->name('stores.index');
+    Route::get('stores/create', [StoreController::class, 'create'])->name('stores.create');
+    Route::post('stores', [StoreController::class, 'store'])->name('stores.store');
+    Route::get('stores/{store}', [StoreController::class, 'show'])->name('stores.show');
+    Route::get('stores/{store}/edit', [StoreController::class, 'edit'])->name('stores.edit');
+    Route::patch('stores/{store}', [StoreController::class, 'update'])->name('stores.update');
+    Route::delete('stores/{store}', [StoreController::class, 'destroy'])->name('stores.destroy');
+
+    // Expenses..
+    Route::get('expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+    Route::get('expenses/create', [ExpenseController::class, 'create'])->name('expenses.create');
+    Route::post('expenses', [ExpenseController::class, 'store'])->name('expenses.store');
+    Route::get('expenses/{expense}', [ExpenseController::class, 'show'])->name('expenses.show');
+    Route::get('expenses/{expense}/edit', [ExpenseController::class, 'edit'])->name('expenses.edit');
+    Route::patch('expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
+    Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
 
     // Moneyboxes..
     Route::get('moneyboxes', [MoneyboxController::class, 'index'])->name('moneyboxes.index');

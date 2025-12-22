@@ -11,7 +11,7 @@ final readonly class UpdateSupplier
 {
     public function handle(Supplier $supplier, UpdateSupplierData $data): void
     {
-        $supplier->update([
+        $updateData = array_filter([
             'name' => $data->name,
             'phone' => $data->phone,
             'email' => $data->email,
@@ -22,7 +22,10 @@ final readonly class UpdateSupplier
             'rc' => $data->rc,
             'rib' => $data->rib,
             'is_active' => $data->is_active,
-            'updated_by' => $data->updated_by,
-        ]);
+        ], static fn (mixed $value): bool => $value !== null);
+
+        $updateData['updated_by'] = $data->updated_by;
+
+        $supplier->update($updateData);
     }
 }

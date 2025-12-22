@@ -11,11 +11,14 @@ final readonly class UpdateUnit
 {
     public function handle(Unit $unit, UpdateUnitData $data): void
     {
-        $unit->update([
+        $updateData = array_filter([
             'name' => $data->name,
             'short_name' => $data->short_name,
             'is_active' => $data->is_active,
-            'updated_by' => $data->updated_by,
-        ]);
+        ], static fn (mixed $value): bool => $value !== null);
+
+        $updateData['updated_by'] = $data->updated_by;
+
+        $unit->update($updateData);
     }
 }

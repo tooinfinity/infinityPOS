@@ -11,7 +11,7 @@ final readonly class UpdateClient
 {
     public function handle(Client $client, UpdateClientData $data): void
     {
-        $client->update([
+        $updateData = array_filter([
             'name' => $data->name,
             'phone' => $data->phone,
             'email' => $data->email,
@@ -22,7 +22,10 @@ final readonly class UpdateClient
             'rc' => $data->rc,
             'rib' => $data->rib,
             'is_active' => $data->is_active,
-            'updated_by' => $data->updated_by,
-        ]);
+        ], static fn (mixed $value): bool => $value !== null);
+
+        $updateData['updated_by'] = $data->updated_by;
+
+        $client->update($updateData);
     }
 }

@@ -11,10 +11,13 @@ final readonly class UpdateBrand
 {
     public function handle(Brand $brand, UpdateBrandData $data): void
     {
-        $brand->update([
+        $updateData = array_filter([
             'name' => $data->name,
             'is_active' => $data->is_active,
-            'updated_by' => $data->updated_by,
-        ]);
+        ], static fn (mixed $value): bool => $value !== null);
+
+        $updateData['updated_by'] = $data->updated_by;
+
+        $brand->update($updateData);
     }
 }
