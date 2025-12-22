@@ -20,6 +20,7 @@ test('to array', function (): void {
             'notes',
             'related_type',
             'related_id',
+            'moneybox_id',
             'created_by',
             'updated_by',
             'created_at',

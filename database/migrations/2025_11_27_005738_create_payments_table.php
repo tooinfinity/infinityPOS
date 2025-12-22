@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('related_type')->nullable();
             $table->unsignedBigInteger('related_id')->nullable();
 
+            $table->foreignId('moneybox_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('created_by')->nullable()->references('id')->on('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->references('id')->on('users')->nullOnDelete();
 

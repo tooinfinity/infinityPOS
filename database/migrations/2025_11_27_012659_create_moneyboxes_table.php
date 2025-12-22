@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->string('type', 20); // ['cash', 'bank', 'mobile']
             $table->text('description')->nullable();
+            $table->unsignedBigInteger('balance')->default(0);
             $table->string('bank_name')->nullable();
             $table->string('account_number')->nullable();
             $table->boolean('is_active')->index();

@@ -10,6 +10,7 @@ use Database\Factories\PaymentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
@@ -45,6 +46,22 @@ final class Payment extends Model
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * @return BelongsTo<Moneybox, $this>
+     */
+    public function moneybox(): BelongsTo
+    {
+        return $this->belongsTo(Moneybox::class);
+    }
+
+    /**
+     * @return HasMany<MoneyboxTransaction, $this>
+     */
+    public function moneyboxTransactions(): HasMany
+    {
+        return $this->hasMany(MoneyboxTransaction::class);
     }
 
     /**

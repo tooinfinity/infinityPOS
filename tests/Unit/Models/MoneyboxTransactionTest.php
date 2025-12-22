@@ -29,6 +29,7 @@ test('to array', function (): void {
             'notes',
             'payment_id',
             'expense_id',
+            'transfer_to_moneybox_id',
             'created_by',
             'updated_by',
             'created_at',

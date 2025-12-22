@@ -20,6 +20,7 @@ test('to array', function (): void {
             'name',
             'type',
             'description',
+            'balance',
             'bank_name',
             'account_number',
             'is_active',

@@ -12,6 +12,9 @@ use App\Http\Controllers\Inventory\StockAdjustmentController;
 use App\Http\Controllers\Inventory\StockMovementController;
 use App\Http\Controllers\Inventory\StockTransferController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\Payments\PaymentController;
+use App\Http\Controllers\Payments\RefundPaymentController;
+use App\Http\Controllers\Payments\VoidPaymentController;
 use App\Http\Controllers\Purchases\CancelPurchaseController;
 use App\Http\Controllers\Purchases\CancelPurchaseReturnController;
 use App\Http\Controllers\Purchases\CompletePurchaseReturnController;
@@ -172,6 +175,13 @@ Route::middleware('auth')->group(function (): void {
     // Inventory - Stock Movements..
     Route::get('inventory/movements', [StockMovementController::class, 'index'])->name('inventory.movements.index');
     Route::get('inventory/movements/{product}', [StockMovementController::class, 'show'])->name('inventory.movements.show');
+
+    // Payments..
+    Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
+    Route::post('payments', [PaymentController::class, 'store'])->name('payments.store');
+    Route::get('payments/{payment}', [PaymentController::class, 'show'])->name('payments.show');
+    Route::post('payments/refund', RefundPaymentController::class)->name('payments.refund');
+    Route::post('payments/{payment}/void', VoidPaymentController::class)->name('payments.void');
 
 });
 
