@@ -11,6 +11,10 @@ use App\Http\Controllers\Inventory\RecalculateStockLevelController;
 use App\Http\Controllers\Inventory\StockAdjustmentController;
 use App\Http\Controllers\Inventory\StockMovementController;
 use App\Http\Controllers\Inventory\StockTransferController;
+use App\Http\Controllers\Invoices\CancelInvoiceController;
+use App\Http\Controllers\Invoices\InvoiceController;
+use App\Http\Controllers\Invoices\MarkInvoiceAsPaidController;
+use App\Http\Controllers\Invoices\SendInvoiceEmailController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\Payments\PaymentController;
 use App\Http\Controllers\Payments\RefundPaymentController;
@@ -182,6 +186,17 @@ Route::middleware('auth')->group(function (): void {
     Route::get('payments/{payment}', [PaymentController::class, 'show'])->name('payments.show');
     Route::post('payments/refund', RefundPaymentController::class)->name('payments.refund');
     Route::post('payments/{payment}/void', VoidPaymentController::class)->name('payments.void');
+
+    // Invoices..
+    Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
+    Route::post('invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+    Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::get('invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit');
+    Route::patch('invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
+    Route::post('invoices/{invoice}/cancel', CancelInvoiceController::class)->name('invoices.cancel');
+    Route::post('invoices/{invoice}/mark-as-paid', MarkInvoiceAsPaidController::class)->name('invoices.mark-as-paid');
+    Route::post('invoices/{invoice}/send-email', SendInvoiceEmailController::class)->name('invoices.send-email');
 
 });
 
