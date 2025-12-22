@@ -16,6 +16,8 @@ use App\Http\Controllers\Invoices\InvoiceController;
 use App\Http\Controllers\Invoices\MarkInvoiceAsPaidController;
 use App\Http\Controllers\Invoices\SendInvoiceEmailController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\Moneyboxes\MoneyboxController;
+use App\Http\Controllers\Moneyboxes\MoneyboxTransactionController;
 use App\Http\Controllers\Payments\PaymentController;
 use App\Http\Controllers\Payments\RefundPaymentController;
 use App\Http\Controllers\Payments\VoidPaymentController;
@@ -197,6 +199,20 @@ Route::middleware('auth')->group(function (): void {
     Route::post('invoices/{invoice}/cancel', CancelInvoiceController::class)->name('invoices.cancel');
     Route::post('invoices/{invoice}/mark-as-paid', MarkInvoiceAsPaidController::class)->name('invoices.mark-as-paid');
     Route::post('invoices/{invoice}/send-email', SendInvoiceEmailController::class)->name('invoices.send-email');
+
+    // Moneyboxes..
+    Route::get('moneyboxes', [MoneyboxController::class, 'index'])->name('moneyboxes.index');
+    Route::get('moneyboxes/create', [MoneyboxController::class, 'create'])->name('moneyboxes.create');
+    Route::post('moneyboxes', [MoneyboxController::class, 'store'])->name('moneyboxes.store');
+
+    // Moneybox Transactions (before {moneybox} routes to avoid conflicts)..
+    Route::get('moneybox-transactions', [MoneyboxTransactionController::class, 'index'])->name('moneyboxes.transactions.index');
+    Route::get('moneyboxes/{moneybox}/transactions', [MoneyboxTransactionController::class, 'show'])->name('moneyboxes.transactions.show');
+
+    Route::get('moneyboxes/{moneybox}', [MoneyboxController::class, 'show'])->name('moneyboxes.show');
+    Route::get('moneyboxes/{moneybox}/edit', [MoneyboxController::class, 'edit'])->name('moneyboxes.edit');
+    Route::patch('moneyboxes/{moneybox}', [MoneyboxController::class, 'update'])->name('moneyboxes.update');
+    Route::delete('moneyboxes/{moneybox}', [MoneyboxController::class, 'destroy'])->name('moneyboxes.destroy');
 
 });
 
