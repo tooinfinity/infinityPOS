@@ -16,7 +16,7 @@ it('may list all moneybox transactions', function (): void {
 
     $response = $this->get(route('moneyboxes.transactions.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show transactions for specific moneybox', function (): void {
@@ -29,7 +29,7 @@ it('may show transactions for specific moneybox', function (): void {
 
     $response = $this->get(route('moneyboxes.transactions.show', $moneybox));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('filters transactions by moneybox correctly', function (): void {
@@ -48,5 +48,5 @@ it('filters transactions by moneybox correctly', function (): void {
 
     $response = $this->get(route('moneyboxes.transactions.show', $moneybox1));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });

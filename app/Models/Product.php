@@ -116,6 +116,17 @@ final class Product extends Model
     }
 
     /**
+     * Get available stock for this product at a specific store.
+     */
+    public function getAvailableStock(int $storeId): int
+    {
+        return (int) InventoryLayer::query()
+            ->where('product_id', $this->id)
+            ->where('store_id', $storeId)
+            ->sum('remaining_qty');
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array

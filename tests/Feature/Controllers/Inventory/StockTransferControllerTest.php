@@ -18,7 +18,7 @@ it('may list stock transfers', function (): void {
 
     $response = $this->get(route('inventory.stock-transfers.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show create stock transfer page', function (): void {
@@ -27,7 +27,7 @@ it('may show create stock transfer page', function (): void {
 
     $response = $this->get(route('inventory.stock-transfers.create'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may create a stock transfer', function (): void {
@@ -65,5 +65,5 @@ it('may show a stock transfer', function (): void {
 
     $response = $this->get(route('inventory.stock-transfers.show', $transfer));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });

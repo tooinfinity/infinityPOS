@@ -15,7 +15,7 @@ it('may list brands', function (): void {
 
     $response = $this->get(route('brands.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may create a brand', function (): void {
@@ -62,4 +62,26 @@ it('may delete a brand', function (): void {
     $this->assertDatabaseMissing('brands', [
         'id' => $brand->id,
     ]);
+});
+
+it('may show create brand page', function (): void {
+    $response = $this->get(route('brands.create'));
+
+    $response->assertStatus(200); // View not created yet
+});
+
+it('may show a brand', function (): void {
+    $brand = Brand::factory()->create(['created_by' => $this->user->id]);
+
+    $response = $this->get(route('brands.show', $brand));
+
+    $response->assertStatus(200); // View not created yet
+});
+
+it('may show edit brand page', function (): void {
+    $brand = Brand::factory()->create(['created_by' => $this->user->id]);
+
+    $response = $this->get(route('brands.edit', $brand));
+
+    $response->assertStatus(200); // View not created yet
 });

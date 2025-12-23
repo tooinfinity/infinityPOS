@@ -23,7 +23,7 @@ it('may list stock adjustments', function (): void {
 
     $response = $this->get(route('inventory.adjustments.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show create adjustment page', function (): void {
@@ -32,7 +32,7 @@ it('may show create adjustment page', function (): void {
 
     $response = $this->get(route('inventory.adjustments.create'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may create positive stock adjustment', function (): void {

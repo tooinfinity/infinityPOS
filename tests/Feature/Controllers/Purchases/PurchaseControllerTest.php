@@ -20,7 +20,7 @@ it('may list purchases', function (): void {
 
     $response = $this->get(route('purchases.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show create purchase page', function (): void {
@@ -29,7 +29,7 @@ it('may show create purchase page', function (): void {
 
     $response = $this->get(route('purchases.create'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may create a purchase', function (): void {
@@ -74,7 +74,7 @@ it('may show a purchase', function (): void {
 
     $response = $this->get(route('purchases.show', $purchase));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show edit purchase page', function (): void {
@@ -82,7 +82,7 @@ it('may show edit purchase page', function (): void {
 
     $response = $this->get(route('purchases.edit', $purchase));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may update a purchase', function (): void {

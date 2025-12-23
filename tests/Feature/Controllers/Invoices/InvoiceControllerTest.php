@@ -21,13 +21,13 @@ it('may list invoices', function (): void {
 
     $response = $this->get(route('invoices.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show create invoice page', function (): void {
     $response = $this->get(route('invoices.create'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may generate an invoice', function (): void {
@@ -86,7 +86,7 @@ it('may show an invoice', function (): void {
 
     $response = $this->get(route('invoices.show', $invoice));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show edit invoice page', function (): void {
@@ -96,7 +96,7 @@ it('may show edit invoice page', function (): void {
 
     $response = $this->get(route('invoices.edit', $invoice));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may update an invoice', function (): void {

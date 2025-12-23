@@ -15,7 +15,7 @@ it('may list stores', function (): void {
 
     $response = $this->get(route('stores.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may create a store', function (): void {
@@ -74,7 +74,7 @@ it('may delete a store', function (): void {
 it('may show create store page', function (): void {
     $response = $this->get(route('stores.create'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show a store', function (): void {
@@ -82,7 +82,7 @@ it('may show a store', function (): void {
 
     $response = $this->get(route('stores.show', $store));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show edit store page', function (): void {
@@ -90,5 +90,5 @@ it('may show edit store page', function (): void {
 
     $response = $this->get(route('stores.edit', $store));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });

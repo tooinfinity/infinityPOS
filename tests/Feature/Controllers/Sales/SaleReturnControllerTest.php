@@ -20,7 +20,7 @@ it('may list sale returns', function (): void {
 
     $response = $this->get(route('sale-returns.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show create sale return page', function (): void {
@@ -28,7 +28,7 @@ it('may show create sale return page', function (): void {
 
     $response = $this->get(route('sale-returns.create', $sale));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may create a sale return', function (): void {
@@ -78,7 +78,7 @@ it('may show a sale return', function (): void {
 
     $response = $this->get(route('sale-returns.show', $saleReturn));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may complete a sale return', function (): void {

@@ -30,6 +30,7 @@ final readonly class ProcessSalePayment
             'notes' => $notes,
             'related_type' => Sale::class,
             'related_id' => $sale->id,
+            'moneybox_id' => null,
             'created_by' => $userId,
         ]));
     }

@@ -18,7 +18,7 @@ it('may list moneyboxes', function (): void {
 
     $response = $this->get(route('moneyboxes.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show create moneybox page', function (): void {
@@ -26,7 +26,7 @@ it('may show create moneybox page', function (): void {
 
     $response = $this->get(route('moneyboxes.create'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may create a cash register', function (): void {
@@ -78,7 +78,7 @@ it('may show a moneybox', function (): void {
 
     $response = $this->get(route('moneyboxes.show', $moneybox));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show edit moneybox page', function (): void {
@@ -86,7 +86,7 @@ it('may show edit moneybox page', function (): void {
 
     $response = $this->get(route('moneyboxes.edit', $moneybox));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may update a moneybox', function (): void {

@@ -17,7 +17,7 @@ it('may list expenses', function (): void {
 
     $response = $this->get(route('expenses.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may create an expense', function (): void {
@@ -77,4 +77,26 @@ it('may delete an expense', function (): void {
     $this->assertDatabaseMissing('expenses', [
         'id' => $expense->id,
     ]);
+});
+
+it('may show create expense page', function (): void {
+    $response = $this->get(route('expenses.create'));
+
+    $response->assertStatus(200); // View not created yet
+});
+
+it('may show a expense', function (): void {
+    $expense = Expense::factory()->create(['created_by' => $this->user->id]);
+
+    $response = $this->get(route('expenses.show', $expense));
+
+    $response->assertStatus(200); // View not created yet
+});
+
+it('may show edit expense page', function (): void {
+    $expense = Expense::factory()->create(['created_by' => $this->user->id]);
+
+    $response = $this->get(route('expenses.edit', $expense));
+
+    $response->assertStatus(200); // View not created yet
 });

@@ -15,7 +15,7 @@ it('may list categories', function (): void {
 
     $response = $this->get(route('categories.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may create a category', function (): void {
@@ -66,4 +66,26 @@ it('may delete a category', function (): void {
     $this->assertDatabaseMissing('categories', [
         'id' => $category->id,
     ]);
+});
+
+it('may show create category page', function (): void {
+    $response = $this->get(route('categories.create'));
+
+    $response->assertStatus(200); // View not created yet
+});
+
+it('may show a category', function (): void {
+    $category = Category::factory()->create(['created_by' => $this->user->id]);
+
+    $response = $this->get(route('categories.show', $category));
+
+    $response->assertStatus(200); // View not created yet
+});
+
+it('may show edit category page', function (): void {
+    $category = Category::factory()->create(['created_by' => $this->user->id]);
+
+    $response = $this->get(route('categories.edit', $category));
+
+    $response->assertStatus(200); // View not created yet
 });

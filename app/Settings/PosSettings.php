@@ -18,6 +18,8 @@ final class PosSettings extends Settings
 
     public bool $enable_customer_display = false;
 
+    public bool $require_cash_drawer_for_cash_payments = false;
+
     public string $receipt_header = '';
 
     public string $receipt_footer = 'Thank you for your purchase!';

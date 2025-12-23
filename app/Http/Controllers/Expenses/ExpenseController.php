@@ -52,7 +52,7 @@ final readonly class ExpenseController
 
     public function show(Expense $expense): Response
     {
-        $expense->load(['category', 'creator', 'payments']);
+        $expense->load(['category', 'creator', 'moneybox', 'moneyboxTransactions']);
 
         return Inertia::render('expenses/show', [
             'expense' => ExpenseData::from($expense),

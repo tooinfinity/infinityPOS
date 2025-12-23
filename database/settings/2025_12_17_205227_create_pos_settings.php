@@ -13,6 +13,7 @@ return new class extends SettingsMigration
         $this->migrator->add('pos.auto_print_receipt', false);
         $this->migrator->add('pos.default_payment_method', 'cash');
         $this->migrator->add('pos.enable_customer_display', false);
+        $this->migrator->add('pos.require_cash_drawer_for_cash_payments', false);
         $this->migrator->add('pos.receipt_header', '');
         $this->migrator->add('pos.receipt_footer', 'Thank you for your purchase!');
     }

@@ -21,6 +21,8 @@ final class PosSettingsData extends Data
         public string $default_payment_method,
         #[Required, BooleanType]
         public bool $enable_customer_display,
+        #[Required, BooleanType]
+        public bool $require_cash_drawer_for_cash_payments,
         public string $receipt_header,
         public string $receipt_footer,
     ) {}

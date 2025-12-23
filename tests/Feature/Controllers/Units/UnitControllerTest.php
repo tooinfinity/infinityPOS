@@ -15,7 +15,7 @@ it('may list units', function (): void {
 
     $response = $this->get(route('units.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may create a unit', function (): void {
@@ -70,7 +70,7 @@ it('may delete a unit', function (): void {
 it('may show create unit page', function (): void {
     $response = $this->get(route('units.create'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show a unit', function (): void {
@@ -78,7 +78,7 @@ it('may show a unit', function (): void {
 
     $response = $this->get(route('units.show', $unit));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show edit unit page', function (): void {
@@ -86,5 +86,5 @@ it('may show edit unit page', function (): void {
 
     $response = $this->get(route('units.edit', $unit));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });

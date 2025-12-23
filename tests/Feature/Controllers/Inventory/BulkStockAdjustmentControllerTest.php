@@ -19,7 +19,7 @@ it('may show bulk adjustment create page', function (): void {
 
     $response = $this->get(route('inventory.bulk-adjustments.create'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may create bulk stock adjustments', function (): void {

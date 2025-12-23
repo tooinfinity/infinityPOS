@@ -15,7 +15,7 @@ it('may list suppliers', function (): void {
 
     $response = $this->get(route('suppliers.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may create a supplier', function (): void {
@@ -84,7 +84,7 @@ it('may delete a supplier', function (): void {
 it('may show create supplier page', function (): void {
     $response = $this->get(route('suppliers.create'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show a supplier', function (): void {
@@ -92,7 +92,7 @@ it('may show a supplier', function (): void {
 
     $response = $this->get(route('suppliers.show', $supplier));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show edit supplier page', function (): void {
@@ -100,5 +100,5 @@ it('may show edit supplier page', function (): void {
 
     $response = $this->get(route('suppliers.edit', $supplier));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });

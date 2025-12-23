@@ -19,7 +19,7 @@ it('may list products', function (): void {
 
     $response = $this->get(route('products.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may create a product', function (): void {
@@ -106,7 +106,7 @@ it('may show create product page', function (): void {
 
     $response = $this->get(route('products.create'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show a product', function (): void {
@@ -114,7 +114,7 @@ it('may show a product', function (): void {
 
     $response = $this->get(route('products.show', $product));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show edit product page', function (): void {
@@ -122,5 +122,5 @@ it('may show edit product page', function (): void {
 
     $response = $this->get(route('products.edit', $product));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });

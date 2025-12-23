@@ -17,7 +17,7 @@ it('may list inventory levels', function (): void {
 
     $response = $this->get(route('inventory.levels.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show inventory levels for product and store', function (): void {
@@ -31,7 +31,7 @@ it('may show inventory levels for product and store', function (): void {
 
     $response = $this->get(route('inventory.levels.show', [$product, $store]));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may recalculate stock levels', function (): void {

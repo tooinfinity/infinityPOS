@@ -25,6 +25,17 @@ use App\Http\Controllers\Moneyboxes\MoneyboxTransactionController;
 use App\Http\Controllers\Payments\PaymentController;
 use App\Http\Controllers\Payments\RefundPaymentController;
 use App\Http\Controllers\Payments\VoidPaymentController;
+use App\Http\Controllers\Pos\AddCartItemController;
+use App\Http\Controllers\Pos\ApplyCartDiscountController;
+use App\Http\Controllers\Pos\CartController;
+use App\Http\Controllers\Pos\ClearCartController;
+use App\Http\Controllers\Pos\ClearRegisterCartController;
+use App\Http\Controllers\Pos\PaymentController as PosPaymentController;
+use App\Http\Controllers\Pos\PosController;
+use App\Http\Controllers\Pos\ProductSearchController;
+use App\Http\Controllers\Pos\ReceiptController;
+use App\Http\Controllers\Pos\RemoveCartItemController;
+use App\Http\Controllers\Pos\UpdateCartItemController;
 use App\Http\Controllers\Products\ProductController;
 use App\Http\Controllers\Purchases\CancelPurchaseController;
 use App\Http\Controllers\Purchases\CancelPurchaseReturnController;
@@ -107,6 +118,37 @@ Route::middleware('auth')->group(function (): void {
 
     // Appearance...
     Route::get('settings/appearance', fn () => Inertia::render('appearance/update'))->name('appearance.edit');
+
+    // POS...
+    Route::prefix('pos')
+        ->as('pos.')
+        ->middleware([App\Http\Middleware\EnsurePosDeviceCookie::class, 'permission:'.PermissionEnum::ACCESS_POS->value, App\Http\Middleware\EnsurePosRegisterConfigured::class])
+        ->group(function (): void {
+            // UI
+            Route::get('/', [PosController::class, 'index'])->name('index');
+
+            // Register setup (per-device)
+            Route::get('/register', [App\Http\Controllers\Pos\RegisterController::class, 'edit'])->name('register.edit');
+            Route::put('/register', [App\Http\Controllers\Pos\RegisterController::class, 'update'])->name('register.update');
+            Route::delete('/register/cart', ClearRegisterCartController::class)->name('register.cart.clear');
+
+            // Product search (query/barcode)
+            Route::get('/products', [ProductSearchController::class, 'index'])->name('products.index');
+
+            // Cart endpoints
+            Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
+            Route::post('/cart/items', AddCartItemController::class)->name('cart.items.store');
+            Route::patch('/cart/items/{lineId}', UpdateCartItemController::class)->name('cart.items.update');
+            Route::delete('/cart/items/{lineId}', RemoveCartItemController::class)->name('cart.items.destroy');
+            Route::put('/cart/discount', ApplyCartDiscountController::class)->name('cart.discount.update');
+            Route::delete('/cart', ClearCartController::class)->name('cart.clear');
+
+            // Payments
+            Route::post('/payments', new PosPaymentController()->store(...))->name('payments.store');
+
+            // Receipts (placeholder)
+            Route::get('/receipts/{sale}', [ReceiptController::class, 'show'])->name('receipts.show');
+        });
 
     // Sales Management...
     Route::get('sales', [SaleController::class, 'index'])->name('sales.index');

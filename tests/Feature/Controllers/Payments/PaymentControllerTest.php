@@ -18,7 +18,7 @@ it('may list payments', function (): void {
 
     $response = $this->get(route('payments.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may create a payment without moneybox', function (): void {
@@ -80,7 +80,7 @@ it('may show a payment', function (): void {
 
     $response = $this->get(route('payments.show', $payment));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may refund a payment partially', function (): void {

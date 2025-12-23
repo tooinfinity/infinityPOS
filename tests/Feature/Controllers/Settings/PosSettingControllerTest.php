@@ -26,6 +26,7 @@ it('updates pos settings via DTO', function (): void {
         'auto_print_receipt' => false,
         'default_payment_method' => 'cash',
         'enable_customer_display' => false,
+        'require_cash_drawer_for_cash_payments' => false,
         'receipt_header' => 'Welcome',
         'receipt_footer' => 'Thanks',
     ];

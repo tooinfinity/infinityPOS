@@ -17,7 +17,7 @@ it('may list all stock movements', function (): void {
 
     $response = $this->get(route('inventory.movements.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show stock movements for a product', function (): void {
@@ -30,7 +30,7 @@ it('may show stock movements for a product', function (): void {
 
     $response = $this->get(route('inventory.movements.show', $product));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show stock movements for a product and store', function (): void {
@@ -45,7 +45,7 @@ it('may show stock movements for a product and store', function (): void {
 
     $response = $this->get(route('inventory.movements.show', [$product, 'store' => $store->id]));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('filters movements by product correctly', function (): void {
@@ -67,7 +67,7 @@ it('filters movements by product correctly', function (): void {
 
     $response = $this->get(route('inventory.movements.show', $product1));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('filters movements by product and store correctly', function (): void {
@@ -89,7 +89,7 @@ it('filters movements by product and store correctly', function (): void {
 
     $response = $this->get(route('inventory.movements.show', [$product, 'store' => $store1->id]));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('handles movements without store filter', function (): void {
@@ -102,7 +102,7 @@ it('handles movements without store filter', function (): void {
 
     $response = $this->get(route('inventory.movements.show', $product));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('paginates movements correctly', function (): void {
@@ -115,7 +115,7 @@ it('paginates movements correctly', function (): void {
 
     $response = $this->get(route('inventory.movements.show', $product));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('filters by store when store instance is passed', function (): void {
@@ -138,5 +138,5 @@ it('filters by store when store instance is passed', function (): void {
     // Pass Store instance directly (not via query parameter)
     $response = $this->get(route('inventory.movements.show', ['product' => $product, 'store' => $store1]));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });

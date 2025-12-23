@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property-read int|null $related_id
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read int|null $moneybox_id
  * @property-read Moneybox|null $moneybox
  * @property-read User $creator
  * @property-read User|null $updater
@@ -111,6 +112,7 @@ final class Payment extends Model
             'notes' => 'string',
             'related_type' => 'string',
             'related_id' => 'integer',
+            'moneybox_id' => 'integer',
             'created_by' => 'integer',
             'updated_by' => 'integer',
             'created_at' => 'datetime',

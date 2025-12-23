@@ -15,7 +15,7 @@ it('may list taxes', function (): void {
 
     $response = $this->get(route('taxes.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may create a tax', function (): void {
@@ -74,7 +74,7 @@ it('may delete a tax', function (): void {
 it('may show create tax page', function (): void {
     $response = $this->get(route('taxes.create'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show a tax', function (): void {
@@ -82,7 +82,7 @@ it('may show a tax', function (): void {
 
     $response = $this->get(route('taxes.show', $tax));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show edit tax page', function (): void {
@@ -90,5 +90,5 @@ it('may show edit tax page', function (): void {
 
     $response = $this->get(route('taxes.edit', $tax));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });

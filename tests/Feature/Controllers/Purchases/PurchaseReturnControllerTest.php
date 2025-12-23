@@ -19,7 +19,7 @@ it('may list purchase returns', function (): void {
 
     $response = $this->get(route('purchase-returns.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may show create purchase return page', function (): void {
@@ -27,7 +27,7 @@ it('may show create purchase return page', function (): void {
 
     $response = $this->get(route('purchase-returns.create', $purchase));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may create a purchase return', function (): void {
@@ -78,7 +78,7 @@ it('may show a purchase return', function (): void {
 
     $response = $this->get(route('purchase-returns.show', $purchaseReturn));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may complete a purchase return', function (): void {

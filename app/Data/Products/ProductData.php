@@ -30,15 +30,16 @@ final class ProductData extends Data
         public int $alert_quantity,
         public bool $has_batches,
         public bool $is_active,
-        public Lazy|CategoryData|null $category,
-        public Lazy|BrandData|null $brand,
-        public Lazy|UnitData|null $unit,
-        public Lazy|TaxData|null $tax,
-        public Lazy|UserData|null $creator,
-        public Lazy|UserData|null $updater,
+        public ?int $available_stock = null,
+        public Lazy|CategoryData|null $category = null,
+        public Lazy|BrandData|null $brand = null,
+        public Lazy|UnitData|null $unit = null,
+        public Lazy|TaxData|null $tax = null,
+        public Lazy|UserData|null $creator = null,
+        public Lazy|UserData|null $updater = null,
         #[WithCast(DateTimeInterfaceCast::class)]
-        public ?string $created_at,
+        public ?string $created_at = null,
         #[WithCast(DateTimeInterfaceCast::class)]
-        public ?string $updated_at,
+        public ?string $updated_at = null,
     ) {}
 }

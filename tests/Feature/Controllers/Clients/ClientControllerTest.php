@@ -15,7 +15,7 @@ it('may list clients', function (): void {
 
     $response = $this->get(route('clients.index'));
 
-    $response->assertStatus(500); // View not created yet
+    $response->assertStatus(200); // View not created yet
 });
 
 it('may create a client', function (): void {
@@ -79,4 +79,26 @@ it('may delete a client', function (): void {
     $this->assertDatabaseMissing('clients', [
         'id' => $client->id,
     ]);
+});
+
+it('may show create client page', function (): void {
+    $response = $this->get(route('clients.create'));
+
+    $response->assertStatus(200); // View not created yet
+});
+
+it('may show a client', function (): void {
+    $client = Client::factory()->create(['created_by' => $this->user->id]);
+
+    $response = $this->get(route('clients.show', $client));
+
+    $response->assertStatus(200); // View not created yet
+});
+
+it('may show edit client page', function (): void {
+    $client = Client::factory()->create(['created_by' => $this->user->id]);
+
+    $response = $this->get(route('clients.edit', $client));
+
+    $response->assertStatus(200); // View not created yet
 });
