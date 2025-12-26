@@ -12,7 +12,6 @@ use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\Store;
 use App\Models\Supplier;
-use App\Models\Tax;
 use App\Models\Unit;
 use App\Models\User;
 
@@ -37,7 +36,6 @@ test('to array', function (): void {
             'category_id',
             'brand_id',
             'unit_id',
-            'tax_id',
             'created_by',
             'updated_by',
             'created_at',
@@ -53,12 +51,10 @@ test('product relationships', function (): void {
     $supplier = Supplier::factory()->create(['created_by' => $user->id]);
     $brand = Brand::factory()->create(['created_by' => $user->id]);
     $unit = Unit::factory()->create(['created_by' => $user->id]);
-    $tax = Tax::factory()->create(['created_by' => $user->id]);
     $product = Product::factory()->create([
         'category_id' => $category->id,
         'brand_id' => $brand->id,
         'unit_id' => $unit->id,
-        'tax_id' => $tax->id,
         'created_by' => $user->id]
     );
     $sale = Sale::factory()->create(['client_id' => $client->id, 'store_id' => $store->id, 'created_by' => $user->id]);
@@ -72,7 +68,6 @@ test('product relationships', function (): void {
         ->and($product->category->id)->toBe($category->id)
         ->and($product->brand->id)->toBe($brand->id)
         ->and($product->unit->id)->toBe($unit->id)
-        ->and($product->tax->id)->toBe($tax->id)
         ->and($product->saleItems->count())->toBe(1)
         ->and($product->saleItems->first()->id)->toBe($saleItems->id)
         ->and($product->purchaseItems->count())->toBe(1)

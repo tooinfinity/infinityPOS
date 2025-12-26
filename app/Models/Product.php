@@ -30,7 +30,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Category|null $category
  * @property-read Brand|null $brand
  * @property-read Unit|null $unit
- * @property-read Tax|null $tax
  * @property-read User $creator
  * @property-read User|null $updater
  * @property-read Collection<int, SaleItem> $saleItems
@@ -64,14 +63,6 @@ final class Product extends Model
     public function unit(): BelongsTo
     {
         return $this->belongsTo(Unit::class);
-    }
-
-    /**
-     * @return BelongsTo<Tax, $this>
-     */
-    public function tax(): BelongsTo
-    {
-        return $this->belongsTo(Tax::class);
     }
 
     /**
@@ -141,7 +132,6 @@ final class Product extends Model
             'category_id' => 'integer',
             'brand_id' => 'integer',
             'unit_id' => 'integer',
-            'tax_id' => 'integer',
             'cost' => 'integer',
             'price' => 'integer',
             'alert_quantity' => 'integer',

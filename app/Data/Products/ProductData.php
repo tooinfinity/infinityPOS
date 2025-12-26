@@ -6,7 +6,6 @@ namespace App\Data\Products;
 
 use App\Data\Brands\BrandData;
 use App\Data\Categories\CategoryData;
-use App\Data\Taxes\TaxData;
 use App\Data\Units\UnitData;
 use App\Data\Users\UserData;
 use Spatie\LaravelData\Attributes\AutoLazy;
@@ -34,7 +33,6 @@ final class ProductData extends Data
         public Lazy|CategoryData|null $category = null,
         public Lazy|BrandData|null $brand = null,
         public Lazy|UnitData|null $unit = null,
-        public Lazy|TaxData|null $tax = null,
         public Lazy|UserData|null $creator = null,
         public Lazy|UserData|null $updater = null,
         #[WithCast(DateTimeInterfaceCast::class)]

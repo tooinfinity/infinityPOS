@@ -20,7 +20,6 @@ final readonly class UpdateProduct
             'category_id' => $data->category_id,
             'brand_id' => $data->brand_id,
             'unit_id' => $data->unit_id,
-            'tax_id' => $data->tax_id,
             'cost' => $data->cost,
             'price' => $data->price,
             'alert_quantity' => $data->alert_quantity,

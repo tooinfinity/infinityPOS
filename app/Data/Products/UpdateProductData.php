@@ -17,7 +17,6 @@ final class UpdateProductData extends Data
         public ?int $category_id,
         public ?int $brand_id,
         public ?int $unit_id,
-        public ?int $tax_id,
         public ?int $cost,
         public ?int $price,
         public ?int $alert_quantity,

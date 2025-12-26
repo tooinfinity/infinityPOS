@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\Tax;
 use App\Models\Unit;
 use App\Models\User;
 
@@ -26,7 +25,6 @@ it('may create a product', function (): void {
     $category = Category::factory()->create(['created_by' => $this->user->id]);
     $brand = Brand::factory()->create(['created_by' => $this->user->id]);
     $unit = Unit::factory()->create(['created_by' => $this->user->id]);
-    $tax = Tax::factory()->create(['created_by' => $this->user->id]);
 
     $response = $this->post(route('products.store'), [
         'name' => 'Test Product',
@@ -35,7 +33,6 @@ it('may create a product', function (): void {
         'category_id' => $category->id,
         'brand_id' => $brand->id,
         'unit_id' => $unit->id,
-        'tax_id' => $tax->id,
         'cost' => 5000,
         'price' => 10000,
         'alert_quantity' => 10,
@@ -67,7 +64,6 @@ it('may update a product', function (): void {
         'category_id' => null,
         'brand_id' => null,
         'unit_id' => null,
-        'tax_id' => null,
         'cost' => null,
         'price' => null,
         'alert_quantity' => null,
@@ -102,7 +98,6 @@ it('may show create product page', function (): void {
     Category::factory()->create(['created_by' => $this->user->id]);
     Brand::factory()->create(['created_by' => $this->user->id]);
     Unit::factory()->create(['created_by' => $this->user->id]);
-    Tax::factory()->create(['created_by' => $this->user->id]);
 
     $response = $this->get(route('products.create'));
 

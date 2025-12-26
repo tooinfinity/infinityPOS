@@ -13,7 +13,6 @@ use App\Data\Products\UpdateProductData;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\Tax;
 use App\Models\Unit;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -24,7 +23,7 @@ final readonly class ProductController
     public function index(): Response
     {
         $products = Product::query()
-            ->with(['category', 'brand', 'unit', 'tax'])
+            ->with(['category', 'brand', 'unit'])
             ->latest()
             ->paginate(50);
 
@@ -39,7 +38,6 @@ final readonly class ProductController
             'categories' => Category::query()->latest()->get(),
             'brands' => Brand::query()->latest()->get(),
             'units' => Unit::query()->latest()->get(),
-            'taxes' => Tax::query()->latest()->get(),
         ]);
     }
 
@@ -52,7 +50,7 @@ final readonly class ProductController
 
     public function show(Product $product): Response
     {
-        $product->load(['category', 'brand', 'unit', 'tax', 'creator']);
+        $product->load(['category', 'brand', 'unit', 'creator']);
 
         return Inertia::render('products/show', [
             'product' => ProductData::from($product),
@@ -61,14 +59,13 @@ final readonly class ProductController
 
     public function edit(Product $product): Response
     {
-        $product->load(['category', 'brand', 'unit', 'tax']);
+        $product->load(['category', 'brand', 'unit']);
 
         return Inertia::render('products/edit', [
             'product' => ProductData::from($product),
             'categories' => Category::query()->latest()->get(),
             'brands' => Brand::query()->latest()->get(),
             'units' => Unit::query()->latest()->get(),
-            'taxes' => Tax::query()->latest()->get(),
         ]);
     }
 

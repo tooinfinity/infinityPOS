@@ -5,13 +5,11 @@ declare(strict_types=1);
 use App\Data\Brands\BrandData;
 use App\Data\Categories\CategoryData;
 use App\Data\Products\ProductData;
-use App\Data\Taxes\TaxData;
 use App\Data\Units\UnitData;
 use App\Data\Users\UserData;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\Tax;
 use App\Models\Unit;
 use App\Models\User;
 
@@ -21,7 +19,6 @@ it('transforms a product model into ProductData', function (): void {
     $category = Category::factory()->create();
     $brand = Brand::factory()->create();
     $unit = Unit::factory()->create();
-    $tax = Tax::factory()->create();
 
     /** @var Product $product */
     $product = Product::factory()
@@ -30,7 +27,6 @@ it('transforms a product model into ProductData', function (): void {
         ->for($category, 'category')
         ->for($brand, 'brand')
         ->for($unit, 'unit')
-        ->for($tax, 'tax')
         ->create([
             'sku' => 'SKU-001',
             'barcode' => '1234567890123',
@@ -45,7 +41,7 @@ it('transforms a product model into ProductData', function (): void {
         ]);
 
     $data = ProductData::from(
-        $product->load(['creator', 'updater', 'category', 'brand', 'unit', 'tax'])
+        $product->load(['creator', 'updater', 'category', 'brand', 'unit'])
     );
 
     expect($data)
@@ -69,9 +65,6 @@ it('transforms a product model into ProductData', function (): void {
         ->and($data->unit->resolve())
         ->toBeInstanceOf(UnitData::class)
         ->id->toBe($unit->id)
-        ->and($data->tax->resolve())
-        ->toBeInstanceOf(TaxData::class)
-        ->id->toBe($tax->id)
         ->and($data->creator->resolve())
         ->toBeInstanceOf(UserData::class)
         ->id->toBe($creator->id)

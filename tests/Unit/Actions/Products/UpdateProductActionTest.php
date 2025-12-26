@@ -7,7 +7,6 @@ use App\Data\Products\UpdateProductData;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\Tax;
 use App\Models\Unit;
 use App\Models\User;
 
@@ -32,7 +31,6 @@ it('may update a product', function (): void {
     $category2 = Category::factory()->create(['created_by' => $user->id]);
     $brand2 = Brand::factory()->create(['created_by' => $user->id]);
     $unit = Unit::factory()->create(['created_by' => $user->id]);
-    $tax = Tax::factory()->create(['created_by' => $user->id]);
     $action = resolve(UpdateProduct::class);
 
     $data = UpdateProductData::from([
@@ -44,7 +42,6 @@ it('may update a product', function (): void {
         'category_id' => $category2->id,
         'brand_id' => $brand2->id,
         'unit_id' => $unit->id,
-        'tax_id' => $tax->id,
         'cost' => 7500,
         'price' => 15000,
         'alert_quantity' => 20,
@@ -63,7 +60,6 @@ it('may update a product', function (): void {
         ->and($product->category_id)->toBe($category2->id)
         ->and($product->brand_id)->toBe($brand2->id)
         ->and($product->unit_id)->toBe($unit->id)
-        ->and($product->tax_id)->toBe($tax->id)
         ->and($product->cost)->toBe(7500)
         ->and($product->price)->toBe(15000)
         ->and($product->alert_quantity)->toBe(20)

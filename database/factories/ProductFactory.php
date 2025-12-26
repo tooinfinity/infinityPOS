@@ -7,7 +7,6 @@ namespace Database\Factories;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\Tax;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -37,7 +36,6 @@ final class ProductFactory extends Factory
             'category_id' => Category::factory(),
             'brand_id' => Brand::factory(),
             'unit_id' => Unit::factory(),
-            'tax_id' => Tax::factory(),
             'cost' => $cost,
             'price' => $price,
             'alert_quantity' => $this->faker->numberBetween(0, 10),

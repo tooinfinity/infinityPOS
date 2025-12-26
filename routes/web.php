@@ -27,7 +27,6 @@ use App\Http\Controllers\Payments\RefundPaymentController;
 use App\Http\Controllers\Payments\VoidPaymentController;
 use App\Http\Controllers\Pos\AddCartItemController;
 use App\Http\Controllers\Pos\ApplyCartDiscountController;
-use App\Http\Controllers\Pos\ApplyCartTaxController;
 use App\Http\Controllers\Pos\CartController;
 use App\Http\Controllers\Pos\ClearCartController;
 use App\Http\Controllers\Pos\ClearRegisterCartController;
@@ -58,7 +57,6 @@ use App\Http\Controllers\Sales\SaleReturnController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\Stores\StoreController;
 use App\Http\Controllers\Suppliers\SupplierController;
-use App\Http\Controllers\Taxes\TaxController;
 use App\Http\Controllers\Units\UnitController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserPasswordController;
@@ -150,7 +148,6 @@ Route::middleware('auth')->group(function (): void {
             Route::patch('/cart/items/{lineId}', UpdateCartItemController::class)->name('cart.items.update');
             Route::delete('/cart/items/{lineId}', RemoveCartItemController::class)->name('cart.items.destroy');
             Route::put('/cart/discount', ApplyCartDiscountController::class)->name('cart.discount.update');
-            Route::put('/cart/tax', ApplyCartTaxController::class)->name('cart.tax.update');
             Route::delete('/cart', ClearCartController::class)->name('cart.clear');
 
             // Payments
@@ -285,14 +282,6 @@ Route::middleware('auth')->group(function (): void {
     Route::get('units/{unit}/edit', [UnitController::class, 'edit'])->name('units.edit');
     Route::patch('units/{unit}', [UnitController::class, 'update'])->name('units.update');
     Route::delete('units/{unit}', [UnitController::class, 'destroy'])->name('units.destroy');
-
-    Route::get('taxes', [TaxController::class, 'index'])->name('taxes.index');
-    Route::get('taxes/create', [TaxController::class, 'create'])->name('taxes.create');
-    Route::post('taxes', [TaxController::class, 'store'])->name('taxes.store');
-    Route::get('taxes/{tax}', [TaxController::class, 'show'])->name('taxes.show');
-    Route::get('taxes/{tax}/edit', [TaxController::class, 'edit'])->name('taxes.edit');
-    Route::patch('taxes/{tax}', [TaxController::class, 'update'])->name('taxes.update');
-    Route::delete('taxes/{tax}', [TaxController::class, 'destroy'])->name('taxes.destroy');
 
     Route::get('products', [ProductController::class, 'index'])->name('products.index');
     Route::get('products/create', [ProductController::class, 'create'])->name('products.create');
