@@ -30,7 +30,7 @@ import {
     UserPlus,
     X,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface Customer {
     id: number;
@@ -56,18 +56,12 @@ export function CustomerSelector({
     const [isLoading, setIsLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
-    useEffect(() => {
-        if (open && customers.length === 0) {
-            loadCustomers();
-        }
-    }, [open, customers.length]);
-
-    const loadCustomers = async () => {
+    const loadCustomers = useCallback(async (search: string = '') => {
         setIsLoading(true);
         try {
-            // Load active customers
-            const response = await axios.get('/api/clients', {
-                params: { per_page: 100, is_active: true },
+            // Load active customers with search
+            const response = await axios.get('/api/clients/search', {
+                params: { search, limit: 50 },
             });
             setCustomers(response.data.data);
         } catch (error) {
@@ -75,7 +69,24 @@ export function CustomerSelector({
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        if (open) {
+            loadCustomers(searchQuery);
+        }
+    }, [open, searchQuery, loadCustomers]);
+
+    // Debounce search
+    useEffect(() => {
+        if (!open) return;
+
+        const timer = setTimeout(() => {
+            loadCustomers(searchQuery);
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [searchQuery, open, loadCustomers]);
 
     const filteredCustomers = customers.filter(
         (customer) =>
@@ -85,7 +96,7 @@ export function CustomerSelector({
     );
 
     return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <Button
@@ -93,7 +104,7 @@ export function CustomerSelector({
                         role="combobox"
                         aria-expanded={open}
                         className={cn(
-                            'flex-1 justify-between',
+                            'h-9 flex-1 justify-between text-sm',
                             !selectedCustomer && 'text-muted-foreground',
                         )}
                     >
@@ -108,21 +119,22 @@ export function CustomerSelector({
                         <ChevronsUpDown className="ml-2 h-4 w-4 flex-shrink-0 opacity-50" />
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[400px] p-0" align="start">
+                <PopoverContent className="w-[350px] p-0" align="start">
                     <Command>
                         <CommandInput
                             placeholder={__('Search customer...')}
                             value={searchQuery}
                             onValueChange={setSearchQuery}
+                            className="h-8 text-xs"
                         />
                         <CommandList>
                             {isLoading ? (
-                                <div className="flex items-center justify-center py-6">
-                                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                                <div className="flex items-center justify-center py-4">
+                                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                                 </div>
                             ) : (
                                 <>
-                                    <CommandEmpty>
+                                    <CommandEmpty className="py-4 text-xs">
                                         {__('No customer found.')}
                                     </CommandEmpty>
                                     <CommandGroup>
@@ -139,10 +151,11 @@ export function CustomerSelector({
                                                     );
                                                     setOpen(false);
                                                 }}
+                                                className="py-2"
                                             >
                                                 <Check
                                                     className={cn(
-                                                        'mr-2 h-4 w-4',
+                                                        'mr-1.5 h-3.5 w-3.5',
                                                         selectedCustomer?.id ===
                                                             customer.id
                                                             ? 'opacity-100'
@@ -150,12 +163,12 @@ export function CustomerSelector({
                                                     )}
                                                 />
                                                 <div className="flex-1">
-                                                    <div className="font-medium">
+                                                    <div className="text-xs font-medium">
                                                         {customer.name}
                                                     </div>
                                                     {(customer.phone ||
                                                         customer.email) && (
-                                                        <div className="text-xs text-muted-foreground">
+                                                        <div className="text-[10px] text-muted-foreground">
                                                             {customer.phone ||
                                                                 customer.email}
                                                         </div>
@@ -176,7 +189,7 @@ export function CustomerSelector({
                     variant="ghost"
                     size="icon"
                     onClick={() => onCustomerChange(null)}
-                    className="flex-shrink-0"
+                    className="h-9 w-9 flex-shrink-0"
                 >
                     <X className="h-4 w-4" />
                 </Button>
@@ -238,13 +251,23 @@ export function QuickAddCustomerModal({
         } catch (error: unknown) {
             console.error('Failed to add customer:', error);
             const apiError = error as {
-                response?: { data?: { errors?: Record<string, string[]> } };
+                response?: {
+                    data?: {
+                        errors?: Record<string, string[]>;
+                        message?: string;
+                    };
+                };
             };
             if (apiError.response?.data?.errors) {
-                setErrors(apiError.response.data.errors);
+                const errors = apiError.response.data.errors;
+                const formattedErrors: Record<string, string> = {};
+                Object.keys(errors).forEach((key) => {
+                    formattedErrors[key] = errors[key][0];
+                });
+                setErrors(formattedErrors);
             } else {
                 alert(
-                    error.response?.data?.message ||
+                    apiError.response?.data?.message ||
                         __('Failed to add customer. Please try again.'),
                 );
             }

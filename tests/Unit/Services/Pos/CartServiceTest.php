@@ -92,6 +92,7 @@ test('it returns empty cart when no draft sale', function (): void {
     expect($raw)->toBe([
         'items' => [],
         'discount' => 0,
+        'tax_override' => 0,
         'sale_id' => null,
     ]);
 });

@@ -18,15 +18,15 @@ export function CategoryFilter({
     onCategoryChange,
 }: CategoryFilterProps) {
     return (
-        <div className="flex items-center gap-2 overflow-x-auto pb-2">
-            <span className="text-sm font-medium whitespace-nowrap text-muted-foreground">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1.5">
+            <span className="text-xs font-medium whitespace-nowrap text-muted-foreground">
                 Category:
             </span>
 
             <button
                 onClick={() => onCategoryChange(null)}
                 className={cn(
-                    'rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-all duration-200',
+                    'rounded-lg px-2.5 py-1.5 text-sm font-medium whitespace-nowrap transition-all duration-200',
                     activeCategory === null
                         ? 'bg-primary text-primary-foreground shadow-sm'
                         : 'bg-secondary/50 text-secondary-foreground hover:bg-secondary',
@@ -40,7 +40,7 @@ export function CategoryFilter({
                     key={category.id}
                     onClick={() => onCategoryChange(category.id)}
                     className={cn(
-                        'rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-all duration-200',
+                        'rounded-lg px-2.5 py-1.5 text-sm font-medium whitespace-nowrap transition-all duration-200',
                         activeCategory === category.id
                             ? 'bg-primary text-primary-foreground shadow-sm'
                             : 'bg-secondary/50 text-secondary-foreground hover:bg-secondary',

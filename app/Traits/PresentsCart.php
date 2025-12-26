@@ -30,7 +30,11 @@ trait PresentsCart
             );
         }
 
-        $totals = $totals->handle($raw['items'], $raw['discount']);
+        $totals = $totals->handle(
+            $raw['items'],
+            $raw['discount'],
+            $raw['tax_override'] ?? 0
+        );
 
         return new PosCartData(items: $items, totals: $totals);
     }

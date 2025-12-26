@@ -18,7 +18,7 @@ import {
 import { useLanguage } from '@/hooks/use-language';
 import { router } from '@inertiajs/react';
 import { Loader2, Settings } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface Store {
     id: number;
@@ -28,6 +28,7 @@ interface Store {
 interface Moneybox {
     id: number;
     name: string;
+    store_id?: number | null;
 }
 
 interface RegisterSetupModalProps {
@@ -51,15 +52,45 @@ export function RegisterSetupModal({
     currentRegister,
 }: RegisterSetupModalProps) {
     const { __ } = useLanguage();
-    const [name, setName] = useState(currentRegister?.name || '');
-    const [storeId, setStoreId] = useState<string>(
-        currentRegister?.store_id?.toString() || '',
-    );
-    const [moneyboxId, setMoneyboxId] = useState<string>(
-        currentRegister?.moneybox_id?.toString() || '',
-    );
+    const [name, setName] = useState('');
+    const [storeId, setStoreId] = useState<string>('');
+    const [moneyboxId, setMoneyboxId] = useState<string>('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    // Reset form when modal opens or register changes
+    useEffect(() => {
+        if (isOpen) {
+            setName(currentRegister?.name || '');
+            setStoreId(
+                currentRegister?.store_id?.toString() ||
+                    stores[0]?.id?.toString() ||
+                    '',
+            );
+            setMoneyboxId(currentRegister?.moneybox_id?.toString() || '');
+            setErrors({});
+            setIsProcessing(false);
+        }
+    }, [isOpen, currentRegister, stores]);
+
+    // Filter moneyboxes by selected store (or store_id is null = available for all stores)
+    const availableMoneyboxes = useMemo(() => {
+        if (!storeId) return moneyboxes;
+        const selectedStoreId = parseInt(storeId);
+        return moneyboxes.filter(
+            (mb) => mb.store_id === null || mb.store_id === selectedStoreId,
+        );
+    }, [moneyboxes, storeId]);
+
+    // Reset moneybox selection if current selection is no longer available
+    useEffect(() => {
+        if (
+            moneyboxId &&
+            !availableMoneyboxes.find((mb) => mb.id.toString() === moneyboxId)
+        ) {
+            setMoneyboxId('');
+        }
+    }, [availableMoneyboxes, moneyboxId]);
 
     const handleSave = () => {
         // Validation
@@ -67,6 +98,10 @@ export function RegisterSetupModal({
 
         if (!name.trim()) {
             newErrors.name = __('Register name is required');
+        }
+
+        if (name.trim().length < 2) {
+            newErrors.name = __('Register name must be at least 2 characters');
         }
 
         if (!storeId) {
@@ -80,7 +115,8 @@ export function RegisterSetupModal({
 
         setIsProcessing(true);
 
-        router.post(
+        // Use PUT method to match the route
+        router.put(
             '/pos/register',
             {
                 name: name.trim(),
@@ -88,13 +124,12 @@ export function RegisterSetupModal({
                 moneybox_id: moneyboxId ? parseInt(moneyboxId) : null,
             },
             {
+                preserveScroll: true,
                 onSuccess: () => {
                     onClose();
-                    router.reload();
                 },
                 onError: (errors) => {
-                    setErrors(errors);
-                    setIsProcessing(false);
+                    setErrors(errors as Record<string, string>);
                 },
                 onFinish: () => {
                     setIsProcessing(false);
@@ -103,8 +138,14 @@ export function RegisterSetupModal({
         );
     };
 
+    const handleClose = () => {
+        if (!isProcessing) {
+            onClose();
+        }
+    };
+
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <Dialog open={isOpen} onOpenChange={handleClose}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-xl font-semibold">
@@ -130,16 +171,20 @@ export function RegisterSetupModal({
                             value={name}
                             onChange={(e) => {
                                 setName(e.target.value);
-                                setErrors((prev) => ({
-                                    ...prev,
-                                    name: '',
-                                }));
+                                if (errors.name) {
+                                    setErrors((prev) => ({
+                                        ...prev,
+                                        name: '',
+                                    }));
+                                }
                             }}
                             placeholder={__('e.g., Register 1, Front Desk')}
                             disabled={isProcessing}
+                            className={errors.name ? 'border-destructive' : ''}
+                            autoFocus
                         />
                         {errors.name && (
-                            <p className="text-sm text-destructive">
+                            <p className="text-sm font-medium text-destructive">
                                 {errors.name}
                             </p>
                         )}
@@ -155,16 +200,27 @@ export function RegisterSetupModal({
                             value={storeId}
                             onValueChange={(value) => {
                                 setStoreId(value);
-                                setErrors((prev) => ({
-                                    ...prev,
-                                    store_id: '',
-                                }));
+                                if (errors.store_id) {
+                                    setErrors((prev) => ({
+                                        ...prev,
+                                        store_id: '',
+                                    }));
+                                }
                             }}
-                            disabled={isProcessing}
+                            disabled={isProcessing || stores.length === 0}
                         >
-                            <SelectTrigger id="store">
+                            <SelectTrigger
+                                id="store"
+                                className={
+                                    errors.store_id ? 'border-destructive' : ''
+                                }
+                            >
                                 <SelectValue
-                                    placeholder={__('Select a store')}
+                                    placeholder={
+                                        stores.length > 0
+                                            ? __('Select a store')
+                                            : __('No stores available')
+                                    }
                                 />
                             </SelectTrigger>
                             <SelectContent>
@@ -179,7 +235,7 @@ export function RegisterSetupModal({
                             </SelectContent>
                         </Select>
                         {errors.store_id && (
-                            <p className="text-sm text-destructive">
+                            <p className="text-sm font-medium text-destructive">
                                 {errors.store_id}
                             </p>
                         )}
@@ -194,8 +250,10 @@ export function RegisterSetupModal({
                             </span>
                         </Label>
                         <Select
-                            value={moneyboxId}
-                            onValueChange={setMoneyboxId}
+                            value={moneyboxId || 'none'}
+                            onValueChange={(value) =>
+                                setMoneyboxId(value === 'none' ? '' : value)
+                            }
                             disabled={isProcessing}
                         >
                             <SelectTrigger id="moneybox">
@@ -204,10 +262,10 @@ export function RegisterSetupModal({
                                 />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="">
+                                <SelectItem value="none">
                                     {__('No cash drawer')}
                                 </SelectItem>
-                                {moneyboxes.map((moneybox) => (
+                                {availableMoneyboxes.map((moneybox) => (
                                     <SelectItem
                                         key={moneybox.id}
                                         value={moneybox.id.toString()}
@@ -217,6 +275,13 @@ export function RegisterSetupModal({
                                 ))}
                             </SelectContent>
                         </Select>
+                        {availableMoneyboxes.length === 0 && storeId && (
+                            <p className="text-xs text-amber-600 dark:text-amber-500">
+                                {__(
+                                    'No cash drawers available for selected store',
+                                )}
+                            </p>
+                        )}
                         <p className="text-xs text-muted-foreground">
                             {__(
                                 'Link a cash drawer to track cash transactions',
@@ -234,13 +299,23 @@ export function RegisterSetupModal({
                             </p>
                         </div>
                     )}
+
+                    {!currentRegister && stores.length === 0 && (
+                        <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-3 text-sm">
+                            <p className="text-amber-700 dark:text-amber-400">
+                                {__(
+                                    'Please create at least one store before setting up a register.',
+                                )}
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Action Buttons */}
                 <div className="flex gap-3">
                     <Button
                         variant="outline"
-                        onClick={onClose}
+                        onClick={handleClose}
                         disabled={isProcessing}
                         className="flex-1"
                     >
@@ -248,7 +323,7 @@ export function RegisterSetupModal({
                     </Button>
                     <Button
                         onClick={handleSave}
-                        disabled={isProcessing}
+                        disabled={isProcessing || stores.length === 0}
                         className="flex-1 gap-2"
                     >
                         {isProcessing ? (

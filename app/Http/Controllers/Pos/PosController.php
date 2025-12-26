@@ -40,11 +40,13 @@ final readonly class PosController
             ])
             ->all();
 
-        // Get active products with relationships
+        // Load only a limited set of products initially to improve performance
+        // Users can search for specific products via the ProductSearchController
         $products = Product::query()
             ->with(['category', 'brand', 'unit', 'tax'])
             ->where('is_active', true)
             ->orderBy('name')
+            ->limit(50) // Limit initial load to 50 products
             ->get();
 
         // Enrich products with stock information
@@ -72,10 +74,11 @@ final readonly class PosController
         $moneyboxes = \App\Models\Moneybox::query()
             ->where('is_active', true)
             ->orderBy('name')
-            ->get(['id', 'name'])
+            ->get(['id', 'name', 'store_id'])
             ->map(fn (\App\Models\Moneybox $moneybox): array => [
                 'id' => $moneybox->id,
                 'name' => $moneybox->name,
+                'store_id' => $moneybox->store_id,
             ])
             ->all();
 

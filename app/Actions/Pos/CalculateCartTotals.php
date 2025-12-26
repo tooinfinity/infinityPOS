@@ -13,7 +13,7 @@ final readonly class CalculateCartTotals
     /**
      * @param  array<string, array{product_id:int,name:string,unit_price:int,quantity:int}>  $items
      */
-    public function handle(array $items, int $cartDiscount = 0): PosCartTotalsData
+    public function handle(array $items, int $cartDiscount = 0, int $taxOverride = 0): PosCartTotalsData
     {
         $subtotal = 0;
         $taxTotal = 0;
@@ -57,9 +57,12 @@ final readonly class CalculateCartTotals
 
         $taxBase = $subtotal - $discountTotal;
 
-        // Recompute tax_total using discounted base proportionally per line.
-        // For now, apply discount proportionally to each line's subtotal.
-        if ($subtotal > 0 && $discountTotal > 0) {
+        // If tax override is set, use it directly; otherwise calculate from products
+        if ($taxOverride > 0) {
+            $taxTotal = $taxOverride;
+        } elseif ($subtotal > 0 && $discountTotal > 0) {
+            // Recompute tax_total using discounted base proportionally per line.
+            // For now, apply discount proportionally to each line's subtotal.
             $taxTotal = 0;
             foreach ($items as $line) {
                 $lineSubtotal = $line['unit_price'] * $line['quantity'];

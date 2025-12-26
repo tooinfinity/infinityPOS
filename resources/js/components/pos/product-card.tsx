@@ -38,8 +38,8 @@ export function ProductCard({
             onClick={() => !isOutOfStock && onAddToCart(id)}
             disabled={isOutOfStock}
             className={cn(
-                'group relative flex flex-col overflow-hidden rounded-lg border bg-card transition-all duration-200',
-                'hover:border-primary/50 hover:shadow-md active:scale-[0.98]',
+                'group relative flex flex-col overflow-hidden rounded-lg border border-border/50 bg-card/50 transition-all duration-200',
+                'hover:border-primary/40 hover:bg-card hover:shadow-sm active:scale-[0.98]',
                 isOutOfStock
                     ? 'cursor-not-allowed opacity-50'
                     : 'cursor-pointer',
@@ -56,7 +56,7 @@ export function ProductCard({
                     />
                 ) : (
                     <div className="flex h-full w-full items-center justify-center">
-                        <Package className="h-12 w-12 text-muted-foreground/40" />
+                        <Package className="h-10 w-10 text-muted-foreground/40" />
                     </div>
                 )}
 
@@ -64,7 +64,7 @@ export function ProductCard({
                 {available_stock !== null && (
                     <div
                         className={cn(
-                            'absolute top-2 right-2 rounded-md px-2 py-1 text-xs font-medium',
+                            'absolute top-2 right-2 rounded px-2 py-0.5 text-xs font-medium shadow-sm',
                             isOutOfStock
                                 ? 'bg-destructive/90 text-destructive-foreground'
                                 : isLowStock
@@ -72,17 +72,13 @@ export function ProductCard({
                                   : 'bg-emerald-500/90 text-white',
                         )}
                     >
-                        {isOutOfStock
-                            ? 'Out of Stock'
-                            : isLowStock
-                              ? 'Low Stock'
-                              : 'Available'}
+                        {isOutOfStock ? 'Out' : isLowStock ? 'Low' : 'In Stock'}
                     </div>
                 )}
             </div>
 
             {/* Content Section */}
-            <div className="flex flex-col gap-1 p-3">
+            <div className="flex flex-col gap-0.5 p-2.5">
                 <h3 className="line-clamp-2 text-sm leading-tight font-semibold text-card-foreground">
                     {name}
                 </h3>
@@ -91,14 +87,14 @@ export function ProductCard({
                     <p className="text-xs text-muted-foreground">SKU: {sku}</p>
                 )}
 
-                <div className="mt-1 flex items-center justify-between gap-2">
-                    <span className="text-lg font-bold text-primary">
+                <div className="mt-0.5 flex items-center justify-between gap-2">
+                    <span className="text-sm font-bold text-primary">
                         {formatPrice(price)}
                     </span>
 
                     {available_stock !== null && !isOutOfStock && (
                         <span className="text-xs text-muted-foreground">
-                            {available_stock} in stock
+                            {available_stock} stock
                         </span>
                     )}
                 </div>

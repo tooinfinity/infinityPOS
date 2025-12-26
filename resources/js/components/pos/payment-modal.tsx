@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useLanguage } from '@/hooks/use-language';
 import { cn } from '@/lib/utils';
-import { router } from '@inertiajs/react';
 import axios from 'axios';
 import {
     ArrowLeftRight,
@@ -20,6 +19,7 @@ import {
     Loader2,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 interface PaymentModalProps {
     isOpen: boolean;
@@ -110,13 +110,11 @@ export function PaymentModal({
                 onSuccess();
             }
 
-            // Show success message
-            alert(
-                `${__('Payment successful!')} \n${__('Sale')}: ${saleReference}`,
-            );
-
-            // Refresh the page to clear cart
-            router.reload();
+            // Show success toast
+            toast.success(__('Payment successful!'), {
+                description: `${__('Sale')}: ${saleReference}`,
+                duration: 3000,
+            });
         } catch (error: unknown) {
             console.error('Payment failed:', error);
             const errorMessage =
@@ -124,7 +122,9 @@ export function PaymentModal({
                     ? (error as { response?: { data?: { message?: string } } })
                           .response?.data?.message
                     : undefined;
-            alert(errorMessage || __('Payment failed. Please try again.'));
+            toast.error(__('Payment failed'), {
+                description: errorMessage || __('Please try again'),
+            });
         } finally {
             setIsProcessing(false);
         }
@@ -140,31 +140,31 @@ export function PaymentModal({
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-semibold">
+                    <DialogTitle className="text-lg font-semibold">
                         {__('Complete Payment')}
                     </DialogTitle>
-                    <DialogDescription>
+                    <DialogDescription className="text-sm">
                         {__('Select payment method and confirm amount')}
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-6 py-4">
+                <div className="space-y-4 py-3.5">
                     {/* Total Amount Display */}
-                    <div className="rounded-lg bg-muted/50 p-4">
-                        <div className="text-sm text-muted-foreground">
+                    <div className="rounded-lg bg-muted/50 p-3.5">
+                        <div className="text-xs text-muted-foreground">
                             {__('Total Amount')}
                         </div>
-                        <div className="text-3xl font-bold text-primary">
+                        <div className="text-2xl font-bold text-primary">
                             {formatPrice(totalAmount)}
                         </div>
                     </div>
 
                     {/* Payment Method Selection */}
-                    <div className="space-y-3">
+                    <div className="space-y-2.5">
                         <Label className="text-sm font-medium">
                             {__('Payment Method')}
                         </Label>
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-3 gap-2.5">
                             {paymentMethods.map((method) => {
                                 const Icon = method.icon;
                                 const isSelected =
@@ -181,7 +181,7 @@ export function PaymentModal({
                                             'hover:border-primary/50 hover:bg-primary/5',
                                             isSelected
                                                 ? 'border-primary bg-primary/10'
-                                                : 'border-border',
+                                                : 'border-border/50',
                                         )}
                                     >
                                         <Icon
@@ -210,8 +210,8 @@ export function PaymentModal({
 
                     {/* Amount Received (for cash) */}
                     {selectedMethod === 'cash' && (
-                        <div className="space-y-2">
-                            <Label htmlFor="amount-received">
+                        <div className="space-y-3">
+                            <Label className="text-sm">
                                 {__('Amount Received')}
                             </Label>
                             <Input
@@ -225,7 +225,7 @@ export function PaymentModal({
                                 }
                                 onKeyDown={handleKeyDown}
                                 placeholder="0.00"
-                                className="text-lg"
+                                className="h-10 text-base"
                                 autoFocus
                             />
 
@@ -255,35 +255,6 @@ export function PaymentModal({
                     )}
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-3">
-                    <Button
-                        variant="outline"
-                        onClick={onClose}
-                        disabled={isProcessing}
-                        className="flex-1"
-                    >
-                        {__('Cancel')}
-                    </Button>
-                    <Button
-                        onClick={handlePayment}
-                        disabled={!isValidAmount || isProcessing}
-                        className="flex-1 gap-2"
-                    >
-                        {isProcessing ? (
-                            <>
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                {__('Processing...')}
-                            </>
-                        ) : (
-                            <>
-                                <Check className="h-4 w-4" />
-                                {__('Complete Payment')}
-                            </>
-                        )}
-                    </Button>
-                </div>
-
                 {/* Quick Amount Buttons for Cash */}
                 {selectedMethod === 'cash' && (
                     <div className="border-t pt-4">
@@ -300,7 +271,7 @@ export function PaymentModal({
                                         setAmountReceived(amount.toFixed(2))
                                     }
                                     disabled={isProcessing}
-                                    className="text-xs"
+                                    className="h-9 text-xs"
                                 >
                                     ${amount}
                                 </Button>
@@ -308,6 +279,35 @@ export function PaymentModal({
                         </div>
                     </div>
                 )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-2">
+                    <Button
+                        variant="outline"
+                        onClick={onClose}
+                        disabled={isProcessing}
+                        className="h-10 flex-1 text-sm"
+                    >
+                        {__('Cancel')}
+                    </Button>
+                    <Button
+                        onClick={handlePayment}
+                        disabled={!isValidAmount || isProcessing}
+                        className="h-10 flex-1 gap-2 text-sm"
+                    >
+                        {isProcessing ? (
+                            <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                {__('Processing...')}
+                            </>
+                        ) : (
+                            <>
+                                <Check className="h-4 w-4" />
+                                {__('Complete Payment')}
+                            </>
+                        )}
+                    </Button>
+                </div>
             </DialogContent>
         </Dialog>
     );

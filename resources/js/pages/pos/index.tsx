@@ -4,371 +4,237 @@ import {
     CustomerSelector,
     QuickAddCustomerModal,
 } from '@/components/pos/customer-selector';
-import { DiscountModal } from '@/components/pos/discount-modal';
-import {
-    HeldSalesListModal,
-    HoldSaleModal,
-} from '@/components/pos/hold-sale-modal';
 import { KeyboardShortcutsBar } from '@/components/pos/keyboard-shortcuts-bar';
 import { PaymentModal } from '@/components/pos/payment-modal';
 import { ProductCard } from '@/components/pos/product-card';
-import { ReceiptModal } from '@/components/pos/receipt-modal';
 import { RegisterSetupModal } from '@/components/pos/register-setup-modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useBarcodeScanner } from '@/hooks/use-barcode-scanner';
+import { useCustomerManagement } from '@/hooks/use-customer-management';
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 import { useLanguage } from '@/hooks/use-language';
+import { usePaymentProcessing } from '@/hooks/use-payment-processing';
+import { usePosCart } from '@/hooks/use-pos-cart';
+import { usePosModals } from '@/hooks/use-pos-modals';
+import type { Customer, PosIndexProps, Product } from '@/types/pos';
 import { Head, router } from '@inertiajs/react';
 import axios from 'axios';
-import {
-    ArrowLeft,
-    Clock,
-    Percent,
-    Search,
-    Settings,
-    UserPlus,
-} from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowLeft, Search, Settings, UserPlus } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
-interface Category {
-    id: number;
-    name: string;
-    code: string;
-}
-
-interface Product {
-    id: number;
-    name: string;
-    sku: string | null;
-    barcode: string | null;
-    price: number;
-    image: string | null;
-    available_stock: number | null;
-    category?: {
-        id: number;
-        name: string;
-    } | null;
-}
-
-interface Customer {
-    id: number;
-    name: string;
-    phone?: string | null;
-    email?: string | null;
-}
-
-interface CartItem {
-    line_id: string;
-    product_id: number;
-    name: string;
-    unit_price: number;
-    quantity: number;
-    line_subtotal: number;
-}
-
-interface CartTotals {
-    subtotal: number;
-    discount_total: number;
-    tax_total: number;
-    total: number;
-}
-
-interface CartData {
-    items: CartItem[];
-    totals: CartTotals;
-}
-
-interface Register {
-    id: number;
-    name: string;
-    store_id: number;
-    moneybox_id: number | null;
-}
-
-interface Store {
-    id: number;
-    name: string;
-}
-
-interface Moneybox {
-    id: number;
-    name: string;
-}
-
-interface Settings {
-    pos: {
-        enable_barcode_scanner: boolean;
-        default_payment_method: string;
-        auto_print_receipt: boolean;
-    };
-    sales: {
-        enable_discounts: boolean;
-        max_discount_percentage: number;
-        require_customer_for_sale: boolean;
-        enable_tax_calculation: boolean;
-    };
-}
-
-interface ReceiptData {
-    sale_reference: string;
-    date: string;
-    items: Array<{
-        name: string;
-        quantity: number;
-        unit_price: number;
-        line_subtotal: number;
-    }>;
-    subtotal: number;
-    tax_total: number;
-    discount_total: number;
-    total: number;
-    amount_received: number;
-    change_due: number;
-    payment_method: string;
-    customer?: {
-        name: string;
-        phone?: string;
-    } | null;
-    store?: {
-        name: string;
-        address?: string;
-        phone?: string;
-    } | null;
-}
-
-interface Props {
-    products: Product[];
-    categories: Category[];
-    register: Register | null;
-    settings: Settings;
-    stores?: Store[];
-    moneyboxes?: Moneybox[];
-}
+// Re-export Product type for backward compatibility
+export type { Product } from '@/types/pos';
 
 export default function PosIndex({
-    products,
+    products: initialProducts,
     categories,
     register,
     settings,
     stores = [],
     moneyboxes = [],
-}: Props) {
+}: PosIndexProps) {
     const { __ } = useLanguage();
+
+    // UI State
     const [activeCategory, setActiveCategory] = useState<number | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const [cart, setCart] = useState<CartData>({
-        items: [],
-        totals: {
-            subtotal: 0,
-            discount_total: 0,
-            tax_total: 0,
-            total: 0,
-        },
-    });
-    // Track loading state for cart operations
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [isLoadingCart, setIsLoadingCart] = useState(false);
+    const [products, setProducts] = useState<Product[]>(initialProducts);
+    const [isSearching, setIsSearching] = useState(false);
     const searchInputRef = useRef<HTMLInputElement>(null);
 
-    // Customer state
-    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
-        null,
+    // Customer Management Hook
+    const { selectedCustomer, selectCustomer, clearCustomer } =
+        useCustomerManagement();
+
+    // Wrapper to handle null customer (for CustomerSelector compatibility)
+    const handleCustomerChange = useCallback(
+        (customer: Customer | null) => {
+            if (customer === null) {
+                clearCustomer();
+            } else {
+                selectCustomer(customer);
+            }
+        },
+        [selectCustomer, clearCustomer],
     );
 
-    // Modal states
-    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-    const [isHoldSaleModalOpen, setIsHoldSaleModalOpen] = useState(false);
-    const [isHeldSalesListOpen, setIsHeldSalesListOpen] = useState(false);
-    const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
-    const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
-    const [isQuickAddCustomerOpen, setIsQuickAddCustomerOpen] = useState(false);
-    const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
-    const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
+    // Custom Hooks
+    const {
+        cart,
+        isLoading: isLoadingCart,
+        loadCart,
+        addToCart,
+        updateQuantity,
+        removeItem,
+        clearCart: clearCartAction,
+        clearCartState,
+    } = usePosCart(products);
 
-    // Load cart on mount
-    useEffect(() => {
-        loadCart();
-    }, []);
-
-    const loadCart = async () => {
-        try {
-            const response = await axios.get('/pos/cart');
-            setCart(response.data.data);
-        } catch (error) {
-            console.error('Failed to load cart:', error);
-        }
-    };
-
-    const handleAddToCart = async (productId: number) => {
-        setIsLoadingCart(true);
-        try {
-            const response = await axios.post('/pos/cart/items', {
-                product_id: productId,
-                quantity: 1,
-            });
-            setCart(response.data.data);
-        } catch (error) {
-            console.error('Failed to add to cart:', error);
-        } finally {
-            setIsLoadingCart(false);
-        }
-    };
-
-    const handleUpdateQuantity = async (lineId: string, quantity: number) => {
-        setIsLoadingCart(true);
-        try {
-            const response = await axios.patch(`/pos/cart/items/${lineId}`, {
-                quantity,
-            });
-            setCart(response.data.data);
-        } catch (error) {
-            console.error('Failed to update quantity:', error);
-        } finally {
-            setIsLoadingCart(false);
-        }
-    };
-
-    const handleRemoveItem = async (lineId: string) => {
-        setIsLoadingCart(true);
-        try {
-            const response = await axios.delete(`/pos/cart/items/${lineId}`);
-            setCart(response.data.data);
-        } catch (error) {
-            console.error('Failed to remove item:', error);
-        } finally {
-            setIsLoadingCart(false);
-        }
-    };
-
-    const handleClearCart = useCallback(async () => {
-        if (!confirm(__('Are you sure you want to clear the cart?'))) {
-            return;
-        }
-
-        setIsLoadingCart(true);
-        try {
-            await axios.delete('/pos/cart');
-            setCart({
-                items: [],
-                totals: {
-                    subtotal: 0,
-                    discount_total: 0,
-                    tax_total: 0,
-                    total: 0,
-                },
-            });
-        } catch (error) {
-            console.error('Failed to clear cart:', error);
-        } finally {
-            setIsLoadingCart(false);
-        }
-    }, [__]);
-
-    const handleHoldSale = useCallback(() => {
-        if (cart.items.length === 0) return;
-        setIsHoldSaleModalOpen(true);
-    }, [cart.items.length]);
-
-    const handlePayNow = useCallback(() => {
-        if (cart.items.length === 0) return;
-        setIsPaymentModalOpen(true);
-    }, [cart.items.length]);
-
-    // Keyboard shortcuts
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            // Don't trigger shortcuts when typing in input fields
-            if (
-                e.target instanceof HTMLInputElement ||
-                e.target instanceof HTMLTextAreaElement
-            ) {
+    // Search products via API
+    const searchProducts = useCallback(
+        async (query: string) => {
+            if (!query.trim()) {
+                setProducts(initialProducts);
+                setIsSearching(false);
                 return;
             }
 
-            switch (e.key) {
-                case 'Enter':
-                    e.preventDefault();
-                    if (cart.items.length > 0) {
-                        handlePayNow();
-                    }
-                    break;
-                case 'F2':
-                    e.preventDefault();
-                    searchInputRef.current?.focus();
-                    break;
-                case 'F4':
-                    e.preventDefault();
-                    if (cart.items.length > 0) {
-                        handleHoldSale();
-                    }
-                    break;
-                case 'Escape':
-                    e.preventDefault();
-                    if (cart.items.length > 0) {
-                        handleClearCart();
-                    }
-                    break;
+            setIsSearching(true);
+            try {
+                const response = await axios.get('/pos/products', {
+                    params: { query: query.trim() },
+                });
+                setProducts(response.data.data);
+            } catch (error) {
+                console.error('Failed to search products:', error);
+                toast.error(__('Failed to search products'));
+                setProducts(initialProducts);
+            } finally {
+                setIsSearching(false);
             }
-        };
+        },
+        [initialProducts, __],
+    );
 
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [cart.items.length, handlePayNow, handleHoldSale, handleClearCart]);
+    // Debounced search effect
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            searchProducts(searchQuery);
+        }, 300);
 
-    const handlePaymentSuccess = (receipt: ReceiptData) => {
-        // Show receipt modal
-        setReceiptData(receipt);
-        setIsReceiptModalOpen(true);
+        return () => clearTimeout(timeoutId);
+    }, [searchQuery, searchProducts]);
+
+    const modals = usePosModals();
+
+    // Handle discount application
+    const handleApplyDiscount = useCallback(
+        async (discountAmount: number) => {
+            try {
+                await axios.put('/pos/cart/discount', {
+                    discount: discountAmount,
+                });
+                await loadCart();
+            } catch (error) {
+                console.error('Failed to apply discount:', error);
+                toast.error(__('Failed to apply discount'));
+            }
+        },
+        [loadCart, __],
+    );
+
+    // Handle tax application
+    const handleApplyTax = useCallback(
+        async (taxAmount: number) => {
+            try {
+                await axios.put('/pos/cart/tax', {
+                    tax: taxAmount,
+                });
+                await loadCart();
+            } catch (error) {
+                console.error('Failed to apply tax:', error);
+                toast.error(__('Failed to apply tax'));
+            }
+        },
+        [loadCart, __],
+    );
+
+    // Load cart on mount and auto-focus search
+    useEffect(() => {
+        loadCart();
+        searchInputRef.current?.focus();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Only run once on mount
+
+    const handlePayNow = useCallback(() => {
+        if (cart.items.length === 0) return;
+        modals.openPaymentModal();
+    }, [cart.items.length, modals]);
+
+    // Payment processing hook
+    const { processQuickPayment } = usePaymentProcessing({
+        onSuccess: () => {
+            clearCartState();
+            clearCustomer();
+            toast.success(__('Payment completed successfully'));
+            setTimeout(() => searchInputRef.current?.focus(), 500);
+        },
+    });
+
+    const handleQuickPayExact = useCallback(async () => {
+        if (cart.items.length === 0) return;
+
+        const defaultMethod = settings.pos.default_payment_method;
+
+        if (
+            !confirm(
+                __(
+                    `Process exact payment of ${(cart.totals.total / 100).toFixed(2)} via ${defaultMethod}?`,
+                ),
+            )
+        ) {
+            return;
+        }
+
+        await processQuickPayment(
+            register?.store_id ?? 0,
+            defaultMethod as 'cash' | 'card' | 'transfer',
+            cart.totals.total,
+        );
+    }, [
+        cart.items.length,
+        cart.totals.total,
+        register,
+        settings,
+        __,
+        processQuickPayment,
+    ]);
+
+    // Barcode Scanner Hook
+    useBarcodeScanner({
+        products,
+        onProductFound: (product) => {
+            addToCart(product.id);
+            toast.success(`${__('Added')} ${product.name}`, {
+                description: `${__('Quantity')}: 1`,
+                duration: 2000,
+            });
+        },
+        searchInputRef: searchInputRef as React.RefObject<HTMLInputElement>,
+        onSearchClear: () => setSearchQuery(''),
+    });
+
+    // Keyboard Shortcuts Hook
+    useKeyboardShortcuts({
+        onPayNow: cart.items.length > 0 ? handlePayNow : undefined,
+        onSearchFocus: () => {
+            searchInputRef.current?.focus();
+            searchInputRef.current?.select();
+        },
+        onClearCart: cart.items.length > 0 ? clearCartAction : undefined,
+        enabled: true,
+    });
+
+    const handlePaymentSuccess = useCallback(() => {
+        // Show success message
+        toast.success(__('Payment completed successfully'));
 
         // Clear cart and customer
-        setCart({
-            items: [],
-            totals: {
-                subtotal: 0,
-                discount_total: 0,
-                tax_total: 0,
-                total: 0,
-            },
-        });
-        setSelectedCustomer(null);
+        clearCartState();
+        clearCustomer();
 
-        // Auto-print if enabled
-        if (settings.pos.auto_print_receipt && receipt) {
-            setTimeout(() => {
-                // The receipt modal will handle printing
-            }, 500);
-        }
-    };
+        // Refocus search for next transaction
+        setTimeout(() => searchInputRef.current?.focus(), 1000);
+    }, [__, clearCartState, clearCustomer]);
 
-    const handleHoldSaleSuccess = () => {
-        // Clear cart after holding
-        handleClearCart();
-    };
+    // Filter products by category (search is handled by API now)
+    const filteredProducts = activeCategory
+        ? products.filter((product) => product.category?.id === activeCategory)
+        : products;
 
-    // Filter products
-    const filteredProducts = useMemo(() => {
-        let filtered = products;
-
-        // Filter by category
-        if (activeCategory !== null) {
-            filtered = filtered.filter(
-                (p) => p.category?.id === activeCategory,
-            );
-        }
-
-        // Filter by search query
-        if (searchQuery.trim() !== '') {
-            const query = searchQuery.toLowerCase();
-            filtered = filtered.filter(
-                (p) =>
-                    p.name.toLowerCase().includes(query) ||
-                    p.sku?.toLowerCase().includes(query) ||
-                    p.barcode?.toLowerCase().includes(query),
-            );
-        }
-
-        return filtered;
-    }, [products, activeCategory, searchQuery]);
-
+    const hasResults = filteredProducts.length > 0;
     const itemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
 
     return (
@@ -377,26 +243,29 @@ export default function PosIndex({
 
             <div className="flex h-screen flex-col bg-background">
                 {/* Header */}
-                <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3">
-                    <div className="flex items-center gap-4">
+                <header className="flex items-center justify-between border-b border-border/50 bg-card/50 px-3.5 py-2.5">
+                    <div className="flex items-center gap-2.5">
                         {/* Back to Dashboard */}
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => router.visit('/dashboard')}
-                            className="gap-2"
+                            className="h-9 gap-2 px-3"
+                            aria-label={__('Back to dashboard')}
                         >
                             <ArrowLeft className="h-4 w-4" />
-                            {__('Dashboard')}
+                            <span className="hidden text-sm sm:inline">
+                                {__('Dashboard')}
+                            </span>
                         </Button>
 
-                        <div className="h-6 w-px bg-border" />
+                        <div className="hidden h-5 w-px bg-border sm:block" />
 
                         <div className="flex items-center gap-2">
-                            <div className="rounded-lg bg-primary px-3 py-2 text-sm font-bold text-primary-foreground">
+                            <div className="rounded-lg bg-primary px-2.5 py-1 text-sm font-bold text-primary-foreground">
                                 POS
                             </div>
-                            <div className="text-sm">
+                            <div className="hidden text-sm sm:block">
                                 <div className="font-medium">
                                     {__('Point of Sale')}
                                 </div>
@@ -412,47 +281,47 @@ export default function PosIndex({
                     <div className="flex items-center gap-2">
                         <Button
                             variant="ghost"
-                            size="sm"
-                            onClick={() => setIsHeldSalesListOpen(true)}
-                            className="gap-2"
-                        >
-                            <Clock className="h-4 w-4" />
-                            {__('Held Sales')}
-                        </Button>
-
-                        <Button
-                            variant="ghost"
                             size="icon"
-                            onClick={() => setIsRegisterModalOpen(true)}
-                            title={__('Register settings')}
+                            onClick={modals.openRegisterModal}
+                            aria-label={__('Register settings')}
+                            className="h-9 w-9"
                         >
-                            <Settings className="h-5 w-5" />
+                            <Settings className="h-4.5 w-4.5" />
                         </Button>
                     </div>
                 </header>
 
                 {/* Main Content */}
-                <div className="flex flex-1 overflow-hidden">
+                <div className="flex flex-1 flex-col overflow-hidden md:flex-row">
                     {/* Products Section */}
-                    <div className="flex flex-1 flex-col overflow-hidden">
+                    <div
+                        className="flex flex-1 flex-col overflow-hidden"
+                        role="main"
+                        aria-label={__('Product selection')}
+                    >
                         {/* Customer & Category Bar */}
-                        <div className="space-y-3 border-b border-border bg-card px-4 py-3">
+                        <div className="space-y-2.5 border-b border-border/50 bg-card/50 px-3.5 py-2.5">
                             {/* Customer Selection */}
                             <div className="flex items-center gap-2">
-                                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground gap-2" />
-                                <Input
-                                    ref={searchInputRef}
-                                    type="text"
-                                    placeholder={__(
-                                        'Search products or scan barcode...',
-                                    )}
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="h-10 pl-10 gap-6"
-                                />
+                                <div className="relative flex-1">
+                                    <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input
+                                        ref={searchInputRef}
+                                        type="text"
+                                        placeholder={__(
+                                            'Search products or scan barcode...',
+                                        )}
+                                        value={searchQuery}
+                                        onChange={(e) =>
+                                            setSearchQuery(e.target.value)
+                                        }
+                                        className="h-9 pr-3 pl-9 text-sm"
+                                        aria-label={__('Search products')}
+                                    />
+                                </div>
                                 <CustomerSelector
                                     selectedCustomer={selectedCustomer}
-                                    onCustomerChange={setSelectedCustomer}
+                                    onCustomerChange={handleCustomerChange}
                                     required={
                                         settings.sales.require_customer_for_sale
                                     }
@@ -460,27 +329,12 @@ export default function PosIndex({
                                 <Button
                                     variant="outline"
                                     size="icon"
-                                    onClick={() =>
-                                        setIsQuickAddCustomerOpen(true)
-                                    }
+                                    onClick={modals.openQuickAddCustomer}
                                     title={__('Quick add customer')}
+                                    className="h-9 w-9"
                                 >
-                                    <UserPlus className="h-4 w-4" />
+                                    <UserPlus className="h-4.5 w-4.5" />
                                 </Button>
-                                {settings.sales.enable_discounts && (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() =>
-                                            setIsDiscountModalOpen(true)
-                                        }
-                                        disabled={cart.items.length === 0}
-                                        className="ml-auto gap-2"
-                                    >
-                                        <Percent className="h-4 w-4" />
-                                        {__('Discount')}
-                                    </Button>
-                                )}
                             </div>
 
                             {/* Category Filter */}
@@ -492,24 +346,33 @@ export default function PosIndex({
                         </div>
 
                         {/* Product Grid */}
-                        <div className="flex-1 overflow-y-auto p-4">
-                            {filteredProducts.length === 0 ? (
+                        <div className="flex-1 overflow-y-auto p-3.5">
+                            {!hasResults ? (
                                 <div className="flex h-full items-center justify-center">
                                     <div className="text-center">
-                                        <p className="text-muted-foreground">
-                                            {searchQuery
+                                        <p className="text-sm text-muted-foreground">
+                                            {searchQuery.trim()
                                                 ? __('No products found')
                                                 : __('No products available')}
                                         </p>
+                                        {isSearching && (
+                                            <p className="mt-2 text-xs text-muted-foreground">
+                                                {__('Searching...')}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+                                <div
+                                    className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
+                                    role="grid"
+                                    aria-label={__('Available products')}
+                                >
                                     {filteredProducts.map((product) => (
                                         <ProductCard
                                             key={product.id}
                                             {...product}
-                                            onAddToCart={handleAddToCart}
+                                            onAddToCart={addToCart}
                                         />
                                     ))}
                                 </div>
@@ -518,17 +381,39 @@ export default function PosIndex({
                     </div>
 
                     {/* Cart Sidebar */}
-                    <div className="flex w-96 flex-col">
+                    <div className="relative flex w-full flex-col md:w-[28rem] lg:w-[32rem]">
+                        {isLoadingCart && (
+                            <div
+                                className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-sm"
+                                role="status"
+                                aria-live="polite"
+                                aria-label={__('Updating cart')}
+                            >
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                                    <span>{__('Updating cart...')}</span>
+                                </div>
+                            </div>
+                        )}
                         <CartSidebar
                             items={cart.items}
                             totals={cart.totals}
                             itemCount={itemCount}
-                            onUpdateQuantity={handleUpdateQuantity}
-                            onRemoveItem={handleRemoveItem}
-                            onClearCart={handleClearCart}
-                            onHoldSale={handleHoldSale}
+                            onUpdateQuantity={updateQuantity}
+                            onRemoveItem={removeItem}
+                            onClearCart={clearCartAction}
                             onPayNow={handlePayNow}
+                            onQuickPayExact={
+                                settings.pos.default_payment_method !== 'cash'
+                                    ? handleQuickPayExact
+                                    : undefined
+                            }
                             enableDiscounts={settings.sales.enable_discounts}
+                            maxDiscountPercentage={
+                                settings.sales.max_discount_percentage
+                            }
+                            onApplyDiscount={handleApplyDiscount}
+                            onApplyTax={handleApplyTax}
                         />
                     </div>
                 </div>
@@ -539,60 +424,29 @@ export default function PosIndex({
 
             {/* Modals */}
             <PaymentModal
-                isOpen={isPaymentModalOpen}
-                onClose={() => setIsPaymentModalOpen(false)}
+                isOpen={modals.isPaymentModalOpen}
+                onClose={modals.closePaymentModal}
                 totalAmount={cart.totals.total}
                 storeId={register?.store_id ?? 0}
                 defaultPaymentMethod={settings.pos.default_payment_method}
                 onSuccess={handlePaymentSuccess}
             />
 
-            <HoldSaleModal
-                isOpen={isHoldSaleModalOpen}
-                onClose={() => setIsHoldSaleModalOpen(false)}
-                onSuccess={handleHoldSaleSuccess}
-            />
-
-            <HeldSalesListModal
-                isOpen={isHeldSalesListOpen}
-                onClose={() => setIsHeldSalesListOpen(false)}
-                onResume={(saleId) => {
-                    console.log('Resume sale:', saleId);
-                    // TODO: Load held sale into cart
-                }}
-            />
-
             <RegisterSetupModal
-                isOpen={isRegisterModalOpen}
-                onClose={() => setIsRegisterModalOpen(false)}
+                isOpen={modals.isRegisterModalOpen}
+                onClose={modals.closeRegisterModal}
                 stores={stores}
                 moneyboxes={moneyboxes}
                 currentRegister={register}
             />
 
-            <DiscountModal
-                isOpen={isDiscountModalOpen}
-                onClose={() => setIsDiscountModalOpen(false)}
-                currentSubtotal={cart.totals.subtotal}
-                currentDiscount={cart.totals.discount_total}
-                maxDiscountPercentage={settings.sales.max_discount_percentage}
-                onDiscountApplied={loadCart}
-            />
-
             <QuickAddCustomerModal
-                isOpen={isQuickAddCustomerOpen}
-                onClose={() => setIsQuickAddCustomerOpen(false)}
+                isOpen={modals.isQuickAddCustomerOpen}
+                onClose={modals.closeQuickAddCustomer}
                 onCustomerAdded={(customer) => {
-                    setSelectedCustomer(customer);
-                    setIsQuickAddCustomerOpen(false);
+                    selectCustomer(customer);
+                    modals.closeQuickAddCustomer();
                 }}
-            />
-
-            <ReceiptModal
-                isOpen={isReceiptModalOpen}
-                onClose={() => setIsReceiptModalOpen(false)}
-                receipt={receiptData}
-                autoPrint={settings.pos.auto_print_receipt}
             />
         </>
     );

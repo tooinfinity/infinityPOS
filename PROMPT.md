@@ -215,3 +215,7 @@ Before building any domain:
 ## First question to ask
 
 “Which domain should we implement first (Products, Sales, Purchases, Inventory, Settings)? I will start by scanning `routes/web.php` + the relevant controller and then generate the minimal correct `index` page that matches the backend props.”
+
+## Second question to ask
+
+"review domain that already implement POS and check it from issues don't change the backend and how to improve UI/UX for serve the customers quickly"

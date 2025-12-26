@@ -27,6 +27,7 @@ use App\Http\Controllers\Payments\RefundPaymentController;
 use App\Http\Controllers\Payments\VoidPaymentController;
 use App\Http\Controllers\Pos\AddCartItemController;
 use App\Http\Controllers\Pos\ApplyCartDiscountController;
+use App\Http\Controllers\Pos\ApplyCartTaxController;
 use App\Http\Controllers\Pos\CartController;
 use App\Http\Controllers\Pos\ClearCartController;
 use App\Http\Controllers\Pos\ClearRegisterCartController;
@@ -119,6 +120,14 @@ Route::middleware('auth')->group(function (): void {
     // Appearance...
     Route::get('settings/appearance', fn () => Inertia::render('appearance/update'))->name('appearance.edit');
 
+    // API Routes for POS (JSON responses)
+    Route::prefix('api')->group(function (): void {
+        Route::get('clients/search', App\Http\Controllers\Api\ClientSearchController::class)->name('api.clients.search');
+        Route::post('clients', [ClientController::class, 'store'])->name('api.clients.store');
+        Route::get('clients/{client}', [ClientController::class, 'show'])->name('api.clients.show');
+        Route::patch('clients/{client}', [ClientController::class, 'update'])->name('api.clients.update');
+    });
+
     // POS...
     Route::prefix('pos')
         ->as('pos.')
@@ -141,6 +150,7 @@ Route::middleware('auth')->group(function (): void {
             Route::patch('/cart/items/{lineId}', UpdateCartItemController::class)->name('cart.items.update');
             Route::delete('/cart/items/{lineId}', RemoveCartItemController::class)->name('cart.items.destroy');
             Route::put('/cart/discount', ApplyCartDiscountController::class)->name('cart.discount.update');
+            Route::put('/cart/tax', ApplyCartTaxController::class)->name('cart.tax.update');
             Route::delete('/cart', ClearCartController::class)->name('cart.clear');
 
             // Payments

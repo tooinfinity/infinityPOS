@@ -76,13 +76,13 @@ final readonly class CartService
     }
 
     /**
-     * @return array{items: array<string, array{product_id:int,name:string,unit_price:int,quantity:int}>, discount:int, sale_id:?int}
+     * @return array{items: array<string, array{product_id:int,name:string,unit_price:int,quantity:int}>, discount:int, tax_override:int, sale_id:?int}
      */
     public function getRaw(): array
     {
         $sale = $this->getDraftSale();
         if (! $sale instanceof Sale) {
-            return ['items' => [], 'discount' => 0, 'sale_id' => null];
+            return ['items' => [], 'discount' => 0, 'tax_override' => 0, 'sale_id' => null];
         }
 
         $sale->loadMissing('items.product');
@@ -99,6 +99,7 @@ final readonly class CartService
         return [
             'items' => $items,
             'discount' => (int) ($sale->discount ?? 0),
+            'tax_override' => (int) ($sale->tax ?? 0),
             'sale_id' => $sale->id,
         ];
     }
@@ -107,6 +108,12 @@ final readonly class CartService
     {
         $sale = $this->getOrCreateDraftSale($userId);
         $sale->update(['discount' => max(0, $discount)]);
+    }
+
+    public function setTaxOverride(int $userId, int $tax): void
+    {
+        $sale = $this->getOrCreateDraftSale($userId);
+        $sale->update(['tax' => max(0, $tax)]);
     }
 
     public function clear(int $userId): void
