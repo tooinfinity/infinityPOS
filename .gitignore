@@ -20,10 +20,14 @@ Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
+bun.lock
+composer.lock
 /auth.json
 /.fleet
 /.idea
 /.nova
 /.vscode
 /.zed
+/.junie
+/.cursor
 /tmp/
