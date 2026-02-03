@@ -1,5 +1,5 @@
 // Components
-import UserEmailResetNotification from '@/actions/App/Http/Controllers/UserEmailResetNotification';
+import UserEmailResetNotification from '@/actions/App/Http/Controllers/UserEmailResetNotificationController';
 import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
