@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Scopes\ActiveScope;
-use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Database\Factories\BrandFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
@@ -21,7 +20,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  */
-
 #[ScopedBy([ActiveScope::class])]
 final class Brand extends Model
 {
