@@ -19,7 +19,7 @@ test('to array', function (): void {
         ]);
 });
 
-test('only returns active posts by default', function (): void {
+test('only returns active categories by default', function (): void {
     Category::factory()->count(2)->create([
         'is_active' => true,
     ]);
