@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read string|null $image
  * @property-read int $cost_price
  * @property-read int $selling_price
+ * @property-read int $quantity
  * @property-read int $alert_quantity
  * @property-read bool $is_active
  * @property-read CarbonInterface $created_at
@@ -51,6 +52,7 @@ final class Product extends Model
             'image' => 'string',
             'cost_price' => 'integer',
             'selling_price' => 'integer',
+            'quantity' => 'integer',
             'alert_quantity' => 'integer',
             'is_active' => 'boolean',
             'created_at' => 'datetime',

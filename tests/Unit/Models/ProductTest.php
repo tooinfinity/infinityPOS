@@ -20,6 +20,7 @@ test('to array', function (): void {
             'image',
             'cost_price',
             'selling_price',
+            'quantity',
             'alert_quantity',
             'is_active',
             'created_at',

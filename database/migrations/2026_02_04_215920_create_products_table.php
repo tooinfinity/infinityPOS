@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->unsignedBigInteger('cost_price');
             $table->unsignedBigInteger('selling_price');
+            $table->unsignedInteger('quantity');
             $table->unsignedInteger('alert_quantity');
             $table->boolean('is_active');
 

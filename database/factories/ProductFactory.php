@@ -37,6 +37,7 @@ final class ProductFactory extends Factory
             'image' => $this->faker->url(),
             'cost_price' => $cost_price,
             'selling_price' => $selling_price,
+            'quantity' => $this->faker->randomNumber(2),
             'alert_quantity' => $this->faker->randomDigitNotZero(),
             'is_active' => $this->faker->boolean(90),
         ];
