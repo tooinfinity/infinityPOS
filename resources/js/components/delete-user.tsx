@@ -1,4 +1,3 @@
-import UserController from '@/actions/App/Http/Controllers/UserController';
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -13,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import UserController from '@/wayfinder/App/Http/Controllers/UserController';
 import { Form } from '@inertiajs/react';
 import { useRef } from 'react';
 

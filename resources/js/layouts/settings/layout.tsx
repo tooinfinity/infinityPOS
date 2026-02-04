@@ -2,11 +2,11 @@ import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { edit as editAppearance } from '@/routes/appearance';
-import { edit as editPassword } from '@/routes/password';
-import { show } from '@/routes/two-factor';
-import { edit } from '@/routes/user-profile';
 import { type NavItem } from '@/types';
+import { edit as editAppearance } from '@/wayfinder/routes/appearance';
+import { edit as editPassword } from '@/wayfinder/routes/password';
+import { show } from '@/wayfinder/routes/two-factor';
+import { edit } from '@/wayfinder/routes/user-profile';
 import { Link } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 

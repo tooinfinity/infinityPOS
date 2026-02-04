@@ -1,5 +1,5 @@
-import UserController from '@/actions/App/Http/Controllers/UserController';
-import { login } from '@/routes';
+import UserController from '@/wayfinder/App/Http/Controllers/UserController';
+import { login } from '@/wayfinder/routes';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 

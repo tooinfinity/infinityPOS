@@ -1,4 +1,4 @@
-import UserPasswordController from '@/actions/App/Http/Controllers/UserPasswordController';
+import UserPasswordController from '@/wayfinder/App/Http/Controllers/UserPasswordController';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 

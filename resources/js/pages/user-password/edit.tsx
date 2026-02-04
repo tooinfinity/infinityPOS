@@ -1,8 +1,8 @@
-import UserPasswordController from '@/actions/App/Http/Controllers/UserPasswordController';
 import InputError from '@/components/input-error';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { type BreadcrumbItem } from '@/types';
+import UserPasswordController from '@/wayfinder/App/Http/Controllers/UserPasswordController';
 import { Transition } from '@headlessui/react';
 import { Form, Head } from '@inertiajs/react';
 import { useRef } from 'react';
@@ -11,7 +11,7 @@ import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { edit } from '@/routes/password';
+import { edit } from '@/wayfinder/routes/password';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

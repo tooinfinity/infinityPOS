@@ -1,6 +1,6 @@
-import UserProfileController from '@/actions/App/Http/Controllers/UserProfileController';
-import { send } from '@/routes/verification';
 import { type BreadcrumbItem, type SharedData } from '@/types';
+import UserProfileController from '@/wayfinder/App/Http/Controllers/UserProfileController';
+import { send } from '@/wayfinder/routes/verification';
 import { Transition } from '@headlessui/react';
 import { Form, Head, Link, usePage } from '@inertiajs/react';
 
@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
-import userProfile from '@/routes/user-profile';
+import userProfile from '@/wayfinder/routes/user-profile';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
