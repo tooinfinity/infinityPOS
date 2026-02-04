@@ -2,8 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Providers\TelescopeServiceProvider;
+
 arch()->preset()->php();
-arch()->preset()->strict();
+arch()->preset()->strict()->ignoring([
+    TelescopeServiceProvider::class,
+]);
 arch()->preset()->security()->ignoring([
     'assert',
 ]);

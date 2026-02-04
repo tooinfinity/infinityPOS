@@ -60,6 +60,7 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - laravel/wayfinder (WAYFINDER) - v
 - larastan/larastan (LARASTAN) - v3
 - laravel/mcp (MCP) - v0
+- laravel/telescope (TELESCOPE) - v5
 - pestphp/pest (PEST) - v4
 - phpunit/phpunit (PHPUNIT) - v12
 - rector/rector (RECTOR) - v2
