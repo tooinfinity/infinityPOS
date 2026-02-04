@@ -30,4 +30,7 @@ composer.lock
 /.zed
 /.junie
 /.cursor
+/.claude
+/.codex
+/.opencode
 /tmp/
