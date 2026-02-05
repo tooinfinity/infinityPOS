@@ -22,6 +22,7 @@ test('to array', function (): void {
             'selling_price',
             'quantity',
             'alert_quantity',
+            'track_inventory',
             'is_active',
             'created_at',
             'updated_at',

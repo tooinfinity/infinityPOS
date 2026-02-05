@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read int $selling_price
  * @property-read int $quantity
  * @property-read int $alert_quantity
+ * @property-read bool $track_inventory
  * @property-read bool $is_active
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
@@ -54,6 +55,7 @@ final class Product extends Model
             'selling_price' => 'integer',
             'quantity' => 'integer',
             'alert_quantity' => 'integer',
+            'track_inventory' => 'boolean',
             'is_active' => 'boolean',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

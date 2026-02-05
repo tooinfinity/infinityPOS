@@ -25,6 +25,7 @@ return new class extends Migration
             $table->unsignedBigInteger('selling_price');
             $table->unsignedInteger('quantity');
             $table->unsignedInteger('alert_quantity');
+            $table->boolean('track_inventory');
             $table->boolean('is_active');
 
             $table->timestamps();
