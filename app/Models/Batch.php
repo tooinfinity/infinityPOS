@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @property-read int $id
  * @property-read int $product_id
+ * @property-read int $warehouse_id
  * @property-read string|null $batch_number
  * @property-read int $cost_amount
  * @property-read int $quantity
@@ -32,6 +33,7 @@ final class Batch extends Model
         return [
             'id' => 'integer',
             'product_id' => 'integer',
+            'warehouse_id' => 'integer',
             'batch_number' => 'string',
             'cost_amount' => 'integer',
             'quantity' => 'integer',

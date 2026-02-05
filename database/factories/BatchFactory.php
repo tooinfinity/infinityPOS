@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\Product;
+use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -22,6 +23,7 @@ final class BatchFactory extends Factory
     {
         return [
             'product_id' => Product::factory(),
+            'warehouse_id' => Warehouse::factory(),
             'batch_number' => mb_strtoupper(Str::random(8)),
             'cost_amount' => $this->faker->randomNumber(6),
             'quantity' => $this->faker->randomNumber(2),

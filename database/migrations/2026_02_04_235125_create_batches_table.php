@@ -13,6 +13,7 @@ return new class extends Migration
         Schema::create('batches', static function (Blueprint $table): void {
             $table->id();
             $table->foreignId('product_id')->constrained();
+            $table->foreignId('warehouse_id')->constrained();
             $table->string('batch_number')->nullable();
             $table->unsignedBigInteger('cost_amount');
             $table->unsignedInteger('quantity');
@@ -21,7 +22,9 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index('product_id');
-            $table->index(['product_id', 'expires_at']);
+            $table->index('warehouse_id');
+            $table->index(['product_id', 'warehouse_id']);
+            $table->index(['warehouse_id', 'expires_at']);
             $table->index(['expires_at', 'quantity']);
         });
     }

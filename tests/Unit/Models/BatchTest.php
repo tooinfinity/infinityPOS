@@ -11,6 +11,7 @@ test('to array', function (): void {
         ->toBe([
             'id',
             'product_id',
+            'warehouse_id',
             'batch_number',
             'cost_amount',
             'quantity',
