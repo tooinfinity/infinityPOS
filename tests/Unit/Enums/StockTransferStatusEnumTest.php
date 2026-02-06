@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 use App\Enums\StockTransferStatusEnum;
 
-it('stock movement type to array', function (): void {
+it('stock transfer status to array', function (): void {
     expect(StockTransferStatusEnum::toArray())->toBeArray();
 });
 
-it('stock movement type label', function (): void {
+it('stock transfer status label', function (): void {
     $value1 = 'Pending';
     $value2 = 'Completed';
     $value3 = 'Cancelled';

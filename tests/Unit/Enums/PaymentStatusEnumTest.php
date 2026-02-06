@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 use App\Enums\PaymentStatusEnum;
 
-it('Payment status to array', function (): void {
+it('payment status to array', function (): void {
     expect(PaymentStatusEnum::toArray())->toBeArray();
 });
 
-it('Payment status label', function (): void {
+it('payment status label', function (): void {
     $value1 = 'Unpaid';
     $value2 = 'Partial';
     $value3 = 'Paid';

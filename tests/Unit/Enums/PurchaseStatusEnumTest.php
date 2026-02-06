@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 use App\Enums\PurchaseStatusEnum;
 
-it('Purchase status to array', function (): void {
+it('purchase status to array', function (): void {
     expect(PurchaseStatusEnum::toArray())->toBeArray();
 });
 
-it('Purchase status label', function (): void {
+it('purchase status label', function (): void {
     $value1 = 'Pending';
     $value2 = 'Ordered';
     $value3 = 'Received';
