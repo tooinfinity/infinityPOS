@@ -9,7 +9,8 @@
     "herd_mcp": false,
     "mcp": true,
     "packages": [
-        "laravel/fortify"
+        "laravel/fortify",
+        "spatie/boost-spatie-guidelines"
     ],
     "sail": false,
     "skills": [
