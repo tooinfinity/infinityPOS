@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Enums\SaleReturnStatusEnum;
+use App\Enums\ReturnStatusEnum;
 use App\Models\Sale;
 use App\Models\SaleReturn;
 use App\Models\User;
@@ -30,7 +30,7 @@ final class SaleReturnFactory extends Factory
             'reference_no' => $this->faker->uuid(),
             'return_date' => $this->faker->dateTimeThisYear(),
             'total_amount' => $this->faker->numberBetween(100, 1000),
-            'status' => $this->faker->randomElement(SaleReturnStatusEnum::class),
+            'status' => $this->faker->randomElement(ReturnStatusEnum::class),
             'note' => $this->faker->optional()->sentence(),
         ];
     }

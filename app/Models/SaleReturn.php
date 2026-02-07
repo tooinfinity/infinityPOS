@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\SaleReturnStatusEnum;
+use App\Enums\ReturnStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\SaleReturnFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read string $reference_no
  * @property-read CarbonInterface $return_date
  * @property-read int $total_amount
- * @property-read SaleReturnStatusEnum $status
+ * @property-read ReturnStatusEnum $status
  * @property-read string|null $note
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
@@ -41,7 +41,7 @@ final class SaleReturn extends Model
             'reference_no' => 'string',
             'return_date' => 'datetime',
             'total_amount' => 'integer',
-            'status' => SaleReturnStatusEnum::class,
+            'status' => ReturnStatusEnum::class,
             'note' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

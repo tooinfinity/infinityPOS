@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-enum SaleReturnStatusEnum: string
+enum ReturnStatusEnum: string
 {
     case Pending = 'pending';
     case Completed = 'completed';
@@ -15,7 +15,7 @@ enum SaleReturnStatusEnum: string
     public static function toArray(): array
     {
         return array_map(
-            static fn (SaleReturnStatusEnum $case): array => [
+            static fn (ReturnStatusEnum $case): array => [
                 'value' => $case->value,
                 'label' => $case->label(),
             ],
