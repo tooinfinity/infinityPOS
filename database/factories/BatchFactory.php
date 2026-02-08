@@ -30,4 +30,53 @@ final class BatchFactory extends Factory
             'expires_at' => now()->addMonths(12),
         ];
     }
+
+    public function forProduct(Product $product): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'product_id' => $product->id,
+        ]);
+    }
+
+    public function forWarehouse(Warehouse $warehouse): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'warehouse_id' => $warehouse->id,
+        ]);
+    }
+
+    public function expired(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'expires_at' => now()->subDays($this->faker->numberBetween(1, 30)),
+        ]);
+    }
+
+    public function expiringWithinDays(int $days): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'expires_at' => now()->addDays($this->faker->numberBetween(1, $days)),
+        ]);
+    }
+
+    public function neverExpires(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'expires_at' => null,
+        ]);
+    }
+
+    public function empty(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'quantity' => 0,
+        ]);
+    }
+
+    public function withQuantity(int $quantity): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'quantity' => $quantity,
+        ]);
+    }
 }

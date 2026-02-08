@@ -25,4 +25,42 @@ final class PaymentMethodFactory extends Factory
             'is_active' => $this->faker->boolean(90),
         ];
     }
+
+    public function active(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'is_active' => true,
+        ]);
+    }
+
+    public function inactive(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'is_active' => false,
+        ]);
+    }
+
+    public function cash(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'name' => 'Cash',
+            'code' => 'cash',
+        ]);
+    }
+
+    public function card(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'name' => 'Card',
+            'code' => 'card',
+        ]);
+    }
+
+    public function bankTransfer(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'name' => 'Bank Transfer',
+            'code' => 'bank_transfer',
+        ]);
+    }
 }

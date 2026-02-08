@@ -31,4 +31,59 @@ final class ExpenseFactory extends Factory
             'document' => null,
         ];
     }
+
+    public function forCategory(ExpenseCategory $category): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'expense_category_id' => $category->id,
+        ]);
+    }
+
+    public function forUser(User $user): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'user_id' => $user->id,
+        ]);
+    }
+
+    public function withAmount(int $amount): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'amount' => $amount,
+        ]);
+    }
+
+    public function withDocument(string $document): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'document' => $document,
+        ]);
+    }
+
+    public function today(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'expense_date' => now()->toDateString(),
+        ]);
+    }
+
+    public function thisMonth(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'expense_date' => $this->faker->dateTimeBetween(
+                now()->startOfMonth(),
+                now()->endOfMonth()
+            )->format('Y-m-d'),
+        ]);
+    }
+
+    public function lastMonth(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'expense_date' => $this->faker->dateTimeBetween(
+                now()->subMonth()->startOfMonth(),
+                now()->subMonth()->endOfMonth()
+            )->format('Y-m-d'),
+        ]);
+    }
 }

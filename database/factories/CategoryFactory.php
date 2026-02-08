@@ -29,4 +29,33 @@ final class CategoryFactory extends Factory
             'is_active' => $this->faker->boolean(90),
         ];
     }
+
+    public function active(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'is_active' => true,
+        ]);
+    }
+
+    public function inactive(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'is_active' => false,
+        ]);
+    }
+
+    public function withName(string $name): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'name' => $name,
+            'slug' => Str::slug($name),
+        ]);
+    }
+
+    public function withoutDescription(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'description' => null,
+        ]);
+    }
 }
