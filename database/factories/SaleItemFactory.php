@@ -137,7 +137,7 @@ final class SaleItemFactory extends Factory
         return $this->state(function (array $attributes): array {
             /** @var int $unitCost */
             $unitCost = $attributes['unit_cost'] ?? $this->faker->numberBetween(100, 1000);
-            $unitPrice = (int) ($unitCost * $this->faker->randomFloat(2, 0.5, 0.9));
+            $unitPrice = max(1, (int) ($unitCost * $this->faker->randomFloat(2, 0.5, 0.9)));
             /** @var int $quantity */
             $quantity = $attributes['quantity'] ?? $this->faker->numberBetween(1, 100);
 

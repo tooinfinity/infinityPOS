@@ -40,7 +40,7 @@ final class ProductFactory extends Factory
             'quantity' => $this->faker->randomNumber(2),
             'alert_quantity' => $this->faker->randomDigitNotZero(),
             'track_inventory' => $this->faker->boolean(90),
-            'is_active' => $this->faker->boolean(90),
+            'is_active' => true,
         ];
     }
 
@@ -122,7 +122,7 @@ final class ProductFactory extends Factory
     {
         return $this->state(function (array $attributes): array {
             /** @var int $alertQuantity */
-            $alertQuantity = $attributes['alert_quantity'] ?? 10;
+            $alertQuantity = max($attributes['alert_quantity'] ?? 10, 2);
 
             return [
                 'quantity' => $this->faker->numberBetween(1, $alertQuantity - 1),

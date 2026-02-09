@@ -22,7 +22,7 @@ final class ExpenseCategoryFactory extends Factory
         return [
             'name' => $this->faker->unique()->word(),
             'description' => $this->faker->sentence(),
-            'is_active' => $this->faker->boolean(90),
+            'is_active' => true,
         ];
     }
 

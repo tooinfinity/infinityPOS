@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Batch;
 use App\Models\Product;
 use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Batch>
+ * @extends Factory<Batch>
  */
 final class BatchFactory extends Factory
 {
@@ -54,6 +55,8 @@ final class BatchFactory extends Factory
 
     public function expiringWithinDays(int $days): self
     {
+        assert($days >= 1, 'Days must be at least 1');
+
         return $this->state(fn (array $attributes): array => [
             'expires_at' => now()->addDays($this->faker->numberBetween(1, $days)),
         ]);

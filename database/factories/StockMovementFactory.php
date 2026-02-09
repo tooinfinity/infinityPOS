@@ -103,7 +103,7 @@ final class StockMovementFactory extends Factory
             /** @var int $quantity */
             $quantity = $attributes['quantity'] ?? $this->faker->numberBetween(1, 50);
             /** @var int $previousQuantity */
-            $previousQuantity = $attributes['previous_quantity'] ?? $this->faker->numberBetween($quantity, 100);
+            $previousQuantity = $attributes['previous_quantity'] ?? $this->faker->numberBetween($quantity, max($quantity + 50, 100));
 
             return [
                 'type' => StockMovementTypeEnum::Out,

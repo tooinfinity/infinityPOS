@@ -102,7 +102,7 @@ final class SaleFactory extends Factory
         return $this->state(function (array $attributes): array {
             /** @var int $totalAmount */
             $totalAmount = $attributes['total_amount'] ?? $this->faker->randomNumber(6);
-            $paidAmount = (int) ($totalAmount * $this->faker->randomFloat(2, 0.1, 0.9));
+            $paidAmount = max(1, (int) ($totalAmount * $this->faker->randomFloat(2, 0.1, 0.9)));
 
             return [
                 'total_amount' => $totalAmount,

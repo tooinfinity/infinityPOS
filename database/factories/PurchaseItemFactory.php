@@ -106,7 +106,7 @@ final class PurchaseItemFactory extends Factory
     {
         return $this->state(function (array $attributes): array {
             /** @var int $quantity */
-            $quantity = $attributes['quantity'] ?? $this->faker->numberBetween(10, 100);
+            $quantity = max($attributes['quantity'] ?? $this->faker->numberBetween(10, 100), 2);
 
             return [
                 'quantity' => $quantity,

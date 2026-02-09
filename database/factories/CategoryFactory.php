@@ -26,7 +26,7 @@ final class CategoryFactory extends Factory
             'name' => $name,
             'slug' => Str::slug($name),
             'description' => $this->faker->paragraph(),
-            'is_active' => $this->faker->boolean(90),
+            'is_active' => true,
         ];
     }
 
