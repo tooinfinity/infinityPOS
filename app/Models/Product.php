@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property-read int $id
@@ -59,6 +60,62 @@ final class Product extends Model
     public function unit(): BelongsTo
     {
         return $this->belongsTo(Unit::class);
+    }
+
+    /**
+     * @return HasMany<Batch, $this>
+     */
+    public function batches(): HasMany
+    {
+        return $this->hasMany(Batch::class);
+    }
+
+    /**
+     * @return HasMany<StockMovement, $this>
+     */
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class);
+    }
+
+    /**
+     * @return HasMany<PurchaseItem, $this>
+     */
+    public function purchaseItems(): HasMany
+    {
+        return $this->hasMany(PurchaseItem::class);
+    }
+
+    /**
+     * @return HasMany<SaleItem, $this>
+     */
+    public function saleItems(): HasMany
+    {
+        return $this->hasMany(SaleItem::class);
+    }
+
+    /**
+     * @return HasMany<StockTransferItem, $this>
+     */
+    public function stockTransferItems(): HasMany
+    {
+        return $this->hasMany(StockTransferItem::class);
+    }
+
+    /**
+     * @return HasMany<SaleReturnItem, $this>
+     */
+    public function saleReturnItems(): HasMany
+    {
+        return $this->hasMany(SaleReturnItem::class);
+    }
+
+    /**
+     * @return HasMany<PurchaseReturnItem, $this>
+     */
+    public function purchaseReturnItems(): HasMany
+    {
+        return $this->hasMany(PurchaseReturnItem::class);
     }
 
     /**
