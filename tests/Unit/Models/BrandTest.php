@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Brand;
+use App\Models\Product;
 
 test('to array', function (): void {
     $brand = Brand::factory()->create()->refresh();
@@ -31,4 +32,13 @@ test('only returns active brands by default', function (): void {
 
     expect($brands)
         ->toHaveCount(2);
+});
+
+test('brand has many products', function (): void {
+    $brand = Brand::factory()->create()->refresh();
+    Product::factory()->create([
+        'brand_id' => $brand->id,
+    ]);
+
+    expect($brand->products)->toHaveCount(1);
 });
