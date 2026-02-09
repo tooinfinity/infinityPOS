@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Models\Customer;
+use App\Models\Sale;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 test('to array', function (): void {
     $customer = Customer::factory()->create()->refresh();
@@ -34,4 +37,28 @@ test('only returns active customers by default', function (): void {
 
     expect($customers)
         ->toHaveCount(2);
+});
+
+it('has many sales', function (): void {
+    $customer = new Customer();
+
+    expect($customer->sales())
+        ->toBeInstanceOf(HasMany::class);
+});
+
+it('can create sales', function (): void {
+    $customer = Customer::factory()->create();
+    Sale::factory()->count(3)->create(['customer_id' => $customer->id]);
+
+    expect($customer->sales)
+        ->toHaveCount(3)
+        ->each->toBeInstanceOf(Sale::class);
+});
+
+it('returns empty collection when no sales exist', function (): void {
+    $customer = Customer::factory()->create();
+
+    expect($customer->sales)
+        ->toBeEmpty()
+        ->toBeInstanceOf(Collection::class);
 });

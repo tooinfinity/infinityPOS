@@ -2,7 +2,15 @@
 
 declare(strict_types=1);
 
+use App\Models\Batch;
+use App\Models\Product;
+use App\Models\Purchase;
+use App\Models\Sale;
 use App\Models\StockMovement;
+use App\Models\User;
+use App\Models\Warehouse;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 test('to array', function (): void {
     $stockMovement = StockMovement::factory()->create()->refresh();
@@ -23,4 +31,60 @@ test('to array', function (): void {
             'note',
             'created_at',
         ]);
+});
+
+dataset('stock_movement_belongs_to_relationships', [
+    'warehouse' => fn (): array => ['relation' => 'warehouse', 'model' => Warehouse::class, 'foreignKey' => 'warehouse_id'],
+    'product' => fn (): array => ['relation' => 'product', 'model' => Product::class, 'foreignKey' => 'product_id'],
+    'batch' => fn (): array => ['relation' => 'batch', 'model' => Batch::class, 'foreignKey' => 'batch_id'],
+    'user' => fn (): array => ['relation' => 'user', 'model' => User::class, 'foreignKey' => 'user_id'],
+]);
+
+it('belongs to {relation}', function (array $config): void {
+    $stockMovement = new StockMovement();
+
+    expect($stockMovement->{$config['relation']}())
+        ->toBeInstanceOf(BelongsTo::class);
+})->with('stock_movement_belongs_to_relationships');
+
+it('can access {relation}', function (array $config): void {
+    $related = $config['model']::factory()->create();
+    $stockMovement = StockMovement::factory()->create([
+        $config['foreignKey'] => $related->id,
+    ]);
+
+    expect($stockMovement->{$config['relation']})
+        ->toBeInstanceOf($config['model'])
+        ->id->toBe($related->id);
+})->with('stock_movement_belongs_to_relationships');
+
+it('has reference morphTo relationship', function (): void {
+    $stockMovement = new StockMovement();
+
+    expect($stockMovement->reference())
+        ->toBeInstanceOf(MorphTo::class);
+});
+
+it('can access reference as Sale', function (): void {
+    $sale = Sale::factory()->create();
+    $stockMovement = StockMovement::factory()->create([
+        'reference_type' => Sale::class,
+        'reference_id' => $sale->id,
+    ]);
+
+    expect($stockMovement->reference)
+        ->toBeInstanceOf(Sale::class)
+        ->id->toBe($sale->id);
+});
+
+it('can access reference as Purchase', function (): void {
+    $purchase = Purchase::factory()->create();
+    $stockMovement = StockMovement::factory()->create([
+        'reference_type' => Purchase::class,
+        'reference_id' => $purchase->id,
+    ]);
+
+    expect($stockMovement->reference)
+        ->toBeInstanceOf(Purchase::class)
+        ->id->toBe($purchase->id);
 });

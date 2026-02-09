@@ -15,6 +15,7 @@ use App\Models\StockTransferItem;
 use App\Models\Unit;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 test('to array', function (): void {
     $product = Product::factory()->create()->refresh();
@@ -123,5 +124,5 @@ it('counts {relation} correctly', function (array $config): void {
 
     $productWithCount = Product::query()->withCount($config['relation'])->find($product->id);
 
-    expect($productWithCount->{Illuminate\Support\Str::snake($config['relation']).'_count'})->toBe(5);
+    expect($productWithCount->{Str::snake($config['relation']).'_count'})->toBe(5);
 })->with('has_many_relationships');
