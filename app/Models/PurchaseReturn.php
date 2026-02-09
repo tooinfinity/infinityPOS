@@ -9,6 +9,9 @@ use Carbon\CarbonInterface;
 use Database\Factories\PurchaseReturnFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * @property-read int $id
@@ -27,6 +30,46 @@ final class PurchaseReturn extends Model
 {
     /** @use HasFactory<PurchaseReturnFactory> */
     use HasFactory;
+
+    /**
+     * @return BelongsTo<Purchase, $this>
+     */
+    public function purchase(): BelongsTo
+    {
+        return $this->belongsTo(Purchase::class);
+    }
+
+    /**
+     * @return BelongsTo<Warehouse, $this>
+     */
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return HasMany<PurchaseReturnItem, $this>
+     */
+    public function items(): HasMany
+    {
+        return $this->hasMany(PurchaseReturnItem::class);
+    }
+
+    /**
+     * @return MorphMany<StockMovement, $this>
+     */
+    public function stockMovements(): MorphMany
+    {
+        return $this->morphMany(StockMovement::class, 'reference');
+    }
 
     /**
      * @return array<string, string>

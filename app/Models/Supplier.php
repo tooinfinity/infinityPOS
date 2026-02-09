@@ -10,6 +10,7 @@ use Database\Factories\SupplierFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property-read int $id
@@ -29,6 +30,14 @@ final class Supplier extends Model
 {
     /** @use HasFactory<SupplierFactory> */
     use HasFactory;
+
+    /**
+     * @return HasMany<Purchase, $this>
+     */
+    public function purchases(): HasMany
+    {
+        return $this->hasMany(Purchase::class);
+    }
 
     /**
      * @return array<string, string>

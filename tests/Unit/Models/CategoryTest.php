@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Category;
+use App\Models\Product;
 
 test('to array', function (): void {
     $category = Category::factory()->create()->refresh();
@@ -31,4 +32,17 @@ test('only returns active categories by default', function (): void {
 
     expect($categories)
         ->toHaveCount(2);
+});
+
+test('category has many products', function (): void {
+    $category = Category::factory()->create()->refresh();
+    Product::factory()->create([
+        'category_id' => $category->id,
+    ]);
+
+    Product::factory()->create([
+        'category_id' => $category->id,
+    ]);
+
+    expect($category->products)->toHaveCount(2);
 });

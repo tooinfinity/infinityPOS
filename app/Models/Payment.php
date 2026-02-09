@@ -8,6 +8,8 @@ use Carbon\CarbonInterface;
 use Database\Factories\PaymentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * @property int $id
@@ -26,6 +28,30 @@ final class Payment extends Model
 {
     /** @use HasFactory<PaymentFactory> */
     use HasFactory;
+
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function payable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    /**
+     * @return BelongsTo<PaymentMethod, $this>
+     */
+    public function paymentMethod(): BelongsTo
+    {
+        return $this->belongsTo(PaymentMethod::class);
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     /**
      * @return array<string, string>

@@ -9,6 +9,9 @@ use Carbon\CarbonInterface;
 use Database\Factories\StockTransferFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * @property-read int $id
@@ -26,6 +29,46 @@ final class StockTransfer extends Model
 {
     /** @use HasFactory<StockTransferFactory> */
     use HasFactory;
+
+    /**
+     * @return BelongsTo<Warehouse, $this>
+     */
+    public function fromWarehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class, 'from_warehouse_id');
+    }
+
+    /**
+     * @return BelongsTo<Warehouse, $this>
+     */
+    public function toWarehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class, 'to_warehouse_id');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return HasMany<StockTransferItem, $this>
+     */
+    public function items(): HasMany
+    {
+        return $this->hasMany(StockTransferItem::class);
+    }
+
+    /**
+     * @return MorphMany<StockMovement, $this>
+     */
+    public function stockMovements(): MorphMany
+    {
+        return $this->morphMany(StockMovement::class, 'reference');
+    }
 
     /**
      * @return array<string, string>

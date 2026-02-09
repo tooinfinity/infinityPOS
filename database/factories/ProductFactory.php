@@ -40,7 +40,7 @@ final class ProductFactory extends Factory
             'quantity' => $this->faker->randomNumber(2),
             'alert_quantity' => $this->faker->randomDigitNotZero(),
             'track_inventory' => $this->faker->boolean(90),
-            'is_active' => $this->faker->boolean(90),
+            'is_active' => true,
         ];
     }
 }

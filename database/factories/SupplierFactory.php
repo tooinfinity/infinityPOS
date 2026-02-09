@@ -27,7 +27,7 @@ final class SupplierFactory extends Factory
             'address' => $this->faker->address(),
             'city' => $this->faker->city(),
             'country' => $this->faker->country(),
-            'is_active' => $this->faker->boolean(90),
+            'is_active' => true,
         ];
     }
 }

@@ -22,7 +22,7 @@ final class PaymentMethodFactory extends Factory
         return [
             'name' => $this->faker->word(),
             'code' => $this->faker->unique()->word(),
-            'is_active' => $this->faker->boolean(90),
+            'is_active' => true,
         ];
     }
 }
