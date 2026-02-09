@@ -41,7 +41,7 @@ final class UnitFactory extends Factory
         return [
             'name' => $name,
             'short_name' => $this->faker->randomElement([$short, mb_strtoupper($short)]),
-            'is_active' => $this->faker->boolean(95),
+            'is_active' => true,
         ];
     }
 }
