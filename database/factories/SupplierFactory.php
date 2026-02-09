@@ -30,4 +30,53 @@ final class SupplierFactory extends Factory
             'is_active' => true,
         ];
     }
+
+    public function active(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'is_active' => true,
+        ]);
+    }
+
+    public function inactive(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'is_active' => false,
+        ]);
+    }
+
+    public function withoutEmail(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'email' => null,
+        ]);
+    }
+
+    public function withoutPhone(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'phone' => null,
+        ]);
+    }
+
+    public function inCity(string $city): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'city' => $city,
+        ]);
+    }
+
+    public function inCountry(string $country): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'country' => $country,
+        ]);
+    }
+
+    public function withCompanyName(string $companyName): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'company_name' => $companyName,
+        ]);
+    }
 }

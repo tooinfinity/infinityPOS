@@ -30,8 +30,64 @@ final class SaleReturnFactory extends Factory
             'reference_no' => $this->faker->uuid(),
             'return_date' => $this->faker->dateTimeThisYear(),
             'total_amount' => $this->faker->numberBetween(100, 1000),
-            'status' => $this->faker->randomElement(ReturnStatusEnum::class),
+            'status' => $this->faker->randomElement(ReturnStatusEnum::cases()),
             'note' => $this->faker->optional()->sentence(),
         ];
+    }
+
+    public function forSale(Sale $sale): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'sale_id' => $sale->id,
+        ]);
+    }
+
+    public function forWarehouse(Warehouse $warehouse): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'warehouse_id' => $warehouse->id,
+        ]);
+    }
+
+    public function forUser(User $user): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'user_id' => $user->id,
+        ]);
+    }
+
+    public function pending(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'status' => ReturnStatusEnum::Pending,
+        ]);
+    }
+
+    public function completed(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'status' => ReturnStatusEnum::Completed,
+        ]);
+    }
+
+    public function withTotalAmount(int $amount): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'total_amount' => $amount,
+        ]);
+    }
+
+    public function today(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'return_date' => now(),
+        ]);
+    }
+
+    public function withoutNote(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'note' => null,
+        ]);
     }
 }

@@ -44,4 +44,58 @@ final class UnitFactory extends Factory
             'is_active' => true,
         ];
     }
+
+    public function active(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'is_active' => true,
+        ]);
+    }
+
+    public function inactive(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'is_active' => false,
+        ]);
+    }
+
+    public function piece(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'name' => 'Piece',
+            'short_name' => 'pc',
+        ]);
+    }
+
+    public function kilogram(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'name' => 'Kilogram',
+            'short_name' => 'kg',
+        ]);
+    }
+
+    public function liter(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'name' => 'Liter',
+            'short_name' => 'l',
+        ]);
+    }
+
+    public function box(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'name' => 'Box',
+            'short_name' => 'box',
+        ]);
+    }
+
+    public function withName(string $name, string $shortName): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'name' => $name,
+            'short_name' => $shortName,
+        ]);
+    }
 }

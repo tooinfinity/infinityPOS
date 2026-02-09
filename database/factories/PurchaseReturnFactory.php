@@ -34,4 +34,60 @@ final class PurchaseReturnFactory extends Factory
             'note' => $this->faker->sentence(),
         ];
     }
+
+    public function forPurchase(Purchase $purchase): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'purchase_id' => $purchase->id,
+        ]);
+    }
+
+    public function forWarehouse(Warehouse $warehouse): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'warehouse_id' => $warehouse->id,
+        ]);
+    }
+
+    public function forUser(User $user): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'user_id' => $user->id,
+        ]);
+    }
+
+    public function pending(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'status' => ReturnStatusEnum::Pending,
+        ]);
+    }
+
+    public function completed(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'status' => ReturnStatusEnum::Completed,
+        ]);
+    }
+
+    public function withTotalAmount(int $amount): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'total_amount' => $amount,
+        ]);
+    }
+
+    public function today(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'return_date' => now(),
+        ]);
+    }
+
+    public function withoutNote(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'note' => null,
+        ]);
+    }
 }

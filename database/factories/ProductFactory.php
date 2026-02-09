@@ -43,4 +43,119 @@ final class ProductFactory extends Factory
             'is_active' => true,
         ];
     }
+
+    public function active(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'is_active' => true,
+        ]);
+    }
+
+    public function inactive(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'is_active' => false,
+        ]);
+    }
+
+    public function forCategory(Category $category): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'category_id' => $category->id,
+        ]);
+    }
+
+    public function forBrand(Brand $brand): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'brand_id' => $brand->id,
+        ]);
+    }
+
+    public function forUnit(Unit $unit): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'unit_id' => $unit->id,
+        ]);
+    }
+
+    public function withoutBrand(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'brand_id' => null,
+        ]);
+    }
+
+    public function withPricing(int $costPrice, int $sellingPrice): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'cost_price' => $costPrice,
+            'selling_price' => $sellingPrice,
+        ]);
+    }
+
+    public function withMargin(int $costPrice, int $marginPercent): self
+    {
+        $sellingPrice = (int) ($costPrice * (1 + $marginPercent / 100));
+
+        return $this->state(fn (array $attributes): array => [
+            'cost_price' => $costPrice,
+            'selling_price' => $sellingPrice,
+        ]);
+    }
+
+    public function withQuantity(int $quantity): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'quantity' => $quantity,
+        ]);
+    }
+
+    public function outOfStock(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'quantity' => 0,
+        ]);
+    }
+
+    public function lowStock(): self
+    {
+        return $this->state(function (array $attributes): array {
+            /** @var int $alertQuantity */
+            $alertQuantity = max($attributes['alert_quantity'] ?? 10, 2);
+
+            return [
+                'quantity' => $this->faker->numberBetween(1, $alertQuantity - 1),
+                'alert_quantity' => $alertQuantity,
+            ];
+        });
+    }
+
+    public function trackingInventory(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'track_inventory' => true,
+        ]);
+    }
+
+    public function notTrackingInventory(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'track_inventory' => false,
+        ]);
+    }
+
+    public function withoutImage(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'image' => null,
+        ]);
+    }
+
+    public function withoutBarcode(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'barcode' => null,
+        ]);
+    }
 }
