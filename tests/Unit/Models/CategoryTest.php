@@ -40,5 +40,9 @@ test('category has many products', function (): void {
         'category_id' => $category->id,
     ]);
 
-    expect($category->products)->toHaveCount(1);
+    Product::factory()->create([
+        'category_id' => $category->id,
+    ]);
+
+    expect($category->products)->toHaveCount(2);
 });

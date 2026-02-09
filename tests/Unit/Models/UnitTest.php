@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Product;
 use App\Models\Unit;
 
 test('to array', function (): void {
@@ -30,4 +31,13 @@ test('only returns active units by default', function (): void {
 
     expect($units)
         ->toHaveCount(2);
+});
+
+test('unit has many products', function (): void {
+    $unit = Unit::factory()->create()->refresh();
+    Product::factory()->create([
+        'unit_id' => $unit->id,
+    ]);
+
+    expect($unit->products)->toHaveCount(1);
 });

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Unit;
 
 test('to array', function (): void {
     $product = Product::factory()->create()->refresh();
@@ -45,18 +46,29 @@ test('only returns active products by default', function (): void {
         ->toHaveCount(2);
 });
 
-dataset('product relationships', [
-    'category' => fn (): array => ['relation' => 'category', 'model' => Category::class],
-    'brand' => fn (): array => ['relation' => 'brand', 'model' => Brand::class],
-]);
+it('belongs to a category', function (): void {
+    $category = Category::factory()->create();
+    $product = Product::factory()->create(['category_id' => $category->id]);
 
-it('belongs to {relation}', function (array $config): void {
-    $related = $config['model']::factory()->create();
-    $product = Product::factory()->create([
-        $config['relation'].'_id' => $related->id,
-    ]);
+    expect($product->category)
+        ->toBeInstanceOf(Category::class)
+        ->id->toBe($category->id);
+});
 
-    expect($product->{$config['relation']})
-        ->toBeInstanceOf($config['model'])
-        ->id->toBe($related->id);
-})->with('product relationships');
+it('belongs to a brand', function (): void {
+    $brand = Brand::factory()->create();
+    $product = Product::factory()->create(['brand_id' => $brand->id]);
+
+    expect($product->brand)
+        ->toBeInstanceOf(Brand::class)
+        ->id->toBe($brand->id);
+});
+
+it('belongs to a unit', function (): void {
+    $unit = Unit::factory()->create();
+    $product = Product::factory()->create(['unit_id' => $unit->id]);
+
+    expect($product->unit)
+        ->toBeInstanceOf(Unit::class)
+        ->id->toBe($unit->id);
+});

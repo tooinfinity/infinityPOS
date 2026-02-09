@@ -54,6 +54,14 @@ final class Product extends Model
     }
 
     /**
+     * @return BelongsTo<Unit, $this>
+     */
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
+    }
+
+    /**
      * @return array<string, string>
      */
     public function casts(): array
