@@ -8,6 +8,7 @@ use Carbon\CarbonInterface;
 use Database\Factories\PurchaseReturnItemFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property-read int $id
@@ -24,6 +25,30 @@ final class PurchaseReturnItem extends Model
 {
     /** @use HasFactory<PurchaseReturnItemFactory> */
     use HasFactory;
+
+    /**
+     * @return BelongsTo<PurchaseReturn, $this>
+     */
+    public function purchaseReturn(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseReturn::class);
+    }
+
+    /**
+     * @return BelongsTo<Product, $this>
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * @return BelongsTo<Batch, $this>
+     */
+    public function batch(): BelongsTo
+    {
+        return $this->belongsTo(Batch::class);
+    }
 
     /**
      * @return array<string, string>

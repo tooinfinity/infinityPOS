@@ -8,6 +8,7 @@ use Carbon\CarbonInterface;
 use Database\Factories\ExpenseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property-read int $id
@@ -25,6 +26,22 @@ final class Expense extends Model
 {
     /** @use HasFactory<ExpenseFactory> */
     use HasFactory;
+
+    /**
+     * @return BelongsTo<ExpenseCategory, $this>
+     */
+    public function expenseCategory(): BelongsTo
+    {
+        return $this->belongsTo(ExpenseCategory::class);
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     /**
      * @return array<string, string>

@@ -10,6 +10,7 @@ use Database\Factories\PaymentMethodFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property-read int $id
@@ -24,6 +25,14 @@ final class PaymentMethod extends Model
 {
     /** @use HasFactory<PaymentMethodFactory> */
     use HasFactory;
+
+    /**
+     * @return HasMany<Payment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
 
     /**
      * @return array<string, string>

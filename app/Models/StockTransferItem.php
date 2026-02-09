@@ -8,6 +8,7 @@ use Carbon\CarbonInterface;
 use Database\Factories\StockTransferItemFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property-read int $id
@@ -22,6 +23,30 @@ final class StockTransferItem extends Model
 {
     /** @use HasFactory<StockTransferItemFactory> */
     use HasFactory;
+
+    /**
+     * @return BelongsTo<StockTransfer, $this>
+     */
+    public function stockTransfer(): BelongsTo
+    {
+        return $this->belongsTo(StockTransfer::class);
+    }
+
+    /**
+     * @return BelongsTo<Product, $this>
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * @return BelongsTo<Batch, $this>
+     */
+    public function batch(): BelongsTo
+    {
+        return $this->belongsTo(Batch::class);
+    }
 
     /**
      * @return array<string, string>

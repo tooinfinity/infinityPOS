@@ -10,6 +10,7 @@ use Database\Factories\WarehouseFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property-read int $id
@@ -29,6 +30,70 @@ final class Warehouse extends Model
 {
     /** @use HasFactory<WarehouseFactory> */
     use HasFactory;
+
+    /**
+     * @return HasMany<Batch, $this>
+     */
+    public function batches(): HasMany
+    {
+        return $this->hasMany(Batch::class);
+    }
+
+    /**
+     * @return HasMany<StockMovement, $this>
+     */
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class);
+    }
+
+    /**
+     * @return HasMany<Purchase, $this>
+     */
+    public function purchases(): HasMany
+    {
+        return $this->hasMany(Purchase::class);
+    }
+
+    /**
+     * @return HasMany<Sale, $this>
+     */
+    public function sales(): HasMany
+    {
+        return $this->hasMany(Sale::class);
+    }
+
+    /**
+     * @return HasMany<StockTransfer, $this>
+     */
+    public function transfersFrom(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class, 'from_warehouse_id');
+    }
+
+    /**
+     * @return HasMany<StockTransfer, $this>
+     */
+    public function transfersTo(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class, 'to_warehouse_id');
+    }
+
+    /**
+     * @return HasMany<SaleReturn, $this>
+     */
+    public function saleReturns(): HasMany
+    {
+        return $this->hasMany(SaleReturn::class);
+    }
+
+    /**
+     * @return HasMany<PurchaseReturn, $this>
+     */
+    public function purchaseReturns(): HasMany
+    {
+        return $this->hasMany(PurchaseReturn::class);
+    }
 
     /**
      * @return array<string, string>
