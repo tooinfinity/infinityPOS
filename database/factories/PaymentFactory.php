@@ -48,7 +48,7 @@ final class PaymentFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'payable_type' => Purchase::class,
-            'payable_id' => $purchase ? $purchase->id : Purchase::factory(),
+            'payable_id' => $purchase instanceof Purchase ? $purchase->id : Purchase::factory(),
         ]);
     }
 
@@ -56,7 +56,7 @@ final class PaymentFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'payable_type' => Sale::class,
-            'payable_id' => $sale ? $sale->id : Sale::factory(),
+            'payable_id' => $sale instanceof Sale ? $sale->id : Sale::factory(),
         ]);
     }
 
