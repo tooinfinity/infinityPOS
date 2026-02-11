@@ -7,6 +7,8 @@ namespace App\Models;
 use App\Enums\ReturnStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\PurchaseReturnFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -89,5 +91,25 @@ final class PurchaseReturn extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @param  Builder<PurchaseReturn>  $query
+     * @return Builder<PurchaseReturn>
+     */
+    #[Scope]
+    protected function pending(Builder $query): Builder
+    {
+        return $query->where('status', ReturnStatusEnum::Pending->value);
+    }
+
+    /**
+     * @param  Builder<PurchaseReturn>  $query
+     * @return Builder<PurchaseReturn>
+     */
+    #[Scope]
+    protected function completed(Builder $query): Builder
+    {
+        return $query->where('status', ReturnStatusEnum::Completed->value);
     }
 }

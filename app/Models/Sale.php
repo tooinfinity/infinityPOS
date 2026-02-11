@@ -8,6 +8,9 @@ use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\SaleFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -112,5 +115,95 @@ final class Sale extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @param  Builder<Sale>  $query
+     * @return Builder<Sale>
+     */
+    #[Scope]
+    protected function pending(Builder $query): Builder
+    {
+        return $query->where('status', SaleStatusEnum::Pending->value);
+    }
+
+    /**
+     * @param  Builder<Sale>  $query
+     * @return Builder<Sale>
+     */
+    #[Scope]
+    protected function completed(Builder $query): Builder
+    {
+        return $query->where('status', SaleStatusEnum::Completed->value);
+    }
+
+    /**
+     * @param  Builder<Sale>  $query
+     * @return Builder<Sale>
+     */
+    #[Scope]
+    protected function cancelled(Builder $query): Builder
+    {
+        return $query->where('status', SaleStatusEnum::Cancelled->value);
+    }
+
+    /**
+     * @param  Builder<Sale>  $query
+     * @return Builder<Sale>
+     */
+    #[Scope]
+    protected function unpaid(Builder $query): Builder
+    {
+        return $query->where('payment_status', PaymentStatusEnum::Unpaid->value);
+    }
+
+    /**
+     * @param  Builder<Sale>  $query
+     * @return Builder<Sale>
+     */
+    #[Scope]
+    protected function partiallyPaid(Builder $query): Builder
+    {
+        return $query->where('payment_status', PaymentStatusEnum::Partial->value);
+    }
+
+    /**
+     * @param  Builder<Sale>  $query
+     * @return Builder<Sale>
+     */
+    #[Scope]
+    protected function paid(Builder $query): Builder
+    {
+        return $query->where('payment_status', PaymentStatusEnum::Paid->value);
+    }
+
+    /**
+     * @param  Builder<Sale>  $query
+     * @return Builder<Sale>
+     */
+    #[Scope]
+    protected function today(Builder $query): Builder
+    {
+        return $query->whereDate('sale_date', today());
+    }
+
+    /**
+     * @return Attribute<int, null>
+     */
+    protected function dueAmount(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): int => max(0, $this->total_amount - $this->paid_amount),
+        );
+    }
+
+    /**
+     * @return Attribute<int, null>
+     */
+    protected function profit(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->items->sum(fn (SaleItem $item): int => ($item->unit_price - $item->unit_cost) * $item->quantity),
+        );
     }
 }

@@ -7,6 +7,8 @@ namespace App\Models;
 use App\Enums\StockTransferStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\StockTransferFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -87,5 +89,35 @@ final class StockTransfer extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @param  Builder<StockTransfer>  $query
+     * @return Builder<StockTransfer>
+     */
+    #[Scope]
+    protected function pending(Builder $query): Builder
+    {
+        return $query->where('status', StockTransferStatusEnum::Pending->value);
+    }
+
+    /**
+     * @param  Builder<StockTransfer>  $query
+     * @return Builder<StockTransfer>
+     */
+    #[Scope]
+    protected function completed(Builder $query): Builder
+    {
+        return $query->where('status', StockTransferStatusEnum::Completed->value);
+    }
+
+    /**
+     * @param  Builder<StockTransfer>  $query
+     * @return Builder<StockTransfer>
+     */
+    #[Scope]
+    protected function cancelled(Builder $query): Builder
+    {
+        return $query->where('status', StockTransferStatusEnum::Cancelled->value);
     }
 }

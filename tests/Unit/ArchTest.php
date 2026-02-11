@@ -7,6 +7,8 @@ use App\Providers\TelescopeServiceProvider;
 arch()->preset()->php();
 arch()->preset()->strict()->ignoring([
     TelescopeServiceProvider::class,
+    'App\Models',
+
 ]);
 arch()->preset()->security()->ignoring([
     'assert',

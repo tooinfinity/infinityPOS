@@ -6,6 +6,8 @@ namespace App\Models;
 
 use Carbon\CarbonInterface;
 use Database\Factories\PaymentFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -71,5 +73,25 @@ final class Payment extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @param  Builder<Payment>  $query
+     * @return Builder<Payment>
+     */
+    #[Scope]
+    protected function recent(Builder $query, int $days = 30): Builder
+    {
+        return $query->where('payment_date', '>=', now()->subDays($days));
+    }
+
+    /**
+     * @param  Builder<Payment>  $query
+     * @return Builder<Payment>
+     */
+    #[Scope]
+    protected function today(Builder $query): Builder
+    {
+        return $query->whereDate('payment_date', today());
     }
 }

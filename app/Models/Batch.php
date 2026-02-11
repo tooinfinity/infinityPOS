@@ -6,6 +6,9 @@ namespace App\Models;
 
 use Carbon\CarbonInterface;
 use Database\Factories\BatchFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -107,5 +110,80 @@ final class Batch extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @param  Builder<Batch>  $query
+     * @return Builder<Batch>
+     */
+    #[Scope]
+    protected function inStock(Builder $query): Builder
+    {
+        return $query->where('quantity', '>', 0);
+    }
+
+    /**
+     * @param  Builder<Batch>  $query
+     * @return Builder<Batch>
+     */
+    #[Scope]
+    protected function expired(Builder $query): Builder
+    {
+        return $query->whereNotNull('expires_at')
+            ->where('expires_at', '<', now());
+    }
+
+    /**
+     * @param  Builder<Batch>  $query
+     * @return Builder<Batch>
+     */
+    #[Scope]
+    protected function expiringSoon(Builder $query, int $days = 30): Builder
+    {
+        return $query->whereNotNull('expires_at')
+            ->where('expires_at', '>=', now())
+            ->where('expires_at', '<=', now()->addDays($days));
+    }
+
+    /**
+     * @param  Builder<Batch>  $query
+     * @return Builder<Batch>
+     */
+    #[Scope]
+    protected function fifo(Builder $query): Builder
+    {
+        return $query->oldest();
+    }
+
+    /**
+     * @param  Builder<Batch>  $query
+     * @return Builder<Batch>
+     */
+    #[Scope]
+    protected function fefo(Builder $query): Builder
+    {
+        return $query->orderByRaw('expires_at IS NULL, expires_at ASC');
+    }
+
+    /**
+     * @return Attribute<bool, null>
+     */
+    protected function isExpired(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): bool => $this->expires_at && $this->expires_at->isPast(),
+        );
+    }
+
+    /**
+     * @return Attribute<bool, null>
+     */
+    protected function isExpiringSoon(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): bool => $this->expires_at
+                && $this->expires_at->isFuture()
+                && $this->expires_at->lte(now()->addDays(30)),
+        );
     }
 }
