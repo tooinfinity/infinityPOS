@@ -7,7 +7,10 @@ namespace App\Models;
 use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\ProductFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -142,5 +145,83 @@ final class Product extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @param  Builder<Product>  $query
+     * @return Builder<Product>
+     */
+    #[Scope]
+    protected function lowStock(Builder $query): Builder
+    {
+        return $query->whereColumn('quantity', '<=', 'alert_quantity')
+            ->where('track_inventory', true);
+    }
+
+    /**
+     * @param  Builder<Product>  $query
+     * @return Builder<Product>
+     */
+    #[Scope]
+    protected function outOfStock(Builder $query): Builder
+    {
+        return $query->where('quantity', '<=', 0)
+            ->where('track_inventory', true);
+    }
+
+    /**
+     * @param  Builder<Product>  $query
+     * @return Builder<Product>
+     */
+    #[Scope]
+    protected function search(Builder $query, string $search): Builder
+    {
+        return $query->where(function (Builder $q) use ($search): void {
+            $q->where('name', 'like', "%{$search}%")
+                ->orWhere('sku', 'like', "%{$search}%")
+                ->orWhere('barcode', 'like', "%{$search}%");
+        });
+    }
+
+    /**
+     * @param  Builder<Product>  $query
+     * @return Builder<Product>
+     */
+    #[Scope]
+    protected function tracked(Builder $query): Builder
+    {
+        return $query->where('track_inventory', true);
+    }
+
+    /**
+     * @return Attribute<bool, null>
+     */
+    protected function isLowStock(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): bool => $this->track_inventory && $this->quantity <= $this->alert_quantity,
+        );
+    }
+
+    /**
+     * @return Attribute<bool, null>
+     */
+    protected function isOutOfStock(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): bool => $this->track_inventory && $this->quantity <= 0,
+        );
+    }
+
+    /**
+     * @return Attribute<int|float, null>
+     */
+    protected function profitMargin(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): int|float => $this->selling_price > 0
+                ? (($this->selling_price - $this->cost_price) / $this->selling_price) * 100
+                : 0,
+        );
     }
 }

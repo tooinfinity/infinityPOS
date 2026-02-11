@@ -7,6 +7,8 @@ namespace App\Models;
 use App\Enums\StockMovementTypeEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\StockMovementFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -94,5 +96,55 @@ final class StockMovement extends Model
             'note' => 'string',
             'created_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @param  Builder<StockMovement>  $query
+     * @return Builder<StockMovement>
+     */
+    #[Scope]
+    protected function in(Builder $query): Builder
+    {
+        return $query->where('type', StockMovementTypeEnum::In->value);
+    }
+
+    /**
+     * @param  Builder<StockMovement>  $query
+     * @return Builder<StockMovement>
+     */
+    #[Scope]
+    protected function out(Builder $query): Builder
+    {
+        return $query->where('type', StockMovementTypeEnum::Out->value);
+    }
+
+    /**
+     * @param  Builder<StockMovement>  $query
+     * @return Builder<StockMovement>
+     */
+    #[Scope]
+    protected function transfer(Builder $query): Builder
+    {
+        return $query->where('type', StockMovementTypeEnum::Transfer->value);
+    }
+
+    /**
+     * @param  Builder<StockMovement>  $query
+     * @return Builder<StockMovement>
+     */
+    #[Scope]
+    protected function adjustment(Builder $query): Builder
+    {
+        return $query->where('type', StockMovementTypeEnum::Adjustment->value);
+    }
+
+    /**
+     * @param  Builder<StockMovement>  $query
+     * @return Builder<StockMovement>
+     */
+    #[Scope]
+    protected function recent(Builder $query, int $days = 30): Builder
+    {
+        return $query->where('created_at', '>=', now()->subDays($days));
     }
 }

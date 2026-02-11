@@ -138,3 +138,91 @@ it('can create stockMovements', function (): void {
         ->toHaveCount(2)
         ->each->toBeInstanceOf(StockMovement::class);
 });
+
+it('filters by pending scope', function (): void {
+    Purchase::factory()->create(['status' => 'pending']);
+    Purchase::factory()->count(2)->create(['status' => 'received']);
+
+    $results = Purchase::pending()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->status->value->toBe('pending');
+});
+
+it('filters by ordered scope', function (): void {
+    Purchase::factory()->create(['status' => 'ordered']);
+    Purchase::factory()->count(2)->create(['status' => 'pending']);
+
+    $results = Purchase::ordered()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->status->value->toBe('ordered');
+});
+
+it('filters by received scope', function (): void {
+    Purchase::factory()->create(['status' => 'received']);
+    Purchase::factory()->count(2)->create(['status' => 'pending']);
+
+    $results = Purchase::received()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->status->value->toBe('received');
+});
+
+it('filters by cancelled scope', function (): void {
+    Purchase::factory()->create(['status' => 'cancelled']);
+    Purchase::factory()->count(2)->create(['status' => 'pending']);
+
+    $results = Purchase::cancelled()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->status->value->toBe('cancelled');
+});
+
+it('filters by unpaid scope', function (): void {
+    Purchase::factory()->create(['payment_status' => 'unpaid']);
+    Purchase::factory()->count(2)->create(['payment_status' => 'paid']);
+
+    $results = Purchase::unpaid()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->payment_status->value->toBe('unpaid');
+});
+
+it('filters by partially paid scope', function (): void {
+    Purchase::factory()->create(['payment_status' => 'partial']);
+    Purchase::factory()->count(2)->create(['payment_status' => 'paid']);
+
+    $results = Purchase::partiallyPaid()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->payment_status->value->toBe('partial');
+});
+
+it('filters by paid scope', function (): void {
+    Purchase::factory()->create(['payment_status' => 'paid']);
+    Purchase::factory()->count(2)->create(['payment_status' => 'unpaid']);
+
+    $results = Purchase::paid()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->payment_status->value->toBe('paid');
+});
+
+it('calculates due amount accessor', function (): void {
+    $purchase = Purchase::factory()->create([
+        'total_amount' => 1000,
+        'paid_amount' => 400,
+    ]);
+
+    expect($purchase->due_amount)->toBe(600);
+});
+
+it('returns zero due amount when overpaid', function (): void {
+    $purchase = Purchase::factory()->create([
+        'total_amount' => 1000,
+        'paid_amount' => 1200,
+    ]);
+
+    expect($purchase->due_amount)->toBe(0);
+});

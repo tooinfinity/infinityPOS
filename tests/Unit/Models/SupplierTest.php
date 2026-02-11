@@ -63,3 +63,43 @@ it('returns empty collection when no purchases exist', function (): void {
         ->toBeEmpty()
         ->toBeInstanceOf(Collection::class);
 });
+
+it('filters by search scope on name', function (): void {
+    Supplier::factory()->create(['name' => 'John Doe', 'company_name' => 'Acme Inc', 'email' => 'john@example.com', 'phone' => '1234567890']);
+    Supplier::factory()->create(['name' => 'Jane Smith', 'company_name' => 'XYZ Corp', 'email' => 'jane@example.com', 'phone' => '0987654321']);
+
+    $results = Supplier::search('John')->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->name->toBe('John Doe');
+});
+
+it('filters by search scope on company name', function (): void {
+    Supplier::factory()->create(['name' => 'John Doe', 'company_name' => 'Acme Inc', 'email' => 'john@example.com', 'phone' => '1234567890']);
+    Supplier::factory()->create(['name' => 'Jane Smith', 'company_name' => 'XYZ Corp', 'email' => 'jane@example.com', 'phone' => '0987654321']);
+
+    $results = Supplier::search('Acme')->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->company_name->toBe('Acme Inc');
+});
+
+it('filters by search scope on email', function (): void {
+    Supplier::factory()->create(['name' => 'John Doe', 'company_name' => 'Acme Inc', 'email' => 'john@example.com', 'phone' => '1234567890']);
+    Supplier::factory()->create(['name' => 'Jane Smith', 'company_name' => 'XYZ Corp', 'email' => 'jane@example.com', 'phone' => '0987654321']);
+
+    $results = Supplier::search('john@example.com')->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->email->toBe('john@example.com');
+});
+
+it('filters by search scope on phone', function (): void {
+    Supplier::factory()->create(['name' => 'John Doe', 'company_name' => 'Acme Inc', 'email' => 'john@example.com', 'phone' => '1234567890']);
+    Supplier::factory()->create(['name' => 'Jane Smith', 'company_name' => 'XYZ Corp', 'email' => 'jane@example.com', 'phone' => '0987654321']);
+
+    $results = Supplier::search('1234567890')->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->phone->toBe('1234567890');
+});

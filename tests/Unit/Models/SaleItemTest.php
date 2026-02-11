@@ -49,3 +49,33 @@ it('can access {relation}', function (array $config): void {
         ->toBeInstanceOf($config['model'])
         ->id->toBe($related->id);
 })->with('sale_item_belongs_to_relationships');
+
+it('calculates profit accessor', function (): void {
+    $saleItem = SaleItem::factory()->create([
+        'unit_price' => 100,
+        'unit_cost' => 60,
+        'quantity' => 5,
+    ]);
+
+    expect($saleItem->profit)->toBe(200); // (100 - 60) * 5 = 200
+});
+
+it('calculates profit accessor with zero cost', function (): void {
+    $saleItem = SaleItem::factory()->create([
+        'unit_price' => 100,
+        'unit_cost' => 0,
+        'quantity' => 3,
+    ]);
+
+    expect($saleItem->profit)->toBe(300); // (100 - 0) * 3 = 300
+});
+
+it('calculates profit accessor with loss', function (): void {
+    $saleItem = SaleItem::factory()->create([
+        'unit_price' => 50,
+        'unit_cost' => 70,
+        'quantity' => 2,
+    ]);
+
+    expect($saleItem->profit)->toBe(-40); // (50 - 70) * 2 = -40
+});

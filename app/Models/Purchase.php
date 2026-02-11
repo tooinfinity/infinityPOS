@@ -8,6 +8,9 @@ use App\Enums\PaymentStatusEnum;
 use App\Enums\PurchaseStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\PurchaseFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -112,5 +115,85 @@ final class Purchase extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @param  Builder<Purchase>  $query
+     * @return Builder<Purchase>
+     */
+    #[Scope]
+    protected function pending(Builder $query): Builder
+    {
+        return $query->where('status', PurchaseStatusEnum::Pending->value);
+    }
+
+    /**
+     * @param  Builder<Purchase>  $query
+     * @return Builder<Purchase>
+     */
+    #[Scope]
+    protected function ordered(Builder $query): Builder
+    {
+        return $query->where('status', PurchaseStatusEnum::Ordered->value);
+    }
+
+    /**
+     * @param  Builder<Purchase>  $query
+     * @return Builder<Purchase>
+     */
+    #[Scope]
+    protected function received(Builder $query): Builder
+    {
+        return $query->where('status', PurchaseStatusEnum::Received->value);
+    }
+
+    /**
+     * @param  Builder<Purchase>  $query
+     * @return Builder<Purchase>
+     */
+    #[Scope]
+    protected function cancelled(Builder $query): Builder
+    {
+        return $query->where('status', PurchaseStatusEnum::Cancelled->value);
+    }
+
+    /**
+     * @param  Builder<Purchase>  $query
+     * @return Builder<Purchase>
+     */
+    #[Scope]
+    protected function unpaid(Builder $query): Builder
+    {
+        return $query->where('payment_status', PaymentStatusEnum::Unpaid->value);
+    }
+
+    /**
+     * @param  Builder<Purchase>  $query
+     * @return Builder<Purchase>
+     */
+    #[Scope]
+    protected function partiallyPaid(Builder $query): Builder
+    {
+        return $query->where('payment_status', PaymentStatusEnum::Partial->value);
+    }
+
+    /**
+     * @param  Builder<Purchase>  $query
+     * @return Builder<Purchase>
+     */
+    #[Scope]
+    protected function paid(Builder $query): Builder
+    {
+        return $query->where('payment_status', PaymentStatusEnum::Paid->value);
+    }
+
+    /**
+     * @return Attribute<int, null>
+     */
+    protected function dueAmount(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): int => max(0, $this->total_amount - $this->paid_amount),
+        );
     }
 }
