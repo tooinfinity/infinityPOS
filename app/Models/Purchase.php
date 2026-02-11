@@ -184,7 +184,7 @@ final class Purchase extends Model
     #[Scope]
     protected function paid(Builder $query): Builder
     {
-        return $query->where('payment_status', 'paid');
+        return $query->where('payment_status', PaymentStatusEnum::Paid->value);
     }
 
     /**

@@ -176,9 +176,11 @@ final class Product extends Model
     #[Scope]
     protected function search(Builder $query, string $search): Builder
     {
-        return $query->where(fn (Builder $q) => $q->where('name', 'like', "%{$search}%")
-            ->orWhere('sku', 'like', "%{$search}%")
-            ->orWhere('barcode', 'like', "%{$search}%"));
+        return $query->where(function (Builder $q) use ($search): void {
+            $q->where('name', 'like', "%{$search}%")
+                ->orWhere('sku', 'like', "%{$search}%")
+                ->orWhere('barcode', 'like', "%{$search}%");
+        });
     }
 
     /**
