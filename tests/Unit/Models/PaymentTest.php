@@ -95,3 +95,32 @@ it('can access payable as Purchase', function (): void {
         ->toBeInstanceOf(Purchase::class)
         ->id->toBe($purchase->id);
 });
+
+it('filters by recent scope', function (): void {
+    Payment::factory()->create(['payment_date' => now()->subDays(10)]);
+    Payment::factory()->create(['payment_date' => now()->subDays(35)]);
+    Payment::factory()->create(['payment_date' => now()->subDays(5)]);
+
+    $results = Payment::recent()->get();
+
+    expect($results)->toHaveCount(2);
+});
+
+it('filters by recent scope with custom days', function (): void {
+    Payment::factory()->create(['payment_date' => now()->subDays(10)]);
+    Payment::factory()->create(['payment_date' => now()->subDays(20)]);
+
+    $results = Payment::recent(15)->get();
+
+    expect($results)->toHaveCount(1);
+});
+
+it('filters by today scope', function (): void {
+    Payment::factory()->create(['payment_date' => now()]);
+    Payment::factory()->create(['payment_date' => now()->subDay()]);
+    Payment::factory()->create(['payment_date' => now()->addDay()]);
+
+    $results = Payment::today()->get();
+
+    expect($results)->toHaveCount(1);
+});

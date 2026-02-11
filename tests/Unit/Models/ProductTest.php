@@ -126,3 +126,130 @@ it('counts {relation} correctly', function (array $config): void {
 
     expect($productWithCount->{Str::snake($config['relation']).'_count'})->toBe(5);
 })->with('has_many_relationships');
+
+it('filters by low stock scope', function (): void {
+    Product::factory()->create([
+        'quantity' => 5,
+        'alert_quantity' => 10,
+        'track_inventory' => true,
+    ]);
+    Product::factory()->create([
+        'quantity' => 15,
+        'alert_quantity' => 10,
+        'track_inventory' => true,
+    ]);
+    Product::factory()->create([
+        'quantity' => 5,
+        'alert_quantity' => 10,
+        'track_inventory' => false,
+    ]);
+
+    $results = Product::lowStock()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->quantity->toBe(5);
+});
+
+it('filters by out of stock scope', function (): void {
+    Product::factory()->create([
+        'quantity' => 0,
+        'track_inventory' => true,
+    ]);
+    Product::factory()->create([
+        'quantity' => 5,
+        'track_inventory' => true,
+    ]);
+    Product::factory()->create([
+        'quantity' => 0,
+        'track_inventory' => false,
+    ]);
+
+    $results = Product::outOfStock()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->quantity->toBe(0);
+});
+
+it('filters by search scope', function (): void {
+    Product::factory()->create(['name' => 'Test Product', 'sku' => 'ABC123', 'barcode' => '123456']);
+    Product::factory()->create(['name' => 'Another Product', 'sku' => 'XYZ789', 'barcode' => '789012']);
+
+    expect(Product::search('Test')->get())->toHaveCount(1)
+        ->and(Product::search('ABC123')->get())->toHaveCount(1)
+        ->and(Product::search('123456')->get())->toHaveCount(1)
+        ->and(Product::search('Product')->get())->toHaveCount(2)
+        ->and(Product::search('NonExistent')->get())->toHaveCount(0);
+});
+
+it('filters by tracked scope', function (): void {
+    Product::factory()->create(['track_inventory' => true]);
+    Product::factory()->create(['track_inventory' => false]);
+
+    $results = Product::tracked()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->track_inventory->toBeTrue();
+});
+
+it('calculates is low stock accessor', function (): void {
+    $lowStockProduct = Product::factory()->create([
+        'quantity' => 5,
+        'alert_quantity' => 10,
+        'track_inventory' => true,
+    ]);
+
+    $normalStockProduct = Product::factory()->create([
+        'quantity' => 15,
+        'alert_quantity' => 10,
+        'track_inventory' => true,
+    ]);
+
+    $notTrackedProduct = Product::factory()->create([
+        'quantity' => 5,
+        'alert_quantity' => 10,
+        'track_inventory' => false,
+    ]);
+
+    expect($lowStockProduct->is_low_stock)->toBeTrue()
+        ->and($normalStockProduct->is_low_stock)->toBeFalse()
+        ->and($notTrackedProduct->is_low_stock)->toBeFalse();
+});
+
+it('calculates is out of stock accessor', function (): void {
+    $outOfStockProduct = Product::factory()->create([
+        'quantity' => 0,
+        'track_inventory' => true,
+    ]);
+
+    $inStockProduct = Product::factory()->create([
+        'quantity' => 5,
+        'track_inventory' => true,
+    ]);
+
+    $notTrackedProduct = Product::factory()->create([
+        'quantity' => 0,
+        'track_inventory' => false,
+    ]);
+
+    expect($outOfStockProduct->is_out_of_stock)->toBeTrue()
+        ->and($inStockProduct->is_out_of_stock)->toBeFalse()
+        ->and($notTrackedProduct->is_out_of_stock)->toBeFalse();
+});
+
+it('calculates profit margin accessor', function (): void {
+    $product = Product::factory()->create([
+        'cost_price' => 60,
+        'selling_price' => 100,
+    ]);
+
+    expect($product->profit_margin)->toBe(40.0);
+});
+
+it('returns zero profit margin when selling price is zero', function (): void {
+    $product = Product::factory()->create([
+        'cost_price' => 60,
+        'selling_price' => 0,
+    ]);
+
+    expect($product->profit_margin)->toBe(0);
+});

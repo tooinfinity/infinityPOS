@@ -47,3 +47,32 @@ it('can access {relation}', function (array $config): void {
         ->toBeInstanceOf($config['model'])
         ->id->toBe($related->id);
 })->with('expense_belongs_to_relationships');
+
+it('filters by recent scope', function (): void {
+    Expense::factory()->create(['expense_date' => now()->subDays(10)]);
+    Expense::factory()->create(['expense_date' => now()->subDays(35)]);
+    Expense::factory()->create(['expense_date' => now()->subDays(5)]);
+
+    $results = Expense::recent()->get();
+
+    expect($results)->toHaveCount(2);
+});
+
+it('filters by recent scope with custom days', function (): void {
+    Expense::factory()->create(['expense_date' => now()->subDays(10)]);
+    Expense::factory()->create(['expense_date' => now()->subDays(20)]);
+
+    $results = Expense::recent(15)->get();
+
+    expect($results)->toHaveCount(1);
+});
+
+it('filters by today scope', function (): void {
+    Expense::factory()->create(['expense_date' => now()]);
+    Expense::factory()->create(['expense_date' => now()->subDay()]);
+    Expense::factory()->create(['expense_date' => now()->addDay()]);
+
+    $results = Expense::today()->get();
+
+    expect($results)->toHaveCount(1);
+});

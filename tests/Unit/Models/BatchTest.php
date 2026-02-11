@@ -87,3 +87,87 @@ it('returns empty collection when no {relation} exist', function (array $config)
         ->toBeEmpty()
         ->toBeInstanceOf(Collection::class);
 })->with('batch_has_many_relationships');
+
+it('filters by in stock scope', function (): void {
+    Batch::factory()->create(['quantity' => 10]);
+    Batch::factory()->create(['quantity' => 0]);
+    Batch::factory()->create(['quantity' => -5]);
+
+    $results = Batch::inStock()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->quantity->toBe(10);
+});
+
+it('filters by expired scope', function (): void {
+    Batch::factory()->create(['expires_at' => now()->subDay()]);
+    Batch::factory()->create(['expires_at' => now()->addDay()]);
+    Batch::factory()->create(['expires_at' => null]);
+
+    $results = Batch::expired()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->expires_at->isPast()->toBeTrue();
+});
+
+it('filters by expiring soon scope', function (): void {
+    Batch::factory()->create(['expires_at' => now()->addDays(15)]);
+    Batch::factory()->create(['expires_at' => now()->addDays(35)]);
+    Batch::factory()->create(['expires_at' => now()->subDay()]);
+    Batch::factory()->create(['expires_at' => null]);
+
+    $results = Batch::expiringSoon()->get();
+
+    expect($results)->toHaveCount(1);
+});
+
+it('filters by expiring soon scope with custom days', function (): void {
+    Batch::factory()->create(['expires_at' => now()->addDays(10)]);
+    Batch::factory()->create(['expires_at' => now()->addDays(20)]);
+
+    $results = Batch::expiringSoon(15)->get();
+
+    expect($results)->toHaveCount(1);
+});
+
+it('orders by fifo scope', function (): void {
+    $batch1 = Batch::factory()->create(['created_at' => now()->subDays(2)]);
+    $batch2 = Batch::factory()->create(['created_at' => now()->subDay()]);
+    $batch3 = Batch::factory()->create(['created_at' => now()]);
+
+    $results = Batch::fifo()->get();
+
+    expect($results->pluck('id')->toArray())->toBe([$batch1->id, $batch2->id, $batch3->id]);
+});
+
+it('orders by fefo scope', function (): void {
+    $batch1 = Batch::factory()->create(['expires_at' => now()->addDays(5)]);
+    $batch2 = Batch::factory()->create(['expires_at' => now()->addDays(10)]);
+    $batch3 = Batch::factory()->create(['expires_at' => null]);
+
+    $results = Batch::fefo()->get();
+
+    expect($results->pluck('id')->toArray())->toBe([$batch1->id, $batch2->id, $batch3->id]);
+});
+
+it('calculates is expired accessor', function (): void {
+    $expiredBatch = Batch::factory()->create(['expires_at' => now()->subDay()]);
+    $validBatch = Batch::factory()->create(['expires_at' => now()->addDay()]);
+    $noExpiryBatch = Batch::factory()->create(['expires_at' => null]);
+
+    expect($expiredBatch->is_expired)->toBeTrue()
+        ->and($validBatch->is_expired)->toBeFalse()
+        ->and($noExpiryBatch->is_expired)->toBeFalse();
+});
+
+it('calculates is expiring soon accessor', function (): void {
+    $expiringSoonBatch = Batch::factory()->create(['expires_at' => now()->addDays(15)]);
+    $notExpiringSoonBatch = Batch::factory()->create(['expires_at' => now()->addDays(35)]);
+    $expiredBatch = Batch::factory()->create(['expires_at' => now()->subDay()]);
+    $noExpiryBatch = Batch::factory()->create(['expires_at' => null]);
+
+    expect($expiringSoonBatch->is_expiring_soon)->toBeTrue()
+        ->and($notExpiringSoonBatch->is_expiring_soon)->toBeFalse()
+        ->and($expiredBatch->is_expiring_soon)->toBeFalse()
+        ->and($noExpiryBatch->is_expiring_soon)->toBeFalse();
+});

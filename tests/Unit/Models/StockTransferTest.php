@@ -126,3 +126,33 @@ it('can create stockMovements', function (): void {
         ->toHaveCount(2)
         ->each->toBeInstanceOf(StockMovement::class);
 });
+
+it('filters by pending scope', function (): void {
+    StockTransfer::factory()->create(['status' => 'pending']);
+    StockTransfer::factory()->count(2)->create(['status' => 'completed']);
+
+    $results = StockTransfer::pending()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->status->value->toBe('pending');
+});
+
+it('filters by completed scope', function (): void {
+    StockTransfer::factory()->create(['status' => 'completed']);
+    StockTransfer::factory()->count(2)->create(['status' => 'pending']);
+
+    $results = StockTransfer::completed()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->status->value->toBe('completed');
+});
+
+it('filters by cancelled scope', function (): void {
+    StockTransfer::factory()->create(['status' => 'cancelled']);
+    StockTransfer::factory()->count(2)->create(['status' => 'pending']);
+
+    $results = StockTransfer::cancelled()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->status->value->toBe('cancelled');
+});

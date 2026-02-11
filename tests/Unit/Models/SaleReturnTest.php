@@ -98,3 +98,23 @@ it('can create stockMovements', function (): void {
         ->toHaveCount(2)
         ->each->toBeInstanceOf(StockMovement::class);
 });
+
+it('filters by pending scope', function (): void {
+    SaleReturn::factory()->create(['status' => 'pending']);
+    SaleReturn::factory()->count(2)->create(['status' => 'completed']);
+
+    $results = SaleReturn::pending()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->status->value->toBe('pending');
+});
+
+it('filters by completed scope', function (): void {
+    SaleReturn::factory()->create(['status' => 'completed']);
+    SaleReturn::factory()->count(2)->create(['status' => 'pending']);
+
+    $results = SaleReturn::completed()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->status->value->toBe('completed');
+});

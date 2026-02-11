@@ -138,3 +138,117 @@ it('can create stockMovements', function (): void {
         ->toHaveCount(2)
         ->each->toBeInstanceOf(StockMovement::class);
 });
+
+it('filters by pending scope', function (): void {
+    Sale::factory()->create(['status' => 'pending']);
+    Sale::factory()->count(2)->create(['status' => 'completed']);
+
+    $results = Sale::pending()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->status->value->toBe('pending');
+});
+
+it('filters by completed scope', function (): void {
+    Sale::factory()->create(['status' => 'completed']);
+    Sale::factory()->count(2)->create(['status' => 'pending']);
+
+    $results = Sale::completed()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->status->value->toBe('completed');
+});
+
+it('filters by cancelled scope', function (): void {
+    Sale::factory()->create(['status' => 'cancelled']);
+    Sale::factory()->count(2)->create(['status' => 'completed']);
+
+    $results = Sale::cancelled()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->status->value->toBe('cancelled');
+});
+
+it('filters by unpaid scope', function (): void {
+    Sale::factory()->create(['payment_status' => 'unpaid']);
+    Sale::factory()->count(2)->create(['payment_status' => 'paid']);
+
+    $results = Sale::unpaid()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->payment_status->value->toBe('unpaid');
+});
+
+it('filters by partially paid scope', function (): void {
+    Sale::factory()->create(['payment_status' => 'partial']);
+    Sale::factory()->count(2)->create(['payment_status' => 'paid']);
+
+    $results = Sale::partiallyPaid()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->payment_status->value->toBe('partial');
+});
+
+it('filters by paid scope', function (): void {
+    Sale::factory()->create(['payment_status' => 'paid']);
+    Sale::factory()->count(2)->create(['payment_status' => 'unpaid']);
+
+    $results = Sale::paid()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->payment_status->value->toBe('paid');
+});
+
+it('filters by today scope', function (): void {
+    Sale::factory()->create(['sale_date' => now()]);
+    Sale::factory()->create(['sale_date' => now()->subDay()]);
+    Sale::factory()->create(['sale_date' => now()->addDay()]);
+
+    $results = Sale::today()->get();
+
+    expect($results)->toHaveCount(1);
+});
+
+it('calculates due amount accessor', function (): void {
+    $sale = Sale::factory()->create([
+        'total_amount' => 1000,
+        'paid_amount' => 400,
+    ]);
+
+    expect($sale->due_amount)->toBe(600);
+});
+
+it('returns zero due amount when overpaid', function (): void {
+    $sale = Sale::factory()->create([
+        'total_amount' => 1000,
+        'paid_amount' => 1200,
+    ]);
+
+    expect($sale->due_amount)->toBe(0);
+});
+
+it('calculates profit accessor from items', function (): void {
+    $sale = Sale::factory()->create();
+    SaleItem::factory()->create([
+        'sale_id' => $sale->id,
+        'unit_price' => 100,
+        'unit_cost' => 60,
+        'quantity' => 2,
+    ]);
+    SaleItem::factory()->create([
+        'sale_id' => $sale->id,
+        'unit_price' => 50,
+        'unit_cost' => 30,
+        'quantity' => 3,
+    ]);
+
+    $sale->refresh();
+
+    expect($sale->profit)->toBe(140);
+});
+
+it('returns zero profit when no items exist', function (): void {
+    $sale = Sale::factory()->create();
+
+    expect($sale->profit)->toBe(0);
+});

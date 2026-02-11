@@ -88,3 +88,62 @@ it('can access reference as Purchase', function (): void {
         ->toBeInstanceOf(Purchase::class)
         ->id->toBe($purchase->id);
 });
+
+it('filters by in scope', function (): void {
+    StockMovement::factory()->create(['type' => 'in']);
+    StockMovement::factory()->count(2)->create(['type' => 'out']);
+
+    $results = StockMovement::in()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->type->value->toBe('in');
+});
+
+it('filters by out scope', function (): void {
+    StockMovement::factory()->create(['type' => 'out']);
+    StockMovement::factory()->count(2)->create(['type' => 'in']);
+
+    $results = StockMovement::out()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->type->value->toBe('out');
+});
+
+it('filters by transfer scope', function (): void {
+    StockMovement::factory()->create(['type' => 'transfer']);
+    StockMovement::factory()->count(2)->create(['type' => 'in']);
+
+    $results = StockMovement::transfer()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->type->value->toBe('transfer');
+});
+
+it('filters by adjustment scope', function (): void {
+    StockMovement::factory()->create(['type' => 'adjustment']);
+    StockMovement::factory()->count(2)->create(['type' => 'in']);
+
+    $results = StockMovement::adjustment()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->type->value->toBe('adjustment');
+});
+
+it('filters by recent scope', function (): void {
+    StockMovement::factory()->create(['created_at' => now()->subDays(10)]);
+    StockMovement::factory()->create(['created_at' => now()->subDays(35)]);
+    StockMovement::factory()->create(['created_at' => now()->subDays(5)]);
+
+    $results = StockMovement::recent()->get();
+
+    expect($results)->toHaveCount(2);
+});
+
+it('filters by recent scope with custom days', function (): void {
+    StockMovement::factory()->create(['created_at' => now()->subDays(10)]);
+    StockMovement::factory()->create(['created_at' => now()->subDays(20)]);
+
+    $results = StockMovement::recent(15)->get();
+
+    expect($results)->toHaveCount(1);
+});

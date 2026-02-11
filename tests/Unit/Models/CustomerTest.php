@@ -62,3 +62,33 @@ it('returns empty collection when no sales exist', function (): void {
         ->toBeEmpty()
         ->toBeInstanceOf(Collection::class);
 });
+
+it('filters by search scope on name', function (): void {
+    Customer::factory()->create(['name' => 'John Doe', 'email' => 'john@example.com', 'phone' => '1234567890']);
+    Customer::factory()->create(['name' => 'Jane Smith', 'email' => 'jane@example.com', 'phone' => '0987654321']);
+
+    $results = Customer::search('John')->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->name->toBe('John Doe');
+});
+
+it('filters by search scope on email', function (): void {
+    Customer::factory()->create(['name' => 'John Doe', 'email' => 'john@example.com', 'phone' => '1234567890']);
+    Customer::factory()->create(['name' => 'Jane Smith', 'email' => 'jane@example.com', 'phone' => '0987654321']);
+
+    $results = Customer::search('john@example.com')->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->email->toBe('john@example.com');
+});
+
+it('filters by search scope on phone', function (): void {
+    Customer::factory()->create(['name' => 'John Doe', 'email' => 'john@example.com', 'phone' => '1234567890']);
+    Customer::factory()->create(['name' => 'Jane Smith', 'email' => 'jane@example.com', 'phone' => '0987654321']);
+
+    $results = Customer::search('1234567890')->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->phone->toBe('1234567890');
+});
