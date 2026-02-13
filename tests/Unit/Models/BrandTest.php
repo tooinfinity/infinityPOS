@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Brand;
 use App\Models\Product;
+use Illuminate\Support\Facades\Storage;
 
 test('to array', function (): void {
     $brand = Brand::factory()->create()->refresh();
@@ -41,4 +42,26 @@ test('brand has many products', function (): void {
     ]);
 
     expect($brand->products)->toHaveCount(1);
+});
+
+test('logo url returns null when no logo', function (): void {
+    $brand = Brand::factory()->create([
+        'logo' => null,
+    ]);
+
+    expect($brand->logo_url)->toBeNull();
+});
+
+test('logo url returns full url when logo exists', function (): void {
+    Storage::fake('public');
+
+    $brand = Brand::factory()->create([
+        'logo' => 'brands/test-logo.webp',
+    ]);
+
+    Storage::disk('public')->put('brands/test-logo.webp', 'fake-content');
+
+    expect($brand->logo_url)
+        ->not->toBeNull()
+        ->toContain('brands/test-logo.webp');
 });
