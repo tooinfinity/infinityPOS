@@ -155,7 +155,7 @@ it('creates product with uploaded image', function (): void {
 
     expect($product->image)
         ->toStartWith('products/')
-        ->toEndWith('.jpg')
+        ->toEndWith('.webp')
         ->and(Storage::disk('public')->exists($product->image))->toBeTrue();
 });
 

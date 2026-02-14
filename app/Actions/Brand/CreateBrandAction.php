@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Brand;
 
 use App\Actions\EnsureUniqueSlugAction;
-use App\Actions\UploadBrandLogoAction;
+use App\Actions\UploadImageAction;
 use App\Models\Brand;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +16,7 @@ final readonly class CreateBrandAction
 {
     public function __construct(
         private EnsureUniqueSlugAction $ensureUniqueSlug,
-        private UploadBrandLogoAction $uploadLogo,
+        private UploadImageAction $uploadImage,
     ) {}
 
     /**
@@ -37,7 +37,7 @@ final readonly class CreateBrandAction
             $data['is_active'] ??= true;
 
             if (isset($data['logo']) && $data['logo'] instanceof UploadedFile) {
-                $data['logo'] = $this->uploadLogo->handle($data['logo']);
+                $data['logo'] = $this->uploadImage->handle($data['logo'], 'brands');
             }
 
             return Brand::query()->create($data)->refresh();

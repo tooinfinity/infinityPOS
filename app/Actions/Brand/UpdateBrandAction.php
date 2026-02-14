@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Brand;
 
 use App\Actions\EnsureUniqueSlugAction;
-use App\Actions\UploadBrandLogoAction;
+use App\Actions\UploadImageAction;
 use App\Models\Brand;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +17,7 @@ final readonly class UpdateBrandAction
 {
     public function __construct(
         private EnsureUniqueSlugAction $ensureUniqueSlug,
-        private UploadBrandLogoAction $uploadLogo,
+        private UploadImageAction $uploadImage,
     ) {}
 
     /**
@@ -38,7 +38,7 @@ final readonly class UpdateBrandAction
 
             if (array_key_exists('logo', $data)) {
                 if ($data['logo'] instanceof UploadedFile) {
-                    $data['logo'] = $this->uploadLogo->handle($data['logo'], $brand->logo);
+                    $data['logo'] = $this->uploadImage->handle($data['logo'], 'brands', $brand->logo);
                 } elseif ($data['logo'] === null && $brand->logo !== null) {
                     Storage::disk('public')->delete($brand->logo);
                 }

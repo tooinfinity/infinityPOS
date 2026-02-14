@@ -186,7 +186,7 @@ it('updates image with uploaded file', function (): void {
 
     expect($updatedProduct->image)
         ->toStartWith('products/')
-        ->toEndWith('.jpg')
+        ->toEndWith('.webp')
         ->not->toBe('products/old-image.jpg');
     expect(Storage::disk('public')->exists('products/old-image.jpg'))->toBeFalse();
     expect(Storage::disk('public')->exists($updatedProduct->image))->toBeTrue();

@@ -6,7 +6,7 @@ namespace App\Actions\Product;
 
 use App\Actions\GenerateUniqueBarcodeAction;
 use App\Actions\GenerateUniqueSkuAction;
-use App\Actions\UploadProductImageAction;
+use App\Actions\UploadImageAction;
 use App\Models\Product;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +17,7 @@ final readonly class CreateProductAction
     public function __construct(
         private GenerateUniqueSkuAction $generateSku,
         private GenerateUniqueBarcodeAction $generateBarcode,
-        private UploadProductImageAction $uploadImage,
+        private UploadImageAction $uploadImage,
     ) {}
 
     /**
@@ -35,7 +35,7 @@ final readonly class CreateProductAction
             $data['is_active'] ??= true;
 
             if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
-                $data['image'] = $this->uploadImage->handle($data['image']);
+                $data['image'] = $this->uploadImage->handle($data['image'], 'products');
             }
 
             return Product::query()->create($data)->refresh();
