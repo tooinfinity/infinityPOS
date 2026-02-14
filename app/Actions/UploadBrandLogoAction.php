@@ -53,14 +53,20 @@ final readonly class UploadBrandLogoAction
         $driver = extension_loaded('imagick') ? ImageDriver::Imagick : ImageDriver::Gd;
         $tmpPath = sys_get_temp_dir().'/brand_logo_'.Str::uuid()->toString().'.webp';
 
-        Image::useImageDriver($driver)
-            ->loadFile($file->getPathname())
-            ->width(400)
-            ->optimize()
-            ->format('webp')
-            ->save($tmpPath);
+        try {
+            Image::useImageDriver($driver)
+                ->loadFile($file->getPathname())
+                ->width(400)
+                ->optimize()
+                ->save($tmpPath);
 
-        return $this->readProcessedImage($tmpPath);
+            return $this->readProcessedImage($tmpPath);
+        } finally {
+            if (file_exists($tmpPath)) {
+                unlink($tmpPath);
+            }
+        }
+
     }
 
     /**

@@ -25,7 +25,7 @@ final readonly class DeleteUnitAction
                 $unit->products()->each(function (Product $product) use ($fallbackUnit): void {
                     $product->forceFill(['unit_id' => $fallbackUnit->id])->save();
                 });
-            } elseif (! $fallbackUnit instanceof Unit && $unit->products()->exists()) {
+            } elseif ($unit->products()->exists()) {
                 throw new DomainException('Cannot delete unit with associated products without a fallback unit.');
             }
 

@@ -107,6 +107,27 @@ it('uses provided default unit for reassignment', function (): void {
     expect($product->refresh()->unit_id)->toBe($customDefault->id);
 });
 
+it('throws exception when deleting default piece unit with associated products', function (): void {
+    $pieceUnit = Unit::query()
+        ->where('name', 'Piece')
+        ->where('short_name', 'pc')
+        ->first();
+
+    $products = Product::factory()->count(2)->create([
+        'unit_id' => $pieceUnit->id,
+    ]);
+
+    $action = resolve(DeleteUnitAction::class);
+
+    expect(fn () => $action->handle($pieceUnit))
+        ->toThrow(DomainException::class, 'Cannot delete unit with associated products without a fallback unit.')
+        ->and($pieceUnit->fresh())->not->toBeNull();
+
+    foreach ($products as $product) {
+        expect($product->fresh()->unit_id)->toBe($pieceUnit->id);
+    }
+});
+
 it('throws exception when deleting unit with products and no fallback unit', function (): void {
     Unit::query()
         ->where('name', 'Piece')
