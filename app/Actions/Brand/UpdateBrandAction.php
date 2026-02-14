@@ -9,6 +9,7 @@ use App\Actions\UploadBrandLogoAction;
 use App\Models\Brand;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -35,8 +36,12 @@ final readonly class UpdateBrandAction
                 $data['slug'] = $this->ensureUniqueSlug->handle($data['slug'], Brand::class, $brand->id);
             }
 
-            if (isset($data['logo']) && $data['logo'] instanceof UploadedFile) {
-                $data['logo'] = $this->uploadLogo->handle($data['logo'], $brand->logo);
+            if (array_key_exists('logo', $data)) {
+                if ($data['logo'] instanceof UploadedFile) {
+                    $data['logo'] = $this->uploadLogo->handle($data['logo'], $brand->logo);
+                } elseif ($data['logo'] === null && $brand->logo !== null) {
+                    Storage::disk('public')->delete($brand->logo);
+                }
             }
 
             $brand->update($data);

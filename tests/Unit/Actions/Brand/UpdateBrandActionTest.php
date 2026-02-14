@@ -146,9 +146,13 @@ it('updates is_active status', function (): void {
 });
 
 it('removes logo when set to null', function (): void {
+    Storage::disk('public')->put('brands/old-logo.webp', 'fake-content');
+
     $brand = Brand::factory()->create([
-        'logo' => 'logo.png',
+        'logo' => 'brands/old-logo.webp',
     ]);
+
+    expect(Storage::disk('public')->exists('brands/old-logo.webp'))->toBeTrue();
 
     $action = resolve(UpdateBrandAction::class);
 
@@ -156,5 +160,6 @@ it('removes logo when set to null', function (): void {
         'logo' => null,
     ]);
 
-    expect($updatedBrand->logo)->toBeNull();
+    expect($updatedBrand->logo)->toBeNull()
+        ->and(Storage::disk('public')->exists('brands/old-logo.webp'))->toBeFalse();
 });

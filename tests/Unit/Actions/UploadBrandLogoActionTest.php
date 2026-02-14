@@ -67,3 +67,41 @@ it('converts image to webp format', function (): void {
 
     expect($path)->toEndWith('.webp');
 });
+
+it('handles non-existent existing logo gracefully', function (): void {
+    $action = resolve(UploadBrandLogoAction::class);
+
+    $file = UploadedFile::fake()->image('logo.png', 800, 600);
+
+    $path = $action->handle($file, 'brands/non-existent-logo.webp');
+
+    expect($path)
+        ->toStartWith('brands/')
+        ->toEndWith('.webp')
+        ->and(Storage::disk('public')->exists($path))->toBeTrue();
+});
+
+it('handles null existing logo parameter', function (): void {
+    $action = resolve(UploadBrandLogoAction::class);
+
+    $file = UploadedFile::fake()->image('logo.png', 800, 600);
+
+    $path = $action->handle($file);
+
+    expect($path)
+        ->toStartWith('brands/')
+        ->toEndWith('.webp')
+        ->and(Storage::disk('public')->exists($path))->toBeTrue();
+});
+
+it('throws runtime exception when file reading fails', function (): void {
+    $action = resolve(UploadBrandLogoAction::class);
+
+    $reflection = new ReflectionClass($action);
+    $method = $reflection->getMethod('readProcessedImage');
+
+    $nonExistentPath = '/non/existent/path/test.webp';
+
+    expect(fn (): mixed => $method->invoke($action, $nonExistentPath))
+        ->toThrow(RuntimeException::class, 'Failed to read processed image file');
+});

@@ -7,8 +7,9 @@ namespace App\Actions;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Spatie\Image\Enums\ImageDriver;
-use Spatie\Image\Exceptions\CouldNotLoadImage;
+use Spatie\Image\Exceptions\InvalidImageDriver;
 use Spatie\Image\Image;
 use Throwable;
 
@@ -45,17 +46,34 @@ final readonly class UploadBrandLogoAction
     }
 
     /**
-     * @throws CouldNotLoadImage
+     * @throws InvalidImageDriver|Throwable
      */
     private function processImage(UploadedFile $file): string
     {
         $driver = extension_loaded('imagick') ? ImageDriver::Imagick : ImageDriver::Gd;
+        $tmpPath = sys_get_temp_dir().'/brand_logo_'.Str::uuid()->toString().'.webp';
 
-        return Image::useImageDriver($driver)
+        Image::useImageDriver($driver)
             ->loadFile($file->getPathname())
             ->width(400)
             ->optimize()
             ->format('webp')
-            ->base64();
+            ->save($tmpPath);
+
+        return $this->readProcessedImage($tmpPath);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    private function readProcessedImage(string $tmpPath): string
+    {
+        throw_unless(file_exists($tmpPath), RuntimeException::class, 'Failed to read processed image file');
+
+        /** @var string $binaryContent */
+        $binaryContent = file_get_contents($tmpPath);
+        unlink($tmpPath);
+
+        return $binaryContent;
     }
 }
