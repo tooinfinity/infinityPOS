@@ -28,6 +28,10 @@ final readonly class UpdateProductAction
             if (array_key_exists('image', $data)) {
                 if ($data['image'] instanceof UploadedFile) {
                     $data['image'] = $this->uploadImage->handle($data['image'], 'products', $product->image);
+                } elseif (is_string($data['image']) && $data['image'] !== '' && $data['image'] !== $product->image) {
+                    if ($product->image !== null && Storage::disk('public')->exists($product->image)) {
+                        Storage::disk('public')->delete($product->image);
+                    }
                 } elseif ($data['image'] === null && $product->image !== null) {
                     Storage::disk('public')->delete($product->image);
                 }

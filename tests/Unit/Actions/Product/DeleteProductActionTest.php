@@ -105,12 +105,11 @@ it('includes all related record types in exception message', function (): void {
 
     $action = resolve(DeleteProductAction::class);
 
-    try {
-        $action->handle($product);
-    } catch (RuntimeException $e) {
-        expect($e->getMessage())->toContain('batches')
-            ->and($e->getMessage())->toContain('purchaseItems');
-    }
+    expect(fn () => $action->handle($product))
+        ->toThrow(function (RuntimeException $e): void {
+            expect($e->getMessage())->toContain('batches')
+                ->and($e->getMessage())->toContain('purchaseItems');
+        });
 });
 
 it('deletes product image when deleting product', function (): void {
@@ -149,6 +148,7 @@ it('does not delete product when any related record exists', function (): void {
 
     try {
         $action->handle($product);
+        test()->fail('Expected RuntimeException to be thrown');
     } catch (RuntimeException) {
         // Expected exception
     }
@@ -168,6 +168,7 @@ it('rolls back transaction when exception is thrown', function (): void {
 
     try {
         $action->handle($product);
+        test()->fail('Expected RuntimeException to be thrown');
     } catch (RuntimeException) {
         // Expected exception
     }

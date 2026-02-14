@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use RuntimeException;
+use Spatie\Image\Enums\Fit;
 use Spatie\Image\Enums\ImageDriver;
 use Spatie\Image\Exceptions\InvalidImageDriver;
 use Spatie\Image\Image;
@@ -69,7 +70,9 @@ final readonly class UploadImageAction
             );
         }
 
-        throw_if($file->getSize() > self::MAX_SIZE_BYTES, InvalidArgumentException::class, 'Image size exceeds maximum allowed size of 2MB');
+        $size = $file->getSize();
+        throw_if($size === false, InvalidArgumentException::class, 'Unable to determine image file size');
+        throw_if($size > self::MAX_SIZE_BYTES, InvalidArgumentException::class, 'Image size exceeds maximum allowed size of 2MB');
     }
 
     private function deleteExistingImage(?string $existingImage): void
@@ -94,7 +97,7 @@ final readonly class UploadImageAction
 
         Image::useImageDriver($driver)
             ->loadFile($file->getPathname())
-            ->width($maxWidth)
+            ->fit(fit: Fit::Max, desiredWidth: $maxWidth)
             ->optimize()
             ->format('webp')
             ->save($tmpPath);

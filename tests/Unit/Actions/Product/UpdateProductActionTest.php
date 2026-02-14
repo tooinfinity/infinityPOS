@@ -160,6 +160,8 @@ it('updates is_active status', function (): void {
 });
 
 it('updates image with string path', function (): void {
+    Storage::disk('public')->put('products/old-image.jpg', 'fake-content');
+
     $product = Product::factory()->create(['image' => 'products/old-image.jpg']);
 
     $action = resolve(UpdateProductAction::class);
@@ -168,7 +170,8 @@ it('updates image with string path', function (): void {
         'image' => 'products/new-image.jpg',
     ]);
 
-    expect($updatedProduct->image)->toBe('products/new-image.jpg');
+    expect($updatedProduct->image)->toBe('products/new-image.jpg')
+        ->and(Storage::disk('public')->exists('products/old-image.jpg'))->toBeFalse();
 });
 
 it('updates image with uploaded file', function (): void {
@@ -272,4 +275,34 @@ it('rolls back transaction on failure', function (): void {
     }
 
     expect($product->fresh()->sku)->toBe('PRD-ORIGINAL');
+});
+
+it('does not delete image when string path is unchanged', function (): void {
+    Storage::disk('public')->put('products/existing-image.jpg', 'fake-content');
+
+    $product = Product::factory()->create(['image' => 'products/existing-image.jpg']);
+
+    $action = resolve(UpdateProductAction::class);
+
+    $updatedProduct = $action->handle($product, [
+        'image' => 'products/existing-image.jpg',
+    ]);
+
+    expect($updatedProduct->image)->toBe('products/existing-image.jpg')
+        ->and(Storage::disk('public')->exists('products/existing-image.jpg'))->toBeTrue();
+});
+
+it('does not delete image when string path is empty', function (): void {
+    Storage::disk('public')->put('products/existing-image.jpg', 'fake-content');
+
+    $product = Product::factory()->create(['image' => 'products/existing-image.jpg']);
+
+    $action = resolve(UpdateProductAction::class);
+
+    $updatedProduct = $action->handle($product, [
+        'image' => '',
+    ]);
+
+    expect($updatedProduct->image)->toBe('')
+        ->and(Storage::disk('public')->exists('products/existing-image.jpg'))->toBeTrue();
 });
