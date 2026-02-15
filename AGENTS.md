@@ -35,6 +35,70 @@ final readonly class CreateFavorite
 
 </code-snippet>
 
+## Optimized Image Upload Pattern
+
+When creating image upload actions, follow this optimized pattern:
+
+- **Always convert to WebP format** (25-35% smaller than JPEG)
+- **Use streams** for memory-efficient file handling (avoid loading entire images as strings)
+- **Enforce max width** with a sensible default (400px for avatars/logos)
+- **Standardize output extension** - all images output as `.webp` regardless of input format
+
+<code-snippet name="Optimized UploadImageAction" lang="php">
+
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions;
+
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Spatie\Image\Image;
+
+final readonly class UploadImage
+{
+    private const int DEFAULT_MAX_WIDTH = 400;
+
+    public function handle(
+        UploadedFile $file,
+        string $directory,
+        ?string $existingImage = null,
+        ?int $maxWidth = null
+    ): string {
+        $maxWidth ??= self::DEFAULT_MAX_WIDTH;
+
+        // Delete existing image if provided
+        if ($existingImage !== null && $existingImage !== '') {
+            Storage::disk('public')->delete($existingImage);
+        }
+
+        // Process image to WebP with size limit
+        $tmpPath = tempnam(sys_get_temp_dir(), 'img_');
+        Image::load($file->getRealPath())
+            ->width($maxWidth)
+            ->format('webp')
+            ->save($tmpPath);
+
+        // Generate filename and store via stream (memory efficient)
+        $filename = $directory.'/'.uniqid().'.webp';
+        $stream = fopen($tmpPath, 'r');
+        Storage::disk('public')->put($filename, $stream);
+        fclose($stream);
+        unlink($tmpPath);
+
+        return $filename;
+    }
+}
+
+</code-snippet>
+
+Key implementation details:
+- Stream-based storage: `Storage::disk('public')->put($filename, $stream)` - never load processed image as string
+- Single-pass processing with Spatie Image: `->format('webp')->save($tmpPath)`
+- Configurable max width via optional parameter with null coalescing operator
+- All output files use `.webp` extension for consistency
+
 === .ai/general rules ===
 
 # General Guidelines

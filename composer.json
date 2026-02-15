@@ -16,6 +16,7 @@
         "laravel/tinker": "^2.11.0",
         "laravel/wayfinder": "dev-next",
         "nunomaduro/essentials": "^1.0.1",
+        "spatie/image": "^3.9",
         "spatie/laravel-permission": "^6.24"
     },
     "require-dev": {
