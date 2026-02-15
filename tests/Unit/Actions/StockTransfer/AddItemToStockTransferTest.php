@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\StockTransfer\AddItemToStockTransfer;
+use App\Data\StockTransfer\StockTransferItemData;
 use App\Enums\StockTransferStatusEnum;
 use App\Models\Batch;
 use App\Models\Product;
@@ -15,10 +16,13 @@ it('may add item to pending transfer', function (): void {
 
     $action = resolve(AddItemToStockTransfer::class);
 
-    $item = $action->handle($transfer, [
-        'product_id' => $product->id,
-        'quantity' => 15,
-    ]);
+    $itemData = new StockTransferItemData(
+        product_id: $product->id,
+        batch_id: null,
+        quantity: 15,
+    );
+
+    $item = $action->handle($transfer, $itemData);
 
     expect($item)->toBeInstanceOf(StockTransferItem::class)
         ->and($item->stock_transfer_id)->toBe($transfer->id)
@@ -32,11 +36,13 @@ it('may add item with batch to pending transfer', function (): void {
 
     $action = resolve(AddItemToStockTransfer::class);
 
-    $item = $action->handle($transfer, [
-        'product_id' => $batch->product_id,
-        'batch_id' => $batch->id,
-        'quantity' => 20,
-    ]);
+    $itemData = new StockTransferItemData(
+        product_id: $batch->product_id,
+        batch_id: $batch->id,
+        quantity: 20,
+    );
+
+    $item = $action->handle($transfer, $itemData);
 
     expect($item->batch_id)->toBe($batch->id);
 });
@@ -47,10 +53,13 @@ it('throws exception when adding to non-pending transfer', function (): void {
 
     $action = resolve(AddItemToStockTransfer::class);
 
-    expect(fn () => $action->handle($transfer, [
-        'product_id' => $product->id,
-        'quantity' => 10,
-    ]))->toThrow(RuntimeException::class, 'Items can only be added to pending transfers.');
+    $itemData = new StockTransferItemData(
+        product_id: $product->id,
+        batch_id: null,
+        quantity: 10,
+    );
+
+    expect(fn () => $action->handle($transfer, $itemData))->toThrow(RuntimeException::class, 'Items can only be added to pending transfers.');
 });
 
 it('throws exception when adding to cancelled transfer', function (): void {
@@ -61,8 +70,11 @@ it('throws exception when adding to cancelled transfer', function (): void {
 
     $action = resolve(AddItemToStockTransfer::class);
 
-    expect(fn () => $action->handle($transfer, [
-        'product_id' => $product->id,
-        'quantity' => 10,
-    ]))->toThrow(RuntimeException::class, 'Items can only be added to pending transfers.');
+    $itemData = new StockTransferItemData(
+        product_id: $product->id,
+        batch_id: null,
+        quantity: 10,
+    );
+
+    expect(fn () => $action->handle($transfer, $itemData))->toThrow(RuntimeException::class, 'Items can only be added to pending transfers.');
 });

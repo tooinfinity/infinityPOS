@@ -3,11 +3,14 @@
 declare(strict_types=1);
 
 use App\Actions\StockTransfer\CreateStockTransfer;
+use App\Data\StockTransfer\CreateStockTransferData;
+use App\Data\StockTransfer\StockTransferItemData;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
 use App\Models\Warehouse;
+use Spatie\LaravelData\DataCollection;
 
 it('may create a stock transfer with required fields', function (): void {
     $fromWarehouse = Warehouse::factory()->create();
@@ -16,13 +19,20 @@ it('may create a stock transfer with required fields', function (): void {
 
     $action = resolve(CreateStockTransfer::class);
 
-    $transfer = $action->handle([
-        'from_warehouse_id' => $fromWarehouse->id,
-        'to_warehouse_id' => $toWarehouse->id,
-        'items' => [
-            ['product_id' => $product->id, 'quantity' => 10],
-        ],
+    $items = new DataCollection(StockTransferItemData::class, [
+        new StockTransferItemData(product_id: $product->id, batch_id: null, quantity: 10),
     ]);
+
+    $data = new CreateStockTransferData(
+        from_warehouse_id: $fromWarehouse->id,
+        to_warehouse_id: $toWarehouse->id,
+        note: null,
+        transfer_date: now(),
+        user_id: null,
+        items: $items,
+    );
+
+    $transfer = $action->handle($data);
 
     expect($transfer)->toBeInstanceOf(StockTransfer::class)
         ->and($transfer->from_warehouse_id)->toBe($fromWarehouse->id)
@@ -38,13 +48,20 @@ it('auto-generates reference number', function (): void {
 
     $action = resolve(CreateStockTransfer::class);
 
-    $transfer = $action->handle([
-        'from_warehouse_id' => $fromWarehouse->id,
-        'to_warehouse_id' => $toWarehouse->id,
-        'items' => [
-            ['product_id' => $product->id, 'quantity' => 10],
-        ],
+    $items = new DataCollection(StockTransferItemData::class, [
+        new StockTransferItemData(product_id: $product->id, batch_id: null, quantity: 10),
     ]);
+
+    $data = new CreateStockTransferData(
+        from_warehouse_id: $fromWarehouse->id,
+        to_warehouse_id: $toWarehouse->id,
+        note: null,
+        transfer_date: now(),
+        user_id: null,
+        items: $items,
+    );
+
+    $transfer = $action->handle($data);
 
     expect($transfer->reference_no)
         ->toStartWith('STF-')
@@ -59,16 +76,20 @@ it('creates transfer with all optional fields', function (): void {
 
     $action = resolve(CreateStockTransfer::class);
 
-    $transfer = $action->handle([
-        'from_warehouse_id' => $fromWarehouse->id,
-        'to_warehouse_id' => $toWarehouse->id,
-        'note' => 'Transfer note',
-        'transfer_date' => now()->addDay(),
-        'user_id' => $user->id,
-        'items' => [
-            ['product_id' => $product->id, 'quantity' => 10],
-        ],
+    $items = new DataCollection(StockTransferItemData::class, [
+        new StockTransferItemData(product_id: $product->id, batch_id: null, quantity: 10),
     ]);
+
+    $data = new CreateStockTransferData(
+        from_warehouse_id: $fromWarehouse->id,
+        to_warehouse_id: $toWarehouse->id,
+        note: 'Transfer note',
+        transfer_date: now()->addDay(),
+        user_id: $user->id,
+        items: $items,
+    );
+
+    $transfer = $action->handle($data);
 
     expect($transfer->note)->toBe('Transfer note')
         ->and($transfer->user_id)->toBe($user->id);
@@ -80,13 +101,20 @@ it('throws exception when source and destination are the same', function (): voi
 
     $action = resolve(CreateStockTransfer::class);
 
-    expect(fn () => $action->handle([
-        'from_warehouse_id' => $warehouse->id,
-        'to_warehouse_id' => $warehouse->id,
-        'items' => [
-            ['product_id' => $product->id, 'quantity' => 10],
-        ],
-    ]))->toThrow(RuntimeException::class, 'Source and destination warehouse cannot be the same.');
+    $items = new DataCollection(StockTransferItemData::class, [
+        new StockTransferItemData(product_id: $product->id, batch_id: null, quantity: 10),
+    ]);
+
+    $data = new CreateStockTransferData(
+        from_warehouse_id: $warehouse->id,
+        to_warehouse_id: $warehouse->id,
+        note: null,
+        transfer_date: now(),
+        user_id: null,
+        items: $items,
+    );
+
+    expect(fn () => $action->handle($data))->toThrow(RuntimeException::class, 'Source and destination warehouse cannot be the same.');
 });
 
 it('creates transfer with items without batches', function (): void {
@@ -96,13 +124,20 @@ it('creates transfer with items without batches', function (): void {
 
     $action = resolve(CreateStockTransfer::class);
 
-    $transfer = $action->handle([
-        'from_warehouse_id' => $fromWarehouse->id,
-        'to_warehouse_id' => $toWarehouse->id,
-        'items' => [
-            ['product_id' => $product->id, 'quantity' => 10],
-        ],
+    $items = new DataCollection(StockTransferItemData::class, [
+        new StockTransferItemData(product_id: $product->id, batch_id: null, quantity: 10),
     ]);
+
+    $data = new CreateStockTransferData(
+        from_warehouse_id: $fromWarehouse->id,
+        to_warehouse_id: $toWarehouse->id,
+        note: null,
+        transfer_date: now(),
+        user_id: null,
+        items: $items,
+    );
+
+    $transfer = $action->handle($data);
 
     $item = StockTransferItem::query()->where('stock_transfer_id', $transfer->id)->first();
 
@@ -119,13 +154,20 @@ it('creates transfer with items with batches', function (): void {
 
     $action = resolve(CreateStockTransfer::class);
 
-    $transfer = $action->handle([
-        'from_warehouse_id' => $fromWarehouse->id,
-        'to_warehouse_id' => $toWarehouse->id,
-        'items' => [
-            ['product_id' => $batch->product_id, 'batch_id' => $batch->id, 'quantity' => 25],
-        ],
+    $items = new DataCollection(StockTransferItemData::class, [
+        new StockTransferItemData(product_id: $batch->product_id, batch_id: $batch->id, quantity: 25),
     ]);
+
+    $data = new CreateStockTransferData(
+        from_warehouse_id: $fromWarehouse->id,
+        to_warehouse_id: $toWarehouse->id,
+        note: null,
+        transfer_date: now(),
+        user_id: null,
+        items: $items,
+    );
+
+    $transfer = $action->handle($data);
 
     $item = StockTransferItem::query()->where('stock_transfer_id', $transfer->id)->first();
 
@@ -141,14 +183,21 @@ it('creates transfer with multiple items', function (): void {
 
     $action = resolve(CreateStockTransfer::class);
 
-    $transfer = $action->handle([
-        'from_warehouse_id' => $fromWarehouse->id,
-        'to_warehouse_id' => $toWarehouse->id,
-        'items' => [
-            ['product_id' => $product1->id, 'quantity' => 10],
-            ['product_id' => $product2->id, 'quantity' => 20],
-        ],
+    $items = new DataCollection(StockTransferItemData::class, [
+        new StockTransferItemData(product_id: $product1->id, batch_id: null, quantity: 10),
+        new StockTransferItemData(product_id: $product2->id, batch_id: null, quantity: 20),
     ]);
+
+    $data = new CreateStockTransferData(
+        from_warehouse_id: $fromWarehouse->id,
+        to_warehouse_id: $toWarehouse->id,
+        note: null,
+        transfer_date: now(),
+        user_id: null,
+        items: $items,
+    );
+
+    $transfer = $action->handle($data);
 
     expect(StockTransferItem::query()->where('stock_transfer_id', $transfer->id)->count())->toBe(2);
 });

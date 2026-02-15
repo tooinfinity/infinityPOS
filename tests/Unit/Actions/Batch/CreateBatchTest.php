@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Batch\CreateBatch;
+use App\Data\Batch\CreateBatchData;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\Warehouse;
@@ -13,12 +14,16 @@ it('may create a batch with required fields', function (): void {
 
     $action = resolve(CreateBatch::class);
 
-    $batch = $action->handle([
-        'product_id' => $product->id,
-        'warehouse_id' => $warehouse->id,
-        'cost_amount' => 5000,
-        'quantity' => 100,
-    ]);
+    $data = new CreateBatchData(
+        product_id: $product->id,
+        warehouse_id: $warehouse->id,
+        batch_number: null,
+        cost_amount: 5000,
+        quantity: 100,
+        expires_at: null,
+    );
+
+    $batch = $action->handle($data);
 
     expect($batch)->toBeInstanceOf(Batch::class)
         ->and($batch->product_id)->toBe($product->id)
@@ -34,14 +39,16 @@ it('creates batch with all optional fields', function (): void {
 
     $action = resolve(CreateBatch::class);
 
-    $batch = $action->handle([
-        'product_id' => $product->id,
-        'warehouse_id' => $warehouse->id,
-        'batch_number' => 'BATCH-001',
-        'cost_amount' => 10000,
-        'quantity' => 500,
-        'expires_at' => now()->addYear(),
-    ]);
+    $data = new CreateBatchData(
+        product_id: $product->id,
+        warehouse_id: $warehouse->id,
+        batch_number: 'BATCH-001',
+        cost_amount: 10000,
+        quantity: 500,
+        expires_at: now()->addYear(),
+    );
+
+    $batch = $action->handle($data);
 
     expect($batch->batch_number)->toBe('BATCH-001')
         ->and($batch->cost_amount)->toBe(10000)
@@ -55,13 +62,16 @@ it('creates batch with null batch_number', function (): void {
 
     $action = resolve(CreateBatch::class);
 
-    $batch = $action->handle([
-        'product_id' => $product->id,
-        'warehouse_id' => $warehouse->id,
-        'batch_number' => null,
-        'cost_amount' => 5000,
-        'quantity' => 100,
-    ]);
+    $data = new CreateBatchData(
+        product_id: $product->id,
+        warehouse_id: $warehouse->id,
+        batch_number: null,
+        cost_amount: 5000,
+        quantity: 100,
+        expires_at: null,
+    );
+
+    $batch = $action->handle($data);
 
     expect($batch->batch_number)->toBeNull();
 });
@@ -72,13 +82,16 @@ it('creates batch with null expires_at', function (): void {
 
     $action = resolve(CreateBatch::class);
 
-    $batch = $action->handle([
-        'product_id' => $product->id,
-        'warehouse_id' => $warehouse->id,
-        'cost_amount' => 5000,
-        'quantity' => 100,
-        'expires_at' => null,
-    ]);
+    $data = new CreateBatchData(
+        product_id: $product->id,
+        warehouse_id: $warehouse->id,
+        batch_number: null,
+        cost_amount: 5000,
+        quantity: 100,
+        expires_at: null,
+    );
+
+    $batch = $action->handle($data);
 
     expect($batch->expires_at)->toBeNull();
 });
@@ -89,12 +102,16 @@ it('creates batch with various quantity and cost values', function (): void {
 
     $action = resolve(CreateBatch::class);
 
-    $batch = $action->handle([
-        'product_id' => $product->id,
-        'warehouse_id' => $warehouse->id,
-        'cost_amount' => 1,
-        'quantity' => 0,
-    ]);
+    $data = new CreateBatchData(
+        product_id: $product->id,
+        warehouse_id: $warehouse->id,
+        batch_number: null,
+        cost_amount: 1,
+        quantity: 0,
+        expires_at: null,
+    );
+
+    $batch = $action->handle($data);
 
     expect($batch->cost_amount)->toBe(1)
         ->and($batch->quantity)->toBe(0);

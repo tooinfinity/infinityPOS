@@ -7,6 +7,7 @@ namespace App\Actions\Product;
 use App\Actions\GenerateUniqueBarcode;
 use App\Actions\GenerateUniqueSku;
 use App\Actions\UploadImage;
+use App\Data\Product\CreateProductData;
 use App\Models\Product;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -21,24 +22,37 @@ final readonly class CreateProduct
     ) {}
 
     /**
-     * @param  array{name: string, sku?: string, barcode?: string, unit_id: int, category_id?: int, brand_id?: int, description?: string, image?: UploadedFile|string, cost_price: int, selling_price: int, quantity: int, alert_quantity: int, track_inventory?: bool, is_active?: bool}  $data
-     *
      * @throws Throwable
      */
-    public function handle(array $data): Product
+    public function handle(CreateProductData $data): Product
     {
         return DB::transaction(function () use ($data): Product {
-            $data['sku'] ??= $this->generateSku->handle();
-            $data['barcode'] ??= $this->generateBarcode->handle();
+            $sku = $data->sku ?? $this->generateSku->handle();
+            $barcode = $data->barcode ?? $this->generateBarcode->handle();
+            $trackInventory = $data->track_inventory ?? true;
+            $isActive = $data->is_active ?? true;
 
-            $data['track_inventory'] ??= true;
-            $data['is_active'] ??= true;
-
-            if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
-                $data['image'] = $this->uploadImage->handle($data['image'], 'products');
+            $image = $data->image;
+            if ($image instanceof UploadedFile) {
+                $image = $this->uploadImage->handle($image, 'products');
             }
 
-            return Product::query()->create($data)->refresh();
+            return Product::query()->create([
+                'name' => $data->name,
+                'sku' => $sku,
+                'barcode' => $barcode,
+                'unit_id' => $data->unit_id,
+                'category_id' => $data->category_id,
+                'brand_id' => $data->brand_id,
+                'description' => $data->description,
+                'image' => $image,
+                'cost_price' => $data->cost_price,
+                'selling_price' => $data->selling_price,
+                'quantity' => $data->quantity,
+                'alert_quantity' => $data->alert_quantity,
+                'track_inventory' => $trackInventory,
+                'is_active' => $isActive,
+            ])->refresh();
         });
     }
 }

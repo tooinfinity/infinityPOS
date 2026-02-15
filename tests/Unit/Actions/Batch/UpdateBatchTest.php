@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Actions\Batch\UpdateBatch;
+use App\Data\Batch\UpdateBatchData;
 use App\Models\Batch;
+use Spatie\LaravelData\Optional;
 
 it('may update a batch batch_number', function (): void {
     $batch = Batch::factory()->create([
@@ -12,9 +14,14 @@ it('may update a batch batch_number', function (): void {
 
     $action = resolve(UpdateBatch::class);
 
-    $action->handle($batch, [
-        'batch_number' => 'NEW-BATCH',
-    ]);
+    $data = new UpdateBatchData(
+        batch_number: 'NEW-BATCH',
+        cost_amount: 5000,
+        quantity: 100,
+        expires_at: null,
+    );
+
+    $action->handle($batch, $data);
 
     expect($batch->fresh()->batch_number)->toBe('NEW-BATCH');
 });
@@ -26,9 +33,14 @@ it('may update a batch cost_amount', function (): void {
 
     $action = resolve(UpdateBatch::class);
 
-    $action->handle($batch, [
-        'cost_amount' => 7500,
-    ]);
+    $data = new UpdateBatchData(
+        batch_number: null,
+        cost_amount: 7500,
+        quantity: 100,
+        expires_at: null,
+    );
+
+    $action->handle($batch, $data);
 
     expect($batch->fresh()->cost_amount)->toBe(7500);
 });
@@ -40,9 +52,14 @@ it('may update a batch quantity', function (): void {
 
     $action = resolve(UpdateBatch::class);
 
-    $action->handle($batch, [
-        'quantity' => 200,
-    ]);
+    $data = new UpdateBatchData(
+        batch_number: null,
+        cost_amount: 5000,
+        quantity: 200,
+        expires_at: null,
+    );
+
+    $action->handle($batch, $data);
 
     expect($batch->fresh()->quantity)->toBe(200);
 });
@@ -54,9 +71,14 @@ it('updates batch expires_at', function (): void {
 
     $action = resolve(UpdateBatch::class);
 
-    $action->handle($batch, [
-        'expires_at' => now()->addYear(),
-    ]);
+    $data = new UpdateBatchData(
+        batch_number: null,
+        cost_amount: 5000,
+        quantity: 100,
+        expires_at: now()->addYear(),
+    );
+
+    $action->handle($batch, $data);
 
     expect($batch->fresh()->expires_at->isAfter(now()->addMonths(11)))->toBeTrue();
 });
@@ -70,11 +92,14 @@ it('updates multiple fields at once', function (): void {
 
     $action = resolve(UpdateBatch::class);
 
-    $action->handle($batch, [
-        'batch_number' => 'NEW-BATCH',
-        'cost_amount' => 10000,
-        'quantity' => 500,
-    ]);
+    $data = new UpdateBatchData(
+        batch_number: 'NEW-BATCH',
+        cost_amount: 10000,
+        quantity: 500,
+        expires_at: null,
+    );
+
+    $action->handle($batch, $data);
 
     $fresh = $batch->fresh();
     expect($fresh->batch_number)->toBe('NEW-BATCH')
@@ -90,10 +115,14 @@ it('sets nullable fields to null', function (): void {
 
     $action = resolve(UpdateBatch::class);
 
-    $action->handle($batch, [
-        'batch_number' => null,
-        'expires_at' => null,
-    ]);
+    $data = new UpdateBatchData(
+        batch_number: null,
+        cost_amount: 5000,
+        quantity: 100,
+        expires_at: null,
+    );
+
+    $action->handle($batch, $data);
 
     $fresh = $batch->fresh();
     expect($fresh->batch_number)->toBeNull()
@@ -109,9 +138,14 @@ it('keeps unchanged fields intact', function (): void {
 
     $action = resolve(UpdateBatch::class);
 
-    $action->handle($batch, [
-        'quantity' => 200,
-    ]);
+    $data = new UpdateBatchData(
+        batch_number: Optional::create(),
+        cost_amount: Optional::create(),
+        quantity: 200,
+        expires_at: Optional::create(),
+    );
+
+    $action->handle($batch, $data);
 
     $fresh = $batch->fresh();
     expect($fresh->batch_number)->toBe('BATCH-001')

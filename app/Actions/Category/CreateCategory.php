@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Category;
 
 use App\Actions\EnsureUniqueSlug;
+use App\Data\Category\CreateCategoryData;
 use App\Models\Category;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -15,23 +16,21 @@ final readonly class CreateCategory
     public function __construct(private EnsureUniqueSlug $ensureUniqueSlug) {}
 
     /**
-     * @param  array{name: string, slug?: string, description?: string, is_active?: bool}  $data
-     *
      * @throws Throwable
      */
-    public function handle(array $data): Category
+    public function handle(CreateCategoryData $data): Category
     {
         return DB::transaction(function () use ($data): Category {
-            $name = $data['name'];
-            if (! isset($data['slug'])) {
-                $data['slug'] = Str::slug($name);
-            }
+            $slug = $data->slug ?? Str::slug($data->name);
+            $slug = $this->ensureUniqueSlug->handle($slug, Category::class);
+            $isActive = $data->is_active ?? true;
 
-            $data['slug'] = $this->ensureUniqueSlug->handle($data['slug'], Category::class);
-
-            $data['is_active'] ??= true;
-
-            return Category::query()->create($data)->refresh();
+            return Category::query()->create([
+                'name' => $data->name,
+                'slug' => $slug,
+                'description' => $data->description,
+                'is_active' => $isActive,
+            ])->refresh();
         });
     }
 }

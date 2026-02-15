@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\StockMovement\RecordStockMovement;
+use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\StockMovementTypeEnum;
 use App\Models\Batch;
 use App\Models\Product;
@@ -18,16 +19,22 @@ it('may record a stock movement with required fields', function (): void {
 
     $action = resolve(RecordStockMovement::class);
 
-    $movement = $action->handle([
-        'warehouse_id' => $warehouse->id,
-        'product_id' => $product->id,
-        'type' => StockMovementTypeEnum::Out,
-        'quantity' => 10,
-        'previous_quantity' => 100,
-        'current_quantity' => 90,
-        'reference_type' => 'Sale',
-        'reference_id' => $sale->id,
-    ]);
+    $data = new RecordStockMovementData(
+        warehouse_id: $warehouse->id,
+        product_id: $product->id,
+        type: StockMovementTypeEnum::Out,
+        quantity: 10,
+        previous_quantity: 100,
+        current_quantity: 90,
+        reference_type: 'Sale',
+        reference_id: $sale->id,
+        batch_id: null,
+        user_id: null,
+        note: null,
+        created_at: null,
+    );
+
+    $movement = $action->handle($data);
 
     expect($movement)->toBeInstanceOf(StockMovement::class)
         ->and($movement->warehouse_id)->toBe($warehouse->id)
@@ -50,20 +57,22 @@ it('records stock movement with all optional fields', function (): void {
 
     $action = resolve(RecordStockMovement::class);
 
-    $movement = $action->handle([
-        'warehouse_id' => $warehouse->id,
-        'product_id' => $product->id,
-        'batch_id' => $batch->id,
-        'user_id' => $user->id,
-        'type' => StockMovementTypeEnum::In,
-        'quantity' => 50,
-        'previous_quantity' => 0,
-        'current_quantity' => 50,
-        'reference_type' => 'Sale',
-        'reference_id' => $sale->id,
-        'note' => 'Stock received from supplier',
-        'created_at' => now()->subDay(),
-    ]);
+    $data = new RecordStockMovementData(
+        warehouse_id: $warehouse->id,
+        product_id: $product->id,
+        type: StockMovementTypeEnum::In,
+        quantity: 50,
+        previous_quantity: 0,
+        current_quantity: 50,
+        reference_type: 'Sale',
+        reference_id: $sale->id,
+        batch_id: $batch->id,
+        user_id: $user->id,
+        note: 'Stock received from supplier',
+        created_at: now()->subDay(),
+    );
+
+    $movement = $action->handle($data);
 
     expect($movement->batch_id)->toBe($batch->id)
         ->and($movement->user_id)->toBe($user->id)
@@ -77,16 +86,22 @@ it('records stock in movement', function (): void {
 
     $action = resolve(RecordStockMovement::class);
 
-    $movement = $action->handle([
-        'warehouse_id' => $warehouse->id,
-        'product_id' => $product->id,
-        'type' => StockMovementTypeEnum::In,
-        'quantity' => 100,
-        'previous_quantity' => 50,
-        'current_quantity' => 150,
-        'reference_type' => 'Sale',
-        'reference_id' => $sale->id,
-    ]);
+    $data = new RecordStockMovementData(
+        warehouse_id: $warehouse->id,
+        product_id: $product->id,
+        type: StockMovementTypeEnum::In,
+        quantity: 100,
+        previous_quantity: 50,
+        current_quantity: 150,
+        reference_type: 'Sale',
+        reference_id: $sale->id,
+        batch_id: null,
+        user_id: null,
+        note: null,
+        created_at: null,
+    );
+
+    $movement = $action->handle($data);
 
     expect($movement->type)->toBe(StockMovementTypeEnum::In)
         ->and($movement->previous_quantity)->toBe(50)
@@ -100,16 +115,22 @@ it('records stock out movement', function (): void {
 
     $action = resolve(RecordStockMovement::class);
 
-    $movement = $action->handle([
-        'warehouse_id' => $warehouse->id,
-        'product_id' => $product->id,
-        'type' => StockMovementTypeEnum::Out,
-        'quantity' => 25,
-        'previous_quantity' => 100,
-        'current_quantity' => 75,
-        'reference_type' => 'Sale',
-        'reference_id' => $sale->id,
-    ]);
+    $data = new RecordStockMovementData(
+        warehouse_id: $warehouse->id,
+        product_id: $product->id,
+        type: StockMovementTypeEnum::Out,
+        quantity: 25,
+        previous_quantity: 100,
+        current_quantity: 75,
+        reference_type: 'Sale',
+        reference_id: $sale->id,
+        batch_id: null,
+        user_id: null,
+        note: null,
+        created_at: null,
+    );
+
+    $movement = $action->handle($data);
 
     expect($movement->type)->toBe(StockMovementTypeEnum::Out);
 });
@@ -121,17 +142,22 @@ it('records adjustment movement', function (): void {
 
     $action = resolve(RecordStockMovement::class);
 
-    $movement = $action->handle([
-        'warehouse_id' => $warehouse->id,
-        'product_id' => $product->id,
-        'type' => StockMovementTypeEnum::Adjustment,
-        'quantity' => 10,
-        'previous_quantity' => 100,
-        'current_quantity' => 110,
-        'reference_type' => 'Sale',
-        'reference_id' => $sale->id,
-        'note' => 'Inventory adjustment - found extra stock',
-    ]);
+    $data = new RecordStockMovementData(
+        warehouse_id: $warehouse->id,
+        product_id: $product->id,
+        type: StockMovementTypeEnum::Adjustment,
+        quantity: 10,
+        previous_quantity: 100,
+        current_quantity: 110,
+        reference_type: 'Sale',
+        reference_id: $sale->id,
+        batch_id: null,
+        user_id: null,
+        note: 'Inventory adjustment - found extra stock',
+        created_at: null,
+    );
+
+    $movement = $action->handle($data);
 
     expect($movement->type)->toBe(StockMovementTypeEnum::Adjustment)
         ->and($movement->note)->toBe('Inventory adjustment - found extra stock');
@@ -144,16 +170,22 @@ it('records transfer movement', function (): void {
 
     $action = resolve(RecordStockMovement::class);
 
-    $movement = $action->handle([
-        'warehouse_id' => $warehouse->id,
-        'product_id' => $product->id,
-        'type' => StockMovementTypeEnum::Transfer,
-        'quantity' => 30,
-        'previous_quantity' => 200,
-        'current_quantity' => 170,
-        'reference_type' => 'Sale',
-        'reference_id' => $sale->id,
-    ]);
+    $data = new RecordStockMovementData(
+        warehouse_id: $warehouse->id,
+        product_id: $product->id,
+        type: StockMovementTypeEnum::Transfer,
+        quantity: 30,
+        previous_quantity: 200,
+        current_quantity: 170,
+        reference_type: 'Sale',
+        reference_id: $sale->id,
+        batch_id: null,
+        user_id: null,
+        note: null,
+        created_at: null,
+    );
+
+    $movement = $action->handle($data);
 
     expect($movement->type)->toBe(StockMovementTypeEnum::Transfer);
 });
@@ -165,18 +197,22 @@ it('records movement without batch and user', function (): void {
 
     $action = resolve(RecordStockMovement::class);
 
-    $movement = $action->handle([
-        'warehouse_id' => $warehouse->id,
-        'product_id' => $product->id,
-        'batch_id' => null,
-        'user_id' => null,
-        'type' => StockMovementTypeEnum::Out,
-        'quantity' => 5,
-        'previous_quantity' => 50,
-        'current_quantity' => 45,
-        'reference_type' => 'Sale',
-        'reference_id' => $sale->id,
-    ]);
+    $data = new RecordStockMovementData(
+        warehouse_id: $warehouse->id,
+        product_id: $product->id,
+        type: StockMovementTypeEnum::Out,
+        quantity: 5,
+        previous_quantity: 50,
+        current_quantity: 45,
+        reference_type: 'Sale',
+        reference_id: $sale->id,
+        batch_id: null,
+        user_id: null,
+        note: null,
+        created_at: null,
+    );
+
+    $movement = $action->handle($data);
 
     expect($movement->batch_id)->toBeNull()
         ->and($movement->user_id)->toBeNull();

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\StockTransfer;
 
 use App\Actions\StockMovement\RecordStockMovement;
+use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\StockMovementTypeEnum;
 use App\Enums\StockTransferStatusEnum;
 use App\Models\Batch;
@@ -77,33 +78,35 @@ final readonly class CompleteStockTransfer
         ])->save();
 
         // Record stock movement out from source
-        $this->recordStockMovement->handle([
-            'warehouse_id' => $transfer->from_warehouse_id,
-            'product_id' => (int) $item->product_id,
-            'batch_id' => $sourceBatch?->id,
-            'user_id' => $transfer->user_id,
-            'type' => StockMovementTypeEnum::Transfer,
-            'quantity' => (int) $item->quantity,
-            'previous_quantity' => (int) $previousQuantity,
-            'current_quantity' => (int) $previousQuantity - (int) $item->quantity,
-            'reference_type' => StockTransfer::class,
-            'reference_id' => $transfer->id,
-            'note' => 'Stock transfer out',
-        ]);
+        $this->recordStockMovement->handle(new RecordStockMovementData(
+            warehouse_id: $transfer->from_warehouse_id,
+            product_id: (int) $item->product_id,
+            type: StockMovementTypeEnum::Transfer,
+            quantity: (int) $item->quantity,
+            previous_quantity: (int) $previousQuantity,
+            current_quantity: (int) $previousQuantity - (int) $item->quantity,
+            reference_type: StockTransfer::class,
+            reference_id: $transfer->id,
+            batch_id: $sourceBatch?->id,
+            user_id: $transfer->user_id,
+            note: 'Stock transfer out',
+            created_at: null,
+        ));
 
         // Record stock movement in to destination
-        $this->recordStockMovement->handle([
-            'warehouse_id' => $transfer->to_warehouse_id,
-            'product_id' => (int) $item->product_id,
-            'batch_id' => $destinationBatch->id,
-            'user_id' => $transfer->user_id,
-            'type' => StockMovementTypeEnum::Transfer,
-            'quantity' => (int) $item->quantity,
-            'previous_quantity' => 0,
-            'current_quantity' => (int) $item->quantity,
-            'reference_type' => StockTransfer::class,
-            'reference_id' => $transfer->id,
-            'note' => 'Stock transfer in',
-        ]);
+        $this->recordStockMovement->handle(new RecordStockMovementData(
+            warehouse_id: $transfer->to_warehouse_id,
+            product_id: (int) $item->product_id,
+            type: StockMovementTypeEnum::Transfer,
+            quantity: (int) $item->quantity,
+            previous_quantity: 0,
+            current_quantity: (int) $item->quantity,
+            reference_type: StockTransfer::class,
+            reference_id: $transfer->id,
+            batch_id: $destinationBatch->id,
+            user_id: $transfer->user_id,
+            note: 'Stock transfer in',
+            created_at: null,
+        ));
     }
 }

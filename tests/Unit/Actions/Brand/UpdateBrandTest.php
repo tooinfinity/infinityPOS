@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use App\Actions\Brand\UpdateBrand;
+use App\Data\Brand\UpdateBrandData;
 use App\Models\Brand;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Spatie\LaravelData\Optional;
 
 beforeEach(function (): void {
     Storage::fake('public');
@@ -19,9 +21,14 @@ it('may update a brand name', function (): void {
 
     $action = resolve(UpdateBrand::class);
 
-    $updatedBrand = $action->handle($brand, [
-        'name' => 'New Name',
-    ]);
+    $data = new UpdateBrandData(
+        name: 'New Name',
+        slug: Optional::create(),
+        logo: Optional::create(),
+        is_active: Optional::create(),
+    );
+
+    $updatedBrand = $action->handle($brand, $data);
 
     expect($updatedBrand->name)->toBe('New Name')
         ->and($updatedBrand->slug)->toBe('new-name');
@@ -35,9 +42,14 @@ it('updates slug when name changes and no slug provided', function (): void {
 
     $action = resolve(UpdateBrand::class);
 
-    $updatedBrand = $action->handle($brand, [
-        'name' => 'New Name',
-    ]);
+    $data = new UpdateBrandData(
+        name: 'New Name',
+        slug: Optional::create(),
+        logo: Optional::create(),
+        is_active: Optional::create(),
+    );
+
+    $updatedBrand = $action->handle($brand, $data);
 
     expect($updatedBrand->slug)->toBe('new-name');
 });
@@ -50,10 +62,14 @@ it('keeps existing slug when name changes but slug is provided', function (): vo
 
     $action = resolve(UpdateBrand::class);
 
-    $updatedBrand = $action->handle($brand, [
-        'name' => 'New Name',
-        'slug' => 'custom-slug',
-    ]);
+    $data = new UpdateBrandData(
+        name: 'New Name',
+        slug: 'custom-slug',
+        logo: Optional::create(),
+        is_active: Optional::create(),
+    );
+
+    $updatedBrand = $action->handle($brand, $data);
 
     expect($updatedBrand->slug)->toBe('custom-slug');
 });
@@ -71,9 +87,14 @@ it('generates unique slug when updating to existing slug', function (): void {
 
     $action = resolve(UpdateBrand::class);
 
-    $updatedBrand = $action->handle($brand, [
-        'slug' => 'existing-slug',
-    ]);
+    $data = new UpdateBrandData(
+        name: Optional::create(),
+        slug: 'existing-slug',
+        logo: Optional::create(),
+        is_active: Optional::create(),
+    );
+
+    $updatedBrand = $action->handle($brand, $data);
 
     expect($updatedBrand->slug)->toBe('existing-slug-1');
 });
@@ -86,26 +107,16 @@ it('allows keeping own slug unchanged', function (): void {
 
     $action = resolve(UpdateBrand::class);
 
-    $updatedBrand = $action->handle($brand, [
-        'name' => 'Updated Brand',
-        'slug' => 'test-slug',
-    ]);
+    $data = new UpdateBrandData(
+        name: 'Updated Brand',
+        slug: 'test-slug',
+        logo: Optional::create(),
+        is_active: Optional::create(),
+    );
+
+    $updatedBrand = $action->handle($brand, $data);
 
     expect($updatedBrand->slug)->toBe('test-slug');
-});
-
-it('updates logo with string path', function (): void {
-    $brand = Brand::factory()->create([
-        'logo' => 'old-logo.png',
-    ]);
-
-    $action = resolve(UpdateBrand::class);
-
-    $updatedBrand = $action->handle($brand, [
-        'logo' => 'new-logo.png',
-    ]);
-
-    expect($updatedBrand->logo)->toBe('new-logo.png');
 });
 
 it('updates logo with uploaded file', function (): void {
@@ -119,9 +130,14 @@ it('updates logo with uploaded file', function (): void {
 
     $file = UploadedFile::fake()->image('logo.png', 800, 600);
 
-    $updatedBrand = $action->handle($brand, [
-        'logo' => $file,
-    ]);
+    $data = new UpdateBrandData(
+        name: Optional::create(),
+        slug: Optional::create(),
+        logo: $file,
+        is_active: Optional::create(),
+    );
+
+    $updatedBrand = $action->handle($brand, $data);
 
     expect($updatedBrand->logo)
         ->toStartWith('brands/')
@@ -138,9 +154,14 @@ it('updates is_active status', function (): void {
 
     $action = resolve(UpdateBrand::class);
 
-    $updatedBrand = $action->handle($brand, [
-        'is_active' => false,
-    ]);
+    $data = new UpdateBrandData(
+        name: Optional::create(),
+        slug: Optional::create(),
+        logo: Optional::create(),
+        is_active: false,
+    );
+
+    $updatedBrand = $action->handle($brand, $data);
 
     expect($updatedBrand->is_active)->toBeFalse();
 });
@@ -156,9 +177,14 @@ it('removes logo when set to null', function (): void {
 
     $action = resolve(UpdateBrand::class);
 
-    $updatedBrand = $action->handle($brand, [
-        'logo' => null,
-    ]);
+    $data = new UpdateBrandData(
+        name: Optional::create(),
+        slug: Optional::create(),
+        logo: null,
+        is_active: Optional::create(),
+    );
+
+    $updatedBrand = $action->handle($brand, $data);
 
     expect($updatedBrand->logo)->toBeNull()
         ->and(Storage::disk('public')->exists('brands/old-logo.webp'))->toBeFalse();

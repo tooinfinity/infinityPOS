@@ -3,15 +3,21 @@
 declare(strict_types=1);
 
 use App\Actions\Category\CreateCategory;
+use App\Data\Category\CreateCategoryData;
 use App\Models\Category;
 use Illuminate\Support\Str;
 
 it('may create a category', function (): void {
     $action = resolve(CreateCategory::class);
 
-    $category = $action->handle([
-        'name' => 'Test Category',
-    ]);
+    $data = new CreateCategoryData(
+        name: 'Test Category',
+        slug: null,
+        description: null,
+        is_active: true,
+    );
+
+    $category = $action->handle($data);
 
     expect($category)->toBeInstanceOf(Category::class)
         ->and($category->name)->toBe('Test Category')
@@ -22,10 +28,14 @@ it('may create a category', function (): void {
 it('creates category with custom slug', function (): void {
     $action = resolve(CreateCategory::class);
 
-    $category = $action->handle([
-        'name' => 'Test Category',
-        'slug' => 'custom-slug',
-    ]);
+    $data = new CreateCategoryData(
+        name: 'Test Category',
+        slug: 'custom-slug',
+        description: null,
+        is_active: true,
+    );
+
+    $category = $action->handle($data);
 
     expect($category->slug)->toBe('custom-slug');
 });
@@ -38,9 +48,14 @@ it('generates unique slug when duplicate exists', function (): void {
 
     $action = resolve(CreateCategory::class);
 
-    $category = $action->handle([
-        'name' => 'Test Category',
-    ]);
+    $data = new CreateCategoryData(
+        name: 'Test Category',
+        slug: null,
+        description: null,
+        is_active: true,
+    );
+
+    $category = $action->handle($data);
 
     expect($category->slug)->toBe('test-category-1');
 });
@@ -48,10 +63,14 @@ it('generates unique slug when duplicate exists', function (): void {
 it('creates category with description', function (): void {
     $action = resolve(CreateCategory::class);
 
-    $category = $action->handle([
-        'name' => 'Test Category',
-        'description' => 'Test description',
-    ]);
+    $data = new CreateCategoryData(
+        name: 'Test Category',
+        slug: null,
+        description: 'Test description',
+        is_active: true,
+    );
+
+    $category = $action->handle($data);
 
     expect($category->description)->toBe('Test description');
 });
@@ -59,10 +78,14 @@ it('creates category with description', function (): void {
 it('creates category with is_active flag', function (): void {
     $action = resolve(CreateCategory::class);
 
-    $category = $action->handle([
-        'name' => 'Test Category',
-        'is_active' => false,
-    ]);
+    $data = new CreateCategoryData(
+        name: 'Test Category',
+        slug: null,
+        description: null,
+        is_active: false,
+    );
+
+    $category = $action->handle($data);
 
     expect($category->is_active)->toBeFalse();
 });
@@ -70,9 +93,14 @@ it('creates category with is_active flag', function (): void {
 it('generates slug from name when not provided', function (): void {
     $action = resolve(CreateCategory::class);
 
-    $category = $action->handle([
-        'name' => 'My Special Category',
-    ]);
+    $data = new CreateCategoryData(
+        name: 'My Special Category',
+        slug: null,
+        description: null,
+        is_active: true,
+    );
+
+    $category = $action->handle($data);
 
     expect($category->slug)->toBe(Str::slug('My Special Category'));
 });

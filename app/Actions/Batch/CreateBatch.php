@@ -4,20 +4,25 @@ declare(strict_types=1);
 
 namespace App\Actions\Batch;
 
+use App\Data\Batch\CreateBatchData;
 use App\Models\Batch;
-use DateTimeInterface;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
 final readonly class CreateBatch
 {
     /**
-     * @param  array{product_id: int, warehouse_id: int, batch_number?: string|null, cost_amount: int, quantity: int, expires_at?: DateTimeInterface|string|null}  $data
-     *
      * @throws Throwable
      */
-    public function handle(array $data): Batch
+    public function handle(CreateBatchData $data): Batch
     {
-        return DB::transaction(static fn (): Batch => Batch::query()->create($data));
+        return DB::transaction(static fn (): Batch => Batch::query()->create([
+            'product_id' => $data->product_id,
+            'warehouse_id' => $data->warehouse_id,
+            'batch_number' => $data->batch_number,
+            'cost_amount' => $data->cost_amount,
+            'quantity' => $data->quantity,
+            'expires_at' => $data->expires_at,
+        ]));
     }
 }

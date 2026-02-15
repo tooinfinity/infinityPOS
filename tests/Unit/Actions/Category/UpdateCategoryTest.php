@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Actions\Category\UpdateCategory;
+use App\Data\Category\UpdateCategoryData;
 use App\Models\Category;
+use Spatie\LaravelData\Optional;
 
 it('may update a category name', function (): void {
     $category = Category::factory()->create([
@@ -13,9 +15,14 @@ it('may update a category name', function (): void {
 
     $action = resolve(UpdateCategory::class);
 
-    $updatedCategory = $action->handle($category, [
-        'name' => 'New Name',
-    ]);
+    $data = new UpdateCategoryData(
+        name: 'New Name',
+        slug: Optional::create(),
+        description: Optional::create(),
+        is_active: Optional::create(),
+    );
+
+    $updatedCategory = $action->handle($category, $data);
 
     expect($updatedCategory->name)->toBe('New Name')
         ->and($updatedCategory->slug)->toBe('new-name');
@@ -29,9 +36,14 @@ it('updates slug when name changes and no slug provided', function (): void {
 
     $action = resolve(UpdateCategory::class);
 
-    $updatedCategory = $action->handle($category, [
-        'name' => 'New Name',
-    ]);
+    $data = new UpdateCategoryData(
+        name: 'New Name',
+        slug: Optional::create(),
+        description: Optional::create(),
+        is_active: Optional::create(),
+    );
+
+    $updatedCategory = $action->handle($category, $data);
 
     expect($updatedCategory->slug)->toBe('new-name');
 });
@@ -44,10 +56,14 @@ it('keeps existing slug when name changes but slug is provided', function (): vo
 
     $action = resolve(UpdateCategory::class);
 
-    $updatedCategory = $action->handle($category, [
-        'name' => 'New Name',
-        'slug' => 'custom-slug',
-    ]);
+    $data = new UpdateCategoryData(
+        name: 'New Name',
+        slug: 'custom-slug',
+        description: Optional::create(),
+        is_active: Optional::create(),
+    );
+
+    $updatedCategory = $action->handle($category, $data);
 
     expect($updatedCategory->slug)->toBe('custom-slug');
 });
@@ -65,9 +81,14 @@ it('generates unique slug when updating to existing slug', function (): void {
 
     $action = resolve(UpdateCategory::class);
 
-    $updatedCategory = $action->handle($category, [
-        'slug' => 'existing-slug',
-    ]);
+    $data = new UpdateCategoryData(
+        name: Optional::create(),
+        slug: 'existing-slug',
+        description: Optional::create(),
+        is_active: Optional::create(),
+    );
+
+    $updatedCategory = $action->handle($category, $data);
 
     expect($updatedCategory->slug)->toBe('existing-slug-1');
 });
@@ -80,10 +101,14 @@ it('allows keeping own slug unchanged', function (): void {
 
     $action = resolve(UpdateCategory::class);
 
-    $updatedCategory = $action->handle($category, [
-        'name' => 'Updated Category',
-        'slug' => 'test-slug',
-    ]);
+    $data = new UpdateCategoryData(
+        name: 'Updated Category',
+        slug: 'test-slug',
+        description: Optional::create(),
+        is_active: Optional::create(),
+    );
+
+    $updatedCategory = $action->handle($category, $data);
 
     expect($updatedCategory->slug)->toBe('test-slug');
 });
@@ -95,9 +120,14 @@ it('updates description', function (): void {
 
     $action = resolve(UpdateCategory::class);
 
-    $updatedCategory = $action->handle($category, [
-        'description' => 'New description',
-    ]);
+    $data = new UpdateCategoryData(
+        name: Optional::create(),
+        slug: Optional::create(),
+        description: 'New description',
+        is_active: Optional::create(),
+    );
+
+    $updatedCategory = $action->handle($category, $data);
 
     expect($updatedCategory->description)->toBe('New description');
 });
@@ -109,9 +139,14 @@ it('updates is_active status', function (): void {
 
     $action = resolve(UpdateCategory::class);
 
-    $updatedCategory = $action->handle($category, [
-        'is_active' => false,
-    ]);
+    $data = new UpdateCategoryData(
+        name: Optional::create(),
+        slug: Optional::create(),
+        description: Optional::create(),
+        is_active: false,
+    );
+
+    $updatedCategory = $action->handle($category, $data);
 
     expect($updatedCategory->is_active)->toBeFalse();
 });

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Unit;
 
+use App\Data\Unit\CreateUnitData;
 use App\Models\Unit;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -11,16 +12,14 @@ use Throwable;
 final readonly class CreateUnit
 {
     /**
-     * @param  array{name: string, short_name: string, is_active?: bool}  $data
-     *
      * @throws Throwable
      */
-    public function handle(array $data): Unit
+    public function handle(CreateUnitData $data): Unit
     {
-        return DB::transaction(static function () use ($data): Unit {
-            $data['is_active'] ??= true;
-
-            return Unit::query()->create($data)->refresh();
-        });
+        return DB::transaction(static fn (): Unit => Unit::query()->create([
+            'name' => $data->name,
+            'short_name' => $data->short_name,
+            'is_active' => $data->is_active ?? true,
+        ])->refresh());
     }
 }

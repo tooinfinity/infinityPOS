@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use App\Actions\StockTransfer\UpdateStockTransfer;
+use App\Data\StockTransfer\UpdateStockTransferData;
 use App\Models\StockTransfer;
 use App\Models\User;
+use Spatie\LaravelData\Optional;
 
 it('may update transfer note', function (): void {
     $transfer = StockTransfer::factory()->pending()->create([
@@ -13,9 +15,13 @@ it('may update transfer note', function (): void {
 
     $action = resolve(UpdateStockTransfer::class);
 
-    $action->handle($transfer, [
-        'note' => 'New note',
-    ]);
+    $data = new UpdateStockTransferData(
+        note: 'New note',
+        transfer_date: Optional::create(),
+        user_id: Optional::create(),
+    );
+
+    $action->handle($transfer, $data);
 
     expect($transfer->fresh()->note)->toBe('New note');
 });
@@ -27,9 +33,13 @@ it('may update transfer date', function (): void {
 
     $action = resolve(UpdateStockTransfer::class);
 
-    $action->handle($transfer, [
-        'transfer_date' => now()->addWeek(),
-    ]);
+    $data = new UpdateStockTransferData(
+        note: Optional::create(),
+        transfer_date: now()->addWeek(),
+        user_id: Optional::create(),
+    );
+
+    $action->handle($transfer, $data);
 
     expect($transfer->fresh()->transfer_date->isAfter(now()))->toBeTrue();
 });
@@ -40,9 +50,13 @@ it('may update transfer user', function (): void {
 
     $action = resolve(UpdateStockTransfer::class);
 
-    $action->handle($transfer, [
-        'user_id' => $newUser->id,
-    ]);
+    $data = new UpdateStockTransferData(
+        note: Optional::create(),
+        transfer_date: Optional::create(),
+        user_id: $newUser->id,
+    );
+
+    $action->handle($transfer, $data);
 
     expect($transfer->fresh()->user_id)->toBe($newUser->id);
 });
@@ -54,9 +68,13 @@ it('throws exception when updating non-pending transfer', function (): void {
 
     $action = resolve(UpdateStockTransfer::class);
 
-    expect(fn () => $action->handle($transfer, [
-        'note' => 'New note',
-    ]))->toThrow(RuntimeException::class, 'Only pending transfers can be updated.');
+    $data = new UpdateStockTransferData(
+        note: 'New note',
+        transfer_date: Optional::create(),
+        user_id: Optional::create(),
+    );
+
+    expect(fn () => $action->handle($transfer, $data))->toThrow(RuntimeException::class, 'Only pending transfers can be updated.');
 });
 
 it('keeps unchanged fields intact', function (): void {
@@ -66,9 +84,13 @@ it('keeps unchanged fields intact', function (): void {
 
     $action = resolve(UpdateStockTransfer::class);
 
-    $action->handle($transfer, [
-        'user_id' => User::factory()->create()->id,
-    ]);
+    $data = new UpdateStockTransferData(
+        note: Optional::create(),
+        transfer_date: Optional::create(),
+        user_id: User::factory()->create()->id,
+    );
+
+    $action->handle($transfer, $data);
 
     expect($transfer->fresh()->note)->toBe('Original note');
 });

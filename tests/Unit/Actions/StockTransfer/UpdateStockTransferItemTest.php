@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 use App\Actions\StockTransfer\UpdateStockTransferItem;
+use App\Data\StockTransfer\UpdateStockTransferItemData;
 use App\Enums\StockTransferStatusEnum;
 use App\Models\Batch;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
+use Spatie\LaravelData\Optional;
 
 it('may update item quantity', function (): void {
     $transfer = StockTransfer::factory()->pending()->create();
@@ -16,9 +18,12 @@ it('may update item quantity', function (): void {
 
     $action = resolve(UpdateStockTransferItem::class);
 
-    $action->handle($item, [
-        'quantity' => 25,
-    ]);
+    $data = new UpdateStockTransferItemData(
+        batch_id: Optional::create(),
+        quantity: 25,
+    );
+
+    $action->handle($item, $data);
 
     expect($item->fresh()->quantity)->toBe(25);
 });
@@ -30,9 +35,12 @@ it('may update item batch', function (): void {
 
     $action = resolve(UpdateStockTransferItem::class);
 
-    $action->handle($item, [
-        'batch_id' => $newBatch->id,
-    ]);
+    $data = new UpdateStockTransferItemData(
+        batch_id: $newBatch->id,
+        quantity: Optional::create(),
+    );
+
+    $action->handle($item, $data);
 
     expect($item->fresh()->batch_id)->toBe($newBatch->id);
 });
@@ -45,9 +53,12 @@ it('throws exception when updating item in non-pending transfer', function (): v
 
     $action = resolve(UpdateStockTransferItem::class);
 
-    expect(fn () => $action->handle($item, [
-        'quantity' => 20,
-    ]))->toThrow(RuntimeException::class, 'Items can only be updated when transfer is pending.');
+    $data = new UpdateStockTransferItemData(
+        batch_id: Optional::create(),
+        quantity: 20,
+    );
+
+    expect(fn () => $action->handle($item, $data))->toThrow(RuntimeException::class, 'Items can only be updated when transfer is pending.');
 });
 
 it('throws exception when updating item in cancelled transfer', function (): void {
@@ -58,7 +69,10 @@ it('throws exception when updating item in cancelled transfer', function (): voi
 
     $action = resolve(UpdateStockTransferItem::class);
 
-    expect(fn () => $action->handle($item, [
-        'quantity' => 20,
-    ]))->toThrow(RuntimeException::class, 'Items can only be updated when transfer is pending.');
+    $data = new UpdateStockTransferItemData(
+        batch_id: Optional::create(),
+        quantity: 20,
+    );
+
+    expect(fn () => $action->handle($item, $data))->toThrow(RuntimeException::class, 'Items can only be updated when transfer is pending.');
 });
