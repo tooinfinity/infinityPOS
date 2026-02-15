@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Product\CreateProductAction;
+use App\Actions\Product\CreateProduct;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
@@ -17,7 +17,7 @@ beforeEach(function (): void {
 it('may create a product with required fields', function (): void {
     $unit = Unit::factory()->create();
 
-    $action = resolve(CreateProductAction::class);
+    $action = resolve(CreateProduct::class);
 
     $product = $action->handle([
         'name' => 'Test Product',
@@ -41,7 +41,7 @@ it('may create a product with required fields', function (): void {
 it('auto-generates SKU when not provided', function (): void {
     $unit = Unit::factory()->create();
 
-    $action = resolve(CreateProductAction::class);
+    $action = resolve(CreateProduct::class);
 
     $product = $action->handle([
         'name' => 'Test Product',
@@ -60,7 +60,7 @@ it('auto-generates SKU when not provided', function (): void {
 it('auto-generates barcode when not provided', function (): void {
     $unit = Unit::factory()->create();
 
-    $action = resolve(CreateProductAction::class);
+    $action = resolve(CreateProduct::class);
 
     $product = $action->handle([
         'name' => 'Test Product',
@@ -79,7 +79,7 @@ it('auto-generates barcode when not provided', function (): void {
 it('creates product with custom SKU and barcode', function (): void {
     $unit = Unit::factory()->create();
 
-    $action = resolve(CreateProductAction::class);
+    $action = resolve(CreateProduct::class);
 
     $product = $action->handle([
         'name' => 'Test Product',
@@ -101,7 +101,7 @@ it('creates product with category and brand', function (): void {
     $category = Category::factory()->create();
     $brand = Brand::factory()->create();
 
-    $action = resolve(CreateProductAction::class);
+    $action = resolve(CreateProduct::class);
 
     $product = $action->handle([
         'name' => 'Test Product',
@@ -121,7 +121,7 @@ it('creates product with category and brand', function (): void {
 it('creates product with description', function (): void {
     $unit = Unit::factory()->create();
 
-    $action = resolve(CreateProductAction::class);
+    $action = resolve(CreateProduct::class);
 
     $product = $action->handle([
         'name' => 'Test Product',
@@ -139,7 +139,7 @@ it('creates product with description', function (): void {
 it('creates product with uploaded image', function (): void {
     $unit = Unit::factory()->create();
 
-    $action = resolve(CreateProductAction::class);
+    $action = resolve(CreateProduct::class);
 
     $file = UploadedFile::fake()->image('product.png', 800, 600);
 
@@ -162,7 +162,7 @@ it('creates product with uploaded image', function (): void {
 it('creates product with string image path', function (): void {
     $unit = Unit::factory()->create();
 
-    $action = resolve(CreateProductAction::class);
+    $action = resolve(CreateProduct::class);
 
     $product = $action->handle([
         'name' => 'Test Product',
@@ -180,7 +180,7 @@ it('creates product with string image path', function (): void {
 it('defaults track_inventory to true when not provided', function (): void {
     $unit = Unit::factory()->create();
 
-    $action = resolve(CreateProductAction::class);
+    $action = resolve(CreateProduct::class);
 
     $product = $action->handle([
         'name' => 'Test Product',
@@ -197,7 +197,7 @@ it('defaults track_inventory to true when not provided', function (): void {
 it('defaults is_active to true when not provided', function (): void {
     $unit = Unit::factory()->create();
 
-    $action = resolve(CreateProductAction::class);
+    $action = resolve(CreateProduct::class);
 
     $product = $action->handle([
         'name' => 'Test Product',
@@ -214,7 +214,7 @@ it('defaults is_active to true when not provided', function (): void {
 it('creates product with track_inventory set to false', function (): void {
     $unit = Unit::factory()->create();
 
-    $action = resolve(CreateProductAction::class);
+    $action = resolve(CreateProduct::class);
 
     $product = $action->handle([
         'name' => 'Test Product',
@@ -232,7 +232,7 @@ it('creates product with track_inventory set to false', function (): void {
 it('creates product with is_active set to false', function (): void {
     $unit = Unit::factory()->create();
 
-    $action = resolve(CreateProductAction::class);
+    $action = resolve(CreateProduct::class);
 
     $product = $action->handle([
         'name' => 'Test Product',
@@ -250,7 +250,7 @@ it('creates product with is_active set to false', function (): void {
 it('creates product without category_id and brand_id', function (): void {
     $unit = Unit::factory()->create();
 
-    $action = resolve(CreateProductAction::class);
+    $action = resolve(CreateProduct::class);
 
     $product = $action->handle([
         'name' => 'Test Product',
@@ -273,7 +273,7 @@ it('rolls back transaction on failure', function (): void {
         'barcode' => '9780000000000',
     ]);
 
-    $action = resolve(CreateProductAction::class);
+    $action = resolve(CreateProduct::class);
 
     try {
         $action->handle([

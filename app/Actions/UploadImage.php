@@ -15,7 +15,7 @@ use Spatie\Image\Exceptions\InvalidImageDriver;
 use Spatie\Image\Image;
 use Throwable;
 
-final readonly class UploadImageAction
+final readonly class UploadImage
 {
     private const array ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp'];
 

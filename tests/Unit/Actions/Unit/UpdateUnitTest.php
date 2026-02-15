@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Unit\UpdateUnitAction;
+use App\Actions\Unit\UpdateUnit;
 use App\Models\Unit;
 
 it('may update a unit name', function (): void {
@@ -11,7 +11,7 @@ it('may update a unit name', function (): void {
         'short_name' => 'old',
     ]);
 
-    $action = resolve(UpdateUnitAction::class);
+    $action = resolve(UpdateUnit::class);
 
     $updatedUnit = $action->handle($unit, [
         'name' => 'New Name',
@@ -27,7 +27,7 @@ it('may update a unit short_name', function (): void {
         'short_name' => 'kg',
     ]);
 
-    $action = resolve(UpdateUnitAction::class);
+    $action = resolve(UpdateUnit::class);
 
     $updatedUnit = $action->handle($unit, [
         'short_name' => 'KG',
@@ -43,7 +43,7 @@ it('updates both name and short_name', function (): void {
         'short_name' => 'ou',
     ]);
 
-    $action = resolve(UpdateUnitAction::class);
+    $action = resolve(UpdateUnit::class);
 
     $updatedUnit = $action->handle($unit, [
         'name' => 'New Unit',
@@ -59,7 +59,7 @@ it('updates is_active status', function (): void {
         'is_active' => true,
     ]);
 
-    $action = resolve(UpdateUnitAction::class);
+    $action = resolve(UpdateUnit::class);
 
     $updatedUnit = $action->handle($unit, [
         'is_active' => false,
@@ -73,7 +73,7 @@ it('activates inactive unit', function (): void {
         'is_active' => false,
     ]);
 
-    $action = resolve(UpdateUnitAction::class);
+    $action = resolve(UpdateUnit::class);
 
     $updatedUnit = $action->handle($unit, [
         'is_active' => true,

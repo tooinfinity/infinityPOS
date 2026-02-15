@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace App\Actions\Product;
 
-use App\Actions\GenerateUniqueBarcodeAction;
-use App\Actions\GenerateUniqueSkuAction;
-use App\Actions\UploadImageAction;
+use App\Actions\GenerateUniqueBarcode;
+use App\Actions\GenerateUniqueSku;
+use App\Actions\UploadImage;
 use App\Models\Product;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
-final readonly class CreateProductAction
+final readonly class CreateProduct
 {
     public function __construct(
-        private GenerateUniqueSkuAction $generateSku,
-        private GenerateUniqueBarcodeAction $generateBarcode,
-        private UploadImageAction $uploadImage,
+        private GenerateUniqueSku $generateSku,
+        private GenerateUniqueBarcode $generateBarcode,
+        private UploadImage $uploadImage,
     ) {}
 
     /**

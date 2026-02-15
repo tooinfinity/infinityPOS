@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Brand\DeleteBrandAction;
+use App\Actions\Brand\DeleteBrand;
 use App\Models\Brand;
 use App\Models\Product;
 use Illuminate\Support\Facades\Storage;
@@ -14,7 +14,7 @@ beforeEach(function (): void {
 it('may delete a brand', function (): void {
     $brand = Brand::factory()->create();
 
-    $action = resolve(DeleteBrandAction::class);
+    $action = resolve(DeleteBrand::class);
 
     $result = $action->handle($brand);
 
@@ -30,7 +30,7 @@ it('nullifies brand_id on associated products when deleting', function (): void 
 
     expect($product->brand_id)->toBe($brand->id);
 
-    $action = resolve(DeleteBrandAction::class);
+    $action = resolve(DeleteBrand::class);
     $action->handle($brand);
 
     expect($product->refresh()->brand_id)->toBeNull();
@@ -42,7 +42,7 @@ it('nullifies brand_id on multiple associated products when deleting', function 
         'brand_id' => $brand->id,
     ]);
 
-    $action = resolve(DeleteBrandAction::class);
+    $action = resolve(DeleteBrand::class);
     $action->handle($brand);
 
     foreach ($products as $product) {
@@ -53,7 +53,7 @@ it('nullifies brand_id on multiple associated products when deleting', function 
 it('deletes brand without products', function (): void {
     $brand = Brand::factory()->create();
 
-    $action = resolve(DeleteBrandAction::class);
+    $action = resolve(DeleteBrand::class);
 
     $result = $action->handle($brand);
 
@@ -70,7 +70,7 @@ it('deletes logo file when deleting brand', function (): void {
 
     expect(Storage::disk('public')->exists('brands/test-logo.webp'))->toBeTrue();
 
-    $action = resolve(DeleteBrandAction::class);
+    $action = resolve(DeleteBrand::class);
     $action->handle($brand);
 
     expect(Storage::disk('public')->exists('brands/test-logo.webp'))->toBeFalse();
@@ -81,7 +81,7 @@ it('deletes brand without logo', function (): void {
         'logo' => null,
     ]);
 
-    $action = resolve(DeleteBrandAction::class);
+    $action = resolve(DeleteBrand::class);
 
     $result = $action->handle($brand);
 

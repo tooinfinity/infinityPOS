@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Actions\Brand;
 
-use App\Actions\EnsureUniqueSlugAction;
-use App\Actions\UploadImageAction;
+use App\Actions\EnsureUniqueSlug;
+use App\Actions\UploadImage;
 use App\Models\Brand;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Throwable;
 
-final readonly class CreateBrandAction
+final readonly class CreateBrand
 {
     public function __construct(
-        private EnsureUniqueSlugAction $ensureUniqueSlug,
-        private UploadImageAction $uploadImage,
+        private EnsureUniqueSlug $ensureUniqueSlug,
+        private UploadImage $uploadImage,
     ) {}
 
     /**

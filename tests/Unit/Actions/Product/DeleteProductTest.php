@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Product\DeleteProductAction;
+use App\Actions\Product\DeleteProduct;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\PurchaseItem;
@@ -20,7 +20,7 @@ beforeEach(function (): void {
 it('may delete a product with no related records', function (): void {
     $product = Product::factory()->create();
 
-    $action = resolve(DeleteProductAction::class);
+    $action = resolve(DeleteProduct::class);
 
     $result = $action->handle($product);
 
@@ -32,7 +32,7 @@ it('throws exception when product has batches', function (): void {
     $product = Product::factory()->create();
     Batch::factory()->create(['product_id' => $product->id]);
 
-    $action = resolve(DeleteProductAction::class);
+    $action = resolve(DeleteProduct::class);
 
     expect(fn () => $action->handle($product))
         ->toThrow(RuntimeException::class, 'Cannot delete product with existing batches');
@@ -42,7 +42,7 @@ it('throws exception when product has stock movements', function (): void {
     $product = Product::factory()->create();
     StockMovement::factory()->create(['product_id' => $product->id]);
 
-    $action = resolve(DeleteProductAction::class);
+    $action = resolve(DeleteProduct::class);
 
     expect(fn () => $action->handle($product))
         ->toThrow(RuntimeException::class, 'Cannot delete product with existing stockMovements');
@@ -52,7 +52,7 @@ it('throws exception when product has purchase items', function (): void {
     $product = Product::factory()->create();
     PurchaseItem::factory()->create(['product_id' => $product->id]);
 
-    $action = resolve(DeleteProductAction::class);
+    $action = resolve(DeleteProduct::class);
 
     expect(fn () => $action->handle($product))
         ->toThrow(RuntimeException::class, 'Cannot delete product with existing purchaseItems');
@@ -62,7 +62,7 @@ it('throws exception when product has sale items', function (): void {
     $product = Product::factory()->create();
     SaleItem::factory()->create(['product_id' => $product->id]);
 
-    $action = resolve(DeleteProductAction::class);
+    $action = resolve(DeleteProduct::class);
 
     expect(fn () => $action->handle($product))
         ->toThrow(RuntimeException::class, 'Cannot delete product with existing saleItems');
@@ -72,7 +72,7 @@ it('throws exception when product has stock transfer items', function (): void {
     $product = Product::factory()->create();
     StockTransferItem::factory()->create(['product_id' => $product->id]);
 
-    $action = resolve(DeleteProductAction::class);
+    $action = resolve(DeleteProduct::class);
 
     expect(fn () => $action->handle($product))
         ->toThrow(RuntimeException::class, 'Cannot delete product with existing stockTransferItems');
@@ -82,7 +82,7 @@ it('throws exception when product has sale return items', function (): void {
     $product = Product::factory()->create();
     SaleReturnItem::factory()->create(['product_id' => $product->id]);
 
-    $action = resolve(DeleteProductAction::class);
+    $action = resolve(DeleteProduct::class);
 
     expect(fn () => $action->handle($product))
         ->toThrow(RuntimeException::class, 'Cannot delete product with existing saleReturnItems');
@@ -92,7 +92,7 @@ it('throws exception when product has purchase return items', function (): void 
     $product = Product::factory()->create();
     PurchaseReturnItem::factory()->create(['product_id' => $product->id]);
 
-    $action = resolve(DeleteProductAction::class);
+    $action = resolve(DeleteProduct::class);
 
     expect(fn () => $action->handle($product))
         ->toThrow(RuntimeException::class, 'Cannot delete product with existing purchaseReturnItems');
@@ -103,7 +103,7 @@ it('includes all related record types in exception message', function (): void {
     Batch::factory()->create(['product_id' => $product->id]);
     PurchaseItem::factory()->create(['product_id' => $product->id]);
 
-    $action = resolve(DeleteProductAction::class);
+    $action = resolve(DeleteProduct::class);
 
     expect(fn () => $action->handle($product))
         ->toThrow(function (RuntimeException $e): void {
@@ -121,7 +121,7 @@ it('deletes product image when deleting product', function (): void {
 
     expect(Storage::disk('public')->exists('products/test-image.jpg'))->toBeTrue();
 
-    $action = resolve(DeleteProductAction::class);
+    $action = resolve(DeleteProduct::class);
     $action->handle($product);
 
     expect(Storage::disk('public')->exists('products/test-image.jpg'))->toBeFalse();
@@ -132,7 +132,7 @@ it('deletes product without image', function (): void {
         'image' => null,
     ]);
 
-    $action = resolve(DeleteProductAction::class);
+    $action = resolve(DeleteProduct::class);
 
     $result = $action->handle($product);
 
@@ -144,7 +144,7 @@ it('does not delete product when any related record exists', function (): void {
     $product = Product::factory()->create();
     Batch::factory()->create(['product_id' => $product->id]);
 
-    $action = resolve(DeleteProductAction::class);
+    $action = resolve(DeleteProduct::class);
 
     try {
         $action->handle($product);
@@ -164,7 +164,7 @@ it('rolls back transaction when exception is thrown', function (): void {
     ]);
     Batch::factory()->create(['product_id' => $product->id]);
 
-    $action = resolve(DeleteProductAction::class);
+    $action = resolve(DeleteProduct::class);
 
     try {
         $action->handle($product);
@@ -182,7 +182,7 @@ it('prevents deletion when multiple related records exist', function (): void {
     Batch::factory()->count(3)->create(['product_id' => $product->id]);
     StockMovement::factory()->count(2)->create(['product_id' => $product->id]);
 
-    $action = resolve(DeleteProductAction::class);
+    $action = resolve(DeleteProduct::class);
 
     expect(fn () => $action->handle($product))
         ->toThrow(RuntimeException::class);

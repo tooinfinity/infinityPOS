@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-use App\Actions\Category\DeleteCategoryAction;
+use App\Actions\Category\DeleteCategory;
 use App\Models\Category;
 use App\Models\Product;
 
 it('may delete a category', function (): void {
     $category = Category::factory()->create();
 
-    $action = resolve(DeleteCategoryAction::class);
+    $action = resolve(DeleteCategory::class);
 
     $result = $action->handle($category);
 
@@ -25,7 +25,7 @@ it('nullifies category_id on associated products when deleting', function (): vo
 
     expect($product->category_id)->toBe($category->id);
 
-    $action = resolve(DeleteCategoryAction::class);
+    $action = resolve(DeleteCategory::class);
     $action->handle($category);
 
     expect($product->refresh()->category_id)->toBeNull();
@@ -37,7 +37,7 @@ it('nullifies category_id on multiple associated products when deleting', functi
         'category_id' => $category->id,
     ]);
 
-    $action = resolve(DeleteCategoryAction::class);
+    $action = resolve(DeleteCategory::class);
     $action->handle($category);
 
     foreach ($products as $product) {
@@ -48,7 +48,7 @@ it('nullifies category_id on multiple associated products when deleting', functi
 it('deletes category without products', function (): void {
     $category = Category::factory()->create();
 
-    $action = resolve(DeleteCategoryAction::class);
+    $action = resolve(DeleteCategory::class);
 
     $result = $action->handle($category);
 

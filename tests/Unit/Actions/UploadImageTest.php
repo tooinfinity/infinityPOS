@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\UploadImageAction;
+use App\Actions\UploadImage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -11,7 +11,7 @@ beforeEach(function (): void {
 });
 
 it('stores uploaded image in products directory', function (): void {
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file = UploadedFile::fake()->image('product.png', 800, 600);
 
@@ -24,7 +24,7 @@ it('stores uploaded image in products directory', function (): void {
 });
 
 it('stores uploaded image in brands directory', function (): void {
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file = UploadedFile::fake()->image('logo.jpg', 800, 600);
 
@@ -37,7 +37,7 @@ it('stores uploaded image in brands directory', function (): void {
 });
 
 it('converts png to webp format', function (): void {
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file = UploadedFile::fake()->image('image.png', 800, 600);
 
@@ -47,7 +47,7 @@ it('converts png to webp format', function (): void {
 });
 
 it('converts jpg to webp format', function (): void {
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file = UploadedFile::fake()->image('image.jpg', 800, 600);
 
@@ -57,7 +57,7 @@ it('converts jpg to webp format', function (): void {
 });
 
 it('converts jpeg to webp format', function (): void {
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file = UploadedFile::fake()->image('image.jpeg', 800, 600);
 
@@ -67,7 +67,7 @@ it('converts jpeg to webp format', function (): void {
 });
 
 it('keeps webp as webp format', function (): void {
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file = UploadedFile::fake()->image('image.webp', 800, 600);
 
@@ -77,7 +77,7 @@ it('keeps webp as webp format', function (): void {
 });
 
 it('rejects gif format', function (): void {
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file = UploadedFile::fake()->image('image.gif', 800, 600);
 
@@ -86,7 +86,7 @@ it('rejects gif format', function (): void {
 });
 
 it('rejects svg format', function (): void {
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file = UploadedFile::fake()->create('image.svg', 100, 'image/svg+xml');
 
@@ -95,7 +95,7 @@ it('rejects svg format', function (): void {
 });
 
 it('rejects files larger than 2MB', function (): void {
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file = UploadedFile::fake()->image('image.png', 800, 600)->size(2049);
 
@@ -104,7 +104,7 @@ it('rejects files larger than 2MB', function (): void {
 });
 
 it('accepts files up to 2MB', function (): void {
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file = UploadedFile::fake()->image('image.png', 800, 600)->size(2048);
 
@@ -116,7 +116,7 @@ it('accepts files up to 2MB', function (): void {
 it('deletes existing image when uploading new one', function (): void {
     Storage::disk('public')->put('products/old-image.jpg', 'fake-content');
 
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file = UploadedFile::fake()->image('product.png', 800, 600);
 
@@ -128,7 +128,7 @@ it('deletes existing image when uploading new one', function (): void {
 it('deletes existing logo when uploading new one', function (): void {
     Storage::disk('public')->put('brands/old-logo.png', 'fake-content');
 
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file = UploadedFile::fake()->image('logo.jpg', 800, 600);
 
@@ -138,7 +138,7 @@ it('deletes existing logo when uploading new one', function (): void {
 });
 
 it('generates unique filename for each upload', function (): void {
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file1 = UploadedFile::fake()->image('image1.png', 800, 600);
     $file2 = UploadedFile::fake()->image('image2.png', 800, 600);
@@ -150,7 +150,7 @@ it('generates unique filename for each upload', function (): void {
 });
 
 it('processes image to default 400px width', function (): void {
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file = UploadedFile::fake()->image('image.png', 800, 600);
 
@@ -161,7 +161,7 @@ it('processes image to default 400px width', function (): void {
 });
 
 it('processes image with custom max width', function (): void {
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file = UploadedFile::fake()->image('image.png', 1200, 900);
 
@@ -174,7 +174,7 @@ it('processes image with custom max width', function (): void {
 });
 
 it('converts all allowed formats to webp', function (string $extension): void {
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file = UploadedFile::fake()->image("image.{$extension}", 800, 600);
 
@@ -184,7 +184,7 @@ it('converts all allowed formats to webp', function (string $extension): void {
 })->with(['png', 'jpg', 'jpeg', 'webp']);
 
 it('handles non-existent existing image gracefully', function (): void {
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file = UploadedFile::fake()->image('image.png', 800, 600);
 
@@ -197,7 +197,7 @@ it('handles non-existent existing image gracefully', function (): void {
 });
 
 it('handles null existing image parameter', function (): void {
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file = UploadedFile::fake()->image('image.png', 800, 600);
 
@@ -210,7 +210,7 @@ it('handles null existing image parameter', function (): void {
 });
 
 it('handles null max width by using default', function (): void {
-    $action = resolve(UploadImageAction::class);
+    $action = resolve(UploadImage::class);
 
     $file = UploadedFile::fake()->image('image.png', 800, 600);
 

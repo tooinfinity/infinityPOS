@@ -7,7 +7,7 @@ namespace App\Actions;
 use App\Models\Product;
 use Random\RandomException;
 
-final readonly class GenerateUniqueBarcodeAction
+final readonly class GenerateUniqueBarcode
 {
     /**
      * @throws RandomException

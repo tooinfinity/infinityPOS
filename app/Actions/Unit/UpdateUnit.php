@@ -8,7 +8,7 @@ use App\Models\Unit;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
-final readonly class UpdateUnitAction
+final readonly class UpdateUnit
 {
     /**
      * @param  array{name?: string, short_name?: string, is_active?: bool}  $data

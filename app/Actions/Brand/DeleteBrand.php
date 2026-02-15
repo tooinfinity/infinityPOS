@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
-final readonly class DeleteBrandAction
+final readonly class DeleteBrand
 {
     /**
      * @throws Throwable

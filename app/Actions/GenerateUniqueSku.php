@@ -7,7 +7,7 @@ namespace App\Actions;
 use App\Models\Product;
 use Illuminate\Support\Str;
 
-final readonly class GenerateUniqueSkuAction
+final readonly class GenerateUniqueSku
 {
     public function handle(): string
     {

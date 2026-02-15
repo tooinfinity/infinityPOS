@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\Category;
 
-use App\Actions\EnsureUniqueSlugAction;
+use App\Actions\EnsureUniqueSlug;
 use App\Models\Category;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Throwable;
 
-final readonly class UpdateCategoryAction
+final readonly class UpdateCategory
 {
-    public function __construct(private EnsureUniqueSlugAction $ensureUniqueSlug) {}
+    public function __construct(private EnsureUniqueSlug $ensureUniqueSlug) {}
 
     /**
      * @param  array{name?: string, slug?: string, description?: string, is_active?: bool}  $data

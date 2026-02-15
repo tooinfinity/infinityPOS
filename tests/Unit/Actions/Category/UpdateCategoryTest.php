@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Category\UpdateCategoryAction;
+use App\Actions\Category\UpdateCategory;
 use App\Models\Category;
 
 it('may update a category name', function (): void {
@@ -11,7 +11,7 @@ it('may update a category name', function (): void {
         'slug' => 'old-name',
     ]);
 
-    $action = resolve(UpdateCategoryAction::class);
+    $action = resolve(UpdateCategory::class);
 
     $updatedCategory = $action->handle($category, [
         'name' => 'New Name',
@@ -27,7 +27,7 @@ it('updates slug when name changes and no slug provided', function (): void {
         'slug' => 'old-name',
     ]);
 
-    $action = resolve(UpdateCategoryAction::class);
+    $action = resolve(UpdateCategory::class);
 
     $updatedCategory = $action->handle($category, [
         'name' => 'New Name',
@@ -42,7 +42,7 @@ it('keeps existing slug when name changes but slug is provided', function (): vo
         'slug' => 'custom-slug',
     ]);
 
-    $action = resolve(UpdateCategoryAction::class);
+    $action = resolve(UpdateCategory::class);
 
     $updatedCategory = $action->handle($category, [
         'name' => 'New Name',
@@ -63,7 +63,7 @@ it('generates unique slug when updating to existing slug', function (): void {
         'slug' => 'another-slug',
     ]);
 
-    $action = resolve(UpdateCategoryAction::class);
+    $action = resolve(UpdateCategory::class);
 
     $updatedCategory = $action->handle($category, [
         'slug' => 'existing-slug',
@@ -78,7 +78,7 @@ it('allows keeping own slug unchanged', function (): void {
         'slug' => 'test-slug',
     ]);
 
-    $action = resolve(UpdateCategoryAction::class);
+    $action = resolve(UpdateCategory::class);
 
     $updatedCategory = $action->handle($category, [
         'name' => 'Updated Category',
@@ -93,7 +93,7 @@ it('updates description', function (): void {
         'description' => 'Old description',
     ]);
 
-    $action = resolve(UpdateCategoryAction::class);
+    $action = resolve(UpdateCategory::class);
 
     $updatedCategory = $action->handle($category, [
         'description' => 'New description',
@@ -107,7 +107,7 @@ it('updates is_active status', function (): void {
         'is_active' => true,
     ]);
 
-    $action = resolve(UpdateCategoryAction::class);
+    $action = resolve(UpdateCategory::class);
 
     $updatedCategory = $action->handle($category, [
         'is_active' => false,

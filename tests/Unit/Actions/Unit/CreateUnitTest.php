@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Actions\Unit\CreateUnitAction;
+use App\Actions\Unit\CreateUnit;
 use App\Models\Unit;
 
 it('may create a unit', function (): void {
-    $action = resolve(CreateUnitAction::class);
+    $action = resolve(CreateUnit::class);
 
     $unit = $action->handle([
         'name' => 'Kilogram',
@@ -20,7 +20,7 @@ it('may create a unit', function (): void {
 });
 
 it('creates unit with is_active flag', function (): void {
-    $action = resolve(CreateUnitAction::class);
+    $action = resolve(CreateUnit::class);
 
     $unit = $action->handle([
         'name' => 'Piece',
@@ -32,7 +32,7 @@ it('creates unit with is_active flag', function (): void {
 });
 
 it('defaults is_active to true when not provided', function (): void {
-    $action = resolve(CreateUnitAction::class);
+    $action = resolve(CreateUnit::class);
 
     $unit = $action->handle([
         'name' => 'Liter',
@@ -43,7 +43,7 @@ it('defaults is_active to true when not provided', function (): void {
 });
 
 it('creates unit with various names', function (): void {
-    $action = resolve(CreateUnitAction::class);
+    $action = resolve(CreateUnit::class);
 
     $unit = $action->handle([
         'name' => 'Box',
@@ -55,7 +55,7 @@ it('creates unit with various names', function (): void {
 });
 
 it('creates unit with uppercase short name', function (): void {
-    $action = resolve(CreateUnitAction::class);
+    $action = resolve(CreateUnit::class);
 
     $unit = $action->handle([
         'name' => 'Dozen',

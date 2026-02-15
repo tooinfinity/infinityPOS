@@ -9,7 +9,7 @@ use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
-final readonly class DeleteCategoryAction
+final readonly class DeleteCategory
 {
     /**
      * @throws Throwable

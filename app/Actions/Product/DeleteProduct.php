@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Throwable;
 
-final readonly class DeleteProductAction
+final readonly class DeleteProduct
 {
     /**
      * @throws Throwable

@@ -6,7 +6,7 @@ namespace App\Actions;
 
 use Illuminate\Database\Eloquent\Model;
 
-final readonly class EnsureUniqueSlugAction
+final readonly class EnsureUniqueSlug
 {
     /**
      * @param  class-string<Model>  $modelClass

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Actions\Category\CreateCategoryAction;
+use App\Actions\Category\CreateCategory;
 use App\Models\Category;
 use Illuminate\Support\Str;
 
 it('may create a category', function (): void {
-    $action = resolve(CreateCategoryAction::class);
+    $action = resolve(CreateCategory::class);
 
     $category = $action->handle([
         'name' => 'Test Category',
@@ -20,7 +20,7 @@ it('may create a category', function (): void {
 });
 
 it('creates category with custom slug', function (): void {
-    $action = resolve(CreateCategoryAction::class);
+    $action = resolve(CreateCategory::class);
 
     $category = $action->handle([
         'name' => 'Test Category',
@@ -36,7 +36,7 @@ it('generates unique slug when duplicate exists', function (): void {
         'slug' => 'test-category',
     ]);
 
-    $action = resolve(CreateCategoryAction::class);
+    $action = resolve(CreateCategory::class);
 
     $category = $action->handle([
         'name' => 'Test Category',
@@ -46,7 +46,7 @@ it('generates unique slug when duplicate exists', function (): void {
 });
 
 it('creates category with description', function (): void {
-    $action = resolve(CreateCategoryAction::class);
+    $action = resolve(CreateCategory::class);
 
     $category = $action->handle([
         'name' => 'Test Category',
@@ -57,7 +57,7 @@ it('creates category with description', function (): void {
 });
 
 it('creates category with is_active flag', function (): void {
-    $action = resolve(CreateCategoryAction::class);
+    $action = resolve(CreateCategory::class);
 
     $category = $action->handle([
         'name' => 'Test Category',
@@ -68,7 +68,7 @@ it('creates category with is_active flag', function (): void {
 });
 
 it('generates slug from name when not provided', function (): void {
-    $action = resolve(CreateCategoryAction::class);
+    $action = resolve(CreateCategory::class);
 
     $category = $action->handle([
         'name' => 'My Special Category',

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Brand\UpdateBrandAction;
+use App\Actions\Brand\UpdateBrand;
 use App\Models\Brand;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -17,7 +17,7 @@ it('may update a brand name', function (): void {
         'slug' => 'old-name',
     ]);
 
-    $action = resolve(UpdateBrandAction::class);
+    $action = resolve(UpdateBrand::class);
 
     $updatedBrand = $action->handle($brand, [
         'name' => 'New Name',
@@ -33,7 +33,7 @@ it('updates slug when name changes and no slug provided', function (): void {
         'slug' => 'old-name',
     ]);
 
-    $action = resolve(UpdateBrandAction::class);
+    $action = resolve(UpdateBrand::class);
 
     $updatedBrand = $action->handle($brand, [
         'name' => 'New Name',
@@ -48,7 +48,7 @@ it('keeps existing slug when name changes but slug is provided', function (): vo
         'slug' => 'custom-slug',
     ]);
 
-    $action = resolve(UpdateBrandAction::class);
+    $action = resolve(UpdateBrand::class);
 
     $updatedBrand = $action->handle($brand, [
         'name' => 'New Name',
@@ -69,7 +69,7 @@ it('generates unique slug when updating to existing slug', function (): void {
         'slug' => 'another-slug',
     ]);
 
-    $action = resolve(UpdateBrandAction::class);
+    $action = resolve(UpdateBrand::class);
 
     $updatedBrand = $action->handle($brand, [
         'slug' => 'existing-slug',
@@ -84,7 +84,7 @@ it('allows keeping own slug unchanged', function (): void {
         'slug' => 'test-slug',
     ]);
 
-    $action = resolve(UpdateBrandAction::class);
+    $action = resolve(UpdateBrand::class);
 
     $updatedBrand = $action->handle($brand, [
         'name' => 'Updated Brand',
@@ -99,7 +99,7 @@ it('updates logo with string path', function (): void {
         'logo' => 'old-logo.png',
     ]);
 
-    $action = resolve(UpdateBrandAction::class);
+    $action = resolve(UpdateBrand::class);
 
     $updatedBrand = $action->handle($brand, [
         'logo' => 'new-logo.png',
@@ -115,7 +115,7 @@ it('updates logo with uploaded file', function (): void {
         'logo' => 'brands/old-logo.webp',
     ]);
 
-    $action = resolve(UpdateBrandAction::class);
+    $action = resolve(UpdateBrand::class);
 
     $file = UploadedFile::fake()->image('logo.png', 800, 600);
 
@@ -136,7 +136,7 @@ it('updates is_active status', function (): void {
         'is_active' => true,
     ]);
 
-    $action = resolve(UpdateBrandAction::class);
+    $action = resolve(UpdateBrand::class);
 
     $updatedBrand = $action->handle($brand, [
         'is_active' => false,
@@ -154,7 +154,7 @@ it('removes logo when set to null', function (): void {
 
     expect(Storage::disk('public')->exists('brands/old-logo.webp'))->toBeTrue();
 
-    $action = resolve(UpdateBrandAction::class);
+    $action = resolve(UpdateBrand::class);
 
     $updatedBrand = $action->handle($brand, [
         'logo' => null,

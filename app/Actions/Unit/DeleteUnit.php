@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
-final readonly class DeleteUnitAction
+final readonly class DeleteUnit
 {
     /**
      * @throws Throwable

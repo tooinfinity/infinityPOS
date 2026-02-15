@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Unit\DeleteUnitAction;
+use App\Actions\Unit\DeleteUnit;
 use App\Models\Product;
 use App\Models\Unit;
 
@@ -20,7 +20,7 @@ it('may delete a unit', function (): void {
         'short_name' => 'tu',
     ]);
 
-    $action = resolve(DeleteUnitAction::class);
+    $action = resolve(DeleteUnit::class);
 
     $result = $action->handle($unit);
 
@@ -44,7 +44,7 @@ it('reassigns products to default unit when deleting', function (): void {
 
     expect($product->unit_id)->toBe($unitToDelete->id);
 
-    $action = resolve(DeleteUnitAction::class);
+    $action = resolve(DeleteUnit::class);
     $action->handle($unitToDelete);
 
     expect($product->refresh()->unit_id)->toBe($defaultUnit->id);
@@ -64,7 +64,7 @@ it('reassigns multiple products to default unit when deleting', function (): voi
         'unit_id' => $unitToDelete->id,
     ]);
 
-    $action = resolve(DeleteUnitAction::class);
+    $action = resolve(DeleteUnit::class);
     $action->handle($unitToDelete);
 
     foreach ($products as $product) {
@@ -78,7 +78,7 @@ it('deletes unit without products', function (): void {
         'short_name' => 'tu',
     ]);
 
-    $action = resolve(DeleteUnitAction::class);
+    $action = resolve(DeleteUnit::class);
 
     $result = $action->handle($unit);
 
@@ -101,7 +101,7 @@ it('uses provided default unit for reassignment', function (): void {
         'unit_id' => $unitToDelete->id,
     ]);
 
-    $action = resolve(DeleteUnitAction::class);
+    $action = resolve(DeleteUnit::class);
     $action->handle($unitToDelete, $customDefault);
 
     expect($product->refresh()->unit_id)->toBe($customDefault->id);
@@ -117,7 +117,7 @@ it('throws exception when deleting default piece unit with associated products',
         'unit_id' => $pieceUnit->id,
     ]);
 
-    $action = resolve(DeleteUnitAction::class);
+    $action = resolve(DeleteUnit::class);
 
     expect(fn () => $action->handle($pieceUnit))
         ->toThrow(DomainException::class, 'Cannot delete unit with associated products without a fallback unit.')
@@ -142,7 +142,7 @@ it('throws exception when deleting unit with products and no fallback unit', fun
         'unit_id' => $unitToDelete->id,
     ]);
 
-    $action = resolve(DeleteUnitAction::class);
+    $action = resolve(DeleteUnit::class);
 
     expect(fn () => $action->handle($unitToDelete))
         ->toThrow(DomainException::class, 'Cannot delete unit with associated products without a fallback unit.')

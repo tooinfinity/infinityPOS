@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Actions\Product;
 
-use App\Actions\UploadImageAction;
+use App\Actions\UploadImage;
 use App\Models\Product;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
-final readonly class UpdateProductAction
+final readonly class UpdateProduct
 {
     public function __construct(
-        private UploadImageAction $uploadImage,
+        private UploadImage $uploadImage,
     ) {}
 
     /**

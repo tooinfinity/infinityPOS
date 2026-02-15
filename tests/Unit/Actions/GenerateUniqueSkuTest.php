@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Actions\GenerateUniqueSkuAction;
+use App\Actions\GenerateUniqueSku;
 use App\Models\Product;
 
 it('generates unique SKU in correct format', function (): void {
-    $action = resolve(GenerateUniqueSkuAction::class);
+    $action = resolve(GenerateUniqueSku::class);
 
     $sku = $action->handle();
 
@@ -17,7 +17,7 @@ it('generates unique SKU in correct format', function (): void {
 });
 
 it('generates different SKUs on consecutive calls', function (): void {
-    $action = resolve(GenerateUniqueSkuAction::class);
+    $action = resolve(GenerateUniqueSku::class);
 
     $sku1 = $action->handle();
     $sku2 = $action->handle();
@@ -28,7 +28,7 @@ it('generates different SKUs on consecutive calls', function (): void {
 it('ensures uniqueness when duplicate exists', function (): void {
     Product::factory()->create(['sku' => 'PRD-ABC123']);
 
-    $action = resolve(GenerateUniqueSkuAction::class);
+    $action = resolve(GenerateUniqueSku::class);
 
     $sku = $action->handle();
 
@@ -37,7 +37,7 @@ it('ensures uniqueness when duplicate exists', function (): void {
 });
 
 it('generates uppercase SKU', function (): void {
-    $action = resolve(GenerateUniqueSkuAction::class);
+    $action = resolve(GenerateUniqueSku::class);
 
     $sku = $action->handle();
 
@@ -45,7 +45,7 @@ it('generates uppercase SKU', function (): void {
 });
 
 it('generates SKU with alphanumeric characters only', function (): void {
-    $action = resolve(GenerateUniqueSkuAction::class);
+    $action = resolve(GenerateUniqueSku::class);
 
     $sku = $action->handle();
 
@@ -57,7 +57,7 @@ it('continues generating until unique SKU found', function (): void {
     Product::factory()->create(['sku' => 'PRD-AAAAAA']);
     Product::factory()->create(['sku' => 'PRD-BBBBBB']);
 
-    $action = resolve(GenerateUniqueSkuAction::class);
+    $action = resolve(GenerateUniqueSku::class);
 
     $sku = $action->handle();
 
