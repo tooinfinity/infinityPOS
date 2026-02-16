@@ -16,7 +16,7 @@ final readonly class CreateWarehouse
      */
     public function handle(CreateWarehouseData $data): Warehouse
     {
-        return DB::transaction(static fn (): Warehouse => Warehouse::query()->create([
+        return DB::transaction(static fn (): Warehouse => Warehouse::query()->forceCreate([
             'name' => $data->name,
             'code' => $data->code,
             'email' => $data->email,
@@ -25,6 +25,6 @@ final readonly class CreateWarehouse
             'city' => $data->city,
             'country' => $data->country,
             'is_active' => $data->is_active ?? true,
-        ]));
+        ]))->refresh();
     }
 }

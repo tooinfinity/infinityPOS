@@ -22,12 +22,12 @@ final readonly class AddItemToStockTransfer
         return DB::transaction(static function () use ($transfer, $itemData): StockTransferItem {
             throw_if($transfer->status !== StockTransferStatusEnum::Pending, RuntimeException::class, 'Items can only be added to pending transfers.');
 
-            return StockTransferItem::query()->create([
+            return StockTransferItem::query()->forceCreate([
                 'stock_transfer_id' => $transfer->id,
                 'product_id' => $itemData->product_id,
                 'batch_id' => $itemData->batch_id,
                 'quantity' => $itemData->quantity,
-            ]);
+            ])->refresh();
         });
     }
 }

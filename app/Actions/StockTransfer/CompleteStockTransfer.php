@@ -56,35 +56,32 @@ final readonly class CompleteStockTransfer
         }
     }
 
+    /**
+     * @throws Throwable
+     */
     private function processItem(StockTransfer $transfer, StockTransferItem $item): void
     {
         $sourceBatch = $item->batch;
         $previousQuantity = $sourceBatch !== null ? $sourceBatch->quantity : 0;
 
-        // Decrease source batch quantity
-        if ($sourceBatch !== null) {
-            $sourceBatch->decrement('quantity', $item->quantity);
-        }
+        $sourceBatch?->decrement('quantity', $item->quantity);
 
-        // Create destination batch
-        $destinationBatch = new Batch();
-        $destinationBatch->forceFill([
+        $destinationBatch = Batch::query()->forceCreate([
             'product_id' => $item->product_id,
             'warehouse_id' => $transfer->to_warehouse_id,
             'batch_number' => $sourceBatch?->batch_number,
             'cost_amount' => $sourceBatch !== null ? $sourceBatch->cost_amount : 0,
             'quantity' => $item->quantity,
             'expires_at' => $sourceBatch?->expires_at,
-        ])->save();
+        ])->refresh();
 
-        // Record stock movement out from source
         $this->recordStockMovement->handle(new RecordStockMovementData(
             warehouse_id: $transfer->from_warehouse_id,
-            product_id: (int) $item->product_id,
+            product_id: $item->product_id,
             type: StockMovementTypeEnum::Transfer,
-            quantity: (int) $item->quantity,
-            previous_quantity: (int) $previousQuantity,
-            current_quantity: (int) $previousQuantity - (int) $item->quantity,
+            quantity: $item->quantity,
+            previous_quantity: $previousQuantity,
+            current_quantity: $previousQuantity - $item->quantity,
             reference_type: StockTransfer::class,
             reference_id: $transfer->id,
             batch_id: $sourceBatch?->id,
@@ -93,14 +90,13 @@ final readonly class CompleteStockTransfer
             created_at: null,
         ));
 
-        // Record stock movement in to destination
         $this->recordStockMovement->handle(new RecordStockMovementData(
             warehouse_id: $transfer->to_warehouse_id,
-            product_id: (int) $item->product_id,
+            product_id: $item->product_id,
             type: StockMovementTypeEnum::Transfer,
-            quantity: (int) $item->quantity,
+            quantity: $item->quantity,
             previous_quantity: 0,
-            current_quantity: (int) $item->quantity,
+            current_quantity: $item->quantity,
             reference_type: StockTransfer::class,
             reference_id: $transfer->id,
             batch_id: $destinationBatch->id,

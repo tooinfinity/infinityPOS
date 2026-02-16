@@ -17,9 +17,9 @@ final readonly class UpdateStockTransferItem
     /**
      * @throws Throwable
      */
-    public function handle(StockTransferItem $item, UpdateStockTransferItemData $data): void
+    public function handle(StockTransferItem $item, UpdateStockTransferItemData $data): StockTransferItem
     {
-        DB::transaction(function () use ($item, $data): void {
+        return DB::transaction(static function () use ($item, $data): StockTransferItem {
             throw_if($item->stockTransfer?->status !== StockTransferStatusEnum::Pending, RuntimeException::class, 'Items can only be updated when transfer is pending.');
 
             $updateData = [];
@@ -31,7 +31,9 @@ final readonly class UpdateStockTransferItem
                 $updateData['quantity'] = $data->quantity;
             }
 
-            $item->forceFill($updateData)->save();
+            $item->update($updateData);
+
+            return $item->refresh();
         });
     }
 }

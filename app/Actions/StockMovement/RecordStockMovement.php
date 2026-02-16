@@ -16,7 +16,7 @@ final readonly class RecordStockMovement
      */
     public function handle(RecordStockMovementData $data): StockMovement
     {
-        return DB::transaction(static fn (): StockMovement => StockMovement::query()->create([
+        return DB::transaction(static fn (): StockMovement => StockMovement::query()->forceCreate([
             'warehouse_id' => $data->warehouse_id,
             'product_id' => $data->product_id,
             'type' => $data->type,
@@ -29,6 +29,6 @@ final readonly class RecordStockMovement
             'user_id' => $data->user_id,
             'note' => $data->note,
             'created_at' => $data->created_at ?? now(),
-        ]));
+        ]))->refresh();
     }
 }

@@ -37,7 +37,7 @@ final readonly class CreateProduct
                 $image = $this->uploadImage->handle($image, 'products');
             }
 
-            return Product::query()->create([
+            return Product::query()->forceCreate([
                 'name' => $data->name,
                 'sku' => $sku,
                 'barcode' => $barcode,

@@ -15,9 +15,9 @@ final readonly class UpdateBatch
     /**
      * @throws Throwable
      */
-    public function handle(Batch $batch, UpdateBatchData $data): void
+    public function handle(Batch $batch, UpdateBatchData $data): Batch
     {
-        DB::transaction(static function () use ($batch, $data): void {
+        return DB::transaction(static function () use ($batch, $data): Batch {
             $updateData = [];
 
             if (! $data->batch_number instanceof Optional) {
@@ -34,6 +34,8 @@ final readonly class UpdateBatch
             }
 
             $batch->update($updateData);
+
+            return $batch->refresh();
         });
     }
 }

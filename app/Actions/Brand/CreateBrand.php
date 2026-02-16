@@ -35,7 +35,7 @@ final readonly class CreateBrand
                 $logo = $this->uploadImage->handle($logo, 'brands');
             }
 
-            return Brand::query()->create([
+            return Brand::query()->forceCreate([
                 'name' => $data->name,
                 'slug' => $slug,
                 'logo' => $logo,

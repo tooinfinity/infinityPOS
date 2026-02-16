@@ -25,7 +25,7 @@ final readonly class CreateCategory
             $slug = $this->ensureUniqueSlug->handle($slug, Category::class);
             $isActive = $data->is_active ?? true;
 
-            return Category::query()->create([
+            return Category::query()->forceCreate([
                 'name' => $data->name,
                 'slug' => $slug,
                 'description' => $data->description,

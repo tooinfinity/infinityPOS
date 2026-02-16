@@ -15,9 +15,9 @@ final readonly class UpdateWarehouse
     /**
      * @throws Throwable
      */
-    public function handle(Warehouse $warehouse, UpdateWarehouseData $data): void
+    public function handle(Warehouse $warehouse, UpdateWarehouseData $data): Warehouse
     {
-        DB::transaction(static function () use ($warehouse, $data): void {
+        return DB::transaction(static function () use ($warehouse, $data): Warehouse {
             $updateData = [];
 
             if (! $data->name instanceof Optional) {
@@ -46,6 +46,8 @@ final readonly class UpdateWarehouse
             }
 
             $warehouse->update($updateData);
+
+            return $warehouse->refresh();
         });
     }
 }

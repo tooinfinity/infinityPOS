@@ -16,7 +16,7 @@ final readonly class CreateUnit
      */
     public function handle(CreateUnitData $data): Unit
     {
-        return DB::transaction(static fn (): Unit => Unit::query()->create([
+        return DB::transaction(static fn (): Unit => Unit::query()->forceCreate([
             'name' => $data->name,
             'short_name' => $data->short_name,
             'is_active' => $data->is_active ?? true,

@@ -20,7 +20,7 @@ final readonly class CancelStockTransfer
         return DB::transaction(static function () use ($transfer): bool {
             throw_if($transfer->status !== StockTransferStatusEnum::Pending, RuntimeException::class, 'Only pending transfers can be cancelled.');
 
-            return (bool) $transfer->forceFill(['status' => StockTransferStatusEnum::Cancelled])->save();
+            return $transfer->forceFill(['status' => StockTransferStatusEnum::Cancelled])->save();
         });
     }
 }
