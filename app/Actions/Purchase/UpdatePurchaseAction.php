@@ -1,0 +1,71 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions\Purchase;
+
+use App\Actions\UploadImage;
+use App\Data\Purchase\UpdatePurchaseData;
+use App\Enums\PurchaseStatusEnum;
+use App\Models\Purchase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use RuntimeException;
+use Spatie\LaravelData\Optional;
+use Throwable;
+
+final readonly class UpdatePurchaseAction
+{
+    public function __construct(private UploadImage $uploadImage) {}
+
+    /**
+     * @throws Throwable
+     */
+    public function handle(Purchase $purchase, UpdatePurchaseData $data): Purchase
+    {
+        return DB::transaction(function () use ($purchase, $data): Purchase {
+            throw_if(
+                $purchase->status !== PurchaseStatusEnum::Pending,
+                RuntimeException::class,
+                'Only pending purchases can be updated.'
+            );
+
+            $updateData = [];
+
+            if (! $data->supplier_id instanceof Optional) {
+                $updateData['supplier_id'] = $data->supplier_id;
+            }
+
+            if (! $data->warehouse_id instanceof Optional) {
+                $updateData['warehouse_id'] = $data->warehouse_id;
+            }
+
+            if (! $data->purchase_date instanceof Optional) {
+                $updateData['purchase_date'] = $data->purchase_date;
+            }
+
+            if (! $data->note instanceof Optional) {
+                $updateData['note'] = $data->note;
+            }
+
+            if (! $data->document instanceof Optional) {
+                if ($data->document instanceof UploadedFile) {
+                    if ($purchase->document !== null) {
+                        Storage::disk('public')->delete($purchase->document);
+                    }
+                    $updateData['document'] = $this->uploadImage->handle($data->document, 'purchases/documents');
+                } else {
+                    if ($purchase->document !== null) {
+                        Storage::disk('public')->delete($purchase->document);
+                    }
+                    $updateData['document'] = null;
+                }
+            }
+
+            $purchase->update($updateData);
+
+            return $purchase->refresh();
+        });
+    }
+}
