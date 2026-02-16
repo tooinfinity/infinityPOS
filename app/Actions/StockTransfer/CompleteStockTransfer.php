@@ -64,7 +64,7 @@ final readonly class CompleteStockTransfer
         $sourceBatch = $item->batch;
         $previousQuantity = $sourceBatch !== null ? $sourceBatch->quantity : 0;
 
-        $sourceBatch?->decrement('quantity', $item->quantity);
+        $sourceBatch?->forceFill(['quantity' => $sourceBatch->quantity - $item->quantity])->save();
 
         $destinationBatch = Batch::query()->forceCreate([
             'product_id' => $item->product_id,

@@ -25,6 +25,9 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string|null $note
  * @property CarbonInterface $created_at
  * @property CarbonInterface $updated_at
+ * @property Model $payable
+ * @property PaymentMethod $paymentMethod
+ * @property User|null $user
  */
 final class Payment extends Model
 {

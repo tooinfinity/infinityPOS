@@ -8,6 +8,7 @@ use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\WarehouseFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,6 +25,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read bool $is_active
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read Collection<int, Batch> $batches
+ * @property-read Collection<int, StockMovement> $stockMovements
+ * @property-read Collection<int, Purchase> $purchases
+ * @property-read Collection<int, Sale> $sales
+ * @property-read Collection<int, StockTransfer> $transfersFrom
+ * @property-read Collection<int, StockTransfer> $transfersTo
+ * @property-read Collection<int, SaleReturn> $saleReturns
+ * @property-read Collection<int, PurchaseReturn> $purchaseReturns
  */
 #[ScopedBy([ActiveScope::class])]
 final class Warehouse extends Model

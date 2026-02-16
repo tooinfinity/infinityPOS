@@ -20,7 +20,7 @@ final readonly class UpdateStockTransferItem
     public function handle(StockTransferItem $item, UpdateStockTransferItemData $data): StockTransferItem
     {
         return DB::transaction(static function () use ($item, $data): StockTransferItem {
-            throw_if($item->stockTransfer?->status !== StockTransferStatusEnum::Pending, RuntimeException::class, 'Items can only be updated when transfer is pending.');
+            throw_if($item->stockTransfer->status !== StockTransferStatusEnum::Pending, RuntimeException::class, 'Items can only be updated when transfer is pending.');
 
             $updateData = [];
 

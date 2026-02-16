@@ -9,6 +9,7 @@ use Carbon\CarbonInterface;
 use Database\Factories\StockTransferFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +27,11 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read CarbonInterface $transfer_date
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read Collection<int, StockTransferItem> $items
+ * @property-read Warehouse $fromWarehouse
+ * @property-read Warehouse $toWarehouse
+ * @property-read User|null $user
+ * @property-read Collection<int, StockMovement> $stockMovements
  */
 final class StockTransfer extends Model
 {

@@ -8,6 +8,7 @@ use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\UnitFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,9 +17,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read int $id
  * @property-read string $name
  * @property-read string $short_name
- * @property-read  bool $is_active
+ * @property-read bool $is_active
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read Collection<int, Product> $products
  */
 #[ScopedBy([ActiveScope::class])]
 final class Unit extends Model

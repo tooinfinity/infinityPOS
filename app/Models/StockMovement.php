@@ -28,6 +28,11 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property-read int $reference_id
  * @property-read string $note
  * @property-read CarbonInterface $created_at
+ * @property-read Warehouse $warehouse
+ * @property-read Product $product
+ * @property-read Batch|null $batch
+ * @property-read User|null $user
+ * @property-read Model $reference
  */
 final class StockMovement extends Model
 {

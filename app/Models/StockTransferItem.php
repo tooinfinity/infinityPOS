@@ -18,6 +18,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read int $quantity
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read StockTransfer $stockTransfer
+ * @property-read Product $product
+ * @property-read Batch|null $batch
  */
 final class StockTransferItem extends Model
 {

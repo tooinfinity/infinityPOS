@@ -20,6 +20,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read int $subtotal
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read SaleReturn $saleReturn
+ * @property-read Product $product
+ * @property-read Batch|null $batch
  */
 final class SaleReturnItem extends Model
 {

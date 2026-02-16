@@ -11,6 +11,7 @@ use Database\Factories\SaleFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -32,6 +33,13 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read string|null $note
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read Customer|null $customer
+ * @property-read Warehouse $warehouse
+ * @property-read User|null $user
+ * @property-read Collection<int, SaleItem> $items
+ * @property-read Collection<int, Payment> $payments
+ * @property-read Collection<int, StockMovement> $stockMovements
+ * @property-read Collection<int, SaleReturn> $returns
  */
 final class Sale extends Model
 {

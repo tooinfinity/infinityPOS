@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read bool $is_active
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Product> $products
  */
 #[ScopedBy([ActiveScope::class])]
 final class Category extends Model

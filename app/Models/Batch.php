@@ -9,6 +9,7 @@ use Database\Factories\BatchFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,6 +25,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read CarbonInterface|null $expires_at
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read Product $product
+ * @property-read Warehouse $warehouse
+ * @property-read Collection<int, StockMovement> $stockMovements
+ * @property-read Collection<int, PurchaseItem> $purchaseItems
+ * @property-read Collection<int, SaleItem> $saleItems
+ * @property-read Collection<int, StockTransferItem> $stockTransferItems
+ * @property-read Collection<int, SaleReturnItem> $saleReturnItems
+ * @property-read Collection<int, PurchaseReturnItem> $purchaseReturnItems
  */
 final class Batch extends Model
 {
