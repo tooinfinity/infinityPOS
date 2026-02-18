@@ -8,6 +8,7 @@ use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\BrandFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -32,6 +33,14 @@ final class Brand extends Model
     use HasFactory;
 
     protected $appends = ['logo_url'];
+
+    /**
+     * @return Builder<self>
+     */
+    public static function withInactive(): Builder
+    {
+        return self::query()->withoutGlobalScope(ActiveScope::class);
+    }
 
     /**
      * @return HasMany<Product, $this>

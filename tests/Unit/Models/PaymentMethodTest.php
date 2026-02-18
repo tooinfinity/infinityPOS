@@ -58,3 +58,17 @@ it('returns empty collection when no payments exist', function (): void {
         ->toBeEmpty()
         ->toBeInstanceOf(Collection::class);
 });
+
+test('withInactive returns both active and inactive payment methods', function (): void {
+    PaymentMethod::factory()->count(2)->create([
+        'is_active' => true,
+    ]);
+    PaymentMethod::factory()->count(2)->create([
+        'is_active' => false,
+    ]);
+
+    $paymentMethods = PaymentMethod::withInactive()->get();
+
+    expect($paymentMethods)
+        ->toHaveCount(4);
+});

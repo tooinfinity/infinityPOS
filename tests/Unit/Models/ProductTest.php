@@ -367,3 +367,17 @@ it('avoids N+1 queries when using withStockQuantity scope', function (): void {
     // Should only have 1 query: products with stock_quantity subquery
     expect($queries)->toHaveCount(1);
 });
+
+test('withInactive returns both active and inactive products', function (): void {
+    Product::factory()->count(2)->create([
+        'is_active' => true,
+    ]);
+    Product::factory()->count(2)->create([
+        'is_active' => false,
+    ]);
+
+    $products = Product::withInactive()->get();
+
+    expect($products)
+        ->toHaveCount(4);
+});

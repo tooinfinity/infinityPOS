@@ -8,6 +8,7 @@ use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\WarehouseFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -39,6 +40,14 @@ final class Warehouse extends Model
 {
     /** @use HasFactory<WarehouseFactory> */
     use HasFactory;
+
+    /**
+     * @return Builder<self>
+     */
+    public static function withInactive(): Builder
+    {
+        return self::query()->withoutGlobalScope(ActiveScope::class);
+    }
 
     /**
      * @return HasMany<Batch, $this>

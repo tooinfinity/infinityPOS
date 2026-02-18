@@ -36,6 +36,14 @@ final class Supplier extends Model
     use HasFactory;
 
     /**
+     * @return Builder<self>
+     */
+    public static function withInactive(): Builder
+    {
+        return self::query()->withoutGlobalScope(ActiveScope::class);
+    }
+
+    /**
      * @return HasMany<Purchase, $this>
      */
     public function purchases(): HasMany

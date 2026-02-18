@@ -8,6 +8,7 @@ use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\PaymentMethodFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +28,14 @@ final class PaymentMethod extends Model
 {
     /** @use HasFactory<PaymentMethodFactory> */
     use HasFactory;
+
+    /**
+     * @return Builder<self>
+     */
+    public static function withInactive(): Builder
+    {
+        return self::query()->withoutGlobalScope(ActiveScope::class);
+    }
 
     /**
      * @return HasMany<Payment, $this>

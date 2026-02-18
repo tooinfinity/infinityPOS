@@ -110,3 +110,17 @@ it('can create transfersTo', function (): void {
         ->toHaveCount(2)
         ->each->toBeInstanceOf(StockTransfer::class);
 });
+
+test('withInactive returns both active and inactive warehouses', function (): void {
+    Warehouse::factory()->count(2)->create([
+        'is_active' => true,
+    ]);
+    Warehouse::factory()->count(2)->create([
+        'is_active' => false,
+    ]);
+
+    $warehouses = Warehouse::withInactive()->get();
+
+    expect($warehouses)
+        ->toHaveCount(4);
+});

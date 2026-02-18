@@ -35,6 +35,14 @@ final class Customer extends Model
     use HasFactory;
 
     /**
+     * @return Builder<self>
+     */
+    public static function withInactive(): Builder
+    {
+        return self::query()->withoutGlobalScope(ActiveScope::class);
+    }
+
+    /**
      * @return HasMany<Sale, $this>
      */
     public function sales(): HasMany

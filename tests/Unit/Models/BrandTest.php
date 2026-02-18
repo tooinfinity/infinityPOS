@@ -69,3 +69,17 @@ test('logo url returns full url when logo exists', function (): void {
         ->not->toBeNull()
         ->toContain('brands/test-logo.webp');
 });
+
+test('withInactive returns both active and inactive brands', function (): void {
+    Brand::factory()->count(2)->create([
+        'is_active' => true,
+    ]);
+    Brand::factory()->count(2)->create([
+        'is_active' => false,
+    ]);
+
+    $brands = Brand::withInactive()->get();
+
+    expect($brands)
+        ->toHaveCount(4);
+});
