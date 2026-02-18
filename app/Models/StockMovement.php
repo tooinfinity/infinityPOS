@@ -110,7 +110,7 @@ final class StockMovement extends Model
     #[Scope]
     protected function in(Builder $query): Builder
     {
-        return $query->where('type', StockMovementTypeEnum::In->value);
+        return $query->where('type', StockMovementTypeEnum::In);
     }
 
     /**
@@ -120,7 +120,7 @@ final class StockMovement extends Model
     #[Scope]
     protected function out(Builder $query): Builder
     {
-        return $query->where('type', StockMovementTypeEnum::Out->value);
+        return $query->where('type', StockMovementTypeEnum::Out);
     }
 
     /**
@@ -130,7 +130,7 @@ final class StockMovement extends Model
     #[Scope]
     protected function transfer(Builder $query): Builder
     {
-        return $query->where('type', StockMovementTypeEnum::Transfer->value);
+        return $query->where('type', StockMovementTypeEnum::Transfer);
     }
 
     /**
@@ -140,7 +140,7 @@ final class StockMovement extends Model
     #[Scope]
     protected function adjustment(Builder $query): Builder
     {
-        return $query->where('type', StockMovementTypeEnum::Adjustment->value);
+        return $query->where('type', StockMovementTypeEnum::Adjustment);
     }
 
     /**

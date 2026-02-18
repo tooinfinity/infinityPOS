@@ -104,7 +104,7 @@ final class StockTransfer extends Model
     #[Scope]
     protected function pending(Builder $query): Builder
     {
-        return $query->where('status', StockTransferStatusEnum::Pending->value);
+        return $query->where('status', StockTransferStatusEnum::Pending);
     }
 
     /**
@@ -114,7 +114,7 @@ final class StockTransfer extends Model
     #[Scope]
     protected function completed(Builder $query): Builder
     {
-        return $query->where('status', StockTransferStatusEnum::Completed->value);
+        return $query->where('status', StockTransferStatusEnum::Completed);
     }
 
     /**
@@ -124,6 +124,6 @@ final class StockTransfer extends Model
     #[Scope]
     protected function cancelled(Builder $query): Builder
     {
-        return $query->where('status', StockTransferStatusEnum::Cancelled->value);
+        return $query->where('status', StockTransferStatusEnum::Cancelled);
     }
 }

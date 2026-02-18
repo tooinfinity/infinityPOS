@@ -32,4 +32,23 @@ enum SaleStatusEnum: string
             self::Cancelled => 'Cancelled'
         };
     }
+
+    public function canTransitionTo(self $newStatus): bool
+    {
+        return match ($this) {
+            self::Pending => in_array($newStatus, [self::Completed, self::Cancelled], true),
+            self::Completed, self::Cancelled => false,
+        };
+    }
+
+    /**
+     * @return list<self>
+     */
+    public function getValidTransitions(): array
+    {
+        return match ($this) {
+            self::Pending => [self::Completed, self::Cancelled],
+            self::Completed, self::Cancelled => [],
+        };
+    }
 }

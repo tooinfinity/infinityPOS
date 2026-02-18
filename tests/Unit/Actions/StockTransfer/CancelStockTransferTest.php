@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\StockTransfer\CancelStockTransfer;
 use App\Enums\StockTransferStatusEnum;
+use App\Exceptions\StateTransitionException;
 use App\Models\StockTransfer;
 
 it('may cancel pending transfer', function (): void {
@@ -26,16 +27,16 @@ it('does not change stock quantities when cancelled', function (): void {
     expect($transfer->fresh()->status)->toBe(StockTransferStatusEnum::Cancelled);
 });
 
-it('throws exception when cancelling non-pending transfer', function (): void {
+it('throws StateTransitionException when cancelling non-pending transfer', function (): void {
     $transfer = StockTransfer::factory()->completed()->create();
 
     $action = resolve(CancelStockTransfer::class);
 
     expect(fn () => $action->handle($transfer))
-        ->toThrow(RuntimeException::class, 'Only pending transfers can be cancelled.');
+        ->toThrow(StateTransitionException::class);
 });
 
-it('throws exception when cancelling already cancelled transfer', function (): void {
+it('throws StateTransitionException when cancelling already cancelled transfer', function (): void {
     $transfer = StockTransfer::factory()->create([
         'status' => StockTransferStatusEnum::Cancelled,
     ]);
@@ -43,5 +44,5 @@ it('throws exception when cancelling already cancelled transfer', function (): v
     $action = resolve(CancelStockTransfer::class);
 
     expect(fn () => $action->handle($transfer))
-        ->toThrow(RuntimeException::class, 'Only pending transfers can be cancelled.');
+        ->toThrow(StateTransitionException::class);
 });

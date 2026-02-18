@@ -134,7 +134,7 @@ final class Sale extends Model
     #[Scope]
     protected function pending(Builder $query): Builder
     {
-        return $query->where('status', SaleStatusEnum::Pending->value);
+        return $query->where('status', SaleStatusEnum::Pending);
     }
 
     /**
@@ -144,7 +144,7 @@ final class Sale extends Model
     #[Scope]
     protected function completed(Builder $query): Builder
     {
-        return $query->where('status', SaleStatusEnum::Completed->value);
+        return $query->where('status', SaleStatusEnum::Completed);
     }
 
     /**
@@ -154,7 +154,7 @@ final class Sale extends Model
     #[Scope]
     protected function cancelled(Builder $query): Builder
     {
-        return $query->where('status', SaleStatusEnum::Cancelled->value);
+        return $query->where('status', SaleStatusEnum::Cancelled);
     }
 
     /**
@@ -164,7 +164,7 @@ final class Sale extends Model
     #[Scope]
     protected function unpaid(Builder $query): Builder
     {
-        return $query->where('payment_status', PaymentStatusEnum::Unpaid->value);
+        return $query->where('payment_status', PaymentStatusEnum::Unpaid);
     }
 
     /**
@@ -174,7 +174,7 @@ final class Sale extends Model
     #[Scope]
     protected function partiallyPaid(Builder $query): Builder
     {
-        return $query->where('payment_status', PaymentStatusEnum::Partial->value);
+        return $query->where('payment_status', PaymentStatusEnum::Partial);
     }
 
     /**
@@ -184,7 +184,7 @@ final class Sale extends Model
     #[Scope]
     protected function paid(Builder $query): Builder
     {
-        return $query->where('payment_status', PaymentStatusEnum::Paid->value);
+        return $query->where('payment_status', PaymentStatusEnum::Paid);
     }
 
     /**

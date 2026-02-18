@@ -114,7 +114,7 @@ final class PurchaseReturn extends Model
     #[Scope]
     protected function pending(Builder $query): Builder
     {
-        return $query->where('status', ReturnStatusEnum::Pending->value);
+        return $query->where('status', ReturnStatusEnum::Pending);
     }
 
     /**
@@ -124,7 +124,7 @@ final class PurchaseReturn extends Model
     #[Scope]
     protected function completed(Builder $query): Builder
     {
-        return $query->where('status', ReturnStatusEnum::Completed->value);
+        return $query->where('status', ReturnStatusEnum::Completed);
     }
 
     /**
@@ -134,7 +134,7 @@ final class PurchaseReturn extends Model
     #[Scope]
     protected function unpaid(Builder $query): Builder
     {
-        return $query->where('payment_status', PaymentStatusEnum::Unpaid->value);
+        return $query->where('payment_status', PaymentStatusEnum::Unpaid);
     }
 
     /**
@@ -144,7 +144,7 @@ final class PurchaseReturn extends Model
     #[Scope]
     protected function partiallyPaid(Builder $query): Builder
     {
-        return $query->where('payment_status', PaymentStatusEnum::Partial->value);
+        return $query->where('payment_status', PaymentStatusEnum::Partial);
     }
 
     /**
@@ -154,7 +154,7 @@ final class PurchaseReturn extends Model
     #[Scope]
     protected function paid(Builder $query): Builder
     {
-        return $query->where('payment_status', PaymentStatusEnum::Paid->value);
+        return $query->where('payment_status', PaymentStatusEnum::Paid);
     }
 
     /**

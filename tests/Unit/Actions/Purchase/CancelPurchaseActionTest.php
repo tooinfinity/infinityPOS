@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Purchase\CancelPurchaseAction;
 use App\Enums\PurchaseStatusEnum;
+use App\Exceptions\StateTransitionException;
 use App\Models\Purchase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -48,22 +49,22 @@ it('deletes document when cancelling', function (): void {
     expect($purchase->fresh()->document)->toBeNull();
 });
 
-it('throws exception when cancelling received purchase', function (): void {
+it('throws StateTransitionException when cancelling received purchase', function (): void {
     $purchase = Purchase::factory()->received()->create();
 
     $action = resolve(CancelPurchaseAction::class);
 
     expect(fn () => $action->handle($purchase))
-        ->toThrow(RuntimeException::class, 'Received purchases cannot be cancelled.');
+        ->toThrow(StateTransitionException::class);
 });
 
-it('throws exception when cancelling already cancelled purchase', function (): void {
+it('throws StateTransitionException when cancelling already cancelled purchase', function (): void {
     $purchase = Purchase::factory()->cancelled()->create();
 
     $action = resolve(CancelPurchaseAction::class);
 
     expect(fn () => $action->handle($purchase))
-        ->toThrow(RuntimeException::class, 'Purchase is already cancelled.');
+        ->toThrow(StateTransitionException::class);
 });
 
 it('persists cancellation to database', function (): void {

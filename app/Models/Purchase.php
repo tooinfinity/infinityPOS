@@ -134,7 +134,7 @@ final class Purchase extends Model
     #[Scope]
     protected function pending(Builder $query): Builder
     {
-        return $query->where('status', PurchaseStatusEnum::Pending->value);
+        return $query->where('status', PurchaseStatusEnum::Pending);
     }
 
     /**
@@ -144,7 +144,7 @@ final class Purchase extends Model
     #[Scope]
     protected function ordered(Builder $query): Builder
     {
-        return $query->where('status', PurchaseStatusEnum::Ordered->value);
+        return $query->where('status', PurchaseStatusEnum::Ordered);
     }
 
     /**
@@ -154,7 +154,7 @@ final class Purchase extends Model
     #[Scope]
     protected function received(Builder $query): Builder
     {
-        return $query->where('status', PurchaseStatusEnum::Received->value);
+        return $query->where('status', PurchaseStatusEnum::Received);
     }
 
     /**
@@ -164,7 +164,7 @@ final class Purchase extends Model
     #[Scope]
     protected function cancelled(Builder $query): Builder
     {
-        return $query->where('status', PurchaseStatusEnum::Cancelled->value);
+        return $query->where('status', PurchaseStatusEnum::Cancelled);
     }
 
     /**
@@ -174,7 +174,7 @@ final class Purchase extends Model
     #[Scope]
     protected function unpaid(Builder $query): Builder
     {
-        return $query->where('payment_status', PaymentStatusEnum::Unpaid->value);
+        return $query->where('payment_status', PaymentStatusEnum::Unpaid);
     }
 
     /**
@@ -184,7 +184,7 @@ final class Purchase extends Model
     #[Scope]
     protected function partiallyPaid(Builder $query): Builder
     {
-        return $query->where('payment_status', PaymentStatusEnum::Partial->value);
+        return $query->where('payment_status', PaymentStatusEnum::Partial);
     }
 
     /**
@@ -194,7 +194,7 @@ final class Purchase extends Model
     #[Scope]
     protected function paid(Builder $query): Builder
     {
-        return $query->where('payment_status', PaymentStatusEnum::Paid->value);
+        return $query->where('payment_status', PaymentStatusEnum::Paid);
     }
 
     /**

@@ -8,6 +8,7 @@ use App\Actions\StockMovement\RecordStockMovement;
 use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\StockMovementTypeEnum;
 use App\Enums\StockTransferStatusEnum;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
@@ -25,7 +26,23 @@ final readonly class CompleteStockTransfer
     public function handle(StockTransfer $transfer): void
     {
         DB::transaction(function () use ($transfer): void {
-            throw_if($transfer->status !== StockTransferStatusEnum::Pending, RuntimeException::class, 'Only pending transfers can be completed.');
+            $transfer = StockTransfer::query()
+                ->lockForUpdate()
+                ->with(['items.product', 'items.batch'])
+                ->findOrFail($transfer->id);
+
+            throw_if(
+                ! $transfer->status->canTransitionTo(StockTransferStatusEnum::Completed),
+                StateTransitionException::class,
+                $transfer->status->label(),
+                StockTransferStatusEnum::Completed->label()
+            );
+
+            // Lock all related batches before validation
+            $batchIds = $transfer->items->pluck('batch_id')->filter();
+            if ($batchIds->isNotEmpty()) {
+                Batch::query()->whereIn('id', $batchIds)->lockForUpdate()->get();
+            }
 
             $this->validateSufficientStock($transfer);
 
@@ -39,8 +56,6 @@ final readonly class CompleteStockTransfer
 
     private function validateSufficientStock(StockTransfer $transfer): void
     {
-        $transfer->load(['items.product', 'items.batch']);
-
         foreach ($transfer->items as $item) {
             if ($item->batch === null) {
                 continue;

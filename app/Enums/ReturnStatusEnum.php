@@ -30,4 +30,23 @@ enum ReturnStatusEnum: string
             self::Completed => 'Completed'
         };
     }
+
+    public function canTransitionTo(self $newStatus): bool
+    {
+        return match ($this) {
+            self::Pending => $newStatus === self::Completed,
+            self::Completed => false,
+        };
+    }
+
+    /**
+     * @return list<self>
+     */
+    public function getValidTransitions(): array
+    {
+        return match ($this) {
+            self::Pending => [self::Completed],
+            self::Completed => [],
+        };
+    }
 }

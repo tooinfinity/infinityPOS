@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Purchase\MarkPurchaseAsOrderedAction;
 use App\Enums\PurchaseStatusEnum;
+use App\Exceptions\StateTransitionException;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
@@ -24,13 +25,13 @@ it('may mark pending purchase as ordered', function (): void {
     expect($orderedPurchase->status)->toBe(PurchaseStatusEnum::Ordered);
 });
 
-it('throws exception when marking non-pending purchase as ordered', function (): void {
+it('throws StateTransitionException when marking non-pending purchase as ordered', function (): void {
     $purchase = Purchase::factory()->received()->create();
 
     $action = resolve(MarkPurchaseAsOrderedAction::class);
 
     expect(fn () => $action->handle($purchase))
-        ->toThrow(RuntimeException::class, 'Only pending purchases can be marked as ordered.');
+        ->toThrow(StateTransitionException::class);
 });
 
 it('throws exception when marking empty purchase as ordered', function (): void {

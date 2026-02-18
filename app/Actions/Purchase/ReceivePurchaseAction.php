@@ -8,6 +8,7 @@ use App\Actions\StockMovement\RecordStockMovement;
 use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\PurchaseStatusEnum;
 use App\Enums\StockMovementTypeEnum;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
@@ -26,13 +27,23 @@ final readonly class ReceivePurchaseAction
     public function handle(Purchase $purchase): Purchase
     {
         return DB::transaction(function () use ($purchase): Purchase {
+            $purchase = Purchase::query()
+                ->lockForUpdate()
+                ->with(['items.product', 'items.batch'])
+                ->findOrFail($purchase->id);
+
+            throw_if(
+                ! $purchase->status->canTransitionTo(PurchaseStatusEnum::Received),
+                StateTransitionException::class,
+                $purchase->status->label(),
+                PurchaseStatusEnum::Received->label()
+            );
+
             throw_if(
                 ! in_array($purchase->status, [PurchaseStatusEnum::Pending, PurchaseStatusEnum::Ordered], true),
                 RuntimeException::class,
                 'Only pending or ordered purchases can be received.'
             );
-
-            $purchase->load(['items.product', 'items.batch']);
 
             foreach ($purchase->items as $item) {
                 $this->processItem($purchase, $item);

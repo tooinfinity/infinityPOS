@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\StockTransfer\CompleteStockTransfer;
 use App\Enums\StockTransferStatusEnum;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\StockMovement;
 use App\Models\StockTransfer;
@@ -104,25 +105,25 @@ it('throws exception when source has insufficient stock', function (): void {
         ->toThrow(RuntimeException::class, 'Insufficient stock in batch');
 });
 
-it('throws exception when completing non-pending transfer', function (): void {
+it('throws StateTransitionException when completing non-pending transfer', function (): void {
     $transfer = StockTransfer::factory()->completed()->create();
 
     $action = resolve(CompleteStockTransfer::class);
 
     expect(fn () => $action->handle($transfer))
-        ->toThrow(RuntimeException::class, 'Only pending transfers can be completed.');
+        ->toThrow(StateTransitionException::class);
 });
 
-it('throws exception when completing already completed transfer', function (): void {
+it('throws StateTransitionException when completing already completed transfer', function (): void {
     $transfer = StockTransfer::factory()->completed()->create();
 
     $action = resolve(CompleteStockTransfer::class);
 
     expect(fn () => $action->handle($transfer))
-        ->toThrow(RuntimeException::class, 'Only pending transfers can be completed.');
+        ->toThrow(StateTransitionException::class);
 });
 
-it('throws exception when completing cancelled transfer', function (): void {
+it('throws StateTransitionException when completing cancelled transfer', function (): void {
     $transfer = StockTransfer::factory()->create([
         'status' => StockTransferStatusEnum::Cancelled,
     ]);
@@ -130,7 +131,7 @@ it('throws exception when completing cancelled transfer', function (): void {
     $action = resolve(CompleteStockTransfer::class);
 
     expect(fn () => $action->handle($transfer))
-        ->toThrow(RuntimeException::class, 'Only pending transfers can be completed.');
+        ->toThrow(StateTransitionException::class);
 });
 
 it('completes transfer with item that has no batch', function (): void {

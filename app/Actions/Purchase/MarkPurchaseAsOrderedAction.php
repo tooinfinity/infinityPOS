@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Purchase;
 
 use App\Enums\PurchaseStatusEnum;
+use App\Exceptions\StateTransitionException;
 use App\Models\Purchase;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -18,6 +19,17 @@ final readonly class MarkPurchaseAsOrderedAction
     public function handle(Purchase $purchase): Purchase
     {
         return DB::transaction(static function () use ($purchase): Purchase {
+            $purchase = Purchase::query()
+                ->lockForUpdate()
+                ->findOrFail($purchase->id);
+
+            throw_if(
+                ! $purchase->status->canTransitionTo(PurchaseStatusEnum::Ordered),
+                StateTransitionException::class,
+                $purchase->status->label(),
+                PurchaseStatusEnum::Ordered->label()
+            );
+
             throw_if(
                 $purchase->status !== PurchaseStatusEnum::Pending,
                 RuntimeException::class,

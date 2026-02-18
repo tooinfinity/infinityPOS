@@ -80,6 +80,10 @@ final readonly class CreatePurchaseAction
 
     private function generateReferenceNo(): string
     {
-        return 'PUR-'.now()->format('YmdHis').'-'.Str::upper(Str::random(4));
+        do {
+            $reference = 'PUR-'.now()->format('YmdHis').'-'.Str::upper(Str::random(4));
+        } while (Purchase::query()->where('reference_no', $reference)->exists());
+
+        return $reference;
     }
 }

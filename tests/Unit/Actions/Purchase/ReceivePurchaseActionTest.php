@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Purchase\ReceivePurchaseAction;
 use App\Enums\PurchaseStatusEnum;
 use App\Enums\StockMovementTypeEnum;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\Purchase;
@@ -119,22 +120,22 @@ it('records stock movement for received items', function (): void {
         ->and($movement->current_quantity)->toBe(25);
 });
 
-it('throws exception when receiving already received purchase', function (): void {
+it('throws StateTransitionException when receiving already received purchase', function (): void {
     $purchase = Purchase::factory()->received()->create();
 
     $action = resolve(ReceivePurchaseAction::class);
 
     expect(fn () => $action->handle($purchase))
-        ->toThrow(RuntimeException::class, 'Only pending or ordered purchases can be received.');
+        ->toThrow(StateTransitionException::class);
 });
 
-it('throws exception when receiving cancelled purchase', function (): void {
+it('throws StateTransitionException when receiving cancelled purchase', function (): void {
     $purchase = Purchase::factory()->cancelled()->create();
 
     $action = resolve(ReceivePurchaseAction::class);
 
     expect(fn () => $action->handle($purchase))
-        ->toThrow(RuntimeException::class, 'Only pending or ordered purchases can be received.');
+        ->toThrow(StateTransitionException::class);
 });
 
 it('creates multiple batches for multiple items', function (): void {
