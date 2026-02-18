@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property-read int $id
@@ -28,6 +29,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read CarbonInterface $purchase_date
  * @property-read int $total_amount
  * @property-read int $paid_amount
+ * @property-read int $due_amount
  * @property-read PaymentStatusEnum $payment_status
  * @property-read string|null $note
  * @property-read string|null $document
@@ -203,5 +205,17 @@ final class Purchase extends Model
         return Attribute::make(
             get: fn (): int => max(0, $this->total_amount - $this->paid_amount),
         );
+    }
+
+    /**
+     * @param  Builder<Purchase>  $query
+     * @return Builder<Purchase>
+     */
+    #[Scope]
+    protected function withDueAmount(Builder $query): Builder
+    {
+        return $query->select('*')->addSelect([
+            'due_amount' => DB::raw('CASE WHEN total_amount > paid_amount THEN total_amount - paid_amount ELSE 0 END'),
+        ]);
     }
 }

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->index('stock_transfer_id');
             $table->index('product_id');
             $table->index('batch_id');
+            $table->unique(['stock_transfer_id', 'product_id', 'batch_id']);
         });
     }
 };

@@ -54,9 +54,6 @@ final readonly class UpdateProduct
             if (! $data->selling_price instanceof Optional) {
                 $updateData['selling_price'] = $data->selling_price;
             }
-            if (! $data->quantity instanceof Optional) {
-                $updateData['quantity'] = $data->quantity;
-            }
             if (! $data->alert_quantity instanceof Optional) {
                 $updateData['alert_quantity'] = $data->alert_quantity;
             }

@@ -37,7 +37,6 @@ final class ProductFactory extends Factory
             'image' => $this->faker->url(),
             'cost_price' => $cost_price,
             'selling_price' => $selling_price,
-            'quantity' => $this->faker->randomNumber(2),
             'alert_quantity' => $this->faker->randomDigitNotZero(),
             'track_inventory' => $this->faker->boolean(90),
             'is_active' => true,
@@ -102,33 +101,6 @@ final class ProductFactory extends Factory
             'cost_price' => $costPrice,
             'selling_price' => $sellingPrice,
         ]);
-    }
-
-    public function withQuantity(int $quantity): self
-    {
-        return $this->state(fn (array $attributes): array => [
-            'quantity' => $quantity,
-        ]);
-    }
-
-    public function outOfStock(): self
-    {
-        return $this->state(fn (array $attributes): array => [
-            'quantity' => 0,
-        ]);
-    }
-
-    public function lowStock(): self
-    {
-        return $this->state(function (array $attributes): array {
-            /** @var int $alertQuantity */
-            $alertQuantity = max($attributes['alert_quantity'] ?? 10, 2);
-
-            return [
-                'quantity' => $this->faker->numberBetween(1, $alertQuantity - 1),
-                'alert_quantity' => $alertQuantity,
-            ];
-        });
     }
 
     public function trackingInventory(): self

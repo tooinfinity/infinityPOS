@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property-read int $id
@@ -28,6 +29,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read CarbonInterface $sale_date
  * @property-read int $total_amount
  * @property-read int $paid_amount
+ * @property-read int $due_amount
  * @property-read int $change_amount
  * @property-read PaymentStatusEnum $payment_status
  * @property-read string|null $note
@@ -206,12 +208,30 @@ final class Sale extends Model
     }
 
     /**
+     * @param  Builder<Sale>  $query
+     * @return Builder<Sale>
+     */
+    #[Scope]
+    protected function withDueAmount(Builder $query): Builder
+    {
+        return $query->select('*')->addSelect([
+            'due_amount' => DB::raw('CASE WHEN total_amount > paid_amount THEN total_amount - paid_amount ELSE 0 END'),
+        ]);
+    }
+
+    /**
      * @return Attribute<int, null>
      */
     protected function profit(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->items->sum(fn (SaleItem $item): int => ($item->unit_price - $item->unit_cost) * $item->quantity),
+            get: function (): int {
+                if (! $this->relationLoaded('items')) {
+                    return 0;
+                }
+
+                return $this->items->sum(fn (SaleItem $item): int => ($item->unit_price - $item->unit_cost) * $item->quantity);
+            },
         );
     }
 }

@@ -25,6 +25,8 @@ test('to array', function (): void {
             'reference_no',
             'return_date',
             'total_amount',
+            'paid_amount',
+            'payment_status',
             'status',
             'note',
             'created_at',
@@ -117,4 +119,69 @@ it('filters by completed scope', function (): void {
 
     expect($results)->toHaveCount(1)
         ->first()->status->value->toBe('completed');
+});
+
+it('filters by unpaid scope', function (): void {
+    PurchaseReturn::factory()->unpaid()->create();
+    PurchaseReturn::factory()->count(2)->paid()->create();
+
+    $results = PurchaseReturn::unpaid()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->payment_status->value->toBe('unpaid');
+});
+
+it('filters by partiallyPaid scope', function (): void {
+    PurchaseReturn::factory()->partiallyPaid(10000)->create(['total_amount' => 10000]);
+    PurchaseReturn::factory()->count(2)->paid()->create();
+
+    $results = PurchaseReturn::partiallyPaid()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->payment_status->value->toBe('partial');
+});
+
+it('filters by paid scope', function (): void {
+    PurchaseReturn::factory()->paid()->create();
+    PurchaseReturn::factory()->count(2)->unpaid()->create();
+
+    $results = PurchaseReturn::paid()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->payment_status->value->toBe('paid');
+});
+
+it('calculates due_amount accessor', function (): void {
+    $unpaidReturn = PurchaseReturn::factory()->unpaid()->create(['total_amount' => 10000]);
+    $partiallyPaidReturn = PurchaseReturn::factory()->create([
+        'total_amount' => 10000,
+        'paid_amount' => 3000,
+    ]);
+    $paidReturn = PurchaseReturn::factory()->paid(10000)->create(['total_amount' => 10000]);
+
+    expect($unpaidReturn->due_amount)->toBe(10000)
+        ->and($partiallyPaidReturn->due_amount)->toBe(7000)
+        ->and($paidReturn->due_amount)->toBe(0);
+});
+
+it('filters by withDueAmount scope', function (): void {
+    $purchaseReturnWithDue = PurchaseReturn::factory()->create([
+        'total_amount' => 1000,
+        'paid_amount' => 400,
+    ]);
+
+    $result = PurchaseReturn::withDueAmount()->find($purchaseReturnWithDue->id);
+
+    expect($result->due_amount)->toBe(600);
+});
+
+it('returns zero due amount with scope when overpaid', function (): void {
+    $purchaseReturnOverpaid = PurchaseReturn::factory()->create([
+        'total_amount' => 1000,
+        'paid_amount' => 1200,
+    ]);
+
+    $result = PurchaseReturn::withDueAmount()->find($purchaseReturnOverpaid->id);
+
+    expect($result->due_amount)->toBe(0);
 });

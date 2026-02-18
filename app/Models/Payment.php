@@ -71,7 +71,7 @@ final class Payment extends Model
             'payable_type' => 'string',
             'payable_id' => 'integer',
             'amount' => 'integer',
-            'payment_date' => 'date',
+            'payment_date' => 'datetime',
             'note' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

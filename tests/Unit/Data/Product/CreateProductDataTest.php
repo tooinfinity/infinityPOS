@@ -17,7 +17,6 @@ it('may be created with required fields', function (): void {
         image: null,
         cost_price: 5000,
         selling_price: 7500,
-        quantity: 100,
         alert_quantity: 10,
         track_inventory: true,
         is_active: true,
@@ -34,7 +33,6 @@ it('may be created with required fields', function (): void {
         ->image->toBeNull()
         ->cost_price->toBe(5000)
         ->selling_price->toBe(7500)
-        ->quantity->toBe(100)
         ->alert_quantity->toBe(10)
         ->track_inventory->toBeTrue()
         ->is_active->toBeTrue();
@@ -54,7 +52,6 @@ it('may be created with an uploaded file image', function (): void {
         image: $file,
         cost_price: 5000,
         selling_price: 7500,
-        quantity: 100,
         alert_quantity: 10,
         track_inventory: true,
         is_active: true,
@@ -75,7 +72,6 @@ it('may be created with a string image path', function (): void {
         image: 'products/test.jpg',
         cost_price: 5000,
         selling_price: 7500,
-        quantity: 100,
         alert_quantity: 10,
         track_inventory: true,
         is_active: true,
@@ -96,7 +92,6 @@ it('may be created with category and brand', function (): void {
         image: null,
         cost_price: 5000,
         selling_price: 7500,
-        quantity: 100,
         alert_quantity: 10,
         track_inventory: true,
         is_active: true,
@@ -119,7 +114,6 @@ it('may be created with description', function (): void {
         image: null,
         cost_price: 5000,
         selling_price: 7500,
-        quantity: 100,
         alert_quantity: 10,
         track_inventory: true,
         is_active: true,

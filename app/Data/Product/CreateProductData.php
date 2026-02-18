@@ -20,7 +20,6 @@ final class CreateProductData extends Data
         public UploadedFile|string|null $image,
         public int $cost_price,
         public int $selling_price,
-        public int $quantity,
         public int $alert_quantity,
         public bool $track_inventory,
         public bool $is_active,

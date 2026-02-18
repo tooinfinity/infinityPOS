@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('reference_no')->unique();
             $table->date('return_date');
             $table->unsignedBigInteger('total_amount');
+            $table->unsignedBigInteger('paid_amount')->default(0);
+            $table->string('payment_status');
             $table->string('status');
             $table->text('note')->nullable();
 

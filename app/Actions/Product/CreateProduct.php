@@ -48,7 +48,6 @@ final readonly class CreateProduct
                 'image' => $image,
                 'cost_price' => $data->cost_price,
                 'selling_price' => $data->selling_price,
-                'quantity' => $data->quantity,
                 'alert_quantity' => $data->alert_quantity,
                 'track_inventory' => $trackInventory,
                 'is_active' => $isActive,

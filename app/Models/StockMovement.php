@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property-read int $reference_id
  * @property-read string $note
  * @property-read CarbonInterface $created_at
+ * @property-read CarbonInterface $updated_at
  * @property-read Warehouse $warehouse
  * @property-read Product $product
  * @property-read Batch|null $batch
@@ -38,8 +39,6 @@ final class StockMovement extends Model
 {
     /** @use HasFactory<StockMovementFactory> */
     use HasFactory;
-
-    public $timestamps = false;
 
     /**
      * @return BelongsTo<Warehouse, $this>
@@ -100,6 +99,7 @@ final class StockMovement extends Model
             'reference_id' => 'integer',
             'note' => 'string',
             'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ];
     }
 

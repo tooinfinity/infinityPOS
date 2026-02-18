@@ -226,3 +226,25 @@ it('returns zero due amount when overpaid', function (): void {
 
     expect($purchase->due_amount)->toBe(0);
 });
+
+it('filters by withDueAmount scope', function (): void {
+    $purchaseWithDue = Purchase::factory()->create([
+        'total_amount' => 1000,
+        'paid_amount' => 400,
+    ]);
+
+    $result = Purchase::withDueAmount()->find($purchaseWithDue->id);
+
+    expect($result->due_amount)->toBe(600);
+});
+
+it('returns zero due amount with scope when overpaid', function (): void {
+    $purchaseOverpaid = Purchase::factory()->create([
+        'total_amount' => 1000,
+        'paid_amount' => 1200,
+    ]);
+
+    $result = Purchase::withDueAmount()->find($purchaseOverpaid->id);
+
+    expect($result->due_amount)->toBe(0);
+});

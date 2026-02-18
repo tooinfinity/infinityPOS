@@ -24,6 +24,7 @@ return new class extends Migration
             $table->index('product_id');
             $table->index('warehouse_id');
             $table->index(['product_id', 'warehouse_id']);
+            $table->unique(['product_id', 'warehouse_id', 'batch_number']);
             $table->index(['warehouse_id', 'expires_at']);
             $table->index(['expires_at', 'quantity']);
         });

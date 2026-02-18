@@ -39,6 +39,8 @@ final readonly class CompleteStockTransfer
 
     private function validateSufficientStock(StockTransfer $transfer): void
     {
+        $transfer->load(['items.product', 'items.batch']);
+
         foreach ($transfer->items as $item) {
             if ($item->batch === null) {
                 continue;

@@ -8,6 +8,7 @@ use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\BrandFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -29,6 +30,8 @@ final class Brand extends Model
 {
     /** @use HasFactory<BrandFactory> */
     use HasFactory;
+
+    protected $appends = ['logo_url'];
 
     /**
      * @return HasMany<Product, $this>
@@ -55,14 +58,18 @@ final class Brand extends Model
     }
 
     /**
-     * Get the full URL for the brand logo.
+     * @return Attribute<string|null, null>
      */
-    protected function getLogoUrlAttribute(): ?string
+    protected function logoUrl(): Attribute
     {
-        if ($this->logo === null) {
-            return null;
-        }
+        return Attribute::make(
+            get: function (): ?string {
+                if ($this->logo === null) {
+                    return null;
+                }
 
-        return Storage::disk('public')->url($this->logo);
+                return Storage::disk('public')->url($this->logo);
+            },
+        );
     }
 }

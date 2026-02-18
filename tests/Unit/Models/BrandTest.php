@@ -7,7 +7,10 @@ use App\Models\Product;
 use Illuminate\Support\Facades\Storage;
 
 test('to array', function (): void {
-    $brand = Brand::factory()->create()->refresh();
+    Storage::fake('public');
+    $brand = Brand::factory()->create([
+        'logo' => 'brands/test-logo.webp',
+    ])->refresh();
 
     expect(array_keys($brand->toArray()))
         ->toBe([
@@ -18,6 +21,7 @@ test('to array', function (): void {
             'is_active',
             'created_at',
             'updated_at',
+            'logo_url',
         ]);
 });
 

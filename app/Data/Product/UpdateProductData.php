@@ -21,7 +21,6 @@ final class UpdateProductData extends Data
         public UploadedFile|string|null|Optional $image,
         public int|Optional $cost_price,
         public int|Optional $selling_price,
-        public int|Optional $quantity,
         public int|Optional $alert_quantity,
         public bool|Optional $track_inventory,
         public bool|Optional $is_active,

@@ -32,7 +32,6 @@ it('may update a product name', function (): void {
         image: Optional::create(),
         cost_price: Optional::create(),
         selling_price: Optional::create(),
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: Optional::create(),
@@ -62,7 +61,6 @@ it('updates product pricing', function (): void {
         image: Optional::create(),
         cost_price: 6000,
         selling_price: 9000,
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: Optional::create(),
@@ -72,37 +70,6 @@ it('updates product pricing', function (): void {
 
     expect($updatedProduct->cost_price)->toBe(6000)
         ->and($updatedProduct->selling_price)->toBe(9000);
-});
-
-it('updates product quantity and alert quantity', function (): void {
-    $product = Product::factory()->create([
-        'quantity' => 100,
-        'alert_quantity' => 10,
-    ]);
-
-    $action = resolve(UpdateProduct::class);
-
-    $data = new UpdateProductData(
-        name: Optional::create(),
-        sku: Optional::create(),
-        barcode: Optional::create(),
-        unit_id: Optional::create(),
-        category_id: Optional::create(),
-        brand_id: Optional::create(),
-        description: Optional::create(),
-        image: Optional::create(),
-        cost_price: Optional::create(),
-        selling_price: Optional::create(),
-        quantity: 200,
-        alert_quantity: 20,
-        track_inventory: Optional::create(),
-        is_active: Optional::create(),
-    );
-
-    $updatedProduct = $action->handle($product, $data);
-
-    expect($updatedProduct->quantity)->toBe(200)
-        ->and($updatedProduct->alert_quantity)->toBe(20);
 });
 
 it('updates product unit', function (): void {
@@ -122,7 +89,6 @@ it('updates product unit', function (): void {
         image: Optional::create(),
         cost_price: Optional::create(),
         selling_price: Optional::create(),
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: Optional::create(),
@@ -150,7 +116,6 @@ it('updates product category', function (): void {
         image: Optional::create(),
         cost_price: Optional::create(),
         selling_price: Optional::create(),
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: Optional::create(),
@@ -178,7 +143,6 @@ it('updates product brand', function (): void {
         image: Optional::create(),
         cost_price: Optional::create(),
         selling_price: Optional::create(),
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: Optional::create(),
@@ -205,7 +169,6 @@ it('removes category by setting to null', function (): void {
         image: Optional::create(),
         cost_price: Optional::create(),
         selling_price: Optional::create(),
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: Optional::create(),
@@ -232,7 +195,6 @@ it('removes brand by setting to null', function (): void {
         image: Optional::create(),
         cost_price: Optional::create(),
         selling_price: Optional::create(),
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: Optional::create(),
@@ -259,7 +221,6 @@ it('updates product description', function (): void {
         image: Optional::create(),
         cost_price: Optional::create(),
         selling_price: Optional::create(),
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: Optional::create(),
@@ -286,7 +247,6 @@ it('updates track_inventory status', function (): void {
         image: Optional::create(),
         cost_price: Optional::create(),
         selling_price: Optional::create(),
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: false,
         is_active: Optional::create(),
@@ -313,7 +273,6 @@ it('updates is_active status', function (): void {
         image: Optional::create(),
         cost_price: Optional::create(),
         selling_price: Optional::create(),
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: false,
@@ -342,7 +301,6 @@ it('updates image with string path', function (): void {
         image: 'products/new-image.jpg',
         cost_price: Optional::create(),
         selling_price: Optional::create(),
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: Optional::create(),
@@ -374,7 +332,6 @@ it('updates image with uploaded file', function (): void {
         image: $file,
         cost_price: Optional::create(),
         selling_price: Optional::create(),
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: Optional::create(),
@@ -410,7 +367,6 @@ it('removes image when set to null', function (): void {
         image: null,
         cost_price: Optional::create(),
         selling_price: Optional::create(),
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: Optional::create(),
@@ -443,7 +399,6 @@ it('updates multiple fields at once', function (): void {
         image: Optional::create(),
         cost_price: 6000,
         selling_price: 9000,
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: Optional::create(),
@@ -478,7 +433,6 @@ it('keeps unchanged fields intact', function (): void {
         image: Optional::create(),
         cost_price: 6000,
         selling_price: Optional::create(),
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: Optional::create(),
@@ -514,7 +468,6 @@ it('rolls back transaction on failure', function (): void {
         image: Optional::create(),
         cost_price: Optional::create(),
         selling_price: Optional::create(),
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: Optional::create(),
@@ -547,7 +500,6 @@ it('does not delete image when string path is unchanged', function (): void {
         image: 'products/existing-image.jpg',
         cost_price: Optional::create(),
         selling_price: Optional::create(),
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: Optional::create(),
@@ -577,7 +529,6 @@ it('does not delete image when string path is empty', function (): void {
         image: '',
         cost_price: Optional::create(),
         selling_price: Optional::create(),
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: Optional::create(),
@@ -609,7 +560,6 @@ it('updates sku and barcode', function (): void {
         image: Optional::create(),
         cost_price: Optional::create(),
         selling_price: Optional::create(),
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: Optional::create(),
@@ -619,6 +569,32 @@ it('updates sku and barcode', function (): void {
 
     expect($updatedProduct->sku)->toBe('NEW-SKU-002')
         ->and($updatedProduct->barcode)->toBe('9780000000002');
+});
+
+it('updates alert quantity', function (): void {
+    $product = Product::factory()->create(['alert_quantity' => 10]);
+
+    $action = resolve(UpdateProduct::class);
+
+    $data = new UpdateProductData(
+        name: Optional::create(),
+        sku: Optional::create(),
+        barcode: Optional::create(),
+        unit_id: Optional::create(),
+        category_id: Optional::create(),
+        brand_id: Optional::create(),
+        description: Optional::create(),
+        image: Optional::create(),
+        cost_price: Optional::create(),
+        selling_price: Optional::create(),
+        alert_quantity: 20,
+        track_inventory: Optional::create(),
+        is_active: Optional::create(),
+    );
+
+    $updatedProduct = $action->handle($product, $data);
+
+    expect($updatedProduct->alert_quantity)->toBe(20);
 });
 
 it('updates image with string path when old image does not exist in storage', function (): void {
@@ -640,7 +616,6 @@ it('updates image with string path when old image does not exist in storage', fu
         image: 'products/new-image.jpg',
         cost_price: Optional::create(),
         selling_price: Optional::create(),
-        quantity: Optional::create(),
         alert_quantity: Optional::create(),
         track_inventory: Optional::create(),
         is_active: Optional::create(),

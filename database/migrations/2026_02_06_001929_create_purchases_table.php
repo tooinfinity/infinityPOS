@@ -28,6 +28,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index('reference_no');
+            $table->index('purchase_date');
+            $table->index('payment_status');
             $table->index(['supplier_id', 'purchase_date']);
             $table->index(['status', 'payment_status']);
             $table->index('warehouse_id');

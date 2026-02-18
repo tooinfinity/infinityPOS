@@ -32,6 +32,8 @@ final readonly class ReceivePurchaseAction
                 'Only pending or ordered purchases can be received.'
             );
 
+            $purchase->load(['items.product', 'items.batch']);
+
             foreach ($purchase->items as $item) {
                 $this->processItem($purchase, $item);
             }
