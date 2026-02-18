@@ -34,7 +34,7 @@ it('may update purchase supplier', function (): void {
     expect($updatedPurchase->supplier_id)->toBe($newSupplier->id);
 });
 
-it('may update purchase warehouse', function (): void {
+it('may update purchase warehouse when no items exist', function (): void {
     $purchase = Purchase::factory()->pending()->create();
     $newWarehouse = Warehouse::factory()->create();
 
@@ -51,6 +51,27 @@ it('may update purchase warehouse', function (): void {
     $updatedPurchase = $action->handle($purchase, $data);
 
     expect($updatedPurchase->warehouse_id)->toBe($newWarehouse->id);
+});
+
+it('throws exception when changing warehouse with items', function (): void {
+    $purchase = Purchase::factory()->pending()->create();
+    App\Models\PurchaseItem::factory()->create([
+        'purchase_id' => $purchase->id,
+    ]);
+    $newWarehouse = Warehouse::factory()->create();
+
+    $action = resolve(UpdatePurchaseAction::class);
+
+    $data = new UpdatePurchaseData(
+        supplier_id: Optional::create(),
+        warehouse_id: $newWarehouse->id,
+        purchase_date: Optional::create(),
+        note: Optional::create(),
+        document: Optional::create(),
+    );
+
+    expect(fn () => $action->handle($purchase, $data))
+        ->toThrow(RuntimeException::class, 'Cannot change warehouse after items have been added.');
 });
 
 it('may update all purchase fields', function (): void {

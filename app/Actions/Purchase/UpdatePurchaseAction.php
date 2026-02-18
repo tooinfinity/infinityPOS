@@ -38,6 +38,7 @@ final readonly class UpdatePurchaseAction
             }
 
             if (! $data->warehouse_id instanceof Optional) {
+                throw_if($purchase->items()->exists(), RuntimeException::class, 'Cannot change warehouse after items have been added.');
                 $updateData['warehouse_id'] = $data->warehouse_id;
             }
 
@@ -55,7 +56,7 @@ final readonly class UpdatePurchaseAction
                         Storage::disk('public')->delete($purchase->document);
                     }
                     $updateData['document'] = $this->uploadImage->handle($data->document, 'purchases/documents');
-                } else {
+                } elseif (! $data->document instanceof \Symfony\Component\HttpFoundation\File\UploadedFile) {
                     if ($purchase->document !== null) {
                         Storage::disk('public')->delete($purchase->document);
                     }

@@ -28,7 +28,7 @@ it('may create a purchase with required fields', function (): void {
     $action = resolve(CreatePurchaseAction::class);
 
     $items = new DataCollection(PurchaseItemData::class, [
-        new PurchaseItemData(product_id: $product->id, batch_id: null, quantity: 10, unit_cost: 500),
+        new PurchaseItemData(product_id: $product->id, quantity: 10, unit_cost: 500),
     ]);
 
     $data = new CreatePurchaseData(
@@ -61,7 +61,7 @@ it('auto-generates reference number', function (): void {
     $action = resolve(CreatePurchaseAction::class);
 
     $items = new DataCollection(PurchaseItemData::class, [
-        new PurchaseItemData(product_id: $product->id, batch_id: null, quantity: 5, unit_cost: 100),
+        new PurchaseItemData(product_id: $product->id, quantity: 5, unit_cost: 100),
     ]);
 
     $data = new CreatePurchaseData(
@@ -90,8 +90,8 @@ it('creates purchase with multiple items', function (): void {
     $action = resolve(CreatePurchaseAction::class);
 
     $items = new DataCollection(PurchaseItemData::class, [
-        new PurchaseItemData(product_id: $product1->id, batch_id: null, quantity: 10, unit_cost: 100),
-        new PurchaseItemData(product_id: $product2->id, batch_id: null, quantity: 5, unit_cost: 200),
+        new PurchaseItemData(product_id: $product1->id, quantity: 10, unit_cost: 100),
+        new PurchaseItemData(product_id: $product2->id, quantity: 5, unit_cost: 200),
     ]);
 
     $data = new CreatePurchaseData(
@@ -120,7 +120,7 @@ it('creates purchase with document', function (): void {
     $document = UploadedFile::fake()->image('invoice.jpg');
 
     $items = new DataCollection(PurchaseItemData::class, [
-        new PurchaseItemData(product_id: $product->id, batch_id: null, quantity: 10, unit_cost: 100),
+        new PurchaseItemData(product_id: $product->id, quantity: 10, unit_cost: 100),
     ]);
 
     $data = new CreatePurchaseData(
@@ -149,7 +149,7 @@ it('calculates correct subtotal for each item', function (): void {
     $action = resolve(CreatePurchaseAction::class);
 
     $items = new DataCollection(PurchaseItemData::class, [
-        new PurchaseItemData(product_id: $product->id, batch_id: null, quantity: 15, unit_cost: 250),
+        new PurchaseItemData(product_id: $product->id, quantity: 15, unit_cost: 250),
     ]);
 
     $data = new CreatePurchaseData(
@@ -178,7 +178,7 @@ it('stores purchase in database', function (): void {
     $action = resolve(CreatePurchaseAction::class);
 
     $items = new DataCollection(PurchaseItemData::class, [
-        new PurchaseItemData(product_id: $product->id, batch_id: null, quantity: 10, unit_cost: 100),
+        new PurchaseItemData(product_id: $product->id, quantity: 10, unit_cost: 100),
     ]);
 
     $data = new CreatePurchaseData(

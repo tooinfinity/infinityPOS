@@ -53,7 +53,6 @@ final readonly class CreatePurchaseAction
                 PurchaseItem::query()->forceCreate([
                     'purchase_id' => $purchase->id,
                     'product_id' => $item->product_id,
-                    'batch_id' => $item->batch_id,
                     'quantity' => $item->quantity,
                     'received_quantity' => 0,
                     'unit_cost' => $item->unit_cost,

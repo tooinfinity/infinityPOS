@@ -28,7 +28,6 @@ final readonly class RecordStockMovement
             'batch_id' => $data->batch_id,
             'user_id' => $data->user_id,
             'note' => $data->note,
-            'created_at' => $data->created_at ?? now(),
         ]))->refresh();
     }
 }

@@ -22,7 +22,6 @@ it('may add item to pending purchase', function (): void {
 
     $data = new PurchaseItemData(
         product_id: $product->id,
-        batch_id: null,
         quantity: 10,
         unit_cost: 100,
     );
@@ -52,7 +51,6 @@ it('recalculates total when adding item', function (): void {
 
     $data = new PurchaseItemData(
         product_id: $product->id,
-        batch_id: null,
         quantity: 10,
         unit_cost: 100,
     );
@@ -70,7 +68,6 @@ it('throws exception when adding item to non-pending purchase', function (): voi
 
     $data = new PurchaseItemData(
         product_id: $product->id,
-        batch_id: null,
         quantity: 10,
         unit_cost: 100,
     );
