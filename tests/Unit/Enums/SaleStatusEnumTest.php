@@ -23,7 +23,7 @@ it('validates state transitions for sale status', function (): void {
         ->and(SaleStatusEnum::Pending->canTransitionTo(SaleStatusEnum::Cancelled))->toBeTrue()
         ->and(SaleStatusEnum::Pending->canTransitionTo(SaleStatusEnum::Pending))->toBeFalse()
         ->and(SaleStatusEnum::Completed->canTransitionTo(SaleStatusEnum::Pending))->toBeFalse()
-        ->and(SaleStatusEnum::Completed->canTransitionTo(SaleStatusEnum::Cancelled))->toBeFalse()
+        ->and(SaleStatusEnum::Completed->canTransitionTo(SaleStatusEnum::Cancelled))->toBeTrue()
         ->and(SaleStatusEnum::Completed->canTransitionTo(SaleStatusEnum::Completed))->toBeFalse()
         ->and(SaleStatusEnum::Cancelled->canTransitionTo(SaleStatusEnum::Pending))->toBeFalse()
         ->and(SaleStatusEnum::Cancelled->canTransitionTo(SaleStatusEnum::Completed))->toBeFalse()
@@ -34,8 +34,8 @@ it('returns valid transitions for sale status', function (): void {
     expect(SaleStatusEnum::Pending->getValidTransitions())->toHaveCount(2)
         ->toContain(SaleStatusEnum::Completed)
         ->toContain(SaleStatusEnum::Cancelled)
-        ->and(SaleStatusEnum::Completed->getValidTransitions())->toHaveCount(0)
-        ->toBe([])
+        ->and(SaleStatusEnum::Completed->getValidTransitions())->toHaveCount(1)
+        ->toContain(SaleStatusEnum::Cancelled)
         ->and(SaleStatusEnum::Cancelled->getValidTransitions())->toHaveCount(0)
         ->toBe([]);
 });

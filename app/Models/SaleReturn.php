@@ -39,6 +39,7 @@ use Illuminate\Support\Facades\DB;
  * @property-read User $user
  * @property-read Collection<int, SaleReturnItem> $items
  * @property-read Collection<int, StockMovement> $stockMovements
+ * @property-read Collection<int, Payment> $payments
  */
 final class SaleReturn extends Model
 {
@@ -83,6 +84,14 @@ final class SaleReturn extends Model
     public function stockMovements(): MorphMany
     {
         return $this->morphMany(StockMovement::class, 'reference');
+    }
+
+    /**
+     * @return MorphMany<Payment, $this>
+     */
+    public function payments(): MorphMany
+    {
+        return $this->morphMany(Payment::class, 'payable');
     }
 
     /**

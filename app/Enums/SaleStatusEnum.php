@@ -37,7 +37,8 @@ enum SaleStatusEnum: string
     {
         return match ($this) {
             self::Pending => in_array($newStatus, [self::Completed, self::Cancelled], true),
-            self::Completed, self::Cancelled => false,
+            self::Completed => $newStatus === self::Cancelled,
+            self::Cancelled => false,
         };
     }
 
@@ -48,7 +49,8 @@ enum SaleStatusEnum: string
     {
         return match ($this) {
             self::Pending => [self::Completed, self::Cancelled],
-            self::Completed, self::Cancelled => [],
+            self::Completed => [self::Cancelled],
+            self::Cancelled => [],
         };
     }
 }

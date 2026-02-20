@@ -32,4 +32,9 @@ enum PaymentStatusEnum: string
             self::Paid => 'Paid'
         };
     }
+
+    public function canAcceptPayment(): bool
+    {
+        return $this !== self::Paid;
+    }
 }
