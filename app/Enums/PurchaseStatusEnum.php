@@ -40,7 +40,8 @@ enum PurchaseStatusEnum: string
         return match ($this) {
             self::Pending => in_array($newStatus, [self::Ordered, self::Received, self::Cancelled], true),
             self::Ordered => in_array($newStatus, [self::Received, self::Cancelled], true),
-            self::Received, self::Cancelled => false,
+            self::Received => false,
+            self::Cancelled => $newStatus === self::Pending,
         };
     }
 
@@ -52,7 +53,8 @@ enum PurchaseStatusEnum: string
         return match ($this) {
             self::Pending => [self::Ordered, self::Received, self::Cancelled],
             self::Ordered => [self::Received, self::Cancelled],
-            self::Received, self::Cancelled => [],
+            self::Received => [],
+            self::Cancelled => [self::Pending],
         };
     }
 }
