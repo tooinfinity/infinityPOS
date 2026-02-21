@@ -1,0 +1,91 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions\PurchaseReturn;
+
+use App\Actions\StockMovement\RecordStockMovement;
+use App\Data\PurchaseReturn\CompletePurchaseReturnData;
+use App\Data\StockMovement\RecordStockMovementData;
+use App\Enums\ReturnStatusEnum;
+use App\Enums\StockMovementTypeEnum;
+use App\Models\PurchaseReturn;
+use Illuminate\Support\Facades\DB;
+use RuntimeException;
+use Throwable;
+
+final readonly class CompletePurchaseReturnAction
+{
+    public function __construct(private RecordStockMovement $recordStockMovement) {}
+
+    /**
+     * @throws Throwable
+     */
+    public function handle(PurchaseReturn $purchaseReturn, CompletePurchaseReturnData $data): PurchaseReturn
+    {
+        return DB::transaction(function () use ($purchaseReturn, $data): PurchaseReturn {
+            $this->validatePurchaseReturnCanBeCompleted($purchaseReturn);
+
+            $this->removeStockFromBatches($purchaseReturn);
+
+            $purchaseReturn->forceFill([
+                'status' => ReturnStatusEnum::Completed,
+                'note' => $data->note ?? $purchaseReturn->note,
+            ])->save();
+
+            return $purchaseReturn->refresh();
+        });
+    }
+
+    private function validatePurchaseReturnCanBeCompleted(PurchaseReturn $purchaseReturn): void
+    {
+        if ($purchaseReturn->status !== ReturnStatusEnum::Pending) {
+            throw new RuntimeException(
+                "Purchase return cannot be completed. Current status: {$purchaseReturn->status->value}"
+            );
+        }
+
+        throw_if($purchaseReturn->items()->count() === 0, RuntimeException::class, 'Cannot complete a purchase return with no items.');
+    }
+
+    /**
+     * @throws Throwable
+     */
+    private function removeStockFromBatches(PurchaseReturn $purchaseReturn): void
+    {
+        foreach ($purchaseReturn->items as $item) {
+            $batch = $item->batch;
+
+            if ($batch === null) {
+                continue;
+            }
+
+            $previousQuantity = $batch->quantity;
+
+            $newQuantity = $batch->quantity - $item->quantity;
+
+            if ($newQuantity < 0) {
+                throw new RuntimeException(
+                    "Cannot complete purchase return. Insufficient stock in batch. Available: $batch->quantity, Required: $item->quantity"
+                );
+            }
+
+            $batch->forceFill(['quantity' => $newQuantity])->save();
+
+            $this->recordStockMovement->handle(new RecordStockMovementData(
+                warehouse_id: $purchaseReturn->warehouse_id,
+                product_id: $item->product_id,
+                type: StockMovementTypeEnum::Out,
+                quantity: $item->quantity,
+                previous_quantity: $previousQuantity,
+                current_quantity: $newQuantity,
+                reference_type: PurchaseReturn::class,
+                reference_id: $purchaseReturn->id,
+                batch_id: $batch->id,
+                user_id: $purchaseReturn->user_id,
+                note: 'Purchase return completed - stock removed',
+                created_at: null,
+            ));
+        }
+    }
+}

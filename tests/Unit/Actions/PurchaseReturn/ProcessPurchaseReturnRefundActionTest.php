@@ -1,0 +1,74 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Actions\PurchaseReturn\ProcessPurchaseReturnRefundAction;
+use App\Data\PurchaseReturn\RefundPurchaseReturnData;
+use App\Enums\PaymentStatusEnum;
+use App\Models\Payment;
+use App\Models\PaymentMethod;
+use App\Models\PurchaseReturn;
+
+it('processes refund for completed purchase return', function (): void {
+    $paymentMethod = PaymentMethod::factory()->create();
+    $purchaseReturn = PurchaseReturn::factory()->completed()->create([
+        'total_amount' => 1000,
+    ]);
+
+    $action = resolve(ProcessPurchaseReturnRefundAction::class);
+
+    $payment = $action->handle($purchaseReturn, new RefundPurchaseReturnData(
+        payment_method_id: $paymentMethod->id,
+        amount: 500,
+        payment_date: now(),
+    ));
+
+    expect($payment)
+        ->toBeInstanceOf(Payment::class)
+        ->and($payment->amount)->toBe(-500);
+});
+
+it('updates payment status after refund', function (): void {
+    $paymentMethod = PaymentMethod::factory()->create();
+    $purchaseReturn = PurchaseReturn::factory()->completed()->create([
+        'total_amount' => 1000,
+    ]);
+
+    $action = resolve(ProcessPurchaseReturnRefundAction::class);
+
+    $action->handle($purchaseReturn, new RefundPurchaseReturnData(
+        payment_method_id: $paymentMethod->id,
+        amount: 500,
+        payment_date: now(),
+    ));
+
+    expect($purchaseReturn->fresh()->payment_status)->toBe(PaymentStatusEnum::Partial);
+});
+
+it('throws exception when refunding non-completed return', function (): void {
+    $paymentMethod = PaymentMethod::factory()->create();
+    $purchaseReturn = PurchaseReturn::factory()->pending()->create();
+
+    $action = resolve(ProcessPurchaseReturnRefundAction::class);
+
+    $action->handle($purchaseReturn, new RefundPurchaseReturnData(
+        payment_method_id: $paymentMethod->id,
+        amount: 500,
+        payment_date: now(),
+    ));
+})->throws(RuntimeException::class, 'must be completed');
+
+it('throws exception when over-refunding', function (): void {
+    $paymentMethod = PaymentMethod::factory()->create();
+    $purchaseReturn = PurchaseReturn::factory()->completed()->create([
+        'total_amount' => 500,
+    ]);
+
+    $action = resolve(ProcessPurchaseReturnRefundAction::class);
+
+    $action->handle($purchaseReturn, new RefundPurchaseReturnData(
+        payment_method_id: $paymentMethod->id,
+        amount: 1000,
+        payment_date: now(),
+    ));
+})->throws(RuntimeException::class, 'exceeds remaining');
