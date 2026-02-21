@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Sale;
+namespace App\Actions\Payment;
 
-use App\Data\Sale\RecordPaymentData;
+use App\Data\Payment\RecordPaymentData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\PurchaseStatusEnum;
 use App\Enums\ReturnStatusEnum;

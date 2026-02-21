@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Data\Sale\RecordPaymentData;
+use App\Data\Payment\RecordPaymentData;
 use Carbon\CarbonInterface;
 
 it('may be created with required fields', function (): void {

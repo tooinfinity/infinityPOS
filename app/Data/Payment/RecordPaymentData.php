@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Data\Sale;
+namespace App\Data\Payment;
 
 use DateTimeInterface;
 use Spatie\LaravelData\Data;

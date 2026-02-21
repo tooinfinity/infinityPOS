@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Actions\Sale\RecordPaymentAction;
-use App\Data\Sale\RecordPaymentData;
+use App\Actions\Payment\RecordPaymentAction;
+use App\Data\Payment\RecordPaymentData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\PurchaseStatusEnum;
 use App\Models\Payment;
