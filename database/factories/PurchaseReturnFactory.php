@@ -33,7 +33,7 @@ final class PurchaseReturnFactory extends Factory
             'total_amount' => $this->faker->numberBetween(1000, 100000),
             'paid_amount' => 0,
             'payment_status' => PaymentStatusEnum::Unpaid,
-            'status' => $this->faker->randomElement(ReturnStatusEnum::cases()),
+            'status' => ReturnStatusEnum::Pending,
             'note' => $this->faker->sentence(),
         ];
     }

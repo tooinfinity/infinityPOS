@@ -30,3 +30,18 @@ it('throws exception when updating item in non-pending return', function (): voi
 
     $action->handle($item, new UpdatePurchaseReturnItemData(quantity: 10));
 })->throws(RuntimeException::class, 'Cannot update items in a non-pending');
+
+it('updates item unit_cost in pending purchase return', function (): void {
+    $item = PurchaseReturnItem::factory()->create([
+        'quantity' => 5,
+        'unit_cost' => 100,
+        'subtotal' => 500,
+    ]);
+
+    $action = resolve(UpdatePurchaseReturnItemAction::class);
+
+    $updated = $action->handle($item, new UpdatePurchaseReturnItemData(unit_cost: 200));
+
+    expect($updated->unit_cost)->toBe(200)
+        ->and($updated->subtotal)->toBe(1000);
+});

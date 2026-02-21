@@ -55,3 +55,17 @@ it('throws exception when completing return with no items', function (): void {
 
     $action->handle($saleReturn, new CompleteSaleReturnData());
 })->throws(RuntimeException::class, 'no items');
+
+it('skips items without batch when completing return', function (): void {
+    $saleReturn = SaleReturn::factory()->pending()->create();
+    SaleReturnItem::factory()->forSaleReturn($saleReturn)->create([
+        'batch_id' => null,
+        'quantity' => 10,
+    ]);
+
+    $action = resolve(CompleteSaleReturnAction::class);
+
+    $result = $action->handle($saleReturn, new CompleteSaleReturnData());
+
+    expect($result->status)->toBe(ReturnStatusEnum::Completed);
+});

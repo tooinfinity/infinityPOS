@@ -50,3 +50,25 @@ it('throws exception when cancelling return with refunds', function (): void {
 
     $action->handle($purchaseReturn, new CancelPurchaseReturnData());
 })->throws(RuntimeException::class, 'existing refunds');
+
+it('throws exception when cancelling non-completed return', function (): void {
+    $purchaseReturn = PurchaseReturn::factory()->pending()->create();
+
+    $action = resolve(CancelPurchaseReturnAction::class);
+
+    $action->handle($purchaseReturn, new CancelPurchaseReturnData());
+})->throws(RuntimeException::class, 'cannot be cancelled');
+
+it('skips items without batch when cancelling completed return', function (): void {
+    $purchaseReturn = PurchaseReturn::factory()->completed()->create();
+    PurchaseReturnItem::factory()->forPurchaseReturn($purchaseReturn)->create([
+        'batch_id' => null,
+        'quantity' => 10,
+    ]);
+
+    $action = resolve(CancelPurchaseReturnAction::class);
+
+    $result = $action->handle($purchaseReturn, new CancelPurchaseReturnData());
+
+    expect($result->status)->toBe(ReturnStatusEnum::Pending);
+});

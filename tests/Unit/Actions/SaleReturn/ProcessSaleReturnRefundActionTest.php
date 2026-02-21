@@ -129,3 +129,32 @@ it('throws exception for zero refund amount', function (): void {
         payment_date: now(),
     ));
 })->throws(RuntimeException::class, 'greater than zero');
+
+it('throws exception for negative refund amount', function (): void {
+    $paymentMethod = PaymentMethod::factory()->create();
+    $saleReturn = SaleReturn::factory()->completed()->create([
+        'total_amount' => 1000,
+    ]);
+
+    $action = resolve(ProcessSaleReturnRefundAction::class);
+
+    $action->handle($saleReturn, new RefundSaleReturnData(
+        payment_method_id: $paymentMethod->id,
+        amount: -100,
+        payment_date: now(),
+    ));
+})->throws(RuntimeException::class, 'greater than zero');
+
+it('returns unpaid status when no negative payments exist', function (): void {
+    $saleReturn = SaleReturn::factory()->completed()->create([
+        'total_amount' => 1000,
+    ]);
+
+    $reflection = new ReflectionClass(ProcessSaleReturnRefundAction::class);
+    $method = $reflection->getMethod('updatePaymentStatus');
+
+    $action = resolve(ProcessSaleReturnRefundAction::class);
+    $method->invoke($action, $saleReturn);
+
+    expect($saleReturn->fresh()->payment_status)->toBe(PaymentStatusEnum::Unpaid);
+});

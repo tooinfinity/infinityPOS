@@ -4,23 +4,9 @@ declare(strict_types=1);
 
 use App\Actions\PurchaseReturn\CompletePurchaseReturnAction;
 use App\Data\PurchaseReturn\CompletePurchaseReturnData;
-use App\Enums\ReturnStatusEnum;
 use App\Models\Batch;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
-
-it('completes a pending purchase return', function (): void {
-    $purchaseReturn = PurchaseReturn::factory()->pending()->create();
-    PurchaseReturnItem::factory()->forPurchaseReturn($purchaseReturn)->create();
-
-    $action = resolve(CompletePurchaseReturnAction::class);
-
-    $result = $action->handle($purchaseReturn, new CompletePurchaseReturnData(
-        note: 'Completed return',
-    ));
-
-    expect($result->status)->toBe(ReturnStatusEnum::Completed);
-});
 
 it('removes stock from batches when completing return', function (): void {
     $batch = Batch::factory()->withQuantity(100)->create();
@@ -60,3 +46,17 @@ it('throws exception when insufficient stock', function (): void {
 
     $action->handle($purchaseReturn, new CompletePurchaseReturnData());
 })->throws(RuntimeException::class, 'Insufficient stock');
+
+it('skips items without batch when completing return', function (): void {
+    $purchaseReturn = PurchaseReturn::factory()->pending()->create();
+    PurchaseReturnItem::factory()->forPurchaseReturn($purchaseReturn)->create([
+        'batch_id' => null,
+        'quantity' => 10,
+    ]);
+
+    $action = resolve(CompletePurchaseReturnAction::class);
+
+    $result = $action->handle($purchaseReturn, new CompletePurchaseReturnData());
+
+    expect($result->status)->toBe(App\Enums\ReturnStatusEnum::Completed);
+});

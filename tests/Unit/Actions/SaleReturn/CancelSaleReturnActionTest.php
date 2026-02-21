@@ -77,3 +77,17 @@ it('throws exception when insufficient stock on cancellation', function (): void
 
     $action->handle($saleReturn, new CancelSaleReturnData());
 })->throws(RuntimeException::class, 'Insufficient stock');
+
+it('skips items without batch when cancelling completed return', function (): void {
+    $saleReturn = SaleReturn::factory()->completed()->create();
+    SaleReturnItem::factory()->forSaleReturn($saleReturn)->create([
+        'batch_id' => null,
+        'quantity' => 10,
+    ]);
+
+    $action = resolve(CancelSaleReturnAction::class);
+
+    $result = $action->handle($saleReturn, new CancelSaleReturnData());
+
+    expect($result->status)->toBe(ReturnStatusEnum::Pending);
+});
