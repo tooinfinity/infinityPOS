@@ -11,6 +11,7 @@ use App\Data\Product\CreateProductData;
 use App\Models\Product;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 final readonly class CreateProduct
@@ -26,18 +27,22 @@ final readonly class CreateProduct
      */
     public function handle(CreateProductData $data): Product
     {
-        return DB::transaction(function () use ($data): Product {
-            $sku = $data->sku ?? $this->generateSku->handle();
-            $barcode = $data->barcode ?? $this->generateBarcode->handle();
-            $trackInventory = $data->track_inventory ?? true;
-            $isActive = $data->is_active ?? true;
+        $sku = $data->sku ?? $this->generateSku->handle();
+        $barcode = $data->barcode ?? $this->generateBarcode->handle();
+        $trackInventory = $data->track_inventory ?? true;
+        $isActive = $data->is_active ?? true;
 
-            $image = $data->image;
-            if ($image instanceof UploadedFile) {
-                $image = $this->uploadImage->handle($image, 'products');
-            }
+        $image = $data->image;
+        $uploadedImagePath = null;
 
-            return Product::query()->forceCreate([
+        if ($image instanceof UploadedFile) {
+            $uploadedImagePath = $this->uploadImage->handle($image, 'products');
+        } elseif (is_string($image)) {
+            $uploadedImagePath = $image;
+        }
+
+        try {
+            return DB::transaction(static fn (): Product => Product::query()->forceCreate([
                 'name' => $data->name,
                 'sku' => $sku,
                 'barcode' => $barcode,
@@ -45,13 +50,19 @@ final readonly class CreateProduct
                 'category_id' => $data->category_id,
                 'brand_id' => $data->brand_id,
                 'description' => $data->description,
-                'image' => $image,
+                'image' => $uploadedImagePath,
                 'cost_price' => $data->cost_price,
                 'selling_price' => $data->selling_price,
                 'alert_quantity' => $data->alert_quantity,
                 'track_inventory' => $trackInventory,
                 'is_active' => $isActive,
-            ])->refresh();
-        });
+            ])->refresh());
+        } catch (Throwable $e) {
+            if ($uploadedImagePath !== null && $image instanceof UploadedFile) {
+                Storage::disk('public')->delete($uploadedImagePath);
+            }
+
+            throw $e;
+        }
     }
 }

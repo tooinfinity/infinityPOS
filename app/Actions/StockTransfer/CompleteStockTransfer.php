@@ -38,7 +38,6 @@ final readonly class CompleteStockTransfer
                 StockTransferStatusEnum::Completed->label()
             );
 
-            // Lock all related batches before validation
             $batchIds = $transfer->items->pluck('batch_id')->filter();
             if ($batchIds->isNotEmpty()) {
                 Batch::query()->whereIn('id', $batchIds)->lockForUpdate()->get();
@@ -79,9 +78,13 @@ final readonly class CompleteStockTransfer
     private function processItem(StockTransfer $transfer, StockTransferItem $item): void
     {
         $sourceBatch = $item->batch;
-        $previousQuantity = $sourceBatch !== null ? $sourceBatch->quantity : 0;
 
-        $sourceBatch?->forceFill(['quantity' => $sourceBatch->quantity - $item->quantity])->save();
+        if ($sourceBatch === null) {
+            $previousQuantity = 0;
+        } else {
+            $previousQuantity = $sourceBatch->quantity;
+            $sourceBatch->forceFill(['quantity' => $sourceBatch->quantity - $item->quantity])->save();
+        }
 
         $destinationBatch = Batch::query()->forceCreate([
             'product_id' => $item->product_id,

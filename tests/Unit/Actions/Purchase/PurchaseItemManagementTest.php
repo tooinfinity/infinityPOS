@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Actions\Purchase\AddPurchaseItemAction;
-use App\Actions\Purchase\RemovePurchaseItemAction;
-use App\Actions\Purchase\UpdatePurchaseItemAction;
+use App\Actions\Purchase\AddPurchaseItem;
+use App\Actions\Purchase\RemovePurchaseItem;
+use App\Actions\Purchase\UpdatePurchaseItem;
 use App\Data\Purchase\PurchaseItemData;
 use App\Data\Purchase\UpdatePurchaseItemData;
 use App\Models\Product;
@@ -18,7 +18,7 @@ it('may add item to pending purchase', function (): void {
     ]);
     $product = Product::factory()->create();
 
-    $action = resolve(AddPurchaseItemAction::class);
+    $action = resolve(AddPurchaseItem::class);
 
     $data = new PurchaseItemData(
         product_id: $product->id,
@@ -47,7 +47,7 @@ it('recalculates total when adding item', function (): void {
         'subtotal' => 500,
     ]);
 
-    $action = resolve(AddPurchaseItemAction::class);
+    $action = resolve(AddPurchaseItem::class);
 
     $data = new PurchaseItemData(
         product_id: $product->id,
@@ -64,7 +64,7 @@ it('throws exception when adding item to non-pending purchase', function (): voi
     $purchase = Purchase::factory()->received()->create();
     $product = Product::factory()->create();
 
-    $action = resolve(AddPurchaseItemAction::class);
+    $action = resolve(AddPurchaseItem::class);
 
     $data = new PurchaseItemData(
         product_id: $product->id,
@@ -85,7 +85,7 @@ it('may update item quantity', function (): void {
         'subtotal' => 1000,
     ]);
 
-    $action = resolve(UpdatePurchaseItemAction::class);
+    $action = resolve(UpdatePurchaseItem::class);
 
     $data = new UpdatePurchaseItemData(
         quantity: 20,
@@ -108,7 +108,7 @@ it('may update item unit cost', function (): void {
         'subtotal' => 1000,
     ]);
 
-    $action = resolve(UpdatePurchaseItemAction::class);
+    $action = resolve(UpdatePurchaseItem::class);
 
     $data = new UpdatePurchaseItemData(
         quantity: Optional::create(),
@@ -134,7 +134,7 @@ it('recalculates subtotal and purchase total on update', function (): void {
         'subtotal' => 1000,
     ]);
 
-    $action = resolve(UpdatePurchaseItemAction::class);
+    $action = resolve(UpdatePurchaseItem::class);
 
     $data = new UpdatePurchaseItemData(
         quantity: 20,
@@ -153,7 +153,7 @@ it('throws exception when updating item on non-pending purchase', function (): v
         'purchase_id' => $purchase->id,
     ]);
 
-    $action = resolve(UpdatePurchaseItemAction::class);
+    $action = resolve(UpdatePurchaseItem::class);
 
     $data = new UpdatePurchaseItemData(
         quantity: 20,
@@ -179,7 +179,7 @@ it('may remove item from pending purchase', function (): void {
         'subtotal' => 500,
     ]);
 
-    $action = resolve(RemovePurchaseItemAction::class);
+    $action = resolve(RemovePurchaseItem::class);
 
     $result = $action->handle($item1);
 
@@ -195,7 +195,7 @@ it('deletes purchase when removing last item', function (): void {
         'purchase_id' => $purchase->id,
     ]);
 
-    $action = new RemovePurchaseItemAction(deleteIfEmpty: true);
+    $action = new RemovePurchaseItem(deleteIfEmpty: true);
 
     $result = $action->handle($item);
 
@@ -210,7 +210,7 @@ it('keeps purchase when removing last item with deleteIfEmpty false', function (
         'purchase_id' => $purchase->id,
     ]);
 
-    $action = new RemovePurchaseItemAction(deleteIfEmpty: false);
+    $action = new RemovePurchaseItem(deleteIfEmpty: false);
 
     $result = $action->handle($item);
 
@@ -224,7 +224,7 @@ it('throws exception when removing item from non-pending purchase', function ():
         'purchase_id' => $purchase->id,
     ]);
 
-    $action = resolve(RemovePurchaseItemAction::class);
+    $action = resolve(RemovePurchaseItem::class);
 
     expect(fn () => $action->handle($item))
         ->toThrow(RuntimeException::class, 'Items can only be removed from pending purchases.');
@@ -245,7 +245,7 @@ it('recalculates total when removing item', function (): void {
         'subtotal' => 1000,
     ]);
 
-    $action = resolve(RemovePurchaseItemAction::class);
+    $action = resolve(RemovePurchaseItem::class);
     $action->handle($item);
 
     expect($purchase->fresh()->total_amount)->toBe(1000);

@@ -189,3 +189,24 @@ it('removes logo when set to null', function (): void {
     expect($updatedBrand->logo)->toBeNull()
         ->and(Storage::disk('public')->exists('brands/old-logo.webp'))->toBeFalse();
 });
+
+it('updates logo with existing storage path string', function (): void {
+    Storage::disk('public')->put('brands/existing-path.webp', 'fake-content');
+
+    $brand = Brand::factory()->create([
+        'logo' => null,
+    ]);
+
+    $action = resolve(UpdateBrand::class);
+
+    $data = new UpdateBrandData(
+        name: Optional::create(),
+        slug: Optional::create(),
+        logo: 'brands/existing-path.webp',
+        is_active: Optional::create(),
+    );
+
+    $updatedBrand = $action->handle($brand, $data);
+
+    expect($updatedBrand->logo)->toBe('brands/existing-path.webp');
+});

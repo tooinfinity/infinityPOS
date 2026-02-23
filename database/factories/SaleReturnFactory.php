@@ -107,6 +107,7 @@ final class SaleReturnFactory extends Factory
         $paidAmount = (int) ($totalAmount * 0.5);
 
         return $this->state(fn (array $attributes): array => [
+            'total_amount' => $totalAmount,
             'paid_amount' => $paidAmount,
             'payment_status' => PaymentStatusEnum::Partial,
         ]);
@@ -115,6 +116,7 @@ final class SaleReturnFactory extends Factory
     public function paid(int $totalAmount = 1000): self
     {
         return $this->state(fn (array $attributes): array => [
+            'total_amount' => $totalAmount,
             'paid_amount' => $totalAmount,
             'payment_status' => PaymentStatusEnum::Paid,
         ]);

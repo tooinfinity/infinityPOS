@@ -32,8 +32,6 @@ final readonly class UploadImage
     {
         $this->validateFile($file);
 
-        $this->deleteExistingImage($existingImage);
-
         $filename = $this->generateFilename($directory);
         $targetWidth = $maxWidth ?? self::DEFAULT_MAX_WIDTH;
 
@@ -43,7 +41,8 @@ final readonly class UploadImage
             $stream = fopen($tmpPath, 'rb');
             throw_if($stream === false, RuntimeException::class, 'Failed to open processed image file');
 
-            Storage::disk('public')->put($filename, $stream);
+            $result = Storage::disk('public')->put($filename, $stream);
+            throw_if(! $result, RuntimeException::class, 'Failed to store image');
 
             if (is_resource($stream)) {
                 fclose($stream);
@@ -52,6 +51,10 @@ final readonly class UploadImage
             if (file_exists($tmpPath)) {
                 unlink($tmpPath);
             }
+        }
+
+        if ($existingImage !== null && Storage::disk('public')->exists($existingImage)) {
+            Storage::disk('public')->delete($existingImage);
         }
 
         return $filename;
@@ -73,13 +76,6 @@ final readonly class UploadImage
         $size = $file->getSize();
         throw_if($size === false, InvalidArgumentException::class, 'Unable to determine image file size');
         throw_if($size > self::MAX_SIZE_BYTES, InvalidArgumentException::class, 'Image size exceeds maximum allowed size of 2MB');
-    }
-
-    private function deleteExistingImage(?string $existingImage): void
-    {
-        if ($existingImage !== null && Storage::disk('public')->exists($existingImage)) {
-            Storage::disk('public')->delete($existingImage);
-        }
     }
 
     private function generateFilename(string $directory): string

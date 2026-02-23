@@ -49,7 +49,9 @@ final readonly class UpdateBrand
                 $logo = $data->logo;
                 if ($logo instanceof UploadedFile) {
                     $updateData['logo'] = $this->uploadImage->handle($logo, 'brands', $brand->logo);
-                } elseif ($logo === null && $brand->logo !== null) {
+                } elseif (is_string($logo)) {
+                    $updateData['logo'] = $logo;
+                } elseif ($brand->logo !== null) {
                     Storage::disk('public')->delete($brand->logo);
                     $updateData['logo'] = null;
                 }

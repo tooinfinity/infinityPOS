@@ -407,3 +407,43 @@ it('rolls back transaction on failure', function (): void {
 
     expect(Product::query()->where('name', 'Test Product')->exists())->toBeFalse();
 });
+
+it('deletes uploaded image when transaction fails', function (): void {
+    $unit = Unit::factory()->create();
+
+    Product::factory()->create([
+        'sku' => 'PRD-DUPLICATE',
+    ]);
+
+    $action = resolve(CreateProduct::class);
+
+    $file = UploadedFile::fake()->image('product.png', 800, 600);
+
+    $data = new CreateProductData(
+        name: 'Test Product',
+        sku: 'PRD-DUPLICATE',
+        barcode: null,
+        unit_id: $unit->id,
+        category_id: null,
+        brand_id: null,
+        description: null,
+        image: $file,
+        cost_price: 5000,
+        selling_price: 7500,
+        alert_quantity: 10,
+        track_inventory: true,
+        is_active: true,
+    );
+
+    $filesBefore = Storage::disk('public')->files('products');
+
+    try {
+        $action->handle($data);
+    } catch (Throwable) {
+        // Expected to fail due to unique constraint
+    }
+
+    $filesAfter = Storage::disk('public')->files('products');
+
+    expect($filesBefore)->toBe($filesAfter);
+});
