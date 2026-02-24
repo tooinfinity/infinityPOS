@@ -22,6 +22,10 @@ final readonly class ProcessPurchaseReturnRefund
     public function handle(PurchaseReturn $purchaseReturn, RefundPurchaseReturnData $data): Payment
     {
         return DB::transaction(function () use ($purchaseReturn, $data): Payment {
+            /** @var PurchaseReturn $purchaseReturn */
+            $purchaseReturn = PurchaseReturn::query()
+                ->lockForUpdate()
+                ->findOrFail($purchaseReturn->id);
             $this->validateRefund($purchaseReturn, $data->amount);
 
             $payment = Payment::query()->forceCreate([
@@ -41,6 +45,9 @@ final readonly class ProcessPurchaseReturnRefund
         });
     }
 
+    /**
+     * @throws Throwable
+     */
     private function validateRefund(PurchaseReturn $purchaseReturn, int $amount): void
     {
         throw_if($purchaseReturn->status !== ReturnStatusEnum::Completed, RuntimeException::class, 'Purchase return must be completed before issuing a refund.');

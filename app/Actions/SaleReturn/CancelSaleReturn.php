@@ -39,6 +39,9 @@ final readonly class CancelSaleReturn
         });
     }
 
+    /**
+     * @throws Throwable
+     */
     private function validateSaleReturnCanBeCancelled(SaleReturn $saleReturn): void
     {
         $hasRefunds = $saleReturn->payments()
@@ -49,7 +52,7 @@ final readonly class CancelSaleReturn
 
         if ($saleReturn->status !== ReturnStatusEnum::Completed) {
             throw new RuntimeException(
-                "Sale return cannot be cancelled. Current status: {$saleReturn->status->value}"
+                "Can only cancel completed sale returns. Use DeleteSaleReturn to delete pending returns. Current status: {$saleReturn->status->value}"
             );
         }
     }

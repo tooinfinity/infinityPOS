@@ -15,6 +15,7 @@ use App\Models\Batch;
 use App\Models\Payment;
 use App\Models\Sale;
 use App\Models\SaleItem;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -33,7 +34,17 @@ final readonly class QuickSale
     public function handle(QuickSaleData $data): Sale
     {
         return DB::transaction(function () use ($data): Sale {
-            $this->validateStockAvailability($data->items);
+            $itemsArray = $data->items->toArray();
+            $batchIds = array_unique(array_column($itemsArray, 'batch_id'));
+
+            /** @var Collection<int, Batch> $batches */
+            $batches = Batch::query()
+                ->whereIn('id', $batchIds)
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+
+            $this->validateStockAvailability($data->items, $batches);
 
             $totalAmount = $this->calculateTotalAmount($data->items);
 
@@ -64,7 +75,7 @@ final readonly class QuickSale
                     'subtotal' => $item->quantity * $item->unit_price,
                 ]);
 
-                $this->deductStock($sale, $item);
+                $this->deductStock($sale, $item, $batches);
             }
 
             if ($data->paid_amount > 0) {
@@ -77,19 +88,21 @@ final readonly class QuickSale
 
     /**
      * @param  DataCollection<int, SaleItemData>  $items
+     * @param  Collection<int, Batch>  $batches
      */
-    private function validateStockAvailability(DataCollection $items): void
+    private function validateStockAvailability(DataCollection $items, Collection $batches): void
     {
         foreach ($items as $item) {
-            $batch = Batch::query()->find($item->batch_id);
+            /** @var Batch|null $batch */
+            $batch = $batches->get($item->batch_id);
 
             if ($batch === null) {
-                throw new RuntimeException("Batch not found for product {$item->product_id}");
+                throw new RuntimeException("Batch not found for product $item->product_id");
             }
 
             if ($batch->quantity < $item->quantity) {
                 throw new RuntimeException(
-                    "Insufficient stock in batch. Required: {$item->quantity}, Available: {$batch->quantity}"
+                    "Insufficient stock in batch. Required: $item->quantity, Available: $batch->quantity"
                 );
             }
         }
@@ -110,12 +123,14 @@ final readonly class QuickSale
     }
 
     /**
+     * @param  Collection<int, Batch>  $batches
+     *
      * @throws Throwable
      */
-    private function deductStock(Sale $sale, SaleItemData $item): void
+    private function deductStock(Sale $sale, SaleItemData $item, Collection $batches): void
     {
         /** @var Batch $batch */
-        $batch = Batch::query()->find($item->batch_id);
+        $batch = $batches->get($item->batch_id);
 
         $previousQuantity = $batch->quantity;
 

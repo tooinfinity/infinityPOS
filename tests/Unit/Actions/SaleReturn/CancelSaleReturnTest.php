@@ -62,7 +62,7 @@ it('throws exception when cancelling already cancelled return', function (): voi
     $action->handle($saleReturn, new CancelSaleReturnData());
 
     $action->handle($saleReturn, new CancelSaleReturnData());
-})->throws(RuntimeException::class, 'cannot be cancelled');
+})->throws(RuntimeException::class, 'Can only cancel completed sale returns');
 
 it('throws exception when insufficient stock on cancellation', function (): void {
     $batch = Batch::factory()->withQuantity(5)->create();

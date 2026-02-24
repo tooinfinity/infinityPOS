@@ -10,6 +10,7 @@ use App\Enums\PurchaseStatusEnum;
 use App\Enums\ReturnStatusEnum;
 use App\Enums\SaleStatusEnum;
 use App\Models\Payment;
+use App\Models\PaymentMethod;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
 use App\Models\Sale;
@@ -30,6 +31,8 @@ final readonly class RecordPayment
     public function handle(Sale|SaleReturn|Purchase|PurchaseReturn $payable, RecordPaymentData $data): Payment
     {
         return DB::transaction(function () use ($payable, $data): Payment {
+            $this->validatePaymentMethod($data->payment_method_id);
+
             $this->validatePayable($payable);
 
             $payment = Payment::query()->forceCreate([
@@ -49,6 +52,16 @@ final readonly class RecordPayment
         });
     }
 
+    /**
+     * @throws Throwable
+     */
+    private function validatePaymentMethod(int $paymentMethodId): void
+    {
+        $paymentMethod = PaymentMethod::query()->find($paymentMethodId);
+
+        throw_if($paymentMethod === null || ! $paymentMethod->is_active, RuntimeException::class, 'Payment method is not active or does not exist.');
+    }
+
     private function validatePayable(Sale|SaleReturn|Purchase|PurchaseReturn $payable): void
     {
         $canAcceptPayment = $this->checkCanAcceptPayment($payable);
@@ -57,19 +70,21 @@ final readonly class RecordPayment
             $payableClass = $payable::class;
             $statusValue = $this->getStatusValue($payable);
             throw new RuntimeException(
-                "Cannot record payment for {$payableClass} with status: {$statusValue}"
+                "Cannot record payment for $payableClass with status: $statusValue"
             );
         }
     }
 
     private function checkCanAcceptPayment(Sale|SaleReturn|Purchase|PurchaseReturn $payable): bool
     {
-        return match ($payable::class) {
+        $statusValid = match ($payable::class) {
             Sale::class => $payable->status === SaleStatusEnum::Completed,
             SaleReturn::class => $payable->status === ReturnStatusEnum::Completed,
             Purchase::class => $payable->status === PurchaseStatusEnum::Received,
             PurchaseReturn::class => $payable->status === ReturnStatusEnum::Completed,
         };
+
+        return $statusValid && $payable->payment_status->canAcceptPayment();
     }
 
     private function getStatusValue(Sale|SaleReturn|Purchase|PurchaseReturn $payable): string
@@ -95,10 +110,16 @@ final readonly class RecordPayment
             default => PaymentStatusEnum::Unpaid,
         };
 
-        $payable->forceFill([
+        $updateData = [
             'paid_amount' => $newPaidAmount,
             'payment_status' => $paymentStatus,
-        ])->save();
+        ];
+
+        if ($payable instanceof Sale && $newPaidAmount > $totalAmount) {
+            $updateData['change_amount'] = $newPaidAmount - $totalAmount;
+        }
+
+        $payable->forceFill($updateData)->save();
     }
 
     private function generateReferenceNo(): string

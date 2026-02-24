@@ -24,64 +24,77 @@ final readonly class UpdateProduct
      */
     public function handle(Product $product, UpdateProductData $data): Product
     {
-        return DB::transaction(function () use ($product, $data): Product {
-            $updateData = [];
+        $uploadedImagePath = null;
 
-            if (! $data->name instanceof Optional) {
-                $updateData['name'] = $data->name;
-            }
-            if (! $data->sku instanceof Optional) {
-                $updateData['sku'] = $data->sku;
-            }
-            if (! $data->barcode instanceof Optional) {
-                $updateData['barcode'] = $data->barcode;
-            }
-            if (! $data->unit_id instanceof Optional) {
-                $updateData['unit_id'] = $data->unit_id;
-            }
-            if (! $data->category_id instanceof Optional) {
-                $updateData['category_id'] = $data->category_id;
-            }
-            if (! $data->brand_id instanceof Optional) {
-                $updateData['brand_id'] = $data->brand_id;
-            }
-            if (! $data->description instanceof Optional) {
-                $updateData['description'] = $data->description;
-            }
-            if (! $data->cost_price instanceof Optional) {
-                $updateData['cost_price'] = $data->cost_price;
-            }
-            if (! $data->selling_price instanceof Optional) {
-                $updateData['selling_price'] = $data->selling_price;
-            }
-            if (! $data->alert_quantity instanceof Optional) {
-                $updateData['alert_quantity'] = $data->alert_quantity;
-            }
-            if (! $data->track_inventory instanceof Optional) {
-                $updateData['track_inventory'] = $data->track_inventory;
-            }
-            if (! $data->is_active instanceof Optional) {
-                $updateData['is_active'] = $data->is_active;
-            }
+        if ($data->image instanceof UploadedFile) {
+            $uploadedImagePath = $this->uploadImage->handle($data->image, 'products', $product->image);
+        }
 
-            if (! $data->image instanceof Optional) {
-                $image = $data->image;
-                if ($image instanceof UploadedFile) {
-                    $updateData['image'] = $this->uploadImage->handle($image, 'products', $product->image);
-                } elseif (is_string($image) && $image !== '' && $image !== $product->image) {
-                    if ($product->image !== null && Storage::disk('public')->exists($product->image)) {
-                        Storage::disk('public')->delete($product->image);
-                    }
-                    $updateData['image'] = $image;
-                } elseif ($image === null && $product->image !== null) {
-                    Storage::disk('public')->delete($product->image);
-                    $updateData['image'] = null;
+        try {
+            return DB::transaction(static function () use ($product, $data, $uploadedImagePath): Product {
+                $updateData = [];
+
+                if (! $data->name instanceof Optional) {
+                    $updateData['name'] = $data->name;
                 }
+                if (! $data->sku instanceof Optional) {
+                    $updateData['sku'] = $data->sku;
+                }
+                if (! $data->barcode instanceof Optional) {
+                    $updateData['barcode'] = $data->barcode;
+                }
+                if (! $data->unit_id instanceof Optional) {
+                    $updateData['unit_id'] = $data->unit_id;
+                }
+                if (! $data->category_id instanceof Optional) {
+                    $updateData['category_id'] = $data->category_id;
+                }
+                if (! $data->brand_id instanceof Optional) {
+                    $updateData['brand_id'] = $data->brand_id;
+                }
+                if (! $data->description instanceof Optional) {
+                    $updateData['description'] = $data->description;
+                }
+                if (! $data->cost_price instanceof Optional) {
+                    $updateData['cost_price'] = $data->cost_price;
+                }
+                if (! $data->selling_price instanceof Optional) {
+                    $updateData['selling_price'] = $data->selling_price;
+                }
+                if (! $data->alert_quantity instanceof Optional) {
+                    $updateData['alert_quantity'] = $data->alert_quantity;
+                }
+                if (! $data->track_inventory instanceof Optional) {
+                    $updateData['track_inventory'] = $data->track_inventory;
+                }
+                if (! $data->is_active instanceof Optional) {
+                    $updateData['is_active'] = $data->is_active;
+                }
+
+                if (! $data->image instanceof Optional) {
+                    $image = $data->image;
+                    if ($image instanceof UploadedFile) {
+                        $updateData['image'] = $uploadedImagePath;
+                    } elseif (is_string($image) && $image !== '' && $image !== $product->image) {
+                        if ($product->image !== null && Storage::disk('public')->exists($product->image)) {
+                            Storage::disk('public')->delete($product->image);
+                        }
+                        $updateData['image'] = $image;
+                    } elseif ($image === null && $product->image !== null) {
+                        Storage::disk('public')->delete($product->image);
+                        $updateData['image'] = null;
+                    }
+                }
+
+                $product->update($updateData);
+
+                return $product->refresh();
+            });
+        } catch (Throwable $e) {
+            if ($uploadedImagePath !== null && Storage::disk('public')->exists($uploadedImagePath)) {
+                Storage::disk('public')->delete($uploadedImagePath);
             }
-
-            $product->update($updateData);
-
-            return $product->refresh();
-        });
+            throw $e;
+        }
     }
 }

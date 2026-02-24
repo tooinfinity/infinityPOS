@@ -55,7 +55,7 @@ final readonly class UpdatePurchase
             if (! $data->document instanceof Optional) {
                 if ($data->document instanceof UploadedFile) {
                     $updateData['document'] = $this->uploadImage->handle($data->document, 'purchases/documents');
-                } elseif (! $data->document instanceof \Symfony\Component\HttpFoundation\File\UploadedFile) {
+                } else {
                     $updateData['document'] = null;
                 }
             }
@@ -63,7 +63,7 @@ final readonly class UpdatePurchase
             $purchase->update($updateData);
 
             if (! $data->document instanceof Optional && $oldDocument !== null) {
-                DB::afterCommit(function () use ($oldDocument): void {
+                DB::afterCommit(static function () use ($oldDocument): void {
                     if (Storage::disk('public')->exists($oldDocument)) {
                         Storage::disk('public')->delete($oldDocument);
                     }

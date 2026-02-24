@@ -19,6 +19,15 @@ final readonly class RemoveItemFromStockTransfer
     public function handle(StockTransfer $transfer, StockTransferItem $item): bool
     {
         return DB::transaction(static function () use ($transfer, $item): bool {
+            /** @var StockTransfer $transfer */
+            $transfer = StockTransfer::query()
+                ->lockForUpdate()
+                ->findOrFail($transfer->id);
+
+            /** @var StockTransferItem $item */
+            $item = StockTransferItem::query()
+                ->lockForUpdate()
+                ->findOrFail($item->id);
             throw_if($transfer->status !== StockTransferStatusEnum::Pending, RuntimeException::class, 'Items can only be removed from pending transfers.');
 
             throw_if($item->stock_transfer_id !== $transfer->id, RuntimeException::class, 'Item does not belong to this transfer.');

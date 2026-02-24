@@ -82,7 +82,7 @@ it('rejects gif format', function (): void {
     $file = UploadedFile::fake()->image('image.gif', 800, 600);
 
     expect(fn (): string => $action->handle($file, 'uploads'))
-        ->toThrow(InvalidArgumentException::class, 'Invalid image format');
+        ->toThrow(InvalidArgumentException::class, 'Invalid image format. Allowed formats: png, jpg, jpeg, webp');
 });
 
 it('rejects svg format', function (): void {
@@ -91,7 +91,7 @@ it('rejects svg format', function (): void {
     $file = UploadedFile::fake()->create('image.svg', 100, 'image/svg+xml');
 
     expect(fn (): string => $action->handle($file, 'uploads'))
-        ->toThrow(InvalidArgumentException::class, 'Invalid image format');
+        ->toThrow(InvalidArgumentException::class, 'Invalid image format. Allowed formats: png, jpg, jpeg, webp');
 });
 
 it('rejects files larger than 2MB', function (): void {
@@ -100,7 +100,7 @@ it('rejects files larger than 2MB', function (): void {
     $file = UploadedFile::fake()->image('image.png', 800, 600)->size(2049);
 
     expect(fn (): string => $action->handle($file, 'uploads'))
-        ->toThrow(InvalidArgumentException::class, 'Image size exceeds maximum allowed size');
+        ->toThrow(InvalidArgumentException::class, 'Image size exceeds maximum allowed size of 2MB');
 });
 
 it('accepts files up to 2MB', function (): void {

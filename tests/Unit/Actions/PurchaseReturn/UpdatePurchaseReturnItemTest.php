@@ -29,7 +29,7 @@ it('throws exception when updating item in non-pending return', function (): voi
     $action = resolve(UpdatePurchaseReturnItem::class);
 
     $action->handle($item, new UpdatePurchaseReturnItemData(quantity: 10));
-})->throws(RuntimeException::class, 'Cannot update items in a non-pending');
+})->throws(RuntimeException::class, 'Cannot update items in a non-pending purchase return.');
 
 it('updates item unit_cost in pending purchase return', function (): void {
     $item = PurchaseReturnItem::factory()->create([

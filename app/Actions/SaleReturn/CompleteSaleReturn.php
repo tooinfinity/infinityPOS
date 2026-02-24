@@ -37,6 +37,9 @@ final readonly class CompleteSaleReturn
         });
     }
 
+    /**
+     * @throws Throwable
+     */
     private function validateSaleReturnCanBeCompleted(SaleReturn $saleReturn): void
     {
         if ($saleReturn->status !== ReturnStatusEnum::Pending) {

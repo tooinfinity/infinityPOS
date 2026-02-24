@@ -11,6 +11,7 @@ use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
+use Spatie\LaravelData\Optional;
 use Throwable;
 
 final readonly class UpdateSaleItem
@@ -23,16 +24,29 @@ final readonly class UpdateSaleItem
         return DB::transaction(function () use ($item, $data): SaleItem {
             $this->validateSaleIsPending($item->sale);
 
-            if ($data->batch_id !== null && $data->batch_id !== $item->batch_id) {
-                $this->validateStockAvailability($data->batch_id, $data->quantity ?? $item->quantity);
-            } elseif ($data->quantity !== null && $data->quantity > $item->quantity && $item->batch_id !== null) {
-                $this->validateStockAvailability($item->batch_id, $data->quantity);
+            $batchIdValue = $data->batch_id;
+            $quantityValue = $data->quantity;
+
+            $isBatchIdProvided = $batchIdValue !== null && ! $batchIdValue instanceof Optional;
+            $isQuantityProvided = $quantityValue !== null && ! $quantityValue instanceof Optional;
+
+            $batchIdChanged = $isBatchIdProvided && $batchIdValue !== $item->batch_id;
+            $quantityIncreased = $isQuantityProvided && $quantityValue > $item->quantity;
+
+            if ($batchIdChanged) {
+                $quantity = $isQuantityProvided ? $quantityValue : $item->quantity;
+                /** @var int $batchIdValue */
+                /** @var int $quantity */
+                $this->validateStockAvailability($item->sale, $batchIdValue, $quantity);
+            } elseif ($quantityIncreased && $item->batch_id !== null) {
+                /** @var int $quantityValue */
+                $this->validateStockAvailability($item->sale, $item->batch_id, $quantityValue);
             }
 
-            $quantity = $data->quantity ?? $item->quantity;
-            $unitPrice = $data->unit_price ?? $item->unit_price;
-            $unitCost = $data->unit_cost ?? $item->unit_cost;
-            $batchId = $data->batch_id ?? $item->batch_id;
+            $quantity = is_int($data->quantity) ? $data->quantity : $item->quantity;
+            $unitPrice = is_numeric($data->unit_price) ? $data->unit_price : $item->unit_price;
+            $unitCost = is_numeric($data->unit_cost) ? $data->unit_cost : $item->unit_cost;
+            $batchId = is_int($data->batch_id) ? $data->batch_id : $item->batch_id;
 
             $item->forceFill([
                 'batch_id' => $batchId,
@@ -60,15 +74,19 @@ final readonly class UpdateSaleItem
     /**
      * @throws Throwable
      */
-    private function validateStockAvailability(int $batchId, int $quantity): void
+    private function validateStockAvailability(Sale $sale, int $batchId, int $quantity): void
     {
-        $batch = Batch::query()->find($batchId);
+        $batch = Batch::query()
+            ->lockForUpdate()
+            ->find($batchId);
 
-        throw_if($batch === null, RuntimeException::class, "Batch not found: {$batchId}");
+        throw_if($batch === null, RuntimeException::class, "Batch not found: $batchId");
+
+        throw_if($batch->warehouse_id !== $sale->warehouse_id, RuntimeException::class, "Batch is not in the sale's warehouse");
 
         if ($batch->quantity < $quantity) {
             throw new RuntimeException(
-                "Insufficient stock in batch. Required: {$quantity}, Available: {$batch->quantity}"
+                "Insufficient stock in batch. Required: $quantity, Available: $batch->quantity"
             );
         }
     }

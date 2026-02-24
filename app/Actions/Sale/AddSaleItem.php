@@ -55,7 +55,9 @@ final readonly class AddSaleItem
      */
     private function validateStockAvailability(Sale $sale, SaleItemData $data): void
     {
-        $batch = Batch::query()->find($data->batch_id);
+        $batch = Batch::query()
+            ->lockForUpdate()
+            ->find($data->batch_id);
 
         if ($batch === null) {
             throw new RuntimeException("Batch not found for product $data->product_id");

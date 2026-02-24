@@ -100,10 +100,8 @@ it('works with completed sale return', function () use (&$paymentMethod): void {
 });
 
 it('works with received purchase', function () use (&$paymentMethod): void {
-    $purchase = Purchase::factory()->create([
-        'status' => PurchaseStatusEnum::Received,
+    $purchase = Purchase::factory()->received()->create([
         'total_amount' => 1000,
-        'paid_amount' => 0,
     ]);
 
     $action = resolve(RecordPayment::class);
@@ -254,3 +252,60 @@ it('throws exception for pending purchase', function () use (&$paymentMethod): v
         note: null,
     ));
 })->throws(RuntimeException::class, 'Cannot record payment');
+
+it('throws exception for non-existent payment method', function (): void {
+    $sale = Sale::factory()->completed()->create([
+        'total_amount' => 1000,
+        'paid_amount' => 0,
+    ]);
+
+    $action = resolve(RecordPayment::class);
+
+    $action->handle($sale, new RecordPaymentData(
+        payment_method_id: 99999,
+        amount: 100,
+        payment_date: now(),
+        user_id: null,
+        note: null,
+    ));
+})->throws(RuntimeException::class, 'Payment method is not active or does not exist');
+
+it('throws exception for inactive payment method', function (): void {
+    $inactiveMethod = PaymentMethod::factory()->create([
+        'is_active' => false,
+    ]);
+
+    $sale = Sale::factory()->completed()->create([
+        'total_amount' => 1000,
+        'paid_amount' => 0,
+    ]);
+
+    $action = resolve(RecordPayment::class);
+
+    $action->handle($sale, new RecordPaymentData(
+        payment_method_id: $inactiveMethod->id,
+        amount: 100,
+        payment_date: now(),
+        user_id: null,
+        note: null,
+    ));
+})->throws(RuntimeException::class, 'Payment method is not active or does not exist');
+
+it('calculates change amount for overpaid sale', function () use (&$paymentMethod): void {
+    $sale = Sale::factory()->completed()->create([
+        'total_amount' => 1000,
+        'paid_amount' => 0,
+    ]);
+
+    $action = resolve(RecordPayment::class);
+
+    $action->handle($sale, new RecordPaymentData(
+        payment_method_id: $paymentMethod->id,
+        amount: 1500,
+        payment_date: now(),
+        user_id: null,
+        note: null,
+    ));
+
+    expect($sale->fresh()->change_amount)->toBe(500);
+});

@@ -41,6 +41,9 @@ final readonly class ProcessSaleReturnRefund
         });
     }
 
+    /**
+     * @throws Throwable
+     */
     private function validateRefund(SaleReturn $saleReturn, int $amount): void
     {
         throw_if($saleReturn->status !== ReturnStatusEnum::Completed, RuntimeException::class, 'Sale return must be completed before issuing a refund.');

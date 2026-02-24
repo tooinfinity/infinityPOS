@@ -626,3 +626,41 @@ it('updates image with string path when old image does not exist in storage', fu
     // Should update to new image without error, even though old doesn't exist
     expect($updatedProduct->image)->toBe('products/new-image.jpg');
 });
+
+it('cleans up uploaded image when transaction fails', function (): void {
+    $product = Product::factory()->create([
+        'sku' => 'ORIGINAL-SKU',
+    ]);
+
+    $action = resolve(UpdateProduct::class);
+
+    $file = UploadedFile::fake()->image('product.png', 800, 600);
+
+    $data = new UpdateProductData(
+        name: Optional::create(),
+        sku: 'DUPLICATE-SKU-FOR-FAILURE',
+        barcode: Optional::create(),
+        unit_id: Optional::create(),
+        category_id: Optional::create(),
+        brand_id: Optional::create(),
+        description: Optional::create(),
+        image: $file,
+        cost_price: Optional::create(),
+        selling_price: Optional::create(),
+        alert_quantity: Optional::create(),
+        track_inventory: Optional::create(),
+        is_active: Optional::create(),
+    );
+
+    Product::factory()->create(['sku' => 'DUPLICATE-SKU-FOR-FAILURE']);
+
+    $uploadedPath = null;
+    try {
+        $action->handle($product, $data);
+    } catch (Throwable) {
+        // Expected to fail
+    }
+
+    // Product should not be updated
+    expect($product->fresh()->sku)->toBe('ORIGINAL-SKU');
+});

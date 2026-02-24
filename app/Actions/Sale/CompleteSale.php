@@ -10,6 +10,7 @@ use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
 use App\Enums\StockMovementTypeEnum;
+use App\Models\Batch;
 use App\Models\Sale;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -25,6 +26,8 @@ final readonly class CompleteSale
     public function handle(Sale $sale, ?CompleteSaleData $data = null): Sale
     {
         return DB::transaction(function () use ($sale, $data): Sale {
+            $sale->loadMissing('items.batch');
+
             $this->validateSaleCanBeCompleted($sale);
 
             $this->deductStock($sale);
@@ -65,11 +68,14 @@ final readonly class CompleteSale
         $this->validateStockAvailability($sale);
 
         foreach ($sale->items as $item) {
-            $batch = $item->batch;
-
-            if ($batch === null) {
+            if ($item->batch_id === null) {
                 continue;
             }
+
+            /** @var Batch $batch */
+            $batch = Batch::query()
+                ->lockForUpdate()
+                ->find($item->batch_id);
 
             $previousQuantity = $batch->quantity;
 
@@ -98,16 +104,18 @@ final readonly class CompleteSale
     private function validateStockAvailability(Sale $sale): void
     {
         foreach ($sale->items as $item) {
-            $batch = $item->batch;
-
-            if ($batch === null) {
+            if ($item->batch_id === null) {
                 continue;
             }
+            /** @var Batch $batch */
+            $batch = Batch::query()
+                ->lockForUpdate()
+                ->find($item->batch_id);
 
             $newQuantity = $batch->quantity - $item->quantity;
 
             throw_if($newQuantity < 0, RuntimeException::class,
-                "Insufficient stock in batch. Available: {$batch->quantity}, Required: {$item->quantity}"
+                "Insufficient stock in batch. Available: $batch->quantity, Required: $item->quantity"
             );
         }
     }

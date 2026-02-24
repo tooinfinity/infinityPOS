@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Sale;
 
+use App\Enums\SaleStatusEnum;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +33,7 @@ final readonly class RemoveSaleItem
 
     private function validateSaleIsPending(Sale $sale): void
     {
-        if ($sale->status !== \App\Enums\SaleStatusEnum::Pending) {
+        if ($sale->status !== SaleStatusEnum::Pending) {
             throw new RuntimeException(
                 "Can only remove items from pending sales. Current status: {$sale->status->value}"
             );

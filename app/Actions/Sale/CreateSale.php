@@ -11,6 +11,7 @@ use App\Enums\SaleStatusEnum;
 use App\Models\Batch;
 use App\Models\Sale;
 use App\Models\SaleItem;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -67,6 +68,7 @@ final readonly class CreateSale
         $itemsArray = $items->toArray();
         $batchIds = array_unique(array_column($itemsArray, 'batch_id'));
 
+        /** @var Collection<int, Batch> $batches */
         $batches = Batch::query()
             ->whereIn('id', $batchIds)
             ->lockForUpdate()
@@ -77,12 +79,12 @@ final readonly class CreateSale
             $batch = $batches->get($item->batch_id);
 
             if ($batch === null) {
-                throw new RuntimeException("Batch not found for product {$item->product_id}");
+                throw new RuntimeException("Batch not found for product $item->product_id");
             }
 
             if ($batch->quantity < $item->quantity) {
                 throw new RuntimeException(
-                    "Insufficient stock in batch. Required: {$item->quantity}, Available: {$batch->quantity}"
+                    "Insufficient stock in batch. Required: $item->quantity, Available: $batch->quantity"
                 );
             }
         }

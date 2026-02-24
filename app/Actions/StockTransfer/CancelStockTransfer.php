@@ -19,6 +19,7 @@ final readonly class CancelStockTransfer
     public function handle(StockTransfer $transfer): bool
     {
         return DB::transaction(static function () use ($transfer): bool {
+            /** @var StockTransfer $transfer */
             $transfer = StockTransfer::query()
                 ->lockForUpdate()
                 ->findOrFail($transfer->id);

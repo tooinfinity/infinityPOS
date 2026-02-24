@@ -9,6 +9,7 @@ use App\Data\Sale\CancelSaleData;
 use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\SaleStatusEnum;
 use App\Enums\StockMovementTypeEnum;
+use App\Models\Batch;
 use App\Models\Sale;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -48,16 +49,22 @@ final readonly class CancelSale
         }
     }
 
+    /**
+     * @throws Throwable
+     */
     private function restockItems(Sale $sale): void
     {
         $sale->loadMissing('items.batch');
 
         foreach ($sale->items as $item) {
-            $batch = $item->batch;
-
-            if ($batch === null) {
+            if ($item->batch_id === null) {
                 continue;
             }
+
+            /** @var Batch $batch */
+            $batch = Batch::query()
+                ->lockForUpdate()
+                ->find($item->batch_id);
 
             $previousQuantity = $batch->quantity;
 

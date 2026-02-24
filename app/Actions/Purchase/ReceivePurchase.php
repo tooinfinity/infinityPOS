@@ -12,9 +12,9 @@ use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use RuntimeException;
 use Throwable;
 
 final readonly class ReceivePurchase
@@ -27,6 +27,7 @@ final readonly class ReceivePurchase
     public function handle(Purchase $purchase): Purchase
     {
         return DB::transaction(function () use ($purchase): Purchase {
+            /** @var Purchase $purchase */
             $purchase = Purchase::query()
                 ->lockForUpdate()
                 ->with(['items.product', 'items.batch'])
@@ -37,12 +38,6 @@ final readonly class ReceivePurchase
                 StateTransitionException::class,
                 $purchase->status->label(),
                 PurchaseStatusEnum::Received->label()
-            );
-
-            throw_if(
-                ! in_array($purchase->status, [PurchaseStatusEnum::Pending, PurchaseStatusEnum::Ordered], true),
-                RuntimeException::class,
-                'Only pending or ordered purchases can be received.'
             );
 
             foreach ($purchase->items as $item) {
@@ -60,14 +55,12 @@ final readonly class ReceivePurchase
      */
     private function processItem(Purchase $purchase, PurchaseItem $item): void
     {
-        $batch = Batch::query()->forceCreate([
-            'product_id' => $item->product_id,
-            'warehouse_id' => $purchase->warehouse_id,
-            'batch_number' => $this->generateBatchNumber($item),
-            'cost_amount' => $item->unit_cost,
-            'quantity' => $item->quantity,
-            'expires_at' => $item->batch?->expires_at,
-        ])->refresh();
+        $batch = $this->findOrCreateBatch($purchase, $item);
+
+        $previousQuantity = $batch->quantity;
+        $newQuantity = $previousQuantity + $item->quantity;
+
+        $batch->forceFill(['quantity' => $newQuantity])->save();
 
         $item->forceFill([
             'batch_id' => $batch->id,
@@ -79,8 +72,8 @@ final readonly class ReceivePurchase
             product_id: $item->product_id,
             type: StockMovementTypeEnum::In,
             quantity: $item->quantity,
-            previous_quantity: 0,
-            current_quantity: $item->quantity,
+            previous_quantity: $previousQuantity,
+            current_quantity: $newQuantity,
             reference_type: Purchase::class,
             reference_id: $purchase->id,
             batch_id: $batch->id,
@@ -88,6 +81,36 @@ final readonly class ReceivePurchase
             note: 'Purchase receipt',
             created_at: null,
         ));
+    }
+
+    private function findOrCreateBatch(Purchase $purchase, PurchaseItem $item): Batch
+    {
+        $expiresAt = $item->batch?->expires_at;
+
+        $existingBatch = Batch::query()
+            ->lockForUpdate()
+            ->where('product_id', $item->product_id)
+            ->where('warehouse_id', $purchase->warehouse_id)
+            ->where('cost_amount', $item->unit_cost)
+            ->where(function (Builder $query) use ($expiresAt): void {
+                $query->where('expires_at', $expiresAt)
+                    ->orWhere(function (Builder $query): void {
+                        $query->whereNull('expires_at')
+                            ->where(function (Builder $query): void {
+                                $query->whereNull('expires_at');
+                            });
+                    });
+            })
+            ->first();
+
+        return $existingBatch ?? Batch::query()->forceCreate([
+            'product_id' => $item->product_id,
+            'warehouse_id' => $purchase->warehouse_id,
+            'batch_number' => $this->generateBatchNumber($item),
+            'cost_amount' => $item->unit_cost,
+            'quantity' => 0,
+            'expires_at' => $item->batch?->expires_at,
+        ]);
     }
 
     private function generateBatchNumber(PurchaseItem $item): string

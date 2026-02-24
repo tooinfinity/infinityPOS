@@ -18,15 +18,19 @@ final readonly class DeleteBrand
     public function handle(Brand $brand): bool
     {
         return DB::transaction(static function () use ($brand): bool {
+            $logo = $brand->logo;
+
             $brand->products()->each(function (Product $product): void {
                 $product->forceFill(['brand_id' => null])->save();
             });
 
-            if ($brand->logo !== null) {
-                Storage::disk('public')->delete($brand->logo);
+            $deleted = (bool) $brand->delete();
+
+            if ($deleted && $logo !== null) {
+                DB::afterCommit(static fn () => Storage::disk('public')->delete($logo));
             }
 
-            return (bool) $brand->delete();
+            return $deleted;
         });
     }
 }

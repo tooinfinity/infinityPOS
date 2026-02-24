@@ -19,6 +19,7 @@ final readonly class MarkPurchaseAsOrdered
     public function handle(Purchase $purchase): Purchase
     {
         return DB::transaction(static function () use ($purchase): Purchase {
+            /** @var Purchase $purchase */
             $purchase = Purchase::query()
                 ->lockForUpdate()
                 ->findOrFail($purchase->id);
@@ -28,12 +29,6 @@ final readonly class MarkPurchaseAsOrdered
                 StateTransitionException::class,
                 $purchase->status->label(),
                 PurchaseStatusEnum::Ordered->label()
-            );
-
-            throw_if(
-                $purchase->status !== PurchaseStatusEnum::Pending,
-                RuntimeException::class,
-                'Only pending purchases can be marked as ordered.'
             );
 
             throw_if(

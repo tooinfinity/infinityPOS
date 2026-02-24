@@ -37,6 +37,9 @@ final readonly class CompletePurchaseReturn
         });
     }
 
+    /**
+     * @throws Throwable
+     */
     private function validatePurchaseReturnCanBeCompleted(PurchaseReturn $purchaseReturn): void
     {
         if ($purchaseReturn->status !== ReturnStatusEnum::Pending) {
@@ -54,7 +57,7 @@ final readonly class CompletePurchaseReturn
     private function removeStockFromBatches(PurchaseReturn $purchaseReturn): void
     {
         foreach ($purchaseReturn->items as $item) {
-            $batch = $item->batch;
+            $batch = $item->batch()->lockForUpdate()->first();
 
             if ($batch === null) {
                 continue;

@@ -78,6 +78,8 @@ final class PurchaseFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'status' => PurchaseStatusEnum::Received,
+            'payment_status' => PaymentStatusEnum::Unpaid,
+            'paid_amount' => 0,
         ]);
     }
 

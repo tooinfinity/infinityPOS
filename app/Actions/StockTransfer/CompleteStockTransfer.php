@@ -12,6 +12,7 @@ use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Throwable;
@@ -26,9 +27,14 @@ final readonly class CompleteStockTransfer
     public function handle(StockTransfer $transfer): void
     {
         DB::transaction(function () use ($transfer): void {
+            /** @var StockTransfer $transfer */
             $transfer = StockTransfer::query()
                 ->lockForUpdate()
                 ->with(['items.product', 'items.batch'])
+                ->with([
+                    'items.product',
+                    'items.batch' => fn (Relation $query): Relation => $query->lockForUpdate(),
+                ])
                 ->findOrFail($transfer->id);
 
             throw_if(
@@ -37,11 +43,6 @@ final readonly class CompleteStockTransfer
                 $transfer->status->label(),
                 StockTransferStatusEnum::Completed->label()
             );
-
-            $batchIds = $transfer->items->pluck('batch_id')->filter();
-            if ($batchIds->isNotEmpty()) {
-                Batch::query()->whereIn('id', $batchIds)->lockForUpdate()->get();
-            }
 
             $this->validateSufficientStock($transfer);
 

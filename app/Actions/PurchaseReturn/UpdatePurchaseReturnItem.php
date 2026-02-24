@@ -57,7 +57,7 @@ final readonly class UpdatePurchaseReturnItem
     {
         $purchaseReturn->refresh();
 
-        $totalAmount = $purchaseReturn->items()->sum('subtotal');
+        $totalAmount = $purchaseReturn->items()->lockForUpdate()->sum('subtotal');
 
         $purchaseReturn->forceFill([
             'total_amount' => $totalAmount,

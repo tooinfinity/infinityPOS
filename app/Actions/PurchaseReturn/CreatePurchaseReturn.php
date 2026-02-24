@@ -10,6 +10,7 @@ use App\Enums\PaymentStatusEnum;
 use App\Enums\ReturnStatusEnum;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
@@ -23,31 +24,33 @@ final readonly class CreatePurchaseReturn
     {
         $totalAmount = $this->calculateTotalAmount($data->items);
 
-        $purchaseReturn = PurchaseReturn::query()->forceCreate([
-            'purchase_id' => $data->purchase_id,
-            'warehouse_id' => $data->warehouse_id,
-            'user_id' => $data->user_id,
-            'reference_no' => $this->generateReferenceNo(),
-            'return_date' => $data->return_date,
-            'total_amount' => $totalAmount,
-            'paid_amount' => 0,
-            'payment_status' => PaymentStatusEnum::Unpaid,
-            'status' => ReturnStatusEnum::Pending,
-            'note' => $data->note,
-        ]);
-
-        foreach ($data->items as $item) {
-            PurchaseReturnItem::query()->forceCreate([
-                'purchase_return_id' => $purchaseReturn->id,
-                'product_id' => $item->product_id,
-                'batch_id' => $item->batch_id,
-                'quantity' => $item->quantity,
-                'unit_cost' => $item->unit_cost,
-                'subtotal' => $item->quantity * $item->unit_cost,
+        return DB::transaction(function () use ($totalAmount, $data): PurchaseReturn {
+            $purchaseReturn = PurchaseReturn::query()->forceCreate([
+                'purchase_id' => $data->purchase_id,
+                'warehouse_id' => $data->warehouse_id,
+                'user_id' => $data->user_id,
+                'reference_no' => $this->generateReferenceNo(),
+                'return_date' => $data->return_date,
+                'total_amount' => $totalAmount,
+                'paid_amount' => 0,
+                'payment_status' => PaymentStatusEnum::Unpaid,
+                'status' => ReturnStatusEnum::Pending,
+                'note' => $data->note,
             ]);
-        }
 
-        return $purchaseReturn->refresh();
+            foreach ($data->items as $item) {
+                PurchaseReturnItem::query()->forceCreate([
+                    'purchase_return_id' => $purchaseReturn->id,
+                    'product_id' => $item->product_id,
+                    'batch_id' => $item->batch_id,
+                    'quantity' => $item->quantity,
+                    'unit_cost' => $item->unit_cost,
+                    'subtotal' => $item->quantity * $item->unit_cost,
+                ]);
+            }
+
+            return $purchaseReturn->refresh();
+        });
     }
 
     /**

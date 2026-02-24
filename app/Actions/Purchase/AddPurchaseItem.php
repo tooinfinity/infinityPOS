@@ -20,6 +20,11 @@ final readonly class AddPurchaseItem
     public function handle(Purchase $purchase, PurchaseItemData $data): PurchaseItem
     {
         return DB::transaction(function () use ($purchase, $data): PurchaseItem {
+            /** @var Purchase $purchase */
+            $purchase = Purchase::query()
+                ->lockForUpdate()
+                ->findOrFail($purchase->id);
+
             throw_if(
                 $purchase->status !== PurchaseStatusEnum::Pending,
                 RuntimeException::class,
@@ -45,6 +50,7 @@ final readonly class AddPurchaseItem
     {
         $total = PurchaseItem::query()
             ->where('purchase_id', $purchase->id)
+            ->lockForUpdate()
             ->sum('subtotal');
 
         $purchase->forceFill(['total_amount' => $total])->save();
