@@ -6,6 +6,7 @@ use App\Actions\Expense\UpdateExpense;
 use App\Data\Expense\UpdateExpenseData;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Models\User;
 use Spatie\LaravelData\Optional;
 
 it('may update an expense amount', function (): void {
@@ -103,7 +104,7 @@ it('updates expense date', function (): void {
 
 it('updates user_id', function (): void {
     $category = ExpenseCategory::factory()->create();
-    $user = App\Models\User::factory()->create();
+    $user = User::factory()->create();
     $expense = Expense::factory()->forCategory($category)->create([
         'user_id' => null,
     ]);

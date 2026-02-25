@@ -79,7 +79,6 @@ final readonly class ReceivePurchase
             batch_id: $batch->id,
             user_id: $purchase->user_id,
             note: 'Purchase receipt',
-            created_at: null,
         ));
     }
 
@@ -92,15 +91,11 @@ final readonly class ReceivePurchase
             ->where('product_id', $item->product_id)
             ->where('warehouse_id', $purchase->warehouse_id)
             ->where('cost_amount', $item->unit_cost)
-            ->where(function (Builder $query) use ($expiresAt): void {
-                $query->where('expires_at', $expiresAt)
-                    ->orWhere(function (Builder $query): void {
-                        $query->whereNull('expires_at')
-                            ->where(function (Builder $query): void {
-                                $query->whereNull('expires_at');
-                            });
-                    });
-            })
+            ->when(
+                $expiresAt !== null,
+                fn (Builder $q) => $q->where('expires_at', $expiresAt),
+                fn (Builder $q) => $q->whereNull('expires_at'),
+            )
             ->first();
 
         return $existingBatch ?? Batch::query()->forceCreate([

@@ -12,6 +12,7 @@ use App\Enums\SaleStatusEnum;
 use App\Enums\StockMovementTypeEnum;
 use App\Models\Batch;
 use App\Models\Sale;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Throwable;
@@ -65,7 +66,25 @@ final readonly class CompleteSale
      */
     private function deductStock(Sale $sale): void
     {
-        $this->validateStockAvailability($sale);
+        $batchIds = $sale->items
+            ->pluck('batch_id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($batchIds === []) {
+            return;
+        }
+
+        /** @var Collection<int, Batch> $batches */
+        $batches = Batch::query()
+            ->lockForUpdate()
+            ->whereIn('id', $batchIds)
+            ->get()
+            ->keyBy('id');
+
+        $this->validateStockAvailability($sale, $batches);
 
         foreach ($sale->items as $item) {
             if ($item->batch_id === null) {
@@ -73,9 +92,7 @@ final readonly class CompleteSale
             }
 
             /** @var Batch $batch */
-            $batch = Batch::query()
-                ->lockForUpdate()
-                ->find($item->batch_id);
+            $batch = $batches->get($item->batch_id);
 
             $previousQuantity = $batch->quantity;
 
@@ -93,29 +110,38 @@ final readonly class CompleteSale
                 batch_id: $batch->id,
                 user_id: $sale->user_id,
                 note: 'Sale completed - stock out',
-                created_at: null,
             ));
         }
     }
 
     /**
+     * @param  Collection<int, Batch>  $batches
+     *
      * @throws Throwable
      */
-    private function validateStockAvailability(Sale $sale): void
+    private function validateStockAvailability(Sale $sale, Collection $batches): void
     {
+        /** @var array<int, int> $requiredQuantities */
+        $requiredQuantities = [];
+
         foreach ($sale->items as $item) {
             if ($item->batch_id === null) {
                 continue;
             }
+
+            $requiredQuantities[$item->batch_id] = ($requiredQuantities[$item->batch_id] ?? 0) + $item->quantity;
+        }
+
+        foreach ($requiredQuantities as $batchId => $requiredQuantity) {
             /** @var Batch $batch */
-            $batch = Batch::query()
-                ->lockForUpdate()
-                ->find($item->batch_id);
+            $batch = $batches->get($batchId);
 
-            $newQuantity = $batch->quantity - $item->quantity;
+            $newQuantity = $batch->quantity - $requiredQuantity;
 
-            throw_if($newQuantity < 0, RuntimeException::class,
-                "Insufficient stock in batch. Available: $batch->quantity, Required: $item->quantity"
+            throw_if(
+                $newQuantity < 0,
+                RuntimeException::class,
+                "Insufficient stock in batch. Available: {$batch->quantity}, Required: {$requiredQuantity}"
             );
         }
     }

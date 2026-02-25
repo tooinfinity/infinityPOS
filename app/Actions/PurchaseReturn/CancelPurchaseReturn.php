@@ -10,6 +10,7 @@ use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\ReturnStatusEnum;
 use App\Enums\StockMovementTypeEnum;
 use App\Models\PurchaseReturn;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Throwable;
@@ -24,6 +25,11 @@ final readonly class CancelPurchaseReturn
     public function handle(PurchaseReturn $purchaseReturn, CancelPurchaseReturnData $data): PurchaseReturn
     {
         return DB::transaction(function () use ($purchaseReturn, $data): PurchaseReturn {
+            /** @var PurchaseReturn $purchaseReturn */
+            $purchaseReturn = PurchaseReturn::query()
+                ->lockForUpdate()
+                ->with(['items.batch' => fn (Relation $query) => $query->lockForUpdate()])
+                ->findOrFail($purchaseReturn->id);
             $this->validatePurchaseReturnCanBeCancelled($purchaseReturn);
 
             if ($purchaseReturn->status === ReturnStatusEnum::Completed) {
@@ -39,6 +45,9 @@ final readonly class CancelPurchaseReturn
         });
     }
 
+    /**
+     * @throws Throwable
+     */
     private function validatePurchaseReturnCanBeCancelled(PurchaseReturn $purchaseReturn): void
     {
         $hasRefunds = $purchaseReturn->payments()
@@ -81,8 +90,7 @@ final readonly class CancelPurchaseReturn
                 reference_id: $purchaseReturn->id,
                 batch_id: $batch->id,
                 user_id: $purchaseReturn->user_id,
-                note: 'Purchase return cancelled - stock added back',
-                created_at: null,
+                note: 'Purchase return reverted - stock restored',
             ));
         }
     }

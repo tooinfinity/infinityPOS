@@ -13,6 +13,7 @@ use App\Enums\SaleStatusEnum;
 use App\Enums\StockMovementTypeEnum;
 use App\Models\Batch;
 use App\Models\Payment;
+use App\Models\PaymentMethod;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Database\Eloquent\Collection;
@@ -34,6 +35,15 @@ final readonly class QuickSale
     public function handle(QuickSaleData $data): Sale
     {
         return DB::transaction(function () use ($data): Sale {
+            if ($data->paid_amount > 0) {
+                $paymentMethodExists = PaymentMethod::query()
+                    ->where('id', $data->payment_method_id)
+                    ->where('is_active', true)
+                    ->exists();
+
+                throw_unless($paymentMethodExists, RuntimeException::class, 'Payment method is not active or does not exist.');
+            }
+
             $itemsArray = $data->items->toArray();
             $batchIds = array_unique(array_column($itemsArray, 'batch_id'));
 
@@ -74,12 +84,14 @@ final readonly class QuickSale
                     'unit_cost' => $item->unit_cost,
                     'subtotal' => $item->quantity * $item->unit_price,
                 ]);
-
-                $this->deductStock($sale, $item, $batches);
             }
 
             if ($data->paid_amount > 0) {
                 $this->recordPayment($sale, $data);
+            }
+
+            foreach ($data->items as $item) {
+                $this->deductStock($sale, $item, $batches);
             }
 
             return $sale->refresh();
@@ -92,17 +104,21 @@ final readonly class QuickSale
      */
     private function validateStockAvailability(DataCollection $items, Collection $batches): void
     {
+        $requiredByBatch = [];
+
         foreach ($items as $item) {
+            $requiredByBatch[$item->batch_id] = ($requiredByBatch[$item->batch_id] ?? 0) + $item->quantity;
+        }
+
+        foreach ($requiredByBatch as $batchId => $requiredQuantity) {
             /** @var Batch|null $batch */
-            $batch = $batches->get($item->batch_id);
+            $batch = $batches->get($batchId);
 
-            if ($batch === null) {
-                throw new RuntimeException("Batch not found for product $item->product_id");
-            }
+            throw_if($batch === null, RuntimeException::class, "Batch not found for id $batchId");
 
-            if ($batch->quantity < $item->quantity) {
+            if ($batch->quantity < $requiredQuantity) {
                 throw new RuntimeException(
-                    "Insufficient stock in batch. Required: $item->quantity, Available: $batch->quantity"
+                    "Insufficient stock in batch. Required: $requiredQuantity, Available: $batch->quantity"
                 );
             }
         }
@@ -148,7 +164,6 @@ final readonly class QuickSale
             batch_id: $batch->id,
             user_id: $sale->user_id,
             note: 'Quick sale - stock out',
-            created_at: null,
         ));
     }
 

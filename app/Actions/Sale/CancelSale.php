@@ -9,8 +9,8 @@ use App\Data\Sale\CancelSaleData;
 use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\SaleStatusEnum;
 use App\Enums\StockMovementTypeEnum;
-use App\Models\Batch;
 use App\Models\Sale;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Throwable;
@@ -27,7 +27,15 @@ final readonly class CancelSale
         return DB::transaction(function () use ($sale, $data): Sale {
             $this->validateSaleCanBeCancelled($sale);
 
-            if ($data->restock_items) {
+            $shouldRestock = $data->restock_items && $sale->status === SaleStatusEnum::Completed;
+
+            if ($shouldRestock) {
+                /** @var Sale $sale */
+                $sale = Sale::query()
+                    ->lockForUpdate()
+                    ->with(['items.batch' => fn (Relation $query): Relation => $query->lockForUpdate()])
+                    ->findOrFail($sale->id);
+
                 $this->restockItems($sale);
             }
 
@@ -54,17 +62,12 @@ final readonly class CancelSale
      */
     private function restockItems(Sale $sale): void
     {
-        $sale->loadMissing('items.batch');
-
         foreach ($sale->items as $item) {
-            if ($item->batch_id === null) {
+            $batch = $item->batch;
+
+            if ($batch === null) {
                 continue;
             }
-
-            /** @var Batch $batch */
-            $batch = Batch::query()
-                ->lockForUpdate()
-                ->find($item->batch_id);
 
             $previousQuantity = $batch->quantity;
 
@@ -82,7 +85,6 @@ final readonly class CancelSale
                 batch_id: $batch->id,
                 user_id: $sale->user_id,
                 note: 'Sale cancelled - stock returned',
-                created_at: null,
             ));
         }
     }

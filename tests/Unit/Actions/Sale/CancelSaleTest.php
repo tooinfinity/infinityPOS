@@ -128,3 +128,31 @@ it('does not create stock movement for items without batch', function (): void {
 
     expect($movements)->toHaveCount(0);
 });
+
+it('does not restock when cancelling pending sale even with restock_items true', function (): void {
+    $sale = Sale::factory()->pending()->create();
+    $batch = Batch::factory()->withQuantity(100)->create([
+        'warehouse_id' => $sale->warehouse_id,
+    ]);
+    SaleItem::factory()->forSale($sale)->create([
+        'product_id' => $batch->product_id,
+        'batch_id' => $batch->id,
+        'quantity' => 20,
+        'unit_price' => 500,
+        'unit_cost' => 300,
+    ]);
+
+    $action = resolve(CancelSale::class);
+
+    $action->handle($sale, new CancelSaleData(restock_items: true, note: null));
+
+    expect($sale->fresh()->status)->toBe(SaleStatusEnum::Cancelled)
+        ->and($batch->fresh()->quantity)->toBe(100);
+
+    $movements = StockMovement::query()
+        ->where('reference_type', Sale::class)
+        ->where('reference_id', $sale->id)
+        ->get();
+
+    expect($movements)->toHaveCount(0);
+});

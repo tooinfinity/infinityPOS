@@ -55,6 +55,7 @@ final readonly class UpdatePurchaseItem
 
         $total = PurchaseItem::query()
             ->where('purchase_id', $purchase->id)
+            ->lockForUpdate()
             ->sum('subtotal');
 
         $purchase->forceFill(['total_amount' => $total])->save();

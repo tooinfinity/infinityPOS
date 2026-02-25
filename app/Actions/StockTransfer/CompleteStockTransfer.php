@@ -30,7 +30,6 @@ final readonly class CompleteStockTransfer
             /** @var StockTransfer $transfer */
             $transfer = StockTransfer::query()
                 ->lockForUpdate()
-                ->with(['items.product', 'items.batch'])
                 ->with([
                     'items.product',
                     'items.batch' => fn (Relation $query): Relation => $query->lockForUpdate(),
@@ -81,19 +80,21 @@ final readonly class CompleteStockTransfer
         $sourceBatch = $item->batch;
 
         if ($sourceBatch === null) {
-            $previousQuantity = 0;
-        } else {
-            $previousQuantity = $sourceBatch->quantity;
-            $sourceBatch->forceFill(['quantity' => $sourceBatch->quantity - $item->quantity])->save();
+            $this->processItemWithoutSourceBatch($transfer, $item);
+
+            return;
         }
+
+        $previousQuantity = $sourceBatch->quantity;
+        $sourceBatch->forceFill(['quantity' => $sourceBatch->quantity - $item->quantity])->save();
 
         $destinationBatch = Batch::query()->forceCreate([
             'product_id' => $item->product_id,
             'warehouse_id' => $transfer->to_warehouse_id,
-            'batch_number' => $sourceBatch?->batch_number,
-            'cost_amount' => $sourceBatch !== null ? $sourceBatch->cost_amount : 0,
+            'batch_number' => 'BAT-'.now()->getTimestampMs().'-'.random_int(1000, 9999),
+            'cost_amount' => $sourceBatch->cost_amount,
             'quantity' => $item->quantity,
-            'expires_at' => $sourceBatch?->expires_at,
+            'expires_at' => $sourceBatch->expires_at,
         ])->refresh();
 
         $this->recordStockMovement->handle(new RecordStockMovementData(
@@ -105,10 +106,9 @@ final readonly class CompleteStockTransfer
             current_quantity: $previousQuantity - $item->quantity,
             reference_type: StockTransfer::class,
             reference_id: $transfer->id,
-            batch_id: $sourceBatch?->id,
+            batch_id: $sourceBatch->id,
             user_id: $transfer->user_id,
             note: 'Stock transfer out',
-            created_at: null,
         ));
 
         $this->recordStockMovement->handle(new RecordStockMovementData(
@@ -123,7 +123,49 @@ final readonly class CompleteStockTransfer
             batch_id: $destinationBatch->id,
             user_id: $transfer->user_id,
             note: 'Stock transfer in',
-            created_at: null,
+        ));
+    }
+
+    /**
+     * @throws Throwable
+     */
+    private function processItemWithoutSourceBatch(StockTransfer $transfer, StockTransferItem $item): void
+    {
+        $destinationBatch = Batch::query()->forceCreate([
+            'product_id' => $item->product_id,
+            'warehouse_id' => $transfer->to_warehouse_id,
+            'batch_number' => 'BAT-'.now()->getTimestampMs().'-'.random_int(1000, 9999),
+            'cost_amount' => 0,
+            'quantity' => $item->quantity,
+            'expires_at' => null,
+        ])->refresh();
+
+        $this->recordStockMovement->handle(new RecordStockMovementData(
+            warehouse_id: $transfer->from_warehouse_id,
+            product_id: $item->product_id,
+            type: StockMovementTypeEnum::Transfer,
+            quantity: $item->quantity,
+            previous_quantity: 0,
+            current_quantity: 0,
+            reference_type: StockTransfer::class,
+            reference_id: $transfer->id,
+            batch_id: null,
+            user_id: $transfer->user_id,
+            note: 'Stock transfer out (no source batch)',
+        ));
+
+        $this->recordStockMovement->handle(new RecordStockMovementData(
+            warehouse_id: $transfer->to_warehouse_id,
+            product_id: $item->product_id,
+            type: StockMovementTypeEnum::Transfer,
+            quantity: $item->quantity,
+            previous_quantity: 0,
+            current_quantity: $item->quantity,
+            reference_type: StockTransfer::class,
+            reference_id: $transfer->id,
+            batch_id: $destinationBatch->id,
+            user_id: $transfer->user_id,
+            note: 'Stock transfer in (no source batch)',
         ));
     }
 }

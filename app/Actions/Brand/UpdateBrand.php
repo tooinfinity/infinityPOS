@@ -27,39 +27,59 @@ final readonly class UpdateBrand
      */
     public function handle(Brand $brand, UpdateBrandData $data): Brand
     {
-        return DB::transaction(function () use ($brand, $data): Brand {
-            $updateData = [];
+        $uploadedLogoPath = null;
+        $logoToDelete = null;
+        if ($data->logo instanceof UploadedFile) {
+            $uploadedLogoPath = $this->uploadImage->handle($data->logo, 'brands');
+            $logoToDelete = $brand->logo;
+        }
+        try {
 
-            if (! $data->name instanceof Optional) {
-                if ($data->name !== $brand->name && $data->slug instanceof Optional) {
-                    $updateData['slug'] = $this->ensureUniqueSlug->handle(Str::slug($data->name), Brand::class, $brand->id);
+            $updatedBrand = DB::transaction(function () use ($brand, $data, $uploadedLogoPath, &$logoToDelete): Brand {
+                $updateData = [];
+
+                if (! $data->name instanceof Optional) {
+                    if ($data->name !== $brand->name && $data->slug instanceof Optional) {
+                        $updateData['slug'] = $this->ensureUniqueSlug->handle(Str::slug($data->name), Brand::class, $brand->id);
+                    }
+                    $updateData['name'] = $data->name;
                 }
-                $updateData['name'] = $data->name;
-            }
 
-            if (! $data->slug instanceof Optional) {
-                $updateData['slug'] = $this->ensureUniqueSlug->handle($data->slug, Brand::class, $brand->id);
-            }
-
-            if (! $data->is_active instanceof Optional) {
-                $updateData['is_active'] = $data->is_active;
-            }
-
-            if (! $data->logo instanceof Optional) {
-                $logo = $data->logo;
-                if ($logo instanceof UploadedFile) {
-                    $updateData['logo'] = $this->uploadImage->handle($logo, 'brands', $brand->logo);
-                } elseif (is_string($logo)) {
-                    $updateData['logo'] = $logo;
-                } elseif ($brand->logo !== null) {
-                    Storage::disk('public')->delete($brand->logo);
-                    $updateData['logo'] = null;
+                if (! $data->slug instanceof Optional) {
+                    $updateData['slug'] = $this->ensureUniqueSlug->handle($data->slug, Brand::class, $brand->id);
                 }
+
+                if (! $data->is_active instanceof Optional) {
+                    $updateData['is_active'] = $data->is_active;
+                }
+
+                if (! $data->logo instanceof Optional) {
+                    $logo = $data->logo;
+                    if ($logo instanceof UploadedFile) {
+                        $updateData['logo'] = $uploadedLogoPath;
+                    } elseif (is_string($logo)) {
+                        $updateData['logo'] = $logo;
+                        $logoToDelete = $brand->logo;
+                    } elseif ($brand->logo !== null) {
+                        $updateData['logo'] = null;
+                        $logoToDelete = $brand->logo;
+                    }
+                }
+
+                $brand->update($updateData);
+
+                return $brand->refresh();
+            });
+            if ($logoToDelete !== null) {
+                Storage::disk('public')->delete($logoToDelete);
             }
 
-            $brand->update($updateData);
-
-            return $brand->refresh();
-        });
+            return $updatedBrand;
+        } catch (Throwable $e) {
+            if ($uploadedLogoPath !== null) {
+                Storage::disk('public')->delete($uploadedLogoPath);
+            }
+            throw $e;
+        }
     }
 }

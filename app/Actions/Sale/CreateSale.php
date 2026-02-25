@@ -65,9 +65,14 @@ final readonly class CreateSale
      */
     private function validateStockAvailability(DataCollection $items): void
     {
-        $itemsArray = $items->toArray();
-        $batchIds = array_unique(array_column($itemsArray, 'batch_id'));
+        $requiredByBatch = [];
+        foreach ($items as $item) {
+            $batchId = $item->batch_id;
+            $requiredByBatch[$batchId]['quantity'] = ($requiredByBatch[$batchId]['quantity'] ?? 0) + $item->quantity;
+            $requiredByBatch[$batchId]['product_id'] ??= $item->product_id;
+        }
 
+        $batchIds = array_keys($requiredByBatch);
         /** @var Collection<int, Batch> $batches */
         $batches = Batch::query()
             ->whereIn('id', $batchIds)
@@ -75,16 +80,16 @@ final readonly class CreateSale
             ->get()
             ->keyBy('id');
 
-        foreach ($items as $item) {
-            $batch = $batches->get($item->batch_id);
+        foreach ($requiredByBatch as $batchId => $required) {
+            $batch = $batches->get($batchId);
 
             if ($batch === null) {
-                throw new RuntimeException("Batch not found for product $item->product_id");
+                throw new RuntimeException("Batch not found for product {$required['product_id']}");
             }
 
-            if ($batch->quantity < $item->quantity) {
+            if ($batch->quantity < $required['quantity']) {
                 throw new RuntimeException(
-                    "Insufficient stock in batch. Required: $item->quantity, Available: $batch->quantity"
+                    "Insufficient stock in batch. Required: {$required['quantity']}, Available: $batch->quantity"
                 );
             }
         }

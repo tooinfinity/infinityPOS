@@ -18,7 +18,6 @@ it('may be created with required fields', function (): void {
         batch_id: null,
         user_id: null,
         note: null,
-        created_at: null,
     );
 
     expect($data)
@@ -44,12 +43,10 @@ it('may be created with all fields', function (): void {
         batch_id: 10,
         user_id: 3,
         note: 'Test movement',
-        created_at: $createdAt,
     );
 
     expect($data)
         ->batch_id->toBe(10)
         ->user_id->toBe(3)
-        ->note->toBe('Test movement')
-        ->created_at->toBe($createdAt);
+        ->note->toBe('Test movement');
 });

@@ -11,7 +11,7 @@ final class UpdateSaleData extends Data
 {
     public function __construct(
         public ?int $customer_id,
-        public ?DateTimeInterface $sale_date,
+        public DateTimeInterface|string|null $sale_date,
         public ?string $note,
     ) {}
 }

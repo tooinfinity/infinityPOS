@@ -12,7 +12,7 @@ final class CreateBatchData extends Data
     public function __construct(
         public int $product_id,
         public int $warehouse_id,
-        public ?string $batch_number,
+        public string $batch_number,
         public int $cost_amount,
         public int $quantity,
         public DateTimeInterface|string|null $expires_at,

@@ -26,6 +26,8 @@ final readonly class CompleteSaleReturn
         return DB::transaction(function () use ($saleReturn, $data): SaleReturn {
             $this->validateSaleReturnCanBeCompleted($saleReturn);
 
+            $saleReturn->loadMissing('items.batch');
+
             $this->addStockToBatches($saleReturn);
 
             $saleReturn->forceFill([
@@ -57,7 +59,7 @@ final readonly class CompleteSaleReturn
     private function addStockToBatches(SaleReturn $saleReturn): void
     {
         foreach ($saleReturn->items as $item) {
-            $batch = $item->batch;
+            $batch = $item->batch()->lockForUpdate()->first();
 
             if ($batch === null) {
                 continue;
@@ -79,7 +81,6 @@ final readonly class CompleteSaleReturn
                 batch_id: $batch->id,
                 user_id: $saleReturn->user_id,
                 note: 'Sale return completed - stock returned',
-                created_at: null,
             ));
         }
     }

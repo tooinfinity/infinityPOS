@@ -10,6 +10,7 @@ use App\Data\Brand\CreateBrandData;
 use App\Models\Brand;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -25,22 +26,29 @@ final readonly class CreateBrand
      */
     public function handle(CreateBrandData $data): Brand
     {
-        return DB::transaction(function () use ($data): Brand {
-            $slug = $data->slug ?? Str::slug($data->name);
-            $slug = $this->ensureUniqueSlug->handle($slug, Brand::class);
-            $isActive = $data->is_active ?? true;
+        $logo = $data->logo;
+        if ($logo instanceof UploadedFile) {
+            $logo = $this->uploadImage->handle($logo, 'brands');
+        }
 
-            $logo = $data->logo;
-            if ($logo instanceof UploadedFile) {
-                $logo = $this->uploadImage->handle($logo, 'brands');
+        try {
+            return DB::transaction(function () use ($data, $logo): Brand {
+                $slug = $data->slug ?? Str::slug($data->name);
+                $slug = $this->ensureUniqueSlug->handle($slug, Brand::class);
+
+                return Brand::query()->forceCreate([
+                    'name' => $data->name,
+                    'slug' => $slug,
+                    'logo' => $logo,
+                    'is_active' => $data->is_active,
+                ])->refresh();
+            });
+        } catch (Throwable $e) {
+            if (is_string($logo) && $logo !== ($data->logo ?? null)) {
+                Storage::disk('public')->delete($logo);
             }
 
-            return Brand::query()->forceCreate([
-                'name' => $data->name,
-                'slug' => $slug,
-                'logo' => $logo,
-                'is_active' => $isActive,
-            ])->refresh();
-        });
+            throw $e;
+        }
     }
 }

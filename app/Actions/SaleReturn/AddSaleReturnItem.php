@@ -48,7 +48,7 @@ final readonly class AddSaleReturnItem
     {
         $saleReturn->refresh();
 
-        $totalAmount = $saleReturn->items()->sum('subtotal');
+        $totalAmount = $saleReturn->items()->lockForUpdate()->sum('subtotal');
 
         $saleReturn->forceFill([
             'total_amount' => $totalAmount,

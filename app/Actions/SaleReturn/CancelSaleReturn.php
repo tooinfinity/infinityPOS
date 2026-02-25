@@ -26,6 +26,8 @@ final readonly class CancelSaleReturn
         return DB::transaction(function () use ($saleReturn, $data): SaleReturn {
             $this->validateSaleReturnCanBeCancelled($saleReturn);
 
+            $saleReturn->loadMissing('items.batch');
+
             if ($saleReturn->status === ReturnStatusEnum::Completed) {
                 $this->removeStockFromBatches($saleReturn);
             }
@@ -63,7 +65,7 @@ final readonly class CancelSaleReturn
     private function removeStockFromBatches(SaleReturn $saleReturn): void
     {
         foreach ($saleReturn->items as $item) {
-            $batch = $item->batch;
+            $batch = $item->batch()->lockForUpdate()->first();
 
             if ($batch === null) {
                 continue;
@@ -93,7 +95,6 @@ final readonly class CancelSaleReturn
                 batch_id: $batch->id,
                 user_id: $saleReturn->user_id,
                 note: 'Sale return cancelled - stock removed',
-                created_at: null,
             ));
         }
     }

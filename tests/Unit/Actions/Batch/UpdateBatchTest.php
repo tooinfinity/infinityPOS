@@ -125,7 +125,7 @@ it('sets nullable fields to null', function (): void {
     $action->handle($batch, $data);
 
     $fresh = $batch->fresh();
-    expect($fresh->batch_number)->toBeNull()
+    expect($fresh->batch_number)->toStartWith('BAT-')
         ->and($fresh->expires_at)->toBeNull();
 });
 

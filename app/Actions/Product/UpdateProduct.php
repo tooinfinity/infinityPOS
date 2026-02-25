@@ -25,13 +25,15 @@ final readonly class UpdateProduct
     public function handle(Product $product, UpdateProductData $data): Product
     {
         $uploadedImagePath = null;
+        $imageToDelete = null;
 
         if ($data->image instanceof UploadedFile) {
-            $uploadedImagePath = $this->uploadImage->handle($data->image, 'products', $product->image);
+            $uploadedImagePath = $this->uploadImage->handle($data->image, 'products');
+            $imageToDelete = $product->image;
         }
 
         try {
-            return DB::transaction(static function () use ($product, $data, $uploadedImagePath): Product {
+            $updatedProduct = DB::transaction(static function () use ($product, $data, $uploadedImagePath, &$imageToDelete): Product {
                 $updateData = [];
 
                 if (! $data->name instanceof Optional) {
@@ -76,13 +78,11 @@ final readonly class UpdateProduct
                     if ($image instanceof UploadedFile) {
                         $updateData['image'] = $uploadedImagePath;
                     } elseif (is_string($image) && $image !== '' && $image !== $product->image) {
-                        if ($product->image !== null && Storage::disk('public')->exists($product->image)) {
-                            Storage::disk('public')->delete($product->image);
-                        }
                         $updateData['image'] = $image;
+                        $imageToDelete = $product->image;
                     } elseif ($image === null && $product->image !== null) {
-                        Storage::disk('public')->delete($product->image);
                         $updateData['image'] = null;
+                        $imageToDelete = $product->image;
                     }
                 }
 
@@ -90,6 +90,11 @@ final readonly class UpdateProduct
 
                 return $product->refresh();
             });
+            if ($imageToDelete !== null) {
+                Storage::disk('public')->delete($imageToDelete);
+            }
+
+            return $updatedProduct;
         } catch (Throwable $e) {
             if ($uploadedImagePath !== null && Storage::disk('public')->exists($uploadedImagePath)) {
                 Storage::disk('public')->delete($uploadedImagePath);

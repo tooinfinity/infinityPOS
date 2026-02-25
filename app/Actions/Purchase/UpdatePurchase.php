@@ -24,53 +24,65 @@ final readonly class UpdatePurchase
      */
     public function handle(Purchase $purchase, UpdatePurchaseData $data): Purchase
     {
-        return DB::transaction(function () use ($purchase, $data): Purchase {
-            throw_if(
-                $purchase->status !== PurchaseStatusEnum::Pending,
-                RuntimeException::class,
-                'Only pending purchases can be updated.'
-            );
+        $oldDocument = $purchase->document;
+        $uploadedDocumentPath = null;
 
-            $updateData = [];
+        if ($data->document instanceof UploadedFile) {
+            $uploadedDocumentPath = $this->uploadImage->handle($data->document, 'purchases/documents');
+        }
 
-            if (! $data->supplier_id instanceof Optional) {
-                $updateData['supplier_id'] = $data->supplier_id;
-            }
+        try {
+            return DB::transaction(static function () use ($purchase, $data, $uploadedDocumentPath, $oldDocument): Purchase {
+                throw_if(
+                    $purchase->status !== PurchaseStatusEnum::Pending,
+                    RuntimeException::class,
+                    'Only pending purchases can be updated.'
+                );
 
-            if (! $data->warehouse_id instanceof Optional) {
-                throw_if($purchase->items()->exists(), RuntimeException::class, 'Cannot change warehouse after items have been added.');
-                $updateData['warehouse_id'] = $data->warehouse_id;
-            }
+                $updateData = [];
 
-            if (! $data->purchase_date instanceof Optional) {
-                $updateData['purchase_date'] = $data->purchase_date;
-            }
-
-            if (! $data->note instanceof Optional) {
-                $updateData['note'] = $data->note;
-            }
-
-            $oldDocument = $purchase->document;
-
-            if (! $data->document instanceof Optional) {
-                if ($data->document instanceof UploadedFile) {
-                    $updateData['document'] = $this->uploadImage->handle($data->document, 'purchases/documents');
-                } else {
-                    $updateData['document'] = null;
+                if (! $data->supplier_id instanceof Optional) {
+                    $updateData['supplier_id'] = $data->supplier_id;
                 }
-            }
 
-            $purchase->update($updateData);
+                if (! $data->warehouse_id instanceof Optional) {
+                    throw_if($purchase->items()->exists(), RuntimeException::class, 'Cannot change warehouse after items have been added.');
+                    $updateData['warehouse_id'] = $data->warehouse_id;
+                }
 
-            if (! $data->document instanceof Optional && $oldDocument !== null) {
-                DB::afterCommit(static function () use ($oldDocument): void {
-                    if (Storage::disk('public')->exists($oldDocument)) {
-                        Storage::disk('public')->delete($oldDocument);
+                if (! $data->purchase_date instanceof Optional) {
+                    $updateData['purchase_date'] = $data->purchase_date;
+                }
+
+                if (! $data->note instanceof Optional) {
+                    $updateData['note'] = $data->note;
+                }
+
+                if (! $data->document instanceof Optional) {
+                    if ($uploadedDocumentPath !== null) {
+                        $updateData['document'] = $uploadedDocumentPath;
+                    } elseif (! $data->document instanceof UploadedFile) {
+                        $updateData['document'] = null;
                     }
-                });
-            }
+                }
 
-            return $purchase->refresh();
-        });
+                $purchase->update($updateData);
+
+                if (! $data->document instanceof Optional && $oldDocument !== null) {
+                    DB::afterCommit(static function () use ($oldDocument): void {
+                        if (Storage::disk('public')->exists($oldDocument)) {
+                            Storage::disk('public')->delete($oldDocument);
+                        }
+                    });
+                }
+
+                return $purchase->refresh();
+            });
+        } catch (Throwable $e) {
+            if ($uploadedDocumentPath !== null) {
+                Storage::disk('public')->delete($uploadedDocumentPath);
+            }
+            throw $e;
+        }
     }
 }

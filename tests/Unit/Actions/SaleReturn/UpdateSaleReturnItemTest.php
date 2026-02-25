@@ -73,4 +73,4 @@ it('throws exception when updating item in non-pending return', function (): voi
     $action->handle($item, new UpdateSaleReturnItemData(
         quantity: 10,
     ));
-})->throws(RuntimeException::class, 'Cannot update items in a non-pending');
+})->throws(RuntimeException::class, 'Cannot update items in a non-pending sale return.');

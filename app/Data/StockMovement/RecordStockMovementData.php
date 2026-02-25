@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Data\StockMovement;
 
 use App\Enums\StockMovementTypeEnum;
-use DateTimeInterface;
 use Spatie\LaravelData\Data;
 
 final class RecordStockMovementData extends Data
@@ -22,6 +21,5 @@ final class RecordStockMovementData extends Data
         public ?int $batch_id,
         public ?int $user_id,
         public ?string $note,
-        public DateTimeInterface|string|null $created_at,
     ) {}
 }

@@ -19,10 +19,15 @@ final readonly class CancelPurchase
      */
     public function handle(Purchase $purchase): Purchase
     {
-        return DB::transaction(static function () use ($purchase): Purchase {
+        $documentPath = null;
+
+        $cancelledPurchase = DB::transaction(static function () use ($purchase, &$documentPath): Purchase {
+            /** @var Purchase $purchase */
             $purchase = Purchase::query()
                 ->lockForUpdate()
                 ->findOrFail($purchase->id);
+
+            $documentPath = $purchase->document;
 
             throw_if(
                 ! $purchase->status->canTransitionTo(PurchaseStatusEnum::Cancelled),
@@ -43,10 +48,6 @@ final readonly class CancelPurchase
                 'Purchase is already cancelled.'
             );
 
-            if ($purchase->document !== null) {
-                Storage::disk('public')->delete($purchase->document);
-            }
-
             $purchase->forceFill([
                 'status' => PurchaseStatusEnum::Cancelled,
                 'document' => null,
@@ -54,5 +55,11 @@ final readonly class CancelPurchase
 
             return $purchase->refresh();
         });
+
+        if ($documentPath !== null) {
+            Storage::disk('public')->delete($documentPath);
+        }
+
+        return $cancelledPurchase;
     }
 }

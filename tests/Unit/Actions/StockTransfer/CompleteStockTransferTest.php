@@ -172,7 +172,7 @@ it('creates destination batch when source batch is null', function (): void {
 
     expect($destinationBatch)->not->toBeNull()
         ->and($destinationBatch->quantity)->toBe(15)
-        ->and($destinationBatch->batch_number)->toBeNull()
+        ->and($destinationBatch->batch_number)->toStartWith('BAT-')
         ->and($destinationBatch->cost_amount)->toBe(0);
 });
 

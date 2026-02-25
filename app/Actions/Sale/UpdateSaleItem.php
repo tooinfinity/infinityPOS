@@ -37,10 +37,10 @@ final readonly class UpdateSaleItem
                 $quantity = $isQuantityProvided ? $quantityValue : $item->quantity;
                 /** @var int $batchIdValue */
                 /** @var int $quantity */
-                $this->validateStockAvailability($item->sale, $batchIdValue, $quantity);
+                $this->validateStockAvailability($item->sale, $batchIdValue, $quantity, $item);
             } elseif ($quantityIncreased && $item->batch_id !== null) {
                 /** @var int $quantityValue */
-                $this->validateStockAvailability($item->sale, $item->batch_id, $quantityValue);
+                $this->validateStockAvailability($item->sale, $item->batch_id, $quantityValue, $item);
             }
 
             $quantity = is_int($data->quantity) ? $data->quantity : $item->quantity;
@@ -74,7 +74,7 @@ final readonly class UpdateSaleItem
     /**
      * @throws Throwable
      */
-    private function validateStockAvailability(Sale $sale, int $batchId, int $quantity): void
+    private function validateStockAvailability(Sale $sale, int $batchId, int $quantity, SaleItem $currentItem): void
     {
         $batch = Batch::query()
             ->lockForUpdate()
@@ -84,11 +84,17 @@ final readonly class UpdateSaleItem
 
         throw_if($batch->warehouse_id !== $sale->warehouse_id, RuntimeException::class, "Batch is not in the sale's warehouse");
 
-        if ($batch->quantity < $quantity) {
-            throw new RuntimeException(
-                "Insufficient stock in batch. Required: $quantity, Available: $batch->quantity"
-            );
-        }
+        $sale->loadMissing('items');
+
+        /** @var int $existingQuantity */
+        $existingQuantity = $sale->items
+            ->where('batch_id', $batchId)
+            ->where('id', '!=', $currentItem->id)
+            ->sum('quantity');
+
+        $totalRequired = $existingQuantity + $quantity;
+
+        throw_if($totalRequired > $batch->quantity, RuntimeException::class, "Insufficient stock in batch. Required: $quantity, Available: ".($batch->quantity - $existingQuantity));
     }
 
     private function recalculateSaleTotals(Sale $sale): void

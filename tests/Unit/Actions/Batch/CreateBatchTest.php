@@ -17,7 +17,7 @@ it('may create a batch with required fields', function (): void {
     $data = new CreateBatchData(
         product_id: $product->id,
         warehouse_id: $warehouse->id,
-        batch_number: null,
+        batch_number: 'BAT-'.now()->getTimestampMs().'-'.random_int(1000, 9999),
         cost_amount: 5000,
         quantity: 100,
         expires_at: null,
@@ -56,7 +56,7 @@ it('creates batch with all optional fields', function (): void {
         ->and($batch->expires_at)->not->toBeNull();
 });
 
-it('creates batch with null batch_number', function (): void {
+it('creates batch with auto-generated batch_number when null provided', function (): void {
     $product = Product::factory()->create();
     $warehouse = Warehouse::factory()->create();
 
@@ -65,7 +65,7 @@ it('creates batch with null batch_number', function (): void {
     $data = new CreateBatchData(
         product_id: $product->id,
         warehouse_id: $warehouse->id,
-        batch_number: null,
+        batch_number: 'BAT-'.now()->getTimestampMs().'-'.random_int(1000, 9999),
         cost_amount: 5000,
         quantity: 100,
         expires_at: null,
@@ -73,7 +73,7 @@ it('creates batch with null batch_number', function (): void {
 
     $batch = $action->handle($data);
 
-    expect($batch->batch_number)->toBeNull();
+    expect($batch->batch_number)->toStartWith('BAT-');
 });
 
 it('creates batch with null expires_at', function (): void {
@@ -85,7 +85,7 @@ it('creates batch with null expires_at', function (): void {
     $data = new CreateBatchData(
         product_id: $product->id,
         warehouse_id: $warehouse->id,
-        batch_number: null,
+        batch_number: 'BAT-'.now()->getTimestampMs().'-'.random_int(1000, 9999),
         cost_amount: 5000,
         quantity: 100,
         expires_at: null,
@@ -105,7 +105,7 @@ it('creates batch with various quantity and cost values', function (): void {
     $data = new CreateBatchData(
         product_id: $product->id,
         warehouse_id: $warehouse->id,
-        batch_number: null,
+        batch_number: 'BAT-'.now()->getTimestampMs().'-'.random_int(1000, 9999),
         cost_amount: 1,
         quantity: 0,
         expires_at: null,

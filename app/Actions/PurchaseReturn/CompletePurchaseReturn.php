@@ -24,6 +24,12 @@ final readonly class CompletePurchaseReturn
     public function handle(PurchaseReturn $purchaseReturn, CompletePurchaseReturnData $data): PurchaseReturn
     {
         return DB::transaction(function () use ($purchaseReturn, $data): PurchaseReturn {
+            /** @var PurchaseReturn $purchaseReturn */
+            $purchaseReturn = PurchaseReturn::query()
+                ->lockForUpdate()
+                ->with('items')
+                ->findOrFail($purchaseReturn->id);
+
             $this->validatePurchaseReturnCanBeCompleted($purchaseReturn);
 
             $this->removeStockFromBatches($purchaseReturn);
@@ -48,7 +54,7 @@ final readonly class CompletePurchaseReturn
             );
         }
 
-        throw_if($purchaseReturn->items()->count() === 0, RuntimeException::class, 'Cannot complete a purchase return with no items.');
+        throw_if($purchaseReturn->items->isEmpty(), RuntimeException::class, 'Cannot complete a purchase return with no items.');
     }
 
     /**
@@ -87,7 +93,6 @@ final readonly class CompletePurchaseReturn
                 batch_id: $batch->id,
                 user_id: $purchaseReturn->user_id,
                 note: 'Purchase return completed - stock removed',
-                created_at: null,
             ));
         }
     }

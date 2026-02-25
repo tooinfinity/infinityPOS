@@ -102,20 +102,18 @@ final class PurchaseReturnFactory extends Factory
         ]);
     }
 
-    public function partiallyPaid(int $totalAmount = 10000): self
+    public function partiallyPaid(): self
     {
-        $paidAmount = (int) ($totalAmount * 0.5);
-
         return $this->state(fn (array $attributes): array => [
-            'paid_amount' => $paidAmount,
+            'paid_amount' => ($attributes['total_amount'] ?? 0) * 0.5,
             'payment_status' => PaymentStatusEnum::Partial,
         ]);
     }
 
-    public function paid(int $totalAmount = 10000): self
+    public function paid(): self
     {
         return $this->state(fn (array $attributes): array => [
-            'paid_amount' => $totalAmount,
+            'paid_amount' => $attributes['total_amount'] ?? 0,
             'payment_status' => PaymentStatusEnum::Paid,
         ]);
     }

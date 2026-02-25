@@ -31,9 +31,19 @@ final readonly class RecordPayment
     public function handle(Sale|SaleReturn|Purchase|PurchaseReturn $payable, RecordPaymentData $data): Payment
     {
         return DB::transaction(function () use ($payable, $data): Payment {
+            /** @var Sale|SaleReturn|Purchase|PurchaseReturn $payable */
+            $payable = match ($payable::class) {
+                Sale::class => Sale::query()->lockForUpdate()->findOrFail($payable->id),
+                SaleReturn::class => SaleReturn::query()->lockForUpdate()->findOrFail($payable->id),
+                Purchase::class => Purchase::query()->lockForUpdate()->findOrFail($payable->id),
+                PurchaseReturn::class => PurchaseReturn::query()->lockForUpdate()->findOrFail($payable->id),
+            };
+
             $this->validatePaymentMethod($data->payment_method_id);
 
             $this->validatePayable($payable);
+
+            $this->validateNoOverpayment($payable, $data);
 
             $payment = Payment::query()->forceCreate([
                 'payment_method_id' => $data->payment_method_id,
@@ -68,11 +78,22 @@ final readonly class RecordPayment
 
         if (! $canAcceptPayment) {
             $payableClass = $payable::class;
-            $statusValue = $this->getStatusValue($payable);
+            $statusValue = $payable->status->value;
             throw new RuntimeException(
                 "Cannot record payment for $payableClass with status: $statusValue"
             );
         }
+    }
+
+    private function validateNoOverpayment(Sale|SaleReturn|Purchase|PurchaseReturn $payable, RecordPaymentData $data): void
+    {
+        if ($payable instanceof Sale) {
+            return;
+        }
+
+        $currentPaid = $payable->payments()->sum('amount');
+
+        throw_if(($currentPaid + $data->amount) > $payable->total_amount, RuntimeException::class, 'Payment amount exceeds the outstanding balance.');
     }
 
     private function checkCanAcceptPayment(Sale|SaleReturn|Purchase|PurchaseReturn $payable): bool
@@ -85,16 +106,6 @@ final readonly class RecordPayment
         };
 
         return $statusValid && $payable->payment_status->canAcceptPayment();
-    }
-
-    private function getStatusValue(Sale|SaleReturn|Purchase|PurchaseReturn $payable): string
-    {
-        return match ($payable::class) {
-            Sale::class => $payable->status->value,
-            SaleReturn::class => $payable->status->value,
-            Purchase::class => $payable->status->value,
-            PurchaseReturn::class => $payable->status->value,
-        };
     }
 
     private function updatePayablePaymentStatus(Sale|SaleReturn|Purchase|PurchaseReturn $payable): void

@@ -21,7 +21,7 @@ final readonly class UpdateBatch
             $updateData = [];
 
             if (! $data->batch_number instanceof Optional) {
-                $updateData['batch_number'] = $data->batch_number;
+                $updateData['batch_number'] = $data->batch_number ?? 'BAT-'.now()->getTimestampMs().'-'.random_int(1000, 9999);
             }
             if (! $data->cost_amount instanceof Optional) {
                 $updateData['cost_amount'] = $data->cost_amount;

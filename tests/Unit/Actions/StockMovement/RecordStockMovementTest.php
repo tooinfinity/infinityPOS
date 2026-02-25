@@ -31,7 +31,6 @@ it('may record a stock movement with required fields', function (): void {
         batch_id: null,
         user_id: null,
         note: null,
-        created_at: null,
     );
 
     $movement = $action->handle($data);
@@ -69,7 +68,6 @@ it('records stock movement with all optional fields', function (): void {
         batch_id: $batch->id,
         user_id: $user->id,
         note: 'Stock received from supplier',
-        created_at: now()->subDay(),
     );
 
     $movement = $action->handle($data);
@@ -98,7 +96,6 @@ it('records stock in movement', function (): void {
         batch_id: null,
         user_id: null,
         note: null,
-        created_at: null,
     );
 
     $movement = $action->handle($data);
@@ -127,7 +124,6 @@ it('records stock out movement', function (): void {
         batch_id: null,
         user_id: null,
         note: null,
-        created_at: null,
     );
 
     $movement = $action->handle($data);
@@ -154,7 +150,6 @@ it('records adjustment movement', function (): void {
         batch_id: null,
         user_id: null,
         note: 'Inventory adjustment - found extra stock',
-        created_at: null,
     );
 
     $movement = $action->handle($data);
@@ -182,7 +177,6 @@ it('records transfer movement', function (): void {
         batch_id: null,
         user_id: null,
         note: null,
-        created_at: null,
     );
 
     $movement = $action->handle($data);
@@ -209,7 +203,6 @@ it('records movement without batch and user', function (): void {
         batch_id: null,
         user_id: null,
         note: null,
-        created_at: null,
     );
 
     $movement = $action->handle($data);
