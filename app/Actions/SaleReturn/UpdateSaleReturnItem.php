@@ -23,21 +23,14 @@ final readonly class UpdateSaleReturnItem
 
             $this->validateSaleReturnIsPending($saleReturn);
 
-            if ($data->quantity !== null) {
-                $item->forceFill([
-                    'quantity' => $data->quantity,
-                    'subtotal' => $data->quantity * $item->unit_price,
-                ]);
-            }
+            $quantity = $data->quantity ?? $item->quantity;
+            $unitPrice = $data->unit_price ?? $item->unit_price;
 
-            if ($data->unit_price !== null) {
-                $item->forceFill([
-                    'unit_price' => $data->unit_price,
-                    'subtotal' => $item->quantity * $data->unit_price,
-                ]);
-            }
-
-            $item->save();
+            $item->forceFill([
+                'quantity' => $quantity,
+                'unit_price' => $unitPrice,
+                'subtotal' => $quantity * $unitPrice,
+            ])->save();
 
             $this->recalculateTotalAmount($saleReturn);
 

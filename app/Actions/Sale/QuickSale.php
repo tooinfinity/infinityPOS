@@ -54,7 +54,11 @@ final readonly class QuickSale
                 ->get()
                 ->keyBy('id');
 
-            $this->validateStockAvailability($data->items, $batches);
+            $this->validateAllBatchesExist($data->items, $batches);
+
+            $requiredByBatch = $this->calculateRequiredQuantities($data->items);
+
+            $this->validateStockAvailability($requiredByBatch, $batches);
 
             $totalAmount = $this->calculateTotalAmount($data->items);
 
@@ -90,9 +94,7 @@ final readonly class QuickSale
                 $this->recordPayment($sale, $data);
             }
 
-            foreach ($data->items as $item) {
-                $this->deductStock($sale, $item, $batches);
-            }
+            $this->deductStockFromBatches($sale, $batches, $requiredByBatch);
 
             return $sale->refresh();
         });
@@ -101,26 +103,86 @@ final readonly class QuickSale
     /**
      * @param  DataCollection<int, SaleItemData>  $items
      * @param  Collection<int, Batch>  $batches
+     *
+     * @throws Throwable
      */
-    private function validateStockAvailability(DataCollection $items, Collection $batches): void
+    private function validateAllBatchesExist(DataCollection $items, Collection $batches): void
+    {
+        foreach ($items as $item) {
+            throw_if(! $batches->has($item->batch_id), RuntimeException::class, "Batch not found for id {$item->batch_id}");
+        }
+    }
+
+    /**
+     * @param  DataCollection<int, SaleItemData>  $items
+     * @return array<int, array{quantity: int, product_id: int}>
+     */
+    private function calculateRequiredQuantities(DataCollection $items): array
     {
         $requiredByBatch = [];
-
         foreach ($items as $item) {
-            $requiredByBatch[$item->batch_id] = ($requiredByBatch[$item->batch_id] ?? 0) + $item->quantity;
+            if (! isset($requiredByBatch[$item->batch_id])) {
+                $requiredByBatch[$item->batch_id] = [
+                    'quantity' => 0,
+                    'product_id' => $item->product_id,
+                ];
+            }
+            $requiredByBatch[$item->batch_id]['quantity'] += $item->quantity;
         }
 
-        foreach ($requiredByBatch as $batchId => $requiredQuantity) {
-            /** @var Batch|null $batch */
+        return $requiredByBatch;
+    }
+
+    /**
+     * @param  array<int, array{quantity: int, product_id: int}>  $requiredByBatch
+     * @param  Collection<int, Batch>  $batches
+     */
+    private function validateStockAvailability(array $requiredByBatch, Collection $batches): void
+    {
+        foreach ($requiredByBatch as $batchId => $required) {
+            /** @var Batch $batch */
             $batch = $batches->get($batchId);
 
-            throw_if($batch === null, RuntimeException::class, "Batch not found for id $batchId");
-
-            if ($batch->quantity < $requiredQuantity) {
+            if ($batch->quantity < $required['quantity']) {
                 throw new RuntimeException(
-                    "Insufficient stock in batch. Required: $requiredQuantity, Available: $batch->quantity"
+                    "Insufficient stock in batch. Required: {$required['quantity']}, Available: {$batch->quantity}"
                 );
             }
+        }
+    }
+
+    /**
+     * Combined validation and deduction in single locked loop
+     *
+     * @param  array<int, array{quantity: int, product_id: int}>  $requiredByBatch
+     * @param  Collection<int, Batch>  $batches
+     *
+     * @throws Throwable
+     */
+    private function deductStockFromBatches(Sale $sale, Collection $batches, array $requiredByBatch): void
+    {
+        foreach ($requiredByBatch as $batchId => $required) {
+            /** @var Batch $batch */
+            $batch = $batches->get($batchId);
+
+            $previousQuantity = $batch->quantity;
+            $newQuantity = $previousQuantity - $required['quantity'];
+
+            $batch->forceFill(['quantity' => $newQuantity])->save();
+
+            $this->recordStockMovement->handle(new RecordStockMovementData(
+                warehouse_id: $sale->warehouse_id,
+                product_id: $required['product_id'],
+                type: StockMovementTypeEnum::Out,
+                quantity: $required['quantity'],
+                previous_quantity: $previousQuantity,
+                current_quantity: $newQuantity,
+                reference_type: Sale::class,
+                reference_id: $sale->id,
+                batch_id: $batch->id,
+                user_id: $sale->user_id,
+                note: 'Quick sale - stock out',
+            ));
         }
     }
 
@@ -136,35 +198,6 @@ final readonly class QuickSale
         }
 
         return $total;
-    }
-
-    /**
-     * @param  Collection<int, Batch>  $batches
-     *
-     * @throws Throwable
-     */
-    private function deductStock(Sale $sale, SaleItemData $item, Collection $batches): void
-    {
-        /** @var Batch $batch */
-        $batch = $batches->get($item->batch_id);
-
-        $previousQuantity = $batch->quantity;
-
-        $batch->forceFill(['quantity' => $batch->quantity - $item->quantity])->save();
-
-        $this->recordStockMovement->handle(new RecordStockMovementData(
-            warehouse_id: $sale->warehouse_id,
-            product_id: $item->product_id,
-            type: StockMovementTypeEnum::Out,
-            quantity: $item->quantity,
-            previous_quantity: $previousQuantity,
-            current_quantity: $previousQuantity - $item->quantity,
-            reference_type: Sale::class,
-            reference_id: $sale->id,
-            batch_id: $batch->id,
-            user_id: $sale->user_id,
-            note: 'Quick sale - stock out',
-        ));
     }
 
     private function recordPayment(Sale $sale, QuickSaleData $data): void

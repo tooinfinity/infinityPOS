@@ -8,13 +8,10 @@ use App\Data\Sale\CreateSaleData;
 use App\Data\Sale\SaleItemData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
-use App\Models\Batch;
 use App\Models\Sale;
 use App\Models\SaleItem;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use RuntimeException;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
 
@@ -26,8 +23,6 @@ final readonly class CreateSale
     public function handle(CreateSaleData $data): Sale
     {
         return DB::transaction(function () use ($data): Sale {
-            $this->validateStockAvailability($data->items);
-
             $totalAmount = $this->calculateTotalAmount($data->items);
 
             $sale = Sale::query()->forceCreate([
@@ -58,41 +53,6 @@ final readonly class CreateSale
 
             return $sale->refresh();
         });
-    }
-
-    /**
-     * @param  DataCollection<int, SaleItemData>  $items
-     */
-    private function validateStockAvailability(DataCollection $items): void
-    {
-        $requiredByBatch = [];
-        foreach ($items as $item) {
-            $batchId = $item->batch_id;
-            $requiredByBatch[$batchId]['quantity'] = ($requiredByBatch[$batchId]['quantity'] ?? 0) + $item->quantity;
-            $requiredByBatch[$batchId]['product_id'] ??= $item->product_id;
-        }
-
-        $batchIds = array_keys($requiredByBatch);
-        /** @var Collection<int, Batch> $batches */
-        $batches = Batch::query()
-            ->whereIn('id', $batchIds)
-            ->lockForUpdate()
-            ->get()
-            ->keyBy('id');
-
-        foreach ($requiredByBatch as $batchId => $required) {
-            $batch = $batches->get($batchId);
-
-            if ($batch === null) {
-                throw new RuntimeException("Batch not found for product {$required['product_id']}");
-            }
-
-            if ($batch->quantity < $required['quantity']) {
-                throw new RuntimeException(
-                    "Insufficient stock in batch. Required: {$required['quantity']}, Available: $batch->quantity"
-                );
-            }
-        }
     }
 
     /**

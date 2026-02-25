@@ -21,6 +21,7 @@ final readonly class DeleteSale
             $this->validateSaleCanBeDeleted($sale);
 
             $sale->items()->delete();
+            $sale->payments()->delete();
             $sale->delete();
         });
     }

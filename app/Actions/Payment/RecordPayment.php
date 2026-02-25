@@ -85,6 +85,9 @@ final readonly class RecordPayment
         }
     }
 
+    /**
+     * @throws Throwable
+     */
     private function validateNoOverpayment(Sale|SaleReturn|Purchase|PurchaseReturn $payable, RecordPaymentData $data): void
     {
         if ($payable instanceof Sale) {
@@ -122,7 +125,7 @@ final readonly class RecordPayment
         };
 
         $updateData = [
-            'paid_amount' => $newPaidAmount,
+            'paid_amount' => min($newPaidAmount, $totalAmount),
             'payment_status' => $paymentStatus,
         ];
 
