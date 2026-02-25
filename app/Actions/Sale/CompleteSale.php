@@ -12,6 +12,7 @@ use App\Enums\SaleStatusEnum;
 use App\Enums\StockMovementTypeEnum;
 use App\Models\Batch;
 use App\Models\Sale;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -27,7 +28,11 @@ final readonly class CompleteSale
     public function handle(Sale $sale, ?CompleteSaleData $data = null): Sale
     {
         return DB::transaction(function () use ($sale, $data): Sale {
-            $sale->loadMissing('items.batch');
+            /** @var Sale $sale */
+            $sale = Sale::query()
+                ->lockForUpdate()
+                ->with(['items', 'items.batch' => fn (Relation $q) => $q->lockForUpdate()])
+                ->findOrFail($sale->id);
 
             $this->validateSaleCanBeCompleted($sale);
 

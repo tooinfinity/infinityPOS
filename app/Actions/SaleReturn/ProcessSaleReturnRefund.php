@@ -22,6 +22,11 @@ final readonly class ProcessSaleReturnRefund
     public function handle(SaleReturn $saleReturn, RefundSaleReturnData $data): Payment
     {
         return DB::transaction(function () use ($saleReturn, $data): Payment {
+            /** @var SaleReturn $saleReturn */
+            $saleReturn = SaleReturn::query()
+                ->lockForUpdate()
+                ->findOrFail($saleReturn->id);
+
             $this->validateRefund($saleReturn, $data->amount);
 
             $payment = Payment::query()->forceCreate([

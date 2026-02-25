@@ -71,9 +71,8 @@ final readonly class AddSaleItem
 
         throw_if($batch->warehouse_id !== $sale->warehouse_id, RuntimeException::class, "Batch is not in the sale's warehouse");
 
-        $sale->loadMissing('items');
         /** @var int $existingQuantity */
-        $existingQuantity = $sale->items
+        $existingQuantity = $sale->items()
             ->where('batch_id', $data->batch_id)
             ->sum('quantity');
 

@@ -25,17 +25,17 @@ final readonly class CancelSale
     public function handle(Sale $sale, CancelSaleData $data): Sale
     {
         return DB::transaction(function () use ($sale, $data): Sale {
+            /** @var Sale $sale */
+            $sale = Sale::query()
+                ->lockForUpdate()
+                ->with(['items.batch' => fn (Relation $query): Relation => $query->lockForUpdate()])
+                ->findOrFail($sale->id);
+
             $this->validateSaleCanBeCancelled($sale);
 
             $shouldRestock = $data->restock_items && $sale->status === SaleStatusEnum::Completed;
 
             if ($shouldRestock) {
-                /** @var Sale $sale */
-                $sale = Sale::query()
-                    ->lockForUpdate()
-                    ->with(['items.batch' => fn (Relation $query): Relation => $query->lockForUpdate()])
-                    ->findOrFail($sale->id);
-
                 $this->restockItems($sale);
             }
 
