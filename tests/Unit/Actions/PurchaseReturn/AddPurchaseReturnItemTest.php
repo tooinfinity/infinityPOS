@@ -5,11 +5,27 @@ declare(strict_types=1);
 use App\Actions\PurchaseReturn\AddPurchaseReturnItem;
 use App\Data\PurchaseReturn\PurchaseReturnItemData;
 use App\Models\Batch;
+use App\Models\Purchase;
+use App\Models\PurchaseItem;
 use App\Models\PurchaseReturn;
+use App\Models\Warehouse;
 
 it('adds item to pending purchase return', function (): void {
-    $purchaseReturn = PurchaseReturn::factory()->pending()->create();
-    $batch = Batch::factory()->withQuantity(100)->create();
+    $warehouse = Warehouse::factory()->create();
+    $purchase = Purchase::factory()->forWarehouse($warehouse)->create();
+    $batch = Batch::factory()->forWarehouse($warehouse)->withQuantity(100)->create();
+
+    PurchaseItem::query()->forceCreate([
+        'purchase_id' => $purchase->id,
+        'product_id' => $batch->product_id,
+        'batch_id' => $batch->id,
+        'quantity' => 10,
+        'unit_cost' => 200,
+        'subtotal' => 2000,
+        'received_quantity' => 10,
+    ]);
+
+    $purchaseReturn = PurchaseReturn::factory()->forPurchase($purchase)->pending()->create();
 
     $action = resolve(AddPurchaseReturnItem::class);
 
@@ -28,8 +44,21 @@ it('adds item to pending purchase return', function (): void {
 });
 
 it('recalculates total amount when adding item', function (): void {
-    $purchaseReturn = PurchaseReturn::factory()->pending()->create(['total_amount' => 0]);
-    $batch = Batch::factory()->withQuantity(100)->create();
+    $warehouse = Warehouse::factory()->create();
+    $purchase = Purchase::factory()->forWarehouse($warehouse)->create();
+    $batch = Batch::factory()->forWarehouse($warehouse)->withQuantity(100)->create();
+
+    PurchaseItem::query()->forceCreate([
+        'purchase_id' => $purchase->id,
+        'product_id' => $batch->product_id,
+        'batch_id' => $batch->id,
+        'quantity' => 10,
+        'unit_cost' => 500,
+        'subtotal' => 5000,
+        'received_quantity' => 10,
+    ]);
+
+    $purchaseReturn = PurchaseReturn::factory()->forPurchase($purchase)->pending()->create(['total_amount' => 0]);
 
     $action = resolve(AddPurchaseReturnItem::class);
 
@@ -44,8 +73,21 @@ it('recalculates total amount when adding item', function (): void {
 });
 
 it('throws exception when adding item to non-pending return', function (): void {
-    $purchaseReturn = PurchaseReturn::factory()->completed()->create();
-    $batch = Batch::factory()->withQuantity(100)->create();
+    $warehouse = Warehouse::factory()->create();
+    $purchase = Purchase::factory()->forWarehouse($warehouse)->create();
+    $batch = Batch::factory()->forWarehouse($warehouse)->withQuantity(100)->create();
+
+    PurchaseItem::query()->forceCreate([
+        'purchase_id' => $purchase->id,
+        'product_id' => $batch->product_id,
+        'batch_id' => $batch->id,
+        'quantity' => 10,
+        'unit_cost' => 200,
+        'subtotal' => 2000,
+        'received_quantity' => 10,
+    ]);
+
+    $purchaseReturn = PurchaseReturn::factory()->forPurchase($purchase)->completed()->create();
 
     $action = resolve(AddPurchaseReturnItem::class);
 
@@ -56,3 +98,59 @@ it('throws exception when adding item to non-pending return', function (): void 
         unit_cost: 200,
     ));
 })->throws(RuntimeException::class, 'Cannot add items to a non-pending');
+
+it('throws exception when product not in original purchase', function (): void {
+    $warehouse = Warehouse::factory()->create();
+    $purchase = Purchase::factory()->forWarehouse($warehouse)->create();
+    $batch = Batch::factory()->forWarehouse($warehouse)->withQuantity(100)->create();
+
+    PurchaseItem::query()->forceCreate([
+        'purchase_id' => $purchase->id,
+        'product_id' => $batch->product_id,
+        'batch_id' => $batch->id,
+        'quantity' => 10,
+        'unit_cost' => 200,
+        'subtotal' => 2000,
+        'received_quantity' => 10,
+    ]);
+
+    $purchaseReturn = PurchaseReturn::factory()->forPurchase($purchase)->pending()->create();
+
+    $action = resolve(AddPurchaseReturnItem::class);
+
+    $otherBatch = Batch::factory()->forWarehouse($warehouse)->withQuantity(100)->create();
+
+    $action->handle($purchaseReturn, new PurchaseReturnItemData(
+        product_id: $otherBatch->product_id,
+        batch_id: $otherBatch->id,
+        quantity: 5,
+        unit_cost: 200,
+    ));
+})->throws(RuntimeException::class, 'Product is not part of the original purchase');
+
+it('throws exception when returning more than purchased', function (): void {
+    $warehouse = Warehouse::factory()->create();
+    $purchase = Purchase::factory()->forWarehouse($warehouse)->create();
+    $batch = Batch::factory()->forWarehouse($warehouse)->withQuantity(100)->create();
+
+    PurchaseItem::query()->forceCreate([
+        'purchase_id' => $purchase->id,
+        'product_id' => $batch->product_id,
+        'batch_id' => $batch->id,
+        'quantity' => 5,
+        'unit_cost' => 200,
+        'subtotal' => 1000,
+        'received_quantity' => 5,
+    ]);
+
+    $purchaseReturn = PurchaseReturn::factory()->forPurchase($purchase)->pending()->create();
+
+    $action = resolve(AddPurchaseReturnItem::class);
+
+    $action->handle($purchaseReturn, new PurchaseReturnItemData(
+        product_id: $batch->product_id,
+        batch_id: $batch->id,
+        quantity: 10,
+        unit_cost: 200,
+    ));
+})->throws(RuntimeException::class, 'Cannot return more than originally purchased');

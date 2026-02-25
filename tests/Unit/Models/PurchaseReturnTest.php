@@ -132,7 +132,7 @@ it('filters by unpaid scope', function (): void {
 });
 
 it('filters by partiallyPaid scope', function (): void {
-    PurchaseReturn::factory()->partiallyPaid(10000)->create(['total_amount' => 10000]);
+    PurchaseReturn::factory()->partiallyPaid()->create(['total_amount' => 10000]);
     PurchaseReturn::factory()->count(2)->paid()->create();
 
     $results = PurchaseReturn::partiallyPaid()->get();
@@ -157,7 +157,7 @@ it('calculates due_amount accessor', function (): void {
         'total_amount' => 10000,
         'paid_amount' => 3000,
     ]);
-    $paidReturn = PurchaseReturn::factory()->paid(10000)->create(['total_amount' => 10000]);
+    $paidReturn = PurchaseReturn::factory()->paid()->create(['total_amount' => 10000]);
 
     expect($unpaidReturn->due_amount)->toBe(10000)
         ->and($partiallyPaidReturn->due_amount)->toBe(7000)
