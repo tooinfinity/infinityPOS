@@ -6,6 +6,7 @@ use App\Actions\Brand\CreateBrand;
 use App\Data\Brand\CreateBrandData;
 use App\Models\Brand;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -144,4 +145,26 @@ it('defaults is_active to true when not provided', function (): void {
     $brand = $action->handle($data);
 
     expect($brand->is_active)->toBeTrue();
+});
+
+it('deletes uploaded logo when transaction fails', function (): void {
+    $file = UploadedFile::fake()->image('logo.png', 800, 600);
+
+    $data = new CreateBrandData(
+        name: 'Test Brand',
+        slug: null,
+        logo: $file,
+        is_active: true,
+    );
+
+    DB::shouldReceive('transaction')
+        ->once()
+        ->andThrow(new Exception('Database error'));
+
+    $action = resolve(CreateBrand::class);
+
+    expect(fn () => $action->handle($data))
+        ->toThrow(Exception::class, 'Database error');
+
+    expect(Storage::disk('public')->files('brands'))->toBeEmpty();
 });

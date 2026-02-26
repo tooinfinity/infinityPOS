@@ -195,3 +195,56 @@ it('records stock movements when source batch is null', function (): void {
 
     expect($movements)->toHaveCount(2);
 });
+
+it('uses existing destination batch when available', function (): void {
+    $transfer = StockTransfer::factory()->pending()->create();
+    $batch = Batch::factory()->withQuantity(100)->create([
+        'warehouse_id' => $transfer->from_warehouse_id,
+    ]);
+
+    $existingDestBatch = Batch::factory()->create([
+        'product_id' => $batch->product_id,
+        'warehouse_id' => $transfer->to_warehouse_id,
+        'cost_amount' => $batch->cost_amount,
+        'quantity' => 20,
+        'expires_at' => $batch->expires_at,
+    ]);
+
+    StockTransferItem::factory()->forStockTransfer($transfer)->create([
+        'product_id' => $batch->product_id,
+        'batch_id' => $batch->id,
+        'quantity' => 30,
+    ]);
+
+    $action = resolve(CompleteStockTransfer::class);
+    $action->handle($transfer);
+
+    expect($transfer->fresh()->status)->toBe(StockTransferStatusEnum::Completed);
+    expect($batch->fresh()->quantity)->toBe(70);
+    expect($existingDestBatch->fresh()->quantity)->toBe(50);
+});
+
+it('uses existing destination batch when source batch is null', function (): void {
+    $transfer = StockTransfer::factory()->pending()->create();
+    $product = App\Models\Product::factory()->create();
+
+    $existingDestBatch = Batch::factory()->create([
+        'product_id' => $product->id,
+        'warehouse_id' => $transfer->to_warehouse_id,
+        'cost_amount' => 0,
+        'quantity' => 10,
+        'expires_at' => null,
+    ]);
+
+    StockTransferItem::factory()->forStockTransfer($transfer)->create([
+        'product_id' => $product->id,
+        'batch_id' => null,
+        'quantity' => 15,
+    ]);
+
+    $action = resolve(CompleteStockTransfer::class);
+    $action->handle($transfer);
+
+    expect($transfer->fresh()->status)->toBe(StockTransferStatusEnum::Completed);
+    expect($existingDestBatch->fresh()->quantity)->toBe(25);
+});

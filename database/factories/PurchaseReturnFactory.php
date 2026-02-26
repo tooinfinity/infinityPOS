@@ -124,9 +124,11 @@ final class PurchaseReturnFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'paid_amount' => $amount,
-            'payment_status' => $amount >= ($attributes['total_amount'] ?? 0)
-                ? PaymentStatusEnum::Paid
-                : ($amount > 0 ? PaymentStatusEnum::Partial : PaymentStatusEnum::Unpaid),
+            'payment_status' => match (true) {
+                $amount >= ($attributes['total_amount'] ?? 0) => PaymentStatusEnum::Paid,
+                $amount > 0 => PaymentStatusEnum::Partial,
+                default => PaymentStatusEnum::Unpaid,
+            },
         ]);
     }
 }

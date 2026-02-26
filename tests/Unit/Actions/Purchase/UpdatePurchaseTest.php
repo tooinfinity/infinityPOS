@@ -8,6 +8,7 @@ use App\Models\Purchase;
 use App\Models\Supplier;
 use App\Models\Warehouse;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelData\Optional;
 
@@ -213,4 +214,31 @@ it('persists updates to database', function (): void {
         'id' => $purchase->id,
         'note' => 'Updated note',
     ]);
+});
+
+it('deletes uploaded document when transaction fails', function (): void {
+    $purchase = Purchase::factory()->pending()->create([
+        'document' => null,
+    ]);
+
+    $file = UploadedFile::fake()->image('document.png', 800, 600);
+
+    $data = new UpdatePurchaseData(
+        supplier_id: Optional::create(),
+        warehouse_id: Optional::create(),
+        purchase_date: Optional::create(),
+        note: Optional::create(),
+        document: $file,
+    );
+
+    DB::shouldReceive('transaction')
+        ->once()
+        ->andThrow(new Exception('Database error'));
+
+    $action = resolve(UpdatePurchase::class);
+
+    expect(fn () => $action->handle($purchase, $data))
+        ->toThrow(Exception::class, 'Database error');
+
+    expect(Storage::disk('public')->files('purchases/documents'))->toBeEmpty();
 });

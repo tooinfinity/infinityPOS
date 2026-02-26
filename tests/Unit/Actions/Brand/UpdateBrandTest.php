@@ -6,6 +6,7 @@ use App\Actions\Brand\UpdateBrand;
 use App\Data\Brand\UpdateBrandData;
 use App\Models\Brand;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelData\Optional;
 
@@ -209,4 +210,30 @@ it('updates logo with existing storage path string', function (): void {
     $updatedBrand = $action->handle($brand, $data);
 
     expect($updatedBrand->logo)->toBe('brands/existing-path.webp');
+});
+
+it('deletes uploaded logo when transaction fails', function (): void {
+    $brand = Brand::factory()->create([
+        'logo' => null,
+    ]);
+
+    $file = UploadedFile::fake()->image('logo.png', 800, 600);
+
+    $data = new UpdateBrandData(
+        name: Optional::create(),
+        slug: Optional::create(),
+        logo: $file,
+        is_active: Optional::create(),
+    );
+
+    DB::shouldReceive('transaction')
+        ->once()
+        ->andThrow(new Exception('Database error'));
+
+    $action = resolve(UpdateBrand::class);
+
+    expect(fn () => $action->handle($brand, $data))
+        ->toThrow(Exception::class, 'Database error');
+
+    expect(Storage::disk('public')->files('brands'))->toBeEmpty();
 });

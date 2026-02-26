@@ -182,3 +182,33 @@ it('skips stock deduction for items without batch', function (): void {
 
     expect($sale->fresh()->status)->toBe(SaleStatusEnum::Completed);
 });
+
+it('handles mixed items with and without batch', function (): void {
+    $sale = Sale::factory()->pending()->create();
+    $batch = Batch::factory()->withQuantity(100)->create([
+        'warehouse_id' => $sale->warehouse_id,
+    ]);
+    $productWithoutBatch = App\Models\Product::factory()->create();
+
+    SaleItem::factory()->forSale($sale)->create([
+        'product_id' => $batch->product_id,
+        'batch_id' => $batch->id,
+        'quantity' => 10,
+        'unit_price' => 500,
+        'unit_cost' => 300,
+    ]);
+
+    SaleItem::factory()->forSale($sale)->create([
+        'product_id' => $productWithoutBatch->id,
+        'batch_id' => null,
+        'quantity' => 5,
+        'unit_price' => 200,
+        'unit_cost' => 100,
+    ]);
+
+    $action = resolve(CompleteSale::class);
+    $action->handle($sale);
+
+    expect($sale->fresh()->status)->toBe(SaleStatusEnum::Completed);
+    expect($batch->fresh()->quantity)->toBe(90);
+});
