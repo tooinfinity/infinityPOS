@@ -6,17 +6,12 @@ namespace App\Actions\StockMovement;
 
 use App\Data\StockMovement\RecordStockMovementData;
 use App\Models\StockMovement;
-use Illuminate\Support\Facades\DB;
-use Throwable;
 
 final readonly class RecordStockMovement
 {
-    /**
-     * @throws Throwable
-     */
     public function handle(RecordStockMovementData $data): StockMovement
     {
-        return DB::transaction(static fn (): StockMovement => StockMovement::query()->forceCreate([
+        return StockMovement::query()->forceCreate([
             'warehouse_id' => $data->warehouse_id,
             'product_id' => $data->product_id,
             'type' => $data->type,
@@ -28,6 +23,6 @@ final readonly class RecordStockMovement
             'batch_id' => $data->batch_id,
             'user_id' => $data->user_id,
             'note' => $data->note,
-        ]))->refresh();
+        ])->refresh();
     }
 }

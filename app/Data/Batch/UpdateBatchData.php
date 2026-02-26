@@ -15,5 +15,6 @@ final class UpdateBatchData extends Data
         public int|Optional $cost_amount,
         public int|Optional $quantity,
         public DateTimeInterface|string|null|Optional $expires_at,
+        public ?string $note = null,
     ) {}
 }

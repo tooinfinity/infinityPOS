@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Throwable;
+
 final readonly class RevertPurchaseReturn
 {
     public function __construct(private RecordStockMovement $recordStockMovement) {}

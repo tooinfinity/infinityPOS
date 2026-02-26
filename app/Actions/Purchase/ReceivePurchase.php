@@ -15,6 +15,7 @@ use App\Models\PurchaseItem;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Throwable;
 
 final readonly class ReceivePurchase
@@ -38,6 +39,12 @@ final readonly class ReceivePurchase
                 StateTransitionException::class,
                 $purchase->status->label(),
                 PurchaseStatusEnum::Received->label()
+            );
+
+            throw_if(
+                $purchase->items()->count() === 0,
+                InvalidArgumentException::class,
+                'Cannot receive a purchase with no items.'
             );
 
             foreach ($purchase->items as $item) {

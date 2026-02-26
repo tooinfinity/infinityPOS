@@ -16,5 +16,6 @@ final class CreateBatchData extends Data
         public int $cost_amount,
         public int $quantity,
         public DateTimeInterface|string|null $expires_at,
+        public ?int $user_id = null,
     ) {}
 }

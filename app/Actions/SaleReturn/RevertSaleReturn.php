@@ -13,6 +13,7 @@ use App\Models\SaleReturn;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Throwable;
+
 final readonly class RevertSaleReturn
 {
     public function __construct(private RecordStockMovement $recordStockMovement) {}
