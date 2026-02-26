@@ -6,6 +6,7 @@ namespace App\Actions\PurchaseReturn;
 
 use App\Data\PurchaseReturn\PurchaseReturnItemData;
 use App\Enums\ReturnStatusEnum;
+use App\Models\Purchase;
 use App\Models\PurchaseItem;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
@@ -58,6 +59,7 @@ final readonly class AddPurchaseReturnItem
      */
     private function validateAgainstOriginalPurchase(PurchaseReturn $purchaseReturn, PurchaseReturnItemData $data): void
     {
+        /** @var Purchase|null $purchase */
         $purchase = $purchaseReturn->purchase;
 
         throw_if($purchase === null, RuntimeException::class, 'Purchase return must be associated with a purchase.');

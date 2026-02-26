@@ -105,7 +105,9 @@ final class PurchaseReturnFactory extends Factory
     public function partiallyPaid(): self
     {
         return $this->state(fn (array $attributes): array => [
-            'paid_amount' => ($attributes['total_amount'] ?? 0) * 0.5,
+            'paid_amount' => is_numeric($attributes['total_amount'] ?? null)
+                ? (int) $attributes['total_amount'] * 0.5
+                : 0,
             'payment_status' => PaymentStatusEnum::Partial,
         ]);
     }

@@ -6,6 +6,7 @@ namespace App\Actions\SaleReturn;
 
 use App\Data\SaleReturn\SaleReturnItemData;
 use App\Enums\ReturnStatusEnum;
+use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\SaleReturn;
 use App\Models\SaleReturnItem;
@@ -58,6 +59,7 @@ final readonly class AddSaleReturnItem
      */
     private function validateAgainstOriginalSale(SaleReturn $saleReturn, SaleReturnItemData $data): void
     {
+        /** @var Sale|null $sale */
         $sale = $saleReturn->sale;
 
         throw_if($sale === null, RuntimeException::class, 'Sale return must be associated with a sale.');
