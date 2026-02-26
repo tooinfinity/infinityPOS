@@ -90,11 +90,24 @@ final readonly class RecordPayment
      */
     private function validateNoOverpayment(Sale|SaleReturn|Purchase|PurchaseReturn $payable, RecordPaymentData $data): void
     {
+        throw_if($data->amount < 0, RuntimeException::class, 'Payment amount cannot be negative.');
+
+        $currentPaid = Payment::query()
+            ->where('payable_type', $payable::class)
+            ->where('payable_id', $payable->id)
+            ->lockForUpdate()
+            ->sum('amount');
+
         if ($payable instanceof Sale) {
+            $maxAllowedPayment = $payable->total_amount * 2;
+            throw_if(
+                ($currentPaid + $data->amount) > $maxAllowedPayment,
+                RuntimeException::class,
+                'Payment amount exceeds the maximum allowed overpayment limit.'
+            );
+
             return;
         }
-
-        $currentPaid = $payable->payments()->sum('amount');
 
         throw_if(($currentPaid + $data->amount) > $payable->total_amount, RuntimeException::class, 'Payment amount exceeds the outstanding balance.');
     }
@@ -113,9 +126,12 @@ final readonly class RecordPayment
 
     private function updatePayablePaymentStatus(Sale|SaleReturn|Purchase|PurchaseReturn $payable): void
     {
-        $payable->refresh();
+        $newPaidAmount = Payment::query()
+            ->where('payable_type', $payable::class)
+            ->where('payable_id', $payable->id)
+            ->lockForUpdate()
+            ->sum('amount');
 
-        $newPaidAmount = $payable->payments()->sum('amount');
         $totalAmount = $payable->total_amount;
 
         $paymentStatus = match (true) {

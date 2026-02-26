@@ -8,10 +8,12 @@ use App\Data\Sale\CreateSaleData;
 use App\Data\Sale\SaleItemData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
+use App\Models\Batch;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
 
@@ -23,6 +25,8 @@ final readonly class CreateSale
     public function handle(CreateSaleData $data): Sale
     {
         return DB::transaction(function () use ($data): Sale {
+            $this->validateStockAvailability($data);
+
             $totalAmount = $this->calculateTotalAmount($data->items);
 
             $sale = Sale::query()->forceCreate([
@@ -53,6 +57,52 @@ final readonly class CreateSale
 
             return $sale->refresh();
         });
+    }
+
+    /**
+     * @throws Throwable
+     */
+    private function validateStockAvailability(CreateSaleData $data): void
+    {
+        /** @var array<int, int> $quantitiesByBatch */
+        $quantitiesByBatch = [];
+
+        foreach ($data->items as $item) {
+            $batchId = $item->batch_id;
+            if (! isset($quantitiesByBatch[$batchId])) {
+                $quantitiesByBatch[$batchId] = 0;
+            }
+            $quantitiesByBatch[$batchId] += $item->quantity;
+        }
+
+        foreach ($data->items as $item) {
+            $batch = Batch::query()
+                ->lockForUpdate()
+                ->find($item->batch_id);
+
+            if ($batch === null) {
+                throw new RuntimeException("Batch not found for product {$item->product_id}");
+            }
+
+            if ($batch->product_id !== $item->product_id) {
+                throw new RuntimeException("Batch does not belong to product {$item->product_id}");
+            }
+
+            if ($batch->warehouse_id !== $data->warehouse_id) {
+                throw new RuntimeException("Batch is not in the sale's warehouse");
+            }
+        }
+
+        foreach ($quantitiesByBatch as $batchId => $totalQuantity) {
+            /** @var Batch $batch */
+            $batch = Batch::query()->lockForUpdate()->find($batchId);
+
+            if ($batch->quantity < $totalQuantity) {
+                throw new RuntimeException(
+                    "Insufficient stock in batch. Required: {$totalQuantity}, Available: {$batch->quantity}"
+                );
+            }
+        }
     }
 
     /**

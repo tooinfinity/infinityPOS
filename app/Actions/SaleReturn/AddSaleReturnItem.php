@@ -10,6 +10,7 @@ use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\SaleReturn;
 use App\Models\SaleReturnItem;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Throwable;
@@ -72,7 +73,8 @@ final readonly class AddSaleReturnItem
 
         throw_if($originalSaleItem === null, RuntimeException::class, 'Product is not part of the original sale or batch does not match.');
 
-        $alreadyReturned = $saleReturn->items()
+        $alreadyReturned = SaleReturnItem::query()
+            ->whereHas('saleReturn', fn (Builder $q) => $q->where('sale_id', $sale->id))
             ->where('product_id', $data->product_id)
             ->where('batch_id', $data->batch_id)
             ->sum('quantity');

@@ -10,6 +10,7 @@ use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\ReturnStatusEnum;
 use App\Enums\StockMovementTypeEnum;
 use App\Models\SaleReturn;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Throwable;
@@ -24,9 +25,13 @@ final readonly class CompleteSaleReturn
     public function handle(SaleReturn $saleReturn, CompleteSaleReturnData $data): SaleReturn
     {
         return DB::transaction(function () use ($saleReturn, $data): SaleReturn {
-            $this->validateSaleReturnCanBeCompleted($saleReturn);
+            /** @var SaleReturn $saleReturn */
+            $saleReturn = SaleReturn::query()
+                ->lockForUpdate()
+                ->with(['items.batch' => fn (Relation $q) => $q->lockForUpdate()])
+                ->findOrFail($saleReturn->id);
 
-            $saleReturn->loadMissing('items.batch');
+            $this->validateSaleReturnCanBeCompleted($saleReturn);
 
             $this->addStockToBatches($saleReturn);
 

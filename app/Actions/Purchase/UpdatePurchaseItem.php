@@ -6,6 +6,7 @@ namespace App\Actions\Purchase;
 
 use App\Data\Purchase\UpdatePurchaseItemData;
 use App\Enums\PurchaseStatusEnum;
+use App\Models\Purchase;
 use App\Models\PurchaseItem;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -20,8 +21,13 @@ final readonly class UpdatePurchaseItem
     public function handle(PurchaseItem $item, UpdatePurchaseItemData $data): PurchaseItem
     {
         return DB::transaction(function () use ($item, $data): PurchaseItem {
+            /** @var Purchase $purchase */
+            $purchase = Purchase::query()
+                ->lockForUpdate()
+                ->findOrFail($item->purchase_id);
+
             throw_if(
-                $item->purchase->status !== PurchaseStatusEnum::Pending,
+                $purchase->status !== PurchaseStatusEnum::Pending,
                 RuntimeException::class,
                 'Items can only be updated on pending purchases.'
             );

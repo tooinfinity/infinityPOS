@@ -22,13 +22,16 @@ final readonly class RemovePurchaseItem
     public function handle(PurchaseItem $item): ?Purchase
     {
         return DB::transaction(function () use ($item): ?Purchase {
+            /** @var Purchase $purchase */
+            $purchase = Purchase::query()
+                ->lockForUpdate()
+                ->findOrFail($item->purchase_id);
+
             throw_if(
-                $item->purchase->status !== PurchaseStatusEnum::Pending,
+                $purchase->status !== PurchaseStatusEnum::Pending,
                 RuntimeException::class,
                 'Items can only be removed from pending purchases.'
             );
-
-            $purchase = $item->purchase;
 
             $item->delete();
 

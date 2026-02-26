@@ -22,8 +22,11 @@ final readonly class DeleteProduct
 
             $imagePath = $product->image;
             $deleted = (bool) $product->delete();
+
             if ($deleted && $imagePath) {
-                Storage::disk('public')->delete($imagePath);
+                DB::afterCommit(static function () use ($imagePath): void {
+                    Storage::disk('public')->delete($imagePath);
+                });
             }
 
             return $deleted;

@@ -4,11 +4,26 @@ declare(strict_types=1);
 
 use App\Actions\PurchaseReturn\UpdatePurchaseReturnItem;
 use App\Data\PurchaseReturn\UpdatePurchaseReturnItemData;
+use App\Models\Batch;
+use App\Models\Product;
+use App\Models\Purchase;
+use App\Models\PurchaseItem;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
+use App\Models\Warehouse;
 
 it('updates item quantity in pending purchase return', function (): void {
-    $item = PurchaseReturnItem::factory()->create([
+    $warehouse = Warehouse::factory()->create();
+    $product = Product::factory()->create();
+    $batch = Batch::factory()->forWarehouse($warehouse)->forProduct($product)->withQuantity(100)->create();
+    $purchase = Purchase::factory()->forWarehouse($warehouse)->create();
+    PurchaseItem::factory()->forPurchase($purchase)->forProduct($product)->forBatch($batch)->create([
+        'quantity' => 20,
+        'unit_cost' => 100,
+    ]);
+
+    $purchaseReturn = PurchaseReturn::factory()->forPurchase($purchase)->forWarehouse($warehouse)->pending()->create();
+    $item = PurchaseReturnItem::factory()->forPurchaseReturn($purchaseReturn)->forProduct($product)->forBatch($batch)->create([
         'quantity' => 5,
         'unit_cost' => 100,
         'subtotal' => 500,
@@ -32,7 +47,8 @@ it('throws exception when updating item in non-pending return', function (): voi
 })->throws(RuntimeException::class, 'Cannot update items in a non-pending purchase return.');
 
 it('updates item unit_cost in pending purchase return', function (): void {
-    $item = PurchaseReturnItem::factory()->create([
+    $purchaseReturn = PurchaseReturn::factory()->pending()->create();
+    $item = PurchaseReturnItem::factory()->forPurchaseReturn($purchaseReturn)->create([
         'quantity' => 5,
         'unit_cost' => 100,
         'subtotal' => 500,

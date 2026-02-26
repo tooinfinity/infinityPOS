@@ -134,9 +134,9 @@ it('throws StateTransitionException when completing cancelled transfer', functio
         ->toThrow(StateTransitionException::class);
 });
 
-it('completes transfer with item that has no batch', function (): void {
+it('throws RuntimeException when item has no batch', function (): void {
     $transfer = StockTransfer::factory()->pending()->create();
-    // Create item without a batch (batch_id is null)
+
     StockTransferItem::factory()->forStockTransfer($transfer)->create([
         'batch_id' => null,
         'quantity' => 10,
@@ -144,56 +144,8 @@ it('completes transfer with item that has no batch', function (): void {
 
     $action = resolve(CompleteStockTransfer::class);
 
-    // Should complete without error even if batch is null
-    $action->handle($transfer);
-
-    expect($transfer->fresh()->status)->toBe(StockTransferStatusEnum::Completed);
-});
-
-it('creates destination batch when source batch is null', function (): void {
-    $transfer = StockTransfer::factory()->pending()->create();
-    $product = App\Models\Product::factory()->create();
-
-    // Create item without a batch
-    StockTransferItem::factory()->forStockTransfer($transfer)->create([
-        'product_id' => $product->id,
-        'batch_id' => null,
-        'quantity' => 15,
-    ]);
-
-    $action = resolve(CompleteStockTransfer::class);
-    $action->handle($transfer);
-
-    // Destination batch should be created even without source batch
-    $destinationBatch = Batch::query()
-        ->where('warehouse_id', $transfer->to_warehouse_id)
-        ->where('product_id', $product->id)
-        ->first();
-
-    expect($destinationBatch)->not->toBeNull()
-        ->and($destinationBatch->quantity)->toBe(15)
-        ->and($destinationBatch->batch_number)->toStartWith('BAT-')
-        ->and($destinationBatch->cost_amount)->toBe(0);
-});
-
-it('records stock movements when source batch is null', function (): void {
-    $transfer = StockTransfer::factory()->pending()->create();
-
-    StockTransferItem::factory()->forStockTransfer($transfer)->create([
-        'batch_id' => null,
-        'quantity' => 20,
-    ]);
-
-    $action = resolve(CompleteStockTransfer::class);
-    $action->handle($transfer);
-
-    // Should still record stock movements even without source batch
-    $movements = StockMovement::query()
-        ->where('reference_type', StockTransfer::class)
-        ->where('reference_id', $transfer->id)
-        ->get();
-
-    expect($movements)->toHaveCount(2);
+    expect(fn () => $action->handle($transfer))
+        ->toThrow(RuntimeException::class, 'is missing a source batch');
 });
 
 it('uses existing destination batch when available', function (): void {
@@ -224,11 +176,11 @@ it('uses existing destination batch when available', function (): void {
     expect($existingDestBatch->fresh()->quantity)->toBe(50);
 });
 
-it('uses existing destination batch when source batch is null', function (): void {
+it('throws RuntimeException when source batch is null', function (): void {
     $transfer = StockTransfer::factory()->pending()->create();
     $product = App\Models\Product::factory()->create();
 
-    $existingDestBatch = Batch::factory()->create([
+    Batch::factory()->create([
         'product_id' => $product->id,
         'warehouse_id' => $transfer->to_warehouse_id,
         'cost_amount' => 0,
@@ -243,8 +195,7 @@ it('uses existing destination batch when source batch is null', function (): voi
     ]);
 
     $action = resolve(CompleteStockTransfer::class);
-    $action->handle($transfer);
 
-    expect($transfer->fresh()->status)->toBe(StockTransferStatusEnum::Completed);
-    expect($existingDestBatch->fresh()->quantity)->toBe(25);
+    expect(fn () => $action->handle($transfer))
+        ->toThrow(RuntimeException::class, 'is missing a source batch');
 });

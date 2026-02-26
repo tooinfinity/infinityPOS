@@ -17,7 +17,7 @@ use Spatie\LaravelData\DataCollection;
 it('creates a pending sale with items', function (): void {
     $customer = Customer::factory()->create();
     $warehouse = Warehouse::factory()->create();
-    $batch = Batch::factory()->withQuantity(100)->create();
+    $batch = Batch::factory()->forWarehouse($warehouse)->withQuantity(100)->create();
 
     $action = resolve(CreateSale::class);
 
@@ -58,7 +58,7 @@ it('creates a pending sale with items', function (): void {
 it('auto-generates unique reference number', function (): void {
     $customer = Customer::factory()->create();
     $warehouse = Warehouse::factory()->create();
-    $batch = Batch::factory()->withQuantity(100)->create();
+    $batch = Batch::factory()->forWarehouse($warehouse)->withQuantity(100)->create();
 
     $action = resolve(CreateSale::class);
 
@@ -91,8 +91,8 @@ it('auto-generates unique reference number', function (): void {
 it('creates sale with multiple items', function (): void {
     $customer = Customer::factory()->create();
     $warehouse = Warehouse::factory()->create();
-    $batch1 = Batch::factory()->withQuantity(100)->create();
-    $batch2 = Batch::factory()->withQuantity(100)->create();
+    $batch1 = Batch::factory()->forWarehouse($warehouse)->withQuantity(100)->create();
+    $batch2 = Batch::factory()->forWarehouse($warehouse)->withQuantity(100)->create();
 
     $action = resolve(CreateSale::class);
 
@@ -131,7 +131,7 @@ it('creates sale with multiple items', function (): void {
 it('calculates correct subtotal for each item', function (): void {
     $customer = Customer::factory()->create();
     $warehouse = Warehouse::factory()->create();
-    $batch = Batch::factory()->withQuantity(100)->create();
+    $batch = Batch::factory()->forWarehouse($warehouse)->withQuantity(100)->create();
 
     $action = resolve(CreateSale::class);
 
@@ -161,10 +161,132 @@ it('calculates correct subtotal for each item', function (): void {
     expect($item->subtotal)->toBe(3750);
 });
 
+it('throws RuntimeException when batch is not found', function (): void {
+    $customer = Customer::factory()->create();
+    $warehouse = Warehouse::factory()->create();
+    $batch = Batch::factory()->forWarehouse($warehouse)->withQuantity(100)->create();
+
+    $action = resolve(CreateSale::class);
+
+    $items = new DataCollection(SaleItemData::class, [
+        new SaleItemData(
+            product_id: $batch->product_id,
+            batch_id: 99999,
+            quantity: 10,
+            unit_price: 500,
+            unit_cost: 300
+        ),
+    ]);
+
+    $data = new CreateSaleData(
+        customer_id: $customer->id,
+        warehouse_id: $warehouse->id,
+        user_id: null,
+        sale_date: now(),
+        note: null,
+        items: $items,
+    );
+
+    expect(fn () => $action->handle($data))
+        ->toThrow(RuntimeException::class, 'Batch not found');
+});
+
+it('throws RuntimeException when batch does not belong to product', function (): void {
+    $customer = Customer::factory()->create();
+    $warehouse = Warehouse::factory()->create();
+    $batch = Batch::factory()->forWarehouse($warehouse)->withQuantity(100)->create();
+    $otherProduct = App\Models\Product::factory()->create();
+
+    $action = resolve(CreateSale::class);
+
+    $items = new DataCollection(SaleItemData::class, [
+        new SaleItemData(
+            product_id: $otherProduct->id,
+            batch_id: $batch->id,
+            quantity: 10,
+            unit_price: 500,
+            unit_cost: 300
+        ),
+    ]);
+
+    $data = new CreateSaleData(
+        customer_id: $customer->id,
+        warehouse_id: $warehouse->id,
+        user_id: null,
+        sale_date: now(),
+        note: null,
+        items: $items,
+    );
+
+    expect(fn () => $action->handle($data))
+        ->toThrow(RuntimeException::class, 'Batch does not belong to product');
+});
+
+it('throws RuntimeException when batch is not in sale warehouse', function (): void {
+    $customer = Customer::factory()->create();
+    $warehouse = Warehouse::factory()->create();
+    $otherWarehouse = Warehouse::factory()->create();
+    $batch = Batch::factory()->forWarehouse($otherWarehouse)->withQuantity(100)->create();
+
+    $action = resolve(CreateSale::class);
+
+    $items = new DataCollection(SaleItemData::class, [
+        new SaleItemData(
+            product_id: $batch->product_id,
+            batch_id: $batch->id,
+            quantity: 10,
+            unit_price: 500,
+            unit_cost: 300
+        ),
+    ]);
+
+    $data = new CreateSaleData(
+        customer_id: $customer->id,
+        warehouse_id: $warehouse->id,
+        user_id: null,
+        sale_date: now(),
+        note: null,
+        items: $items,
+    );
+
+    expect(fn () => $action->handle($data))
+        ->toThrow(RuntimeException::class, 'Batch is not in the sale\'s warehouse');
+});
+
+it('throws RuntimeException when insufficient stock', function (): void {
+    $customer = Customer::factory()->create();
+    $warehouse = Warehouse::factory()->create();
+    $batch = Batch::factory()->forWarehouse($warehouse)->withQuantity(5)->create();
+
+    $action = resolve(CreateSale::class);
+
+    $items = new DataCollection(SaleItemData::class, [
+        new SaleItemData(
+            product_id: $batch->product_id,
+            batch_id: $batch->id,
+            quantity: 10,
+            unit_price: 500,
+            unit_cost: 300
+        ),
+    ]);
+
+    $data = new CreateSaleData(
+        customer_id: $customer->id,
+        warehouse_id: $warehouse->id,
+        user_id: null,
+        sale_date: now(),
+        note: null,
+        items: $items,
+    );
+
+    expect(fn () => $action->handle($data))
+        ->toThrow(RuntimeException::class, 'Insufficient stock in batch');
+});
+
 it('stores sale in database', function (): void {
     $customer = Customer::factory()->create();
     $warehouse = Warehouse::factory()->create();
-    $batch = Batch::factory()->withQuantity(100)->create();
+    $batch = Batch::factory()->forWarehouse($warehouse)->withQuantity(100)->create();
 
     $action = resolve(CreateSale::class);
 

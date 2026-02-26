@@ -10,6 +10,7 @@ use App\Models\Purchase;
 use App\Models\PurchaseItem;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Throwable;
@@ -72,7 +73,8 @@ final readonly class AddPurchaseReturnItem
 
         throw_if($originalPurchaseItem === null, RuntimeException::class, 'Product is not part of the original purchase or batch does not match.');
 
-        $alreadyReturned = $purchaseReturn->items()
+        $alreadyReturned = PurchaseReturnItem::query()
+            ->whereHas('purchaseReturn', fn (Builder $q) => $q->where('purchase_id', $purchase->id))
             ->where('product_id', $data->product_id)
             ->where('batch_id', $data->batch_id)
             ->sum('quantity');

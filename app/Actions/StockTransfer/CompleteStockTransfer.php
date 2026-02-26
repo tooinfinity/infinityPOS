@@ -59,18 +59,23 @@ final readonly class CompleteStockTransfer
     {
         foreach ($transfer->items as $item) {
             if ($item->batch === null) {
-                continue;
+                throw new RuntimeException(
+                    sprintf(
+                        'Stock transfer item for product %d is missing a source batch.',
+                        $item->product_id
+                    )
+                );
             }
-            if ($item->batch->quantity >= $item->quantity) {
-                continue;
+
+            if ($item->batch->quantity < $item->quantity) {
+                throw new RuntimeException(
+                    sprintf(
+                        'Insufficient stock in batch. Required: %d, Available: %d',
+                        $item->quantity,
+                        $item->batch->quantity
+                    )
+                );
             }
-            throw new RuntimeException(
-                sprintf(
-                    'Insufficient stock in batch. Required: %d, Available: %d',
-                    $item->quantity,
-                    $item->batch->quantity
-                )
-            );
         }
     }
 
@@ -80,12 +85,6 @@ final readonly class CompleteStockTransfer
     private function processItem(StockTransfer $transfer, StockTransferItem $item): void
     {
         $sourceBatch = $item->batch;
-
-        if ($sourceBatch === null) {
-            $this->processItemWithoutSourceBatch($transfer, $item);
-
-            return;
-        }
 
         $previousQuantity = $sourceBatch->quantity;
         $sourceBatch->forceFill(['quantity' => $sourceBatch->quantity - $item->quantity])->save();
@@ -150,69 +149,6 @@ final readonly class CompleteStockTransfer
             'cost_amount' => $sourceBatch->cost_amount,
             'quantity' => 0,
             'expires_at' => $sourceBatch->expires_at,
-        ]);
-    }
-
-    /**
-     * @throws Throwable
-     */
-    private function processItemWithoutSourceBatch(StockTransfer $transfer, StockTransferItem $item): void
-    {
-        $destinationBatch = $this->findOrCreateDestinationBatchWithoutSource($transfer, $item);
-
-        $previousDestQuantity = $destinationBatch->quantity;
-        $destinationBatch->forceFill(['quantity' => $destinationBatch->quantity + $item->quantity])->save();
-
-        $this->recordStockMovement->handle(new RecordStockMovementData(
-            warehouse_id: $transfer->from_warehouse_id,
-            product_id: $item->product_id,
-            type: StockMovementTypeEnum::Transfer,
-            quantity: $item->quantity,
-            previous_quantity: 0,
-            current_quantity: 0,
-            reference_type: StockTransfer::class,
-            reference_id: $transfer->id,
-            batch_id: null,
-            user_id: $transfer->user_id,
-            note: 'Stock transfer out (no source batch)',
-        ));
-
-        $this->recordStockMovement->handle(new RecordStockMovementData(
-            warehouse_id: $transfer->to_warehouse_id,
-            product_id: $item->product_id,
-            type: StockMovementTypeEnum::Transfer,
-            quantity: $item->quantity,
-            previous_quantity: $previousDestQuantity,
-            current_quantity: $previousDestQuantity + $item->quantity,
-            reference_type: StockTransfer::class,
-            reference_id: $transfer->id,
-            batch_id: $destinationBatch->id,
-            user_id: $transfer->user_id,
-            note: 'Stock transfer in (no source batch)',
-        ));
-    }
-
-    private function findOrCreateDestinationBatchWithoutSource(StockTransfer $transfer, StockTransferItem $item): Batch
-    {
-        $existingBatch = Batch::query()
-            ->lockForUpdate()
-            ->where('product_id', $item->product_id)
-            ->where('warehouse_id', $transfer->to_warehouse_id)
-            ->where('cost_amount', 0)
-            ->whereNull('expires_at')
-            ->first();
-
-        if ($existingBatch !== null) {
-            return $existingBatch;
-        }
-
-        return Batch::query()->forceCreate([
-            'product_id' => $item->product_id,
-            'warehouse_id' => $transfer->to_warehouse_id,
-            'batch_number' => 'BAT-'.now()->getTimestampMs().'-'.random_int(1000, 9999),
-            'cost_amount' => 0,
-            'quantity' => 0,
-            'expires_at' => null,
         ]);
     }
 }
