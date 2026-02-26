@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Actions\PurchaseReturn\CancelPurchaseReturn;
-use App\Data\PurchaseReturn\CancelPurchaseReturnData;
+use App\Actions\PurchaseReturn\RevertPurchaseReturn;
+use App\Data\PurchaseReturn\RevertPurchaseReturnData;
 use App\Enums\ReturnStatusEnum;
 use App\Models\Batch;
 use App\Models\Payment;
@@ -13,9 +13,9 @@ use App\Models\PurchaseReturnItem;
 it('cancels a completed purchase return', function (): void {
     $purchaseReturn = PurchaseReturn::factory()->completed()->create();
 
-    $action = resolve(CancelPurchaseReturn::class);
+    $action = resolve(RevertPurchaseReturn::class);
 
-    $result = $action->handle($purchaseReturn, new CancelPurchaseReturnData());
+    $result = $action->handle($purchaseReturn, new RevertPurchaseReturnData());
 
     expect($result->status)->toBe(ReturnStatusEnum::Pending);
 });
@@ -29,9 +29,9 @@ it('adds stock back when cancelling completed return', function (): void {
         'quantity' => 10,
     ]);
 
-    $action = resolve(CancelPurchaseReturn::class);
+    $action = resolve(RevertPurchaseReturn::class);
 
-    $action->handle($purchaseReturn, new CancelPurchaseReturnData());
+    $action->handle($purchaseReturn, new RevertPurchaseReturnData());
 
     expect($batch->fresh()->quantity)->toBe(110);
 });
@@ -46,17 +46,17 @@ it('throws exception when cancelling return with refunds', function (): void {
         'amount' => -500,
     ]);
 
-    $action = resolve(CancelPurchaseReturn::class);
+    $action = resolve(RevertPurchaseReturn::class);
 
-    $action->handle($purchaseReturn, new CancelPurchaseReturnData());
+    $action->handle($purchaseReturn, new RevertPurchaseReturnData());
 })->throws(RuntimeException::class, 'existing refunds');
 
 it('throws exception when cancelling non-completed return', function (): void {
     $purchaseReturn = PurchaseReturn::factory()->pending()->create();
 
-    $action = resolve(CancelPurchaseReturn::class);
+    $action = resolve(RevertPurchaseReturn::class);
 
-    $action->handle($purchaseReturn, new CancelPurchaseReturnData());
+    $action->handle($purchaseReturn, new RevertPurchaseReturnData());
 })->throws(RuntimeException::class, 'cannot be cancelled');
 
 it('skips items without batch when cancelling completed return', function (): void {
@@ -66,9 +66,9 @@ it('skips items without batch when cancelling completed return', function (): vo
         'quantity' => 10,
     ]);
 
-    $action = resolve(CancelPurchaseReturn::class);
+    $action = resolve(RevertPurchaseReturn::class);
 
-    $result = $action->handle($purchaseReturn, new CancelPurchaseReturnData());
+    $result = $action->handle($purchaseReturn, new RevertPurchaseReturnData());
 
     expect($result->status)->toBe(ReturnStatusEnum::Pending);
 });

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\PurchaseReturn;
 
 use App\Data\PurchaseReturn\UpdatePurchaseReturnItemData;
+use App\Enums\ReturnStatusEnum;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +44,7 @@ final readonly class UpdatePurchaseReturnItem
      */
     private function validatePurchaseReturnIsPending(PurchaseReturn $purchaseReturn): void
     {
-        throw_if($purchaseReturn->status->value !== 'pending', RuntimeException::class, 'Cannot update items in a non-pending purchase return.');
+        throw_if($purchaseReturn->status !== ReturnStatusEnum::Pending, RuntimeException::class, 'Cannot update items in a non-pending purchase return.');
     }
 
     private function recalculateTotalAmount(PurchaseReturn $purchaseReturn): void

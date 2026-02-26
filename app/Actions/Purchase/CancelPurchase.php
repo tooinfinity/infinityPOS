@@ -9,7 +9,6 @@ use App\Exceptions\StateTransitionException;
 use App\Models\Purchase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use RuntimeException;
 use Throwable;
 
 final readonly class CancelPurchase
@@ -34,18 +33,6 @@ final readonly class CancelPurchase
                 StateTransitionException::class,
                 $purchase->status->label(),
                 PurchaseStatusEnum::Cancelled->label()
-            );
-
-            throw_if(
-                $purchase->status === PurchaseStatusEnum::Received,
-                RuntimeException::class,
-                'Received purchases cannot be cancelled.'
-            );
-
-            throw_if(
-                $purchase->status === PurchaseStatusEnum::Cancelled,
-                RuntimeException::class,
-                'Purchase is already cancelled.'
             );
 
             $purchase->forceFill([

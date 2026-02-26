@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\SaleReturn;
 
 use App\Actions\StockMovement\RecordStockMovement;
-use App\Data\SaleReturn\CancelSaleReturnData;
+use App\Data\SaleReturn\RevertSaleReturnData;
 use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\ReturnStatusEnum;
 use App\Enums\StockMovementTypeEnum;
@@ -13,15 +13,14 @@ use App\Models\SaleReturn;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Throwable;
-
-final readonly class CancelSaleReturn
+final readonly class RevertSaleReturn
 {
     public function __construct(private RecordStockMovement $recordStockMovement) {}
 
     /**
      * @throws Throwable
      */
-    public function handle(SaleReturn $saleReturn, CancelSaleReturnData $data): SaleReturn
+    public function handle(SaleReturn $saleReturn, RevertSaleReturnData $data): SaleReturn
     {
         return DB::transaction(function () use ($saleReturn, $data): SaleReturn {
             $this->validateSaleReturnCanBeCancelled($saleReturn);

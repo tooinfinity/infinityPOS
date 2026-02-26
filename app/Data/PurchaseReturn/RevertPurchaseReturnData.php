@@ -6,7 +6,7 @@ namespace App\Data\PurchaseReturn;
 
 use Spatie\LaravelData\Data;
 
-final class CancelPurchaseReturnData extends Data
+final class RevertPurchaseReturnData extends Data
 {
     public function __construct(
         public ?string $note = null,

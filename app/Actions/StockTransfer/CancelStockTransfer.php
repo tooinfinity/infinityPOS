@@ -8,7 +8,6 @@ use App\Enums\StockTransferStatusEnum;
 use App\Exceptions\StateTransitionException;
 use App\Models\StockTransfer;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class CancelStockTransfer
@@ -30,8 +29,6 @@ final readonly class CancelStockTransfer
                 $transfer->status->label(),
                 StockTransferStatusEnum::Cancelled->label()
             );
-
-            throw_if($transfer->status !== StockTransferStatusEnum::Pending, RuntimeException::class, 'Only pending transfers can be cancelled.');
 
             return $transfer->forceFill(['status' => StockTransferStatusEnum::Cancelled])->save();
         });

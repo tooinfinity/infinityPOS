@@ -48,6 +48,10 @@ final readonly class CreateStockTransfer
 
     private function generateReferenceNo(): string
     {
-        return 'STF-'.now()->format('YmdHis').'-'.Str::upper(Str::random(4));
+        do {
+            $referenceNo = 'STF-'.now()->format('YmdHis').'-'.Str::upper(Str::random(4));
+        } while (StockTransfer::query()->where('reference_no', $referenceNo)->exists());
+
+        return $referenceNo;
     }
 }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\PurchaseReturn;
 
 use App\Actions\StockMovement\RecordStockMovement;
-use App\Data\PurchaseReturn\CancelPurchaseReturnData;
+use App\Data\PurchaseReturn\RevertPurchaseReturnData;
 use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\ReturnStatusEnum;
 use App\Enums\StockMovementTypeEnum;
@@ -14,15 +14,14 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Throwable;
-
-final readonly class CancelPurchaseReturn
+final readonly class RevertPurchaseReturn
 {
     public function __construct(private RecordStockMovement $recordStockMovement) {}
 
     /**
      * @throws Throwable
      */
-    public function handle(PurchaseReturn $purchaseReturn, CancelPurchaseReturnData $data): PurchaseReturn
+    public function handle(PurchaseReturn $purchaseReturn, RevertPurchaseReturnData $data): PurchaseReturn
     {
         return DB::transaction(function () use ($purchaseReturn, $data): PurchaseReturn {
             /** @var PurchaseReturn $purchaseReturn */

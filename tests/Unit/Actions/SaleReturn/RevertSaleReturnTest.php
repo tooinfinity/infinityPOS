@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Actions\SaleReturn\CancelSaleReturn;
-use App\Data\SaleReturn\CancelSaleReturnData;
+use App\Actions\SaleReturn\RevertSaleReturn;
+use App\Data\SaleReturn\RevertSaleReturnData;
 use App\Enums\ReturnStatusEnum;
 use App\Models\Batch;
 use App\Models\Payment;
@@ -13,9 +13,9 @@ use App\Models\SaleReturnItem;
 it('cancels a completed sale return', function (): void {
     $saleReturn = SaleReturn::factory()->completed()->create();
 
-    $action = resolve(CancelSaleReturn::class);
+    $action = resolve(RevertSaleReturn::class);
 
-    $result = $action->handle($saleReturn, new CancelSaleReturnData(
+    $result = $action->handle($saleReturn, new RevertSaleReturnData(
         note: 'Cancelled',
     ));
 
@@ -32,9 +32,9 @@ it('removes stock when cancelling completed return', function (): void {
         'quantity' => 10,
     ]);
 
-    $action = resolve(CancelSaleReturn::class);
+    $action = resolve(RevertSaleReturn::class);
 
-    $action->handle($saleReturn, new CancelSaleReturnData());
+    $action->handle($saleReturn, new RevertSaleReturnData());
 
     expect($batch->fresh()->quantity)->toBe(90);
 });
@@ -49,19 +49,19 @@ it('throws exception when cancelling return with refunds', function (): void {
         'amount' => -500,
     ]);
 
-    $action = resolve(CancelSaleReturn::class);
+    $action = resolve(RevertSaleReturn::class);
 
-    $action->handle($saleReturn, new CancelSaleReturnData());
+    $action->handle($saleReturn, new RevertSaleReturnData());
 })->throws(RuntimeException::class, 'existing refunds');
 
 it('throws exception when cancelling already cancelled return', function (): void {
     $saleReturn = SaleReturn::factory()->completed()->create();
 
-    $action = resolve(CancelSaleReturn::class);
+    $action = resolve(RevertSaleReturn::class);
 
-    $action->handle($saleReturn, new CancelSaleReturnData());
+    $action->handle($saleReturn, new RevertSaleReturnData());
 
-    $action->handle($saleReturn, new CancelSaleReturnData());
+    $action->handle($saleReturn, new RevertSaleReturnData());
 })->throws(RuntimeException::class, 'Can only cancel completed sale returns');
 
 it('throws exception when insufficient stock on cancellation', function (): void {
@@ -73,9 +73,9 @@ it('throws exception when insufficient stock on cancellation', function (): void
         'quantity' => 10,
     ]);
 
-    $action = resolve(CancelSaleReturn::class);
+    $action = resolve(RevertSaleReturn::class);
 
-    $action->handle($saleReturn, new CancelSaleReturnData());
+    $action->handle($saleReturn, new RevertSaleReturnData());
 })->throws(RuntimeException::class, 'Insufficient stock');
 
 it('skips items without batch when cancelling completed return', function (): void {
@@ -85,9 +85,9 @@ it('skips items without batch when cancelling completed return', function (): vo
         'quantity' => 10,
     ]);
 
-    $action = resolve(CancelSaleReturn::class);
+    $action = resolve(RevertSaleReturn::class);
 
-    $result = $action->handle($saleReturn, new CancelSaleReturnData());
+    $result = $action->handle($saleReturn, new RevertSaleReturnData());
 
     expect($result->status)->toBe(ReturnStatusEnum::Pending);
 });

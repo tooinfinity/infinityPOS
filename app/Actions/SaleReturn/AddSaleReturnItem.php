@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\SaleReturn;
 
 use App\Data\SaleReturn\SaleReturnItemData;
+use App\Enums\ReturnStatusEnum;
 use App\Models\SaleItem;
 use App\Models\SaleReturn;
 use App\Models\SaleReturnItem;
@@ -49,7 +50,7 @@ final readonly class AddSaleReturnItem
      */
     private function validateSaleReturnIsPending(SaleReturn $saleReturn): void
     {
-        throw_if($saleReturn->status->value !== 'pending', RuntimeException::class, 'Cannot add items to a non-pending sale return.');
+        throw_if($saleReturn->status !== ReturnStatusEnum::Pending, RuntimeException::class, 'Cannot add items to a non-pending sale return.');
     }
 
     /**
