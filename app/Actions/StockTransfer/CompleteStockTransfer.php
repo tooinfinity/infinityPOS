@@ -84,6 +84,7 @@ final readonly class CompleteStockTransfer
      */
     private function processItem(StockTransfer $transfer, StockTransferItem $item): void
     {
+        /** @var Batch $sourceBatch */
         $sourceBatch = $item->batch;
 
         $previousQuantity = $sourceBatch->quantity;

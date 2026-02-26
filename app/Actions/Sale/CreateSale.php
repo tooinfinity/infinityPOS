@@ -88,9 +88,7 @@ final readonly class CreateSale
                 throw new RuntimeException("Batch does not belong to product {$item->product_id}");
             }
 
-            if ($batch->warehouse_id !== $data->warehouse_id) {
-                throw new RuntimeException("Batch is not in the sale's warehouse");
-            }
+            throw_if($batch->warehouse_id !== $data->warehouse_id, RuntimeException::class, "Batch is not in the sale's warehouse");
         }
 
         foreach ($quantitiesByBatch as $batchId => $totalQuantity) {
