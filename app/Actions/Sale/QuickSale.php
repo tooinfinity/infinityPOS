@@ -8,6 +8,7 @@ use App\Actions\StockMovement\RecordStockMovement;
 use App\Data\Sale\QuickSaleData;
 use App\Data\Sale\SaleItemData;
 use App\Data\StockMovement\RecordStockMovementData;
+use App\Enums\PaymentStateEnum;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
 use App\Enums\StockMovementTypeEnum;
@@ -213,6 +214,7 @@ final readonly class QuickSale
             'amount' => $paidAmount,
             'payment_date' => $data->sale_date,
             'note' => 'Quick sale payment',
+            'status' => PaymentStateEnum::Active,
         ]);
     }
 

@@ -95,6 +95,14 @@ final class SaleReturn extends Model
     }
 
     /**
+     * @return MorphMany<Payment, $this>
+     */
+    public function activePayments(): MorphMany
+    {
+        return $this->morphMany(Payment::class, 'payable')->active();
+    }
+
+    /**
      * @return array<string, string>
      */
     public function casts(): array

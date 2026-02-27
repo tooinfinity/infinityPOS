@@ -139,6 +139,33 @@ it('can create stockMovements', function (): void {
         ->each->toBeInstanceOf(StockMovement::class);
 });
 
+it('has morphMany activePayments', function (): void {
+    $purchase = new Purchase();
+
+    expect($purchase->activePayments())
+        ->toBeInstanceOf(MorphMany::class);
+});
+
+it('can create activePayments', function (): void {
+    $purchase = Purchase::factory()->create();
+    Payment::factory()->count(2)->create([
+        'payable_type' => Purchase::class,
+        'payable_id' => $purchase->id,
+    ]);
+    Payment::factory()->count(3)->voided()->create([
+        'payable_type' => Purchase::class,
+        'payable_id' => $purchase->id,
+    ]);
+
+    expect($purchase->activePayments)->toHaveCount(2);
+});
+
+it('returns empty collection when no activePayments exist', function (): void {
+    $purchase = Purchase::factory()->create();
+
+    expect($purchase->activePayments)->toBeEmpty();
+});
+
 it('filters by pending scope', function (): void {
     Purchase::factory()->create(['status' => 'pending']);
     Purchase::factory()->count(2)->create(['status' => 'received']);

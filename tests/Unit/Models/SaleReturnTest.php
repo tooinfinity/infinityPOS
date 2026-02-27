@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Payment;
 use App\Models\Sale;
 use App\Models\SaleReturn;
 use App\Models\SaleReturnItem;
@@ -99,6 +100,58 @@ it('can create stockMovements', function (): void {
     expect($saleReturn->stockMovements)
         ->toHaveCount(2)
         ->each->toBeInstanceOf(StockMovement::class);
+});
+
+it('has morphMany payments', function (): void {
+    $saleReturn = new SaleReturn();
+
+    expect($saleReturn->payments())
+        ->toBeInstanceOf(MorphMany::class);
+});
+
+it('can create payments', function (): void {
+    $saleReturn = SaleReturn::factory()->create();
+    Payment::factory()->count(2)->create([
+        'payable_type' => SaleReturn::class,
+        'payable_id' => $saleReturn->id,
+    ]);
+
+    expect($saleReturn->payments)
+        ->toHaveCount(2)
+        ->each->toBeInstanceOf(Payment::class);
+});
+
+it('returns empty collection when no payments exist', function (): void {
+    $saleReturn = SaleReturn::factory()->create();
+
+    expect($saleReturn->payments)->toBeEmpty();
+});
+
+it('has morphMany activePayments', function (): void {
+    $saleReturn = new SaleReturn();
+
+    expect($saleReturn->activePayments())
+        ->toBeInstanceOf(MorphMany::class);
+});
+
+it('can create activePayments', function (): void {
+    $saleReturn = SaleReturn::factory()->create();
+    Payment::factory()->count(2)->create([
+        'payable_type' => SaleReturn::class,
+        'payable_id' => $saleReturn->id,
+    ]);
+    Payment::factory()->count(3)->voided()->create([
+        'payable_type' => SaleReturn::class,
+        'payable_id' => $saleReturn->id,
+    ]);
+
+    expect($saleReturn->activePayments)->toHaveCount(2);
+});
+
+it('returns empty collection when no activePayments exist', function (): void {
+    $saleReturn = SaleReturn::factory()->create();
+
+    expect($saleReturn->activePayments)->toBeEmpty();
 });
 
 it('filters by pending scope', function (): void {

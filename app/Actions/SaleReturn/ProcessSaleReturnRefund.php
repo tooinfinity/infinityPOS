@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\SaleReturn;
 
 use App\Data\SaleReturn\RefundSaleReturnData;
+use App\Enums\PaymentStateEnum;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\ReturnStatusEnum;
 use App\Models\Payment;
@@ -38,6 +39,7 @@ final readonly class ProcessSaleReturnRefund
                 'amount' => -$data->amount,
                 'payment_date' => $data->payment_date,
                 'note' => $data->note,
+                'status' => PaymentStateEnum::Active,
             ]);
 
             $this->updatePaymentStatus($saleReturn);

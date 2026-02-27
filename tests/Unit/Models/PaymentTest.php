@@ -24,6 +24,10 @@ test('to array', function (): void {
             'amount',
             'payment_date',
             'note',
+            'status',
+            'voided_by',
+            'voided_at',
+            'void_reason',
             'created_at',
             'updated_at',
         ]);
@@ -123,4 +127,83 @@ it('filters by today scope', function (): void {
     $results = Payment::today()->get();
 
     expect($results)->toHaveCount(1);
+});
+
+it('filters by active scope', function (): void {
+    Payment::factory()->create();
+    Payment::factory()->voided()->create();
+    Payment::factory()->create();
+
+    $results = Payment::query()->active()->get();
+
+    expect($results)->toHaveCount(2);
+});
+
+it('filters by voided scope', function (): void {
+    Payment::factory()->create();
+    Payment::factory()->voided()->create();
+    Payment::factory()->voided()->create();
+
+    $results = Payment::query()->voided()->get();
+
+    expect($results)->toHaveCount(2);
+});
+
+it('isActive returns true for active payment', function (): void {
+    $payment = Payment::factory()->create();
+
+    expect($payment->isActive())->toBeTrue();
+});
+
+it('isActive returns false for voided payment', function (): void {
+    $payment = Payment::factory()->voided()->create();
+
+    expect($payment->isActive())->toBeFalse();
+});
+
+it('isVoided returns true for voided payment', function (): void {
+    $payment = Payment::factory()->voided()->create();
+
+    expect($payment->isVoided())->toBeTrue();
+});
+
+it('isVoided returns false for active payment', function (): void {
+    $payment = Payment::factory()->create();
+
+    expect($payment->isVoided())->toBeFalse();
+});
+
+it('canBeVoided returns true for active payment', function (): void {
+    $payment = Payment::factory()->create();
+
+    expect($payment->canBeVoided())->toBeTrue();
+});
+
+it('canBeVoided returns false for voided payment', function (): void {
+    $payment = Payment::factory()->voided()->create();
+
+    expect($payment->canBeVoided())->toBeFalse();
+});
+
+it('canBeUnvoided returns true for voided payment', function (): void {
+    $payment = Payment::factory()->voided()->create();
+
+    expect($payment->canBeUnvoided())->toBeTrue();
+});
+
+it('canBeUnvoided returns false for active payment', function (): void {
+    $payment = Payment::factory()->create();
+
+    expect($payment->canBeUnvoided())->toBeFalse();
+});
+
+it('has voidedBy relationship', function (): void {
+    $user = User::factory()->create();
+    $payment = Payment::factory()->voided()->create([
+        'voided_by' => $user->id,
+    ]);
+
+    expect($payment->voidedBy)
+        ->toBeInstanceOf(User::class)
+        ->id->toBe($user->id);
 });

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Payment;
 
 use App\Data\Payment\RecordPaymentData;
+use App\Enums\PaymentStateEnum;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\PurchaseStatusEnum;
 use App\Enums\ReturnStatusEnum;
@@ -54,6 +55,7 @@ final readonly class RecordPayment
                 'amount' => $data->amount,
                 'payment_date' => $data->payment_date,
                 'note' => $data->note,
+                'status' => PaymentStateEnum::Active,
             ]);
 
             $this->updatePayablePaymentStatus($payable);
@@ -95,6 +97,7 @@ final readonly class RecordPayment
         $currentPaid = Payment::query()
             ->where('payable_type', $payable::class)
             ->where('payable_id', $payable->id)
+            ->where('status', PaymentStateEnum::Active)
             ->lockForUpdate()
             ->sum('amount');
 
@@ -129,6 +132,7 @@ final readonly class RecordPayment
         $newPaidAmount = Payment::query()
             ->where('payable_type', $payable::class)
             ->where('payable_id', $payable->id)
+            ->where('status', PaymentStateEnum::Active)
             ->lockForUpdate()
             ->sum('amount');
 

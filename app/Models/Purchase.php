@@ -89,6 +89,14 @@ final class Purchase extends Model
     }
 
     /**
+     * @return MorphMany<Payment, $this>
+     */
+    public function activePayments(): MorphMany
+    {
+        return $this->morphMany(Payment::class, 'payable')->active();
+    }
+
+    /**
      * @return MorphMany<StockMovement, $this>
      */
     public function stockMovements(): MorphMany

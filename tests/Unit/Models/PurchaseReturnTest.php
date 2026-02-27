@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Payment;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
@@ -101,6 +102,58 @@ it('can create stockMovements', function (): void {
         ->each->toBeInstanceOf(StockMovement::class);
 });
 
+it('has morphMany payments', function (): void {
+    $purchaseReturn = new PurchaseReturn();
+
+    expect($purchaseReturn->payments())
+        ->toBeInstanceOf(MorphMany::class);
+});
+
+it('can create payments', function (): void {
+    $purchaseReturn = PurchaseReturn::factory()->create();
+    Payment::factory()->count(2)->create([
+        'payable_type' => PurchaseReturn::class,
+        'payable_id' => $purchaseReturn->id,
+    ]);
+
+    expect($purchaseReturn->payments)
+        ->toHaveCount(2)
+        ->each->toBeInstanceOf(Payment::class);
+});
+
+it('returns empty collection when no payments exist', function (): void {
+    $purchaseReturn = PurchaseReturn::factory()->create();
+
+    expect($purchaseReturn->payments)->toBeEmpty();
+});
+
+it('has morphMany activePayments', function (): void {
+    $purchaseReturn = new PurchaseReturn();
+
+    expect($purchaseReturn->activePayments())
+        ->toBeInstanceOf(MorphMany::class);
+});
+
+it('can create activePayments', function (): void {
+    $purchaseReturn = PurchaseReturn::factory()->create();
+    Payment::factory()->count(2)->create([
+        'payable_type' => PurchaseReturn::class,
+        'payable_id' => $purchaseReturn->id,
+    ]);
+    Payment::factory()->count(3)->voided()->create([
+        'payable_type' => PurchaseReturn::class,
+        'payable_id' => $purchaseReturn->id,
+    ]);
+
+    expect($purchaseReturn->activePayments)->toHaveCount(2);
+});
+
+it('returns empty collection when no activePayments exist', function (): void {
+    $purchaseReturn = PurchaseReturn::factory()->create();
+
+    expect($purchaseReturn->activePayments)->toBeEmpty();
+});
+
 it('filters by pending scope', function (): void {
     PurchaseReturn::factory()->create(['status' => 'pending']);
     PurchaseReturn::factory()->count(2)->create(['status' => 'completed']);
@@ -121,7 +174,7 @@ it('filters by completed scope', function (): void {
         ->first()->status->value->toBe('completed');
 });
 
-it('filters by unpaid scope', function (): void {
+it('filters by unpaid payment scope', function (): void {
     PurchaseReturn::factory()->unpaid()->create();
     PurchaseReturn::factory()->count(2)->paid()->create();
 

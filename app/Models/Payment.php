@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\PaymentStateEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\PaymentFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -23,11 +24,16 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property int $amount
  * @property CarbonInterface $payment_date
  * @property string|null $note
+ * @property PaymentStateEnum $status
+ * @property int|null $voided_by
+ * @property CarbonInterface|null $voided_at
+ * @property string|null $void_reason
  * @property CarbonInterface $created_at
  * @property CarbonInterface $updated_at
  * @property Model $payable
  * @property PaymentMethod $paymentMethod
  * @property User|null $user
+ * @property User|null $voidedBy
  */
 final class Payment extends Model
 {
@@ -59,6 +65,14 @@ final class Payment extends Model
     }
 
     /**
+     * @return BelongsTo<User, $this>
+     */
+    public function voidedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'voided_by');
+    }
+
+    /**
      * @return array<string, string>
      */
     public function casts(): array
@@ -73,9 +87,53 @@ final class Payment extends Model
             'amount' => 'integer',
             'payment_date' => 'datetime',
             'note' => 'string',
+            'status' => PaymentStateEnum::class,
+            'voided_by' => 'integer',
+            'voided_at' => 'datetime',
+            'void_reason' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === PaymentStateEnum::Active;
+    }
+
+    public function isVoided(): bool
+    {
+        return $this->status === PaymentStateEnum::Voided;
+    }
+
+    public function canBeVoided(): bool
+    {
+        return $this->isActive();
+    }
+
+    public function canBeUnvoided(): bool
+    {
+        return $this->isVoided();
+    }
+
+    /**
+     * @param  Builder<Payment>  $query
+     * @return Builder<Payment>
+     */
+    #[Scope]
+    protected function active(Builder $query): Builder
+    {
+        return $query->where('status', PaymentStateEnum::Active);
+    }
+
+    /**
+     * @param  Builder<Payment>  $query
+     * @return Builder<Payment>
+     */
+    #[Scope]
+    protected function voided(Builder $query): Builder
+    {
+        return $query->where('status', PaymentStateEnum::Voided);
     }
 
     /**
