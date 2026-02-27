@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Payment;
 
 use App\Actions\GenerateReferenceNo;
+use App\Actions\Shared\UpdatePaymentStatus;
 use App\Data\Payment\RecordPaymentData;
 use App\Enums\PaymentStateEnum;
-use App\Enums\PaymentStatusEnum;
 use App\Enums\PurchaseStatusEnum;
 use App\Enums\ReturnStatusEnum;
 use App\Enums\SaleStatusEnum;
@@ -26,6 +26,8 @@ use Throwable;
  */
 final readonly class RecordPayment
 {
+    public function __construct(private UpdatePaymentStatus $updatePaymentStatus) {}
+
     /**
      * @throws Throwable
      */
@@ -58,7 +60,7 @@ final readonly class RecordPayment
                 'status' => PaymentStateEnum::Active,
             ]);
 
-            $this->updatePayablePaymentStatus($payable);
+            $this->updatePaymentStatus->handle($payable);
 
             return $payment->refresh();
         });
@@ -125,34 +127,5 @@ final readonly class RecordPayment
         };
 
         return $statusValid && $payable->payment_status->canAcceptPayment();
-    }
-
-    private function updatePayablePaymentStatus(Sale|SaleReturn|Purchase|PurchaseReturn $payable): void
-    {
-        $newPaidAmount = Payment::query()
-            ->where('payable_type', $payable::class)
-            ->where('payable_id', $payable->id)
-            ->where('status', PaymentStateEnum::Active)
-            ->lockForUpdate()
-            ->sum('amount');
-
-        $totalAmount = $payable->total_amount;
-
-        $paymentStatus = match (true) {
-            $newPaidAmount >= $totalAmount => PaymentStatusEnum::Paid,
-            $newPaidAmount > 0 => PaymentStatusEnum::Partial,
-            default => PaymentStatusEnum::Unpaid,
-        };
-
-        $updateData = [
-            'paid_amount' => min($newPaidAmount, $totalAmount),
-            'payment_status' => $paymentStatus,
-        ];
-
-        if ($payable instanceof Sale && $newPaidAmount > $totalAmount) {
-            $updateData['change_amount'] = $newPaidAmount - $totalAmount;
-        }
-
-        $payable->forceFill($updateData)->save();
     }
 }

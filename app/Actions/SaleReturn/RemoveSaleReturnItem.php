@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace App\Actions\SaleReturn;
 
-use App\Enums\ReturnStatusEnum;
-use App\Models\SaleReturn;
+use App\Actions\Shared\RecalculateParentTotal;
+use App\Actions\Shared\ValidateStatusIsPending;
 use App\Models\SaleReturnItem;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class RemoveSaleReturnItem
 {
+    public function __construct(
+        private ValidateStatusIsPending $validateStatus,
+        private RecalculateParentTotal $recalculateTotal,
+    ) {}
+
     /**
      * @throws Throwable
      */
@@ -21,34 +25,15 @@ final readonly class RemoveSaleReturnItem
         return DB::transaction(function () use ($item): bool {
             $saleReturn = $item->saleReturn;
 
-            $this->validateSaleReturnIsPending($saleReturn);
+            $this->validateStatus->handle($saleReturn, 'Cannot remove items from a non-pending sale return.');
 
             $deleted = $item->delete();
 
             if ($deleted) {
-                $this->recalculateTotalAmount($saleReturn);
+                $this->recalculateTotal->handle($saleReturn);
             }
 
             return (bool) $deleted;
         });
-    }
-
-    /**
-     * @throws Throwable
-     */
-    private function validateSaleReturnIsPending(SaleReturn $saleReturn): void
-    {
-        throw_if($saleReturn->status !== ReturnStatusEnum::Pending, RuntimeException::class, 'Cannot remove items from a non-pending sale return.');
-    }
-
-    private function recalculateTotalAmount(SaleReturn $saleReturn): void
-    {
-        $saleReturn->refresh();
-
-        $totalAmount = $saleReturn->items()->lockForUpdate()->sum('subtotal');
-
-        $saleReturn->forceFill([
-            'total_amount' => $totalAmount,
-        ])->save();
     }
 }

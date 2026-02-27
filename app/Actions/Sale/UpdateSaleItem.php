@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Sale;
 
+use App\Actions\Shared\RecalculateParentTotal;
+use App\Actions\Shared\ValidateStatusIsPending;
 use App\Data\Sale\UpdateSaleItemData;
-use App\Enums\SaleStatusEnum;
 use App\Models\Batch;
 use App\Models\Sale;
 use App\Models\SaleItem;
@@ -16,13 +17,18 @@ use Throwable;
 
 final readonly class UpdateSaleItem
 {
+    public function __construct(
+        private ValidateStatusIsPending $validateStatus,
+        private RecalculateParentTotal $recalculateTotal,
+    ) {}
+
     /**
      * @throws Throwable
      */
     public function handle(SaleItem $item, UpdateSaleItemData $data): SaleItem
     {
         return DB::transaction(function () use ($item, $data): SaleItem {
-            $this->validateSaleIsPending($item->sale);
+            $this->validateStatus->handle($item->sale);
 
             $batchIdValue = $data->batch_id;
             $quantityValue = $data->quantity;
@@ -56,19 +62,10 @@ final readonly class UpdateSaleItem
                 'subtotal' => $quantity * $unitPrice,
             ])->save();
 
-            $this->recalculateSaleTotals($item->sale);
+            $this->recalculateTotal->handle($item->sale);
 
             return $item->refresh();
         });
-    }
-
-    private function validateSaleIsPending(Sale $sale): void
-    {
-        if ($sale->status !== SaleStatusEnum::Pending) {
-            throw new RuntimeException(
-                "Can only update items in pending sales. Current status: {$sale->status->value}"
-            );
-        }
     }
 
     /**
@@ -95,12 +92,5 @@ final readonly class UpdateSaleItem
         $totalRequired = $existingQuantity + $quantity;
 
         throw_if($totalRequired > $batch->quantity, RuntimeException::class, "Insufficient stock in batch. Required: $quantity, Available: ".($batch->quantity - $existingQuantity));
-    }
-
-    private function recalculateSaleTotals(Sale $sale): void
-    {
-        $sale->load('items');
-        $totalAmount = $sale->items->sum('subtotal');
-        $sale->forceFill(['total_amount' => $totalAmount])->save();
     }
 }

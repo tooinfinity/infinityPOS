@@ -5,24 +5,25 @@ declare(strict_types=1);
 namespace App\Actions\PurchaseReturn;
 
 use App\Actions\GenerateReferenceNo;
+use App\Actions\Shared\CalculateTotalFromItems;
 use App\Data\PurchaseReturn\CreatePurchaseReturnData;
-use App\Data\PurchaseReturn\PurchaseReturnItemData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\ReturnStatusEnum;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
 use Illuminate\Support\Facades\DB;
-use Spatie\LaravelData\DataCollection;
 use Throwable;
 
 final readonly class CreatePurchaseReturn
 {
+    public function __construct(private CalculateTotalFromItems $calculateTotal) {}
+
     /**
      * @throws Throwable
      */
     public function handle(CreatePurchaseReturnData $data): PurchaseReturn
     {
-        $totalAmount = $this->calculateTotalAmount($data->items);
+        $totalAmount = $this->calculateTotal->handle($data->items, 'unit_cost');
 
         return DB::transaction(function () use ($totalAmount, $data): PurchaseReturn {
             $purchaseReturn = PurchaseReturn::query()->forceCreate([
@@ -51,19 +52,5 @@ final readonly class CreatePurchaseReturn
 
             return $purchaseReturn->refresh();
         });
-    }
-
-    /**
-     * @param  DataCollection<int, PurchaseReturnItemData>  $items
-     */
-    private function calculateTotalAmount(DataCollection $items): int
-    {
-        $total = 0;
-
-        foreach ($items as $item) {
-            $total += $item->quantity * $item->unit_cost;
-        }
-
-        return $total;
     }
 }

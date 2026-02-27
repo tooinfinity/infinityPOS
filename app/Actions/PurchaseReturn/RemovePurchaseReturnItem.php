@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace App\Actions\PurchaseReturn;
 
-use App\Enums\ReturnStatusEnum;
-use App\Models\PurchaseReturn;
+use App\Actions\Shared\RecalculateParentTotal;
+use App\Actions\Shared\ValidateStatusIsPending;
 use App\Models\PurchaseReturnItem;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class RemovePurchaseReturnItem
 {
+    public function __construct(
+        private ValidateStatusIsPending $validateStatus,
+        private RecalculateParentTotal $recalculateTotal,
+    ) {}
+
     /**
      * @throws Throwable
      */
@@ -21,34 +25,15 @@ final readonly class RemovePurchaseReturnItem
         return DB::transaction(function () use ($item): bool {
             $purchaseReturn = $item->purchaseReturn;
 
-            $this->validatePurchaseReturnIsPending($purchaseReturn);
+            $this->validateStatus->handle($purchaseReturn, 'Cannot remove items from a non-pending purchase return.');
 
             $deleted = $item->delete();
 
             if ($deleted) {
-                $this->recalculateTotalAmount($purchaseReturn);
+                $this->recalculateTotal->handle($purchaseReturn);
             }
 
             return (bool) $deleted;
         });
-    }
-
-    /**
-     * @throws Throwable
-     */
-    private function validatePurchaseReturnIsPending(PurchaseReturn $purchaseReturn): void
-    {
-        throw_if($purchaseReturn->status !== ReturnStatusEnum::Pending, RuntimeException::class, 'Cannot remove items from a non-pending purchase return.');
-    }
-
-    private function recalculateTotalAmount(PurchaseReturn $purchaseReturn): void
-    {
-        $purchaseReturn->refresh();
-
-        $totalAmount = $purchaseReturn->items()->lockForUpdate()->sum('subtotal');
-
-        $purchaseReturn->forceFill([
-            'total_amount' => $totalAmount,
-        ])->save();
     }
 }

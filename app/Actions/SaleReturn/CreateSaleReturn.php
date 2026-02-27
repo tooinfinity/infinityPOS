@@ -5,25 +5,26 @@ declare(strict_types=1);
 namespace App\Actions\SaleReturn;
 
 use App\Actions\GenerateReferenceNo;
+use App\Actions\Shared\CalculateTotalFromItems;
 use App\Data\SaleReturn\CreateSaleReturnData;
-use App\Data\SaleReturn\SaleReturnItemData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\ReturnStatusEnum;
 use App\Models\SaleReturn;
 use App\Models\SaleReturnItem;
 use Illuminate\Support\Facades\DB;
-use Spatie\LaravelData\DataCollection;
 use Throwable;
 
 final readonly class CreateSaleReturn
 {
+    public function __construct(private CalculateTotalFromItems $calculateTotal) {}
+
     /**
      * @throws Throwable
      */
     public function handle(CreateSaleReturnData $data): SaleReturn
     {
         return DB::transaction(function () use ($data): SaleReturn {
-            $totalAmount = $this->calculateTotalAmount($data->items);
+            $totalAmount = $this->calculateTotal->handle($data->items, 'unit_price');
 
             $saleReturn = SaleReturn::query()->forceCreate([
                 'sale_id' => $data->sale_id,
@@ -51,19 +52,5 @@ final readonly class CreateSaleReturn
 
             return $saleReturn->refresh();
         });
-    }
-
-    /**
-     * @param  DataCollection<int, SaleReturnItemData>  $items
-     */
-    private function calculateTotalAmount(DataCollection $items): int
-    {
-        $total = 0;
-
-        foreach ($items as $item) {
-            $total += $item->quantity * $item->unit_price;
-        }
-
-        return $total;
     }
 }

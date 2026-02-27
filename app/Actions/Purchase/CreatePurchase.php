@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Purchase;
 
+use App\Actions\Shared\CalculateTotalFromItems;
 use App\Actions\UploadImage;
 use App\Data\Purchase\CreatePurchaseData;
-use App\Data\Purchase\PurchaseItemData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\PurchaseStatusEnum;
 use App\Models\Purchase;
@@ -14,12 +14,14 @@ use App\Models\PurchaseItem;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Spatie\LaravelData\DataCollection;
 use Throwable;
 
 final readonly class CreatePurchase
 {
-    public function __construct(private UploadImage $uploadImage) {}
+    public function __construct(
+        private UploadImage $uploadImage,
+        private CalculateTotalFromItems $calculateTotal,
+    ) {}
 
     /**
      * @throws Throwable
@@ -34,7 +36,7 @@ final readonly class CreatePurchase
 
         try {
             return DB::transaction(function () use ($data, $documentPath): Purchase {
-                $totalAmount = $this->calculateTotalAmount($data->items);
+                $totalAmount = $this->calculateTotal->handle($data->items, 'unit_cost');
 
                 $purchase = Purchase::query()->forceCreate([
                     'supplier_id' => $data->supplier_id,
@@ -70,19 +72,5 @@ final readonly class CreatePurchase
 
             throw $e;
         }
-    }
-
-    /**
-     * @param  DataCollection<int, PurchaseItemData>  $items
-     */
-    private function calculateTotalAmount(DataCollection $items): int
-    {
-        $total = 0;
-
-        foreach ($items as $item) {
-            $total += $item->quantity * $item->unit_cost;
-        }
-
-        return $total;
     }
 }

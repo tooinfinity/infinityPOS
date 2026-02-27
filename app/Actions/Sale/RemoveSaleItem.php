@@ -4,15 +4,20 @@ declare(strict_types=1);
 
 namespace App\Actions\Sale;
 
-use App\Enums\SaleStatusEnum;
+use App\Actions\Shared\RecalculateParentTotal;
+use App\Actions\Shared\ValidateStatusIsPending;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class RemoveSaleItem
 {
+    public function __construct(
+        private ValidateStatusIsPending $validateStatus,
+        private RecalculateParentTotal $recalculateTotal,
+    ) {}
+
     /**
      * @throws Throwable
      */
@@ -21,29 +26,13 @@ final readonly class RemoveSaleItem
         return DB::transaction(function () use ($item): Sale {
             $sale = $item->sale;
 
-            $this->validateSaleIsPending($sale);
+            $this->validateStatus->handle($sale);
 
             $item->delete();
 
-            $this->recalculateSaleTotals($sale);
+            $this->recalculateTotal->handle($sale);
 
             return $sale->refresh();
         });
-    }
-
-    private function validateSaleIsPending(Sale $sale): void
-    {
-        if ($sale->status !== SaleStatusEnum::Pending) {
-            throw new RuntimeException(
-                "Can only remove items from pending sales. Current status: {$sale->status->value}"
-            );
-        }
-    }
-
-    private function recalculateSaleTotals(Sale $sale): void
-    {
-        $sale->load('items');
-        $totalAmount = $sale->items->sum('subtotal');
-        $sale->forceFill(['total_amount' => $totalAmount])->save();
     }
 }

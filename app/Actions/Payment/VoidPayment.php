@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Payment;
 
+use App\Actions\Shared\UpdatePaymentStatus;
 use App\Data\Payment\VoidPaymentData;
-use App\Enums\PaymentStateEnum;
-use App\Enums\PaymentStatusEnum;
 use App\Models\Payment;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
@@ -21,6 +20,8 @@ use Throwable;
  */
 final readonly class VoidPayment
 {
+    public function __construct(private UpdatePaymentStatus $updatePaymentStatus) {}
+
     /**
      * @throws Throwable
      */
@@ -30,7 +31,7 @@ final readonly class VoidPayment
             $this->validatePaymentCanBeVoided($payment);
 
             $payment->forceFill([
-                'status' => PaymentStateEnum::Voided,
+                'status' => \App\Enums\PaymentStateEnum::Voided,
                 'voided_by' => $userId,
                 'voided_at' => now(),
                 'void_reason' => $data->void_reason,
@@ -39,7 +40,7 @@ final readonly class VoidPayment
             $payable = $payment->payable;
 
             if ($payable instanceof Sale || $payable instanceof SaleReturn || $payable instanceof Purchase || $payable instanceof PurchaseReturn) {
-                $this->updatePayablePaymentStatus($payable);
+                $this->updatePaymentStatus->handle($payable);
             }
 
             return $payment->refresh();
@@ -53,36 +54,5 @@ final readonly class VoidPayment
                 'Payment cannot be voided. Current status: '.$payment->status->value
             );
         }
-    }
-
-    private function updatePayablePaymentStatus(Sale|SaleReturn|Purchase|PurchaseReturn $payable): void
-    {
-        $newPaidAmount = Payment::query()
-            ->where('payable_type', $payable::class)
-            ->where('payable_id', $payable->id)
-            ->where('status', PaymentStateEnum::Active)
-            ->lockForUpdate()
-            ->sum('amount');
-
-        $totalAmount = $payable->total_amount;
-
-        $paymentStatus = match (true) {
-            $newPaidAmount >= $totalAmount => PaymentStatusEnum::Paid,
-            $newPaidAmount > 0 => PaymentStatusEnum::Partial,
-            default => PaymentStatusEnum::Unpaid,
-        };
-
-        $updateData = [
-            'paid_amount' => min($newPaidAmount, $totalAmount),
-            'payment_status' => $paymentStatus,
-        ];
-
-        if ($payable instanceof Sale && $newPaidAmount > $totalAmount) {
-            $updateData['change_amount'] = $newPaidAmount - $totalAmount;
-        } elseif ($payable instanceof Sale) {
-            $updateData['change_amount'] = 0;
-        }
-
-        $payable->forceFill($updateData)->save();
     }
 }

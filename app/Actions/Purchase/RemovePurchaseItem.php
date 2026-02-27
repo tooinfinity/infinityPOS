@@ -4,34 +4,37 @@ declare(strict_types=1);
 
 namespace App\Actions\Purchase;
 
-use App\Enums\PurchaseStatusEnum;
+use App\Actions\Shared\RecalculateParentTotal;
+use App\Actions\Shared\ValidateStatusIsPending;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use RuntimeException;
 use Throwable;
 
 final readonly class RemovePurchaseItem
 {
-    public function __construct(private ?bool $deleteIfEmpty = true) {}
+    public function __construct(
+        private ?ValidateStatusIsPending $validateStatus = null,
+        private ?RecalculateParentTotal $recalculateTotal = null,
+        private ?bool $deleteIfEmpty = true,
+    ) {}
 
     /**
      * @throws Throwable
      */
     public function handle(PurchaseItem $item): ?Purchase
     {
-        return DB::transaction(function () use ($item): ?Purchase {
+        $validateStatus = $this->validateStatus ?? new ValidateStatusIsPending();
+        $recalculateTotal = $this->recalculateTotal ?? new RecalculateParentTotal();
+
+        return DB::transaction(function () use ($item, $validateStatus, $recalculateTotal): ?Purchase {
             /** @var Purchase $purchase */
             $purchase = Purchase::query()
                 ->lockForUpdate()
                 ->findOrFail($item->purchase_id);
 
-            throw_if(
-                $purchase->status !== PurchaseStatusEnum::Pending,
-                RuntimeException::class,
-                'Items can only be removed from pending purchases.'
-            );
+            $validateStatus->handle($purchase, 'Items can only be removed from pending purchases.');
 
             $item->delete();
 
@@ -48,18 +51,9 @@ final readonly class RemovePurchaseItem
                 return null;
             }
 
-            $this->recalculatePurchaseTotal($purchase);
+            $recalculateTotal->handle($purchase);
 
             return $purchase->refresh();
         });
-    }
-
-    private function recalculatePurchaseTotal(Purchase $purchase): void
-    {
-        $total = PurchaseItem::query()
-            ->where('purchase_id', $purchase->id)
-            ->sum('subtotal');
-
-        $purchase->forceFill(['total_amount' => $total])->save();
     }
 }

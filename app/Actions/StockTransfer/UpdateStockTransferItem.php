@@ -4,23 +4,24 @@ declare(strict_types=1);
 
 namespace App\Actions\StockTransfer;
 
+use App\Actions\Shared\ValidateStatusIsPending;
 use App\Data\StockTransfer\UpdateStockTransferItemData;
-use App\Enums\StockTransferStatusEnum;
 use App\Models\StockTransferItem;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Spatie\LaravelData\Optional;
 use Throwable;
 
 final readonly class UpdateStockTransferItem
 {
+    public function __construct(private ValidateStatusIsPending $validateStatus) {}
+
     /**
      * @throws Throwable
      */
     public function handle(StockTransferItem $item, UpdateStockTransferItemData $data): StockTransferItem
     {
-        return DB::transaction(static function () use ($item, $data): StockTransferItem {
-            throw_if($item->stockTransfer->status !== StockTransferStatusEnum::Pending, RuntimeException::class, 'Items can only be updated when transfer is pending.');
+        return DB::transaction(function () use ($item, $data): StockTransferItem {
+            $this->validateStatus->forItem($item, 'Items can only be updated when transfer is pending.');
 
             $updateData = [];
 

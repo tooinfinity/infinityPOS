@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Sale;
 
+use App\Actions\GenerateReferenceNo;
+use App\Actions\Shared\CalculateTotalFromItems;
 use App\Data\Sale\CreateSaleData;
-use App\Data\Sale\SaleItemData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
 use App\Models\Batch;
@@ -13,11 +14,12 @@ use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
-use Spatie\LaravelData\DataCollection;
 use Throwable;
 
 final readonly class CreateSale
 {
+    public function __construct(private CalculateTotalFromItems $calculateTotal) {}
+
     /**
      * @throws Throwable
      */
@@ -26,13 +28,13 @@ final readonly class CreateSale
         return DB::transaction(function () use ($data): Sale {
             $this->validateStockAvailability($data);
 
-            $totalAmount = $this->calculateTotalAmount($data->items);
+            $totalAmount = $this->calculateTotal->handle($data->items, 'unit_price');
 
             $sale = Sale::query()->forceCreate([
                 'customer_id' => $data->customer_id,
                 'warehouse_id' => $data->warehouse_id,
                 'user_id' => $data->user_id,
-                'reference_no' => new \App\Actions\GenerateReferenceNo('SAL', Sale::query())->handle(),
+                'reference_no' => new GenerateReferenceNo('SAL', Sale::query())->handle(),
                 'status' => SaleStatusEnum::Pending,
                 'sale_date' => $data->sale_date,
                 'total_amount' => $totalAmount,
@@ -100,19 +102,5 @@ final readonly class CreateSale
                 );
             }
         }
-    }
-
-    /**
-     * @param  DataCollection<int, SaleItemData>  $items
-     */
-    private function calculateTotalAmount(DataCollection $items): int
-    {
-        $total = 0;
-
-        foreach ($items as $item) {
-            $total += $item->quantity * $item->unit_price;
-        }
-
-        return $total;
     }
 }

@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace App\Actions\Purchase;
 
+use App\Actions\Shared\RecalculateParentTotal;
+use App\Actions\Shared\ValidateStatusIsPending;
 use App\Data\Purchase\PurchaseItemData;
-use App\Enums\PurchaseStatusEnum;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class AddPurchaseItem
 {
+    public function __construct(
+        private ValidateStatusIsPending $validateStatus,
+        private RecalculateParentTotal $recalculateTotal,
+    ) {}
+
     /**
      * @throws Throwable
      */
@@ -25,11 +30,7 @@ final readonly class AddPurchaseItem
                 ->lockForUpdate()
                 ->findOrFail($purchase->id);
 
-            throw_if(
-                $purchase->status !== PurchaseStatusEnum::Pending,
-                RuntimeException::class,
-                'Items can only be added to pending purchases.'
-            );
+            $this->validateStatus->handle($purchase);
 
             $item = PurchaseItem::query()->forceCreate([
                 'purchase_id' => $purchase->id,
@@ -40,19 +41,9 @@ final readonly class AddPurchaseItem
                 'subtotal' => $data->quantity * $data->unit_cost,
             ]);
 
-            $this->recalculatePurchaseTotal($purchase);
+            $this->recalculateTotal->handle($purchase);
 
             return $item->refresh();
         });
-    }
-
-    private function recalculatePurchaseTotal(Purchase $purchase): void
-    {
-        $total = PurchaseItem::query()
-            ->where('purchase_id', $purchase->id)
-            ->lockForUpdate()
-            ->sum('subtotal');
-
-        $purchase->forceFill(['total_amount' => $total])->save();
     }
 }

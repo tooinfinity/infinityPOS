@@ -4,19 +4,23 @@ declare(strict_types=1);
 
 namespace App\Actions\PurchaseReturn;
 
+use App\Actions\Shared\RecalculateParentTotal;
+use App\Actions\Shared\ValidateReturnAgainstOriginal;
+use App\Actions\Shared\ValidateStatusIsPending;
 use App\Data\PurchaseReturn\PurchaseReturnItemData;
-use App\Enums\ReturnStatusEnum;
-use App\Models\Purchase;
-use App\Models\PurchaseItem;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class AddPurchaseReturnItem
 {
+    public function __construct(
+        private ValidateStatusIsPending $validateStatus,
+        private ValidateReturnAgainstOriginal $validateReturn,
+        private RecalculateParentTotal $recalculateTotal,
+    ) {}
+
     /**
      * @throws Throwable
      */
@@ -29,8 +33,8 @@ final readonly class AddPurchaseReturnItem
                 ->with('purchase.items')
                 ->findOrFail($purchaseReturn->id);
 
-            $this->validatePurchaseReturnIsPending($purchaseReturn);
-            $this->validateAgainstOriginalPurchase($purchaseReturn, $data);
+            $this->validateStatus->handle($purchaseReturn);
+            $this->validateReturn->validateNewReturnForPurchase($purchaseReturn, $data->product_id, $data->batch_id, $data->quantity);
 
             $item = PurchaseReturnItem::query()->forceCreate([
                 'purchase_return_id' => $purchaseReturn->id,
@@ -41,57 +45,9 @@ final readonly class AddPurchaseReturnItem
                 'subtotal' => $data->quantity * $data->unit_cost,
             ]);
 
-            $this->recalculateTotalAmount($purchaseReturn);
+            $this->recalculateTotal->handle($purchaseReturn);
 
             return $item;
         });
-    }
-
-    /**
-     * @throws Throwable
-     */
-    private function validatePurchaseReturnIsPending(PurchaseReturn $purchaseReturn): void
-    {
-        throw_if($purchaseReturn->status !== ReturnStatusEnum::Pending, RuntimeException::class, 'Cannot add items to a non-pending purchase return.');
-    }
-
-    /**
-     * @throws Throwable
-     */
-    private function validateAgainstOriginalPurchase(PurchaseReturn $purchaseReturn, PurchaseReturnItemData $data): void
-    {
-        /** @var Purchase|null $purchase */
-        $purchase = $purchaseReturn->purchase;
-
-        throw_if($purchase === null, RuntimeException::class, 'Purchase return must be associated with a purchase.');
-
-        /** @var PurchaseItem|null $originalPurchaseItem */
-        $originalPurchaseItem = $purchase->items
-            ->where('product_id', $data->product_id)
-            ->where('batch_id', $data->batch_id)
-            ->first();
-
-        throw_if($originalPurchaseItem === null, RuntimeException::class, 'Product is not part of the original purchase or batch does not match.');
-
-        $alreadyReturned = PurchaseReturnItem::query()
-            ->whereHas('purchaseReturn', fn (Builder $q) => $q->where('purchase_id', $purchase->id))
-            ->where('product_id', $data->product_id)
-            ->where('batch_id', $data->batch_id)
-            ->sum('quantity');
-
-        $maxReturnable = $originalPurchaseItem->quantity - $alreadyReturned;
-
-        throw_if($data->quantity > $maxReturnable, RuntimeException::class, "Cannot return more than originally purchased. Original: {$originalPurchaseItem->quantity}, Already returned: {$alreadyReturned}, Remaining: {$maxReturnable}");
-    }
-
-    private function recalculateTotalAmount(PurchaseReturn $purchaseReturn): void
-    {
-        $purchaseReturn->refresh();
-
-        $totalAmount = $purchaseReturn->items()->lockForUpdate()->sum('subtotal');
-
-        $purchaseReturn->forceFill([
-            'total_amount' => $totalAmount,
-        ])->save();
     }
 }

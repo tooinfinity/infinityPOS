@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Sale;
 
+use App\Actions\Shared\RecalculateParentTotal;
+use App\Actions\Shared\ValidateStatusIsPending;
 use App\Data\Sale\SaleItemData;
-use App\Enums\SaleStatusEnum;
 use App\Models\Batch;
 use App\Models\Sale;
 use App\Models\SaleItem;
@@ -15,13 +16,18 @@ use Throwable;
 
 final readonly class AddSaleItem
 {
+    public function __construct(
+        private ValidateStatusIsPending $validateStatus,
+        private RecalculateParentTotal $recalculateTotal,
+    ) {}
+
     /**
      * @throws Throwable
      */
     public function handle(Sale $sale, SaleItemData $data): SaleItem
     {
         return DB::transaction(function () use ($sale, $data): SaleItem {
-            $this->validateSaleIsPending($sale);
+            $this->validateStatus->handle($sale);
 
             $this->validateStockAvailability($sale, $data);
 
@@ -35,19 +41,10 @@ final readonly class AddSaleItem
                 'subtotal' => $data->quantity * $data->unit_price,
             ]);
 
-            $this->recalculateSaleTotals($sale);
+            $this->recalculateTotal->handle($sale);
 
             return $item;
         });
-    }
-
-    private function validateSaleIsPending(Sale $sale): void
-    {
-        if ($sale->status !== SaleStatusEnum::Pending) {
-            throw new RuntimeException(
-                "Can only add items to pending sales. Current status: {$sale->status->value}"
-            );
-        }
     }
 
     /**
@@ -83,12 +80,5 @@ final readonly class AddSaleItem
                 "Insufficient stock in batch. Required: $data->quantity, Available: $availableQuantity"
             );
         }
-    }
-
-    private function recalculateSaleTotals(Sale $sale): void
-    {
-        $sale->load('items');
-        $totalAmount = $sale->items->sum('subtotal');
-        $sale->forceFill(['total_amount' => $totalAmount])->save();
     }
 }
