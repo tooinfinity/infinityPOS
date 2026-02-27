@@ -45,7 +45,7 @@ it('creates a pending sale return with items', function (): void {
         ->toBeInstanceOf(SaleReturn::class)
         ->and($saleReturn->sale_id)->toBe($sale->id)
         ->and($saleReturn->warehouse_id)->toBe($warehouse->id)
-        ->and($saleReturn->reference_no)->toStartWith('SRET-')
+        ->and($saleReturn->reference_no)->toStartWith('SAL-RETURN-')
         ->and($saleReturn->status)->toBe(ReturnStatusEnum::Pending)
         ->and($saleReturn->payment_status)->toBe(PaymentStatusEnum::Unpaid)
         ->and($saleReturn->total_amount)->toBe(5000)
@@ -82,7 +82,7 @@ it('auto-generates unique reference number', function (): void {
     $saleReturn = $action->handle($data);
 
     expect($saleReturn->reference_no)
-        ->toStartWith('SRET-')
+        ->toStartWith('SAL-RETURN-')
         ->and(mb_strlen($saleReturn->reference_no))->toBeGreaterThan(10);
 });
 

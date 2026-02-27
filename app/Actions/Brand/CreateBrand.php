@@ -35,12 +35,13 @@ final readonly class CreateBrand
             return DB::transaction(function () use ($data, $logo): Brand {
                 $slug = $data->slug ?? Str::slug($data->name);
                 $slug = $this->ensureUniqueSlug->handle($slug, Brand::class);
+                $isActive = $data->is_active ?? true;
 
                 return Brand::query()->forceCreate([
                     'name' => $data->name,
                     'slug' => $slug,
                     'logo' => $logo,
-                    'is_active' => $data->is_active,
+                    'is_active' => $isActive,
                 ])->refresh();
             });
         } catch (Throwable $e) {

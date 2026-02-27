@@ -28,7 +28,7 @@ it('processes refund for completed sale return', function (): void {
     expect($payment)
         ->toBeInstanceOf(Payment::class)
         ->and($payment->amount)->toBe(-500)
-        ->and($payment->reference_no)->toStartWith('REFUND-');
+        ->and($payment->reference_no)->toStartWith('PAY-');
 });
 
 it('updates payment status after refund', function (): void {

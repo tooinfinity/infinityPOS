@@ -37,7 +37,7 @@ it('may create a stock transfer with required fields', function (): void {
     expect($transfer)->toBeInstanceOf(StockTransfer::class)
         ->and($transfer->from_warehouse_id)->toBe($fromWarehouse->id)
         ->and($transfer->to_warehouse_id)->toBe($toWarehouse->id)
-        ->and($transfer->reference_no)->toStartWith('STF-')
+        ->and($transfer->reference_no)->toStartWith('STK-')
         ->and($transfer->exists)->toBeTrue();
 });
 
@@ -64,7 +64,7 @@ it('auto-generates reference number', function (): void {
     $transfer = $action->handle($data);
 
     expect($transfer->reference_no)
-        ->toStartWith('STF-')
+        ->toStartWith('STK-')
         ->and(mb_strlen($transfer->reference_no))->toBeGreaterThan(10);
 });
 

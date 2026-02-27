@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Payment;
 
+use App\Actions\GenerateReferenceNo;
 use App\Data\Payment\RecordPaymentData;
 use App\Enums\PaymentStateEnum;
 use App\Enums\PaymentStatusEnum;
@@ -17,7 +18,6 @@ use App\Models\PurchaseReturn;
 use App\Models\Sale;
 use App\Models\SaleReturn;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use RuntimeException;
 use Throwable;
 
@@ -49,7 +49,7 @@ final readonly class RecordPayment
             $payment = Payment::query()->forceCreate([
                 'payment_method_id' => $data->payment_method_id,
                 'user_id' => $data->user_id,
-                'reference_no' => $this->generateReferenceNo(),
+                'reference_no' => new GenerateReferenceNo('PAY', Payment::query())->handle(),
                 'payable_type' => $payable::class,
                 'payable_id' => $payable->id,
                 'amount' => $data->amount,
@@ -154,14 +154,5 @@ final readonly class RecordPayment
         }
 
         $payable->forceFill($updateData)->save();
-    }
-
-    private function generateReferenceNo(): string
-    {
-        do {
-            $reference = 'PAY-'.now()->format('YmdHis').'-'.Str::upper(Str::random(4));
-        } while (Payment::query()->where('reference_no', $reference)->exists());
-
-        return $reference;
     }
 }

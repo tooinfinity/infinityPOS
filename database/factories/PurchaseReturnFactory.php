@@ -114,10 +114,15 @@ final class PurchaseReturnFactory extends Factory
 
     public function paid(): self
     {
-        return $this->state(fn (array $attributes): array => [
-            'paid_amount' => $attributes['total_amount'] ?? 0,
-            'payment_status' => PaymentStatusEnum::Paid,
-        ]);
+        return $this->state(function (array $attributes): array {
+            $totalAmount = $attributes['total_amount'] ?? 0;
+
+            return [
+                'total_amount' => $totalAmount,
+                'paid_amount' => $totalAmount,
+                'payment_status' => PaymentStatusEnum::Paid,
+            ];
+        });
     }
 
     public function withPaidAmount(int $amount): self

@@ -14,7 +14,6 @@ use App\Models\PurchaseItem;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
 
@@ -41,7 +40,7 @@ final readonly class CreatePurchase
                     'supplier_id' => $data->supplier_id,
                     'warehouse_id' => $data->warehouse_id,
                     'user_id' => $data->user_id,
-                    'reference_no' => $this->generateReferenceNo(),
+                    'reference_no' => new \App\Actions\GenerateReferenceNo('PUR', Purchase::query())->handle(),
                     'status' => PurchaseStatusEnum::Pending,
                     'purchase_date' => $data->purchase_date,
                     'total_amount' => $totalAmount,
@@ -85,14 +84,5 @@ final readonly class CreatePurchase
         }
 
         return $total;
-    }
-
-    private function generateReferenceNo(): string
-    {
-        do {
-            $reference = 'PUR-'.now()->format('YmdHis').'-'.Str::upper(Str::random(4));
-        } while (Purchase::query()->where('reference_no', $reference)->exists());
-
-        return $reference;
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\PurchaseReturn;
 
+use App\Actions\GenerateReferenceNo;
 use App\Data\PurchaseReturn\CreatePurchaseReturnData;
 use App\Data\PurchaseReturn\PurchaseReturnItemData;
 use App\Enums\PaymentStatusEnum;
@@ -11,7 +12,6 @@ use App\Enums\ReturnStatusEnum;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
 
@@ -29,7 +29,7 @@ final readonly class CreatePurchaseReturn
                 'purchase_id' => $data->purchase_id,
                 'warehouse_id' => $data->warehouse_id,
                 'user_id' => $data->user_id,
-                'reference_no' => $this->generateReferenceNo(),
+                'reference_no' => new GenerateReferenceNo('PUR-RETURN', PurchaseReturn::query())->handle(),
                 'return_date' => $data->return_date,
                 'total_amount' => $totalAmount,
                 'paid_amount' => 0,
@@ -65,14 +65,5 @@ final readonly class CreatePurchaseReturn
         }
 
         return $total;
-    }
-
-    private function generateReferenceNo(): string
-    {
-        do {
-            $reference = 'PRET-'.now()->format('YmdHis').'-'.Str::upper(Str::random(4));
-        } while (PurchaseReturn::query()->where('reference_no', $reference)->exists());
-
-        return $reference;
     }
 }

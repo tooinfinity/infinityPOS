@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\SaleReturn;
 
+use App\Actions\GenerateReferenceNo;
 use App\Data\SaleReturn\CreateSaleReturnData;
 use App\Data\SaleReturn\SaleReturnItemData;
 use App\Enums\PaymentStatusEnum;
@@ -11,7 +12,6 @@ use App\Enums\ReturnStatusEnum;
 use App\Models\SaleReturn;
 use App\Models\SaleReturnItem;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
 
@@ -29,7 +29,7 @@ final readonly class CreateSaleReturn
                 'sale_id' => $data->sale_id,
                 'warehouse_id' => $data->warehouse_id,
                 'user_id' => $data->user_id,
-                'reference_no' => $this->generateReferenceNo(),
+                'reference_no' => new GenerateReferenceNo('SAL-RETURN', SaleReturn::query())->handle(),
                 'return_date' => $data->return_date,
                 'total_amount' => $totalAmount,
                 'paid_amount' => 0,
@@ -65,14 +65,5 @@ final readonly class CreateSaleReturn
         }
 
         return $total;
-    }
-
-    private function generateReferenceNo(): string
-    {
-        do {
-            $reference = 'SRET-'.now()->format('YmdHis').'-'.Str::upper(Str::random(4));
-        } while (SaleReturn::query()->where('reference_no', $reference)->exists());
-
-        return $reference;
     }
 }

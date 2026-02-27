@@ -45,7 +45,7 @@ it('creates a pending purchase return with items', function (): void {
         ->toBeInstanceOf(PurchaseReturn::class)
         ->and($purchaseReturn->purchase_id)->toBe($purchase->id)
         ->and($purchaseReturn->warehouse_id)->toBe($warehouse->id)
-        ->and($purchaseReturn->reference_no)->toStartWith('PRET-')
+        ->and($purchaseReturn->reference_no)->toStartWith('PUR-RETURN-')
         ->and($purchaseReturn->status)->toBe(ReturnStatusEnum::Pending)
         ->and($purchaseReturn->payment_status)->toBe(PaymentStatusEnum::Unpaid)
         ->and($purchaseReturn->total_amount)->toBe(5000)
@@ -80,7 +80,7 @@ it('auto-generates unique reference number', function (): void {
     $purchaseReturn = $action->handle($data);
 
     expect($purchaseReturn->reference_no)
-        ->toStartWith('PRET-')
+        ->toStartWith('PUR-RETURN-')
         ->and(mb_strlen($purchaseReturn->reference_no))->toBeGreaterThan(10);
 });
 

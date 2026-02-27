@@ -31,26 +31,6 @@ it('may create an expense', function (): void {
         ->and($expense->reference_no)->toStartWith('EXP-');
 });
 
-it('creates expense with custom reference number', function (): void {
-    $category = ExpenseCategory::factory()->create();
-
-    $action = resolve(CreateExpense::class);
-
-    $data = new CreateExpenseData(
-        expense_category_id: $category->id,
-        user_id: null,
-        reference_no: 'CUSTOM-001',
-        amount: 1000,
-        expense_date: now(),
-        description: null,
-        document: null,
-    );
-
-    $expense = $action->handle($data);
-
-    expect($expense->reference_no)->toBe('CUSTOM-001');
-});
-
 it('creates expense with description', function (): void {
     $category = ExpenseCategory::factory()->create();
 

@@ -12,7 +12,6 @@ use App\Models\Batch;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use RuntimeException;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
@@ -33,7 +32,7 @@ final readonly class CreateSale
                 'customer_id' => $data->customer_id,
                 'warehouse_id' => $data->warehouse_id,
                 'user_id' => $data->user_id,
-                'reference_no' => $this->generateReferenceNo(),
+                'reference_no' => new \App\Actions\GenerateReferenceNo('SAL', Sale::query())->handle(),
                 'status' => SaleStatusEnum::Pending,
                 'sale_date' => $data->sale_date,
                 'total_amount' => $totalAmount,
@@ -115,14 +114,5 @@ final readonly class CreateSale
         }
 
         return $total;
-    }
-
-    private function generateReferenceNo(): string
-    {
-        do {
-            $reference = 'SAL-'.now()->format('YmdHis').'-'.Str::upper(Str::random(4));
-        } while (Sale::query()->where('reference_no', $reference)->exists());
-
-        return $reference;
     }
 }

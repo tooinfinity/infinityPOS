@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\SaleReturn;
 
+use App\Actions\GenerateReferenceNo;
 use App\Data\SaleReturn\RefundSaleReturnData;
 use App\Enums\PaymentStateEnum;
 use App\Enums\PaymentStatusEnum;
@@ -11,7 +12,6 @@ use App\Enums\ReturnStatusEnum;
 use App\Models\Payment;
 use App\Models\SaleReturn;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use RuntimeException;
 use Throwable;
 
@@ -33,7 +33,7 @@ final readonly class ProcessSaleReturnRefund
             $payment = Payment::query()->forceCreate([
                 'payment_method_id' => $data->payment_method_id,
                 'user_id' => $data->user_id,
-                'reference_no' => $this->generateReferenceNo(),
+                'reference_no' => new GenerateReferenceNo('PAY-SAL-REFUND', Payment::query())->handle(),
                 'payable_type' => SaleReturn::class,
                 'payable_id' => $saleReturn->id,
                 'amount' => -$data->amount,
@@ -84,14 +84,5 @@ final readonly class ProcessSaleReturnRefund
             'paid_amount' => abs($totalRefunds),
             'payment_status' => $paymentStatus,
         ])->save();
-    }
-
-    private function generateReferenceNo(): string
-    {
-        do {
-            $reference = 'REFUND-'.now()->format('YmdHis').'-'.Str::upper(Str::random(4));
-        } while (Payment::query()->where('reference_no', $reference)->exists());
-
-        return $reference;
     }
 }

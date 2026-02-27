@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\StockTransfer;
 
+use App\Actions\GenerateReferenceNo;
 use App\Data\StockTransfer\CreateStockTransferData;
 use App\Enums\StockTransferStatusEnum;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use RuntimeException;
 use Throwable;
 
@@ -20,13 +20,13 @@ final readonly class CreateStockTransfer
      */
     public function handle(CreateStockTransferData $data): StockTransfer
     {
-        return DB::transaction(function () use ($data): StockTransfer {
+        return DB::transaction(static function () use ($data): StockTransfer {
             throw_if($data->from_warehouse_id === $data->to_warehouse_id, RuntimeException::class, 'Source and destination warehouse cannot be the same.');
 
             $transfer = StockTransfer::query()->forceCreate([
                 'from_warehouse_id' => $data->from_warehouse_id,
                 'to_warehouse_id' => $data->to_warehouse_id,
-                'reference_no' => $this->generateReferenceNo(),
+                'reference_no' => new GenerateReferenceNo('STK', StockTransfer::query())->handle(),
                 'status' => StockTransferStatusEnum::Pending,
                 'note' => $data->note,
                 'transfer_date' => $data->transfer_date,
@@ -44,14 +44,5 @@ final readonly class CreateStockTransfer
 
             return $transfer->refresh();
         });
-    }
-
-    private function generateReferenceNo(): string
-    {
-        do {
-            $referenceNo = 'STF-'.now()->format('YmdHis').'-'.Str::upper(Str::random(4));
-        } while (StockTransfer::query()->where('reference_no', $referenceNo)->exists());
-
-        return $referenceNo;
     }
 }

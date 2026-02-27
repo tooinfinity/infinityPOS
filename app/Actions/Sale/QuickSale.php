@@ -19,7 +19,6 @@ use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use RuntimeException;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
@@ -67,7 +66,7 @@ final readonly class QuickSale
                 'customer_id' => $data->customer_id,
                 'warehouse_id' => $data->warehouse_id,
                 'user_id' => $data->user_id,
-                'reference_no' => $this->generateReferenceNo(),
+                'reference_no' => new \App\Actions\GenerateReferenceNo('SAL', Sale::query())->handle(),
                 'status' => SaleStatusEnum::Completed,
                 'sale_date' => $data->sale_date,
                 'total_amount' => $totalAmount,
@@ -208,7 +207,7 @@ final readonly class QuickSale
         Payment::query()->forceCreate([
             'payment_method_id' => $data->payment_method_id,
             'user_id' => $data->user_id,
-            'reference_no' => $this->generatePaymentReferenceNo(),
+            'reference_no' => new \App\Actions\GenerateReferenceNo('PAY', Payment::query())->handle(),
             'payable_type' => Sale::class,
             'payable_id' => $sale->id,
             'amount' => $paidAmount,
@@ -216,23 +215,5 @@ final readonly class QuickSale
             'note' => 'Quick sale payment',
             'status' => PaymentStateEnum::Active,
         ]);
-    }
-
-    private function generateReferenceNo(): string
-    {
-        do {
-            $reference = 'SAL-'.now()->format('YmdHis').'-'.Str::upper(Str::random(4));
-        } while (Sale::query()->where('reference_no', $reference)->exists());
-
-        return $reference;
-    }
-
-    private function generatePaymentReferenceNo(): string
-    {
-        do {
-            $reference = 'PAY-'.now()->format('YmdHis').'-'.Str::upper(Str::random(4));
-        } while (Payment::query()->where('reference_no', $reference)->exists());
-
-        return $reference;
     }
 }
