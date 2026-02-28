@@ -29,12 +29,8 @@ final readonly class ValidateReturnAgainstOriginal
     ): void {
         /** @var SaleReturn|PurchaseReturn $returnModel */
         $returnModel = $item instanceof SaleReturnItem ? $item->saleReturn : $item->purchaseReturn;
-        /** @var Sale|Purchase|null $originalOrder */
+        /** @var Sale|Purchase $originalOrder */
         $originalOrder = $returnModel instanceof SaleReturn ? $returnModel->sale : $returnModel->purchase;
-
-        if ($originalOrder === null) {
-            throw new RuntimeException('Return must be associated with an original order.');
-        }
 
         $originalItem = $this->findOriginalItem($originalOrder, $productId, $batchId);
 
@@ -61,12 +57,8 @@ final readonly class ValidateReturnAgainstOriginal
         ?int $batchId,
         int $quantity,
     ): void {
-        /** @var Sale|null $sale */
+        /** @var Sale $sale */
         $sale = $saleReturn->sale;
-
-        if ($sale === null) {
-            throw new RuntimeException('Sale return must be associated with a sale.');
-        }
 
         $originalItem = $this->findOriginalItem($sale, $productId, $batchId);
 
@@ -97,12 +89,8 @@ final readonly class ValidateReturnAgainstOriginal
         ?int $batchId,
         int $quantity,
     ): void {
-        /** @var Purchase|null $purchase */
+        /** @var Purchase $purchase */
         $purchase = $purchaseReturn->purchase;
-
-        if ($purchase === null) {
-            throw new RuntimeException('Purchase return must be associated with a purchase.');
-        }
 
         $originalItem = $this->findOriginalItem($purchase, $productId, $batchId);
 
