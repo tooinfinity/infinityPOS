@@ -6,12 +6,10 @@ namespace App\Actions\Sale;
 
 use App\Actions\Shared\RecalculateParentTotal;
 use App\Actions\Shared\ValidateStatusIsPending;
+use App\Actions\Stock\ValidateStockForPendingSale;
 use App\Data\Sale\UpdateSaleItemData;
-use App\Models\Batch;
-use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Spatie\LaravelData\Optional;
 use Throwable;
 
@@ -20,6 +18,7 @@ final readonly class UpdateSaleItem
     public function __construct(
         private ValidateStatusIsPending $validateStatus,
         private RecalculateParentTotal $recalculateTotal,
+        private ValidateStockForPendingSale $validateStockForPendingSale,
     ) {}
 
     /**
@@ -43,10 +42,10 @@ final readonly class UpdateSaleItem
                 $quantity = $isQuantityProvided ? $quantityValue : $item->quantity;
                 /** @var int $batchIdValue */
                 /** @var int $quantity */
-                $this->validateStockAvailability($item->sale, $batchIdValue, $quantity, $item);
+                $this->validateStockForPendingSale->handle($item->sale, $batchIdValue, $quantity, $item->id);
             } elseif ($quantityIncreased && $item->batch_id !== null) {
                 /** @var int $quantityValue */
-                $this->validateStockAvailability($item->sale, $item->batch_id, $quantityValue, $item);
+                $this->validateStockForPendingSale->handle($item->sale, $item->batch_id, $quantityValue, $item->id);
             }
 
             $quantity = is_int($data->quantity) ? $data->quantity : $item->quantity;
@@ -66,31 +65,5 @@ final readonly class UpdateSaleItem
 
             return $item->refresh();
         });
-    }
-
-    /**
-     * @throws Throwable
-     */
-    private function validateStockAvailability(Sale $sale, int $batchId, int $quantity, SaleItem $currentItem): void
-    {
-        $batch = Batch::query()
-            ->lockForUpdate()
-            ->find($batchId);
-
-        throw_if($batch === null, RuntimeException::class, "Batch not found: $batchId");
-
-        throw_if($batch->warehouse_id !== $sale->warehouse_id, RuntimeException::class, "Batch is not in the sale's warehouse");
-
-        $sale->loadMissing('items');
-
-        /** @var int $existingQuantity */
-        $existingQuantity = $sale->items
-            ->where('batch_id', $batchId)
-            ->where('id', '!=', $currentItem->id)
-            ->sum('quantity');
-
-        $totalRequired = $existingQuantity + $quantity;
-
-        throw_if($totalRequired > $batch->quantity, RuntimeException::class, "Insufficient stock in batch. Required: $quantity, Available: ".($batch->quantity - $existingQuantity));
     }
 }

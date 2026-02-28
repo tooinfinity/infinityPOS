@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Sale;
 
+use App\Actions\Stock\ValidateStockForNewSale;
 use App\Actions\StockMovement\RecordStockMovement;
 use App\Data\Sale\QuickSaleData;
 use App\Data\Sale\SaleItemData;
@@ -27,6 +28,7 @@ final readonly class QuickSale
 {
     public function __construct(
         private RecordStockMovement $recordStockMovement,
+        private ValidateStockForNewSale $validateStockForNewSale,
     ) {}
 
     /**
@@ -44,6 +46,10 @@ final readonly class QuickSale
                 throw_unless($paymentMethodExists, RuntimeException::class, 'Payment method is not active or does not exist.');
             }
 
+            $this->validateStockForNewSale->handle($data->items, $data->warehouse_id);
+
+            $requiredByBatch = $this->calculateRequiredQuantities($data->items);
+
             $itemsArray = $data->items->toArray();
             $batchIds = array_unique(array_column($itemsArray, 'batch_id'));
 
@@ -53,12 +59,6 @@ final readonly class QuickSale
                 ->lockForUpdate()
                 ->get()
                 ->keyBy('id');
-
-            $this->validateAllBatchesExist($data->items, $batches);
-
-            $requiredByBatch = $this->calculateRequiredQuantities($data->items);
-
-            $this->validateStockAvailability($requiredByBatch, $batches);
 
             $totalAmount = $this->calculateTotalAmount($data->items);
 
@@ -102,19 +102,6 @@ final readonly class QuickSale
 
     /**
      * @param  DataCollection<int, SaleItemData>  $items
-     * @param  Collection<int, Batch>  $batches
-     *
-     * @throws Throwable
-     */
-    private function validateAllBatchesExist(DataCollection $items, Collection $batches): void
-    {
-        foreach ($items as $item) {
-            throw_if(! $batches->has($item->batch_id), RuntimeException::class, "Batch not found for id {$item->batch_id}");
-        }
-    }
-
-    /**
-     * @param  DataCollection<int, SaleItemData>  $items
      * @return array<int, array{quantity: int, product_id: int}>
      */
     private function calculateRequiredQuantities(DataCollection $items): array
@@ -131,24 +118,6 @@ final readonly class QuickSale
         }
 
         return $requiredByBatch;
-    }
-
-    /**
-     * @param  array<int, array{quantity: int, product_id: int}>  $requiredByBatch
-     * @param  Collection<int, Batch>  $batches
-     */
-    private function validateStockAvailability(array $requiredByBatch, Collection $batches): void
-    {
-        foreach ($requiredByBatch as $batchId => $required) {
-            /** @var Batch $batch */
-            $batch = $batches->get($batchId);
-
-            if ($batch->quantity < $required['quantity']) {
-                throw new RuntimeException(
-                    "Insufficient stock in batch. Required: {$required['quantity']}, Available: {$batch->quantity}"
-                );
-            }
-        }
     }
 
     /**
