@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\StockTransfer;
 
-use App\Actions\Shared\ValidateStatusIsPending;
 use App\Data\StockTransfer\StockTransferItemData;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
@@ -14,8 +13,6 @@ use Throwable;
 
 final readonly class AddItemToStockTransfer
 {
-    public function __construct(private ValidateStatusIsPending $validateStatus) {}
-
     /**
      * @throws Throwable
      */

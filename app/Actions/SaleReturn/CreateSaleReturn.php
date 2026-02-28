@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Actions\SaleReturn;
 
 use App\Actions\GenerateReferenceNo;
-use App\Actions\Shared\CalculateTotalFromItems;
 use App\Data\SaleReturn\CreateSaleReturnData;
+use App\Data\SaleReturn\SaleReturnItemData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\ReturnStatusEnum;
 use App\Models\SaleReturn;
@@ -16,15 +16,13 @@ use Throwable;
 
 final readonly class CreateSaleReturn
 {
-    public function __construct(private CalculateTotalFromItems $calculateTotal) {}
-
     /**
      * @throws Throwable
      */
     public function handle(CreateSaleReturnData $data): SaleReturn
     {
-        return DB::transaction(function () use ($data): SaleReturn {
-            $totalAmount = $this->calculateTotal->handle($data->items, 'unit_price');
+        return DB::transaction(static function () use ($data): SaleReturn {
+            $totalAmount = $data->items->toCollection()->reduce(fn (int $total, SaleReturnItemData $item) => $total + ($item->quantity * $item->unit_price), 0);
 
             $saleReturn = SaleReturn::query()->forceCreate([
                 'sale_id' => $data->sale_id,

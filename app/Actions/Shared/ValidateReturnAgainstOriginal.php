@@ -5,19 +5,21 @@ declare(strict_types=1);
 namespace App\Actions\Shared;
 
 use App\Models\Purchase;
+use App\Models\PurchaseItem;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
 use App\Models\Sale;
+use App\Models\SaleItem;
 use App\Models\SaleReturn;
 use App\Models\SaleReturnItem;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use RuntimeException;
+use Throwable;
 
 final readonly class ValidateReturnAgainstOriginal
 {
     /**
-     * @throws RuntimeException
+     * @throws RuntimeException|Throwable
      */
     public function handle(
         SaleReturnItem|PurchaseReturnItem $item,
@@ -25,10 +27,14 @@ final readonly class ValidateReturnAgainstOriginal
         ?int $batchId,
         int $quantity,
     ): void {
+        /** @var SaleReturn|PurchaseReturn $returnModel */
         $returnModel = $item instanceof SaleReturnItem ? $item->saleReturn : $item->purchaseReturn;
+        /** @var Sale|Purchase|null $originalOrder */
         $originalOrder = $returnModel instanceof SaleReturn ? $returnModel->sale : $returnModel->purchase;
 
-        throw_if($originalOrder === null, RuntimeException::class, 'Return must be associated with an original order.');
+        if ($originalOrder === null) {
+            throw new RuntimeException('Return must be associated with an original order.');
+        }
 
         $originalItem = $this->findOriginalItem($originalOrder, $productId, $batchId);
 
@@ -47,6 +53,7 @@ final readonly class ValidateReturnAgainstOriginal
 
     /**
      * @throws RuntimeException
+     * @throws Throwable
      */
     public function validateNewReturn(
         SaleReturn $saleReturn,
@@ -54,9 +61,12 @@ final readonly class ValidateReturnAgainstOriginal
         ?int $batchId,
         int $quantity,
     ): void {
+        /** @var Sale|null $sale */
         $sale = $saleReturn->sale;
 
-        throw_if($sale === null, RuntimeException::class, 'Sale return must be associated with a sale.');
+        if ($sale === null) {
+            throw new RuntimeException('Sale return must be associated with a sale.');
+        }
 
         $originalItem = $this->findOriginalItem($sale, $productId, $batchId);
 
@@ -79,6 +89,7 @@ final readonly class ValidateReturnAgainstOriginal
 
     /**
      * @throws RuntimeException
+     * @throws Throwable
      */
     public function validateNewReturnForPurchase(
         PurchaseReturn $purchaseReturn,
@@ -86,9 +97,12 @@ final readonly class ValidateReturnAgainstOriginal
         ?int $batchId,
         int $quantity,
     ): void {
+        /** @var Purchase|null $purchase */
         $purchase = $purchaseReturn->purchase;
 
-        throw_if($purchase === null, RuntimeException::class, 'Purchase return must be associated with a purchase.');
+        if ($purchase === null) {
+            throw new RuntimeException('Purchase return must be associated with a purchase.');
+        }
 
         $originalItem = $this->findOriginalItem($purchase, $productId, $batchId);
 
@@ -109,7 +123,7 @@ final readonly class ValidateReturnAgainstOriginal
         );
     }
 
-    private function findOriginalItem(Sale|Purchase $order, int $productId, ?int $batchId): ?Model
+    private function findOriginalItem(Sale|Purchase $order, int $productId, ?int $batchId): SaleItem|PurchaseItem|null
     {
         $items = $order instanceof Sale ? $order->items : $order->items;
 
@@ -126,20 +140,28 @@ final readonly class ValidateReturnAgainstOriginal
         ?int $batchId,
         string $returnItemClass,
     ): int {
-        $query = $returnItemClass::query()
-            ->whereHas(
-                $returnModel instanceof SaleReturn ? 'saleReturn' : 'purchaseReturn',
-                fn (Builder $q) => $q->where($originalOrder instanceof Sale ? 'sale_id' : 'purchase_id', $originalOrder->id)
-            )
-            ->where('product_id', $productId)
-            ->where('batch_id', $batchId);
+        $query = SaleReturnItem::query();
 
-        if ($returnItemClass === SaleReturnItem::class && isset($returnModel->id)) {
-            $query->where('id', '!=', $returnModel->id);
-        } elseif ($returnItemClass === PurchaseReturnItem::class && isset($returnModel->id)) {
+        if ($returnItemClass === SaleReturnItem::class) {
+            $query = SaleReturnItem::query()
+                ->whereHas('saleReturn', fn (Builder $q) => $q->where('sale_id', $originalOrder->id))
+                ->where('product_id', $productId)
+                ->where('batch_id', $batchId);
+
+        } else {
+            $query = PurchaseReturnItem::query()
+                ->whereHas('purchaseReturn', fn (Builder $q) => $q->where('purchase_id', $originalOrder->id))
+                ->where('product_id', $productId)
+                ->where('batch_id', $batchId);
+
+        }
+        if (isset($returnModel->id)) {
             $query->where('id', '!=', $returnModel->id);
         }
 
-        return $query->sum('quantity');
+        /** @var int $sum */
+        $sum = $query->sum('quantity');
+
+        return $sum;
     }
 }

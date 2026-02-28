@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Actions\PurchaseReturn;
 
 use App\Actions\GenerateReferenceNo;
-use App\Actions\Shared\CalculateTotalFromItems;
 use App\Data\PurchaseReturn\CreatePurchaseReturnData;
+use App\Data\PurchaseReturn\PurchaseReturnItemData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\ReturnStatusEnum;
 use App\Models\PurchaseReturn;
@@ -16,16 +16,14 @@ use Throwable;
 
 final readonly class CreatePurchaseReturn
 {
-    public function __construct(private CalculateTotalFromItems $calculateTotal) {}
-
     /**
      * @throws Throwable
      */
     public function handle(CreatePurchaseReturnData $data): PurchaseReturn
     {
-        $totalAmount = $this->calculateTotal->handle($data->items, 'unit_cost');
+        return DB::transaction(static function () use ($data): PurchaseReturn {
+            $totalAmount = $data->items->toCollection()->reduce(fn (int $total, PurchaseReturnItemData $item) => $total + ($item->quantity * $item->unit_cost), 0);
 
-        return DB::transaction(function () use ($totalAmount, $data): PurchaseReturn {
             $purchaseReturn = PurchaseReturn::query()->forceCreate([
                 'purchase_id' => $data->purchase_id,
                 'warehouse_id' => $data->warehouse_id,

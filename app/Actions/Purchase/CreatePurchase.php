@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Purchase;
 
-use App\Actions\Shared\CalculateTotalFromItems;
+use App\Actions\GenerateReferenceNo;
 use App\Actions\UploadImage;
 use App\Data\Purchase\CreatePurchaseData;
+use App\Data\Purchase\PurchaseItemData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\PurchaseStatusEnum;
 use App\Models\Purchase;
@@ -18,10 +19,7 @@ use Throwable;
 
 final readonly class CreatePurchase
 {
-    public function __construct(
-        private UploadImage $uploadImage,
-        private CalculateTotalFromItems $calculateTotal,
-    ) {}
+    public function __construct(private UploadImage $uploadImage) {}
 
     /**
      * @throws Throwable
@@ -35,14 +33,15 @@ final readonly class CreatePurchase
         }
 
         try {
-            return DB::transaction(function () use ($data, $documentPath): Purchase {
-                $totalAmount = $this->calculateTotal->handle($data->items, 'unit_cost');
+            return DB::transaction(static function () use ($data, $documentPath): Purchase {
+
+                $totalAmount = $data->items->toCollection()->reduce(fn (int $total, PurchaseItemData $item) => $total + ($item->quantity * $item->unit_cost), 0);
 
                 $purchase = Purchase::query()->forceCreate([
                     'supplier_id' => $data->supplier_id,
                     'warehouse_id' => $data->warehouse_id,
                     'user_id' => $data->user_id,
-                    'reference_no' => new \App\Actions\GenerateReferenceNo('PUR', Purchase::query())->handle(),
+                    'reference_no' => new GenerateReferenceNo('PUR', Purchase::query())->handle(),
                     'status' => PurchaseStatusEnum::Pending,
                     'purchase_date' => $data->purchase_date,
                     'total_amount' => $totalAmount,

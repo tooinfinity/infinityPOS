@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Actions\Sale;
 
 use App\Actions\GenerateReferenceNo;
-use App\Actions\Shared\CalculateTotalFromItems;
 use App\Data\Sale\CreateSaleData;
+use App\Data\Sale\SaleItemData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
 use App\Models\Batch;
@@ -18,8 +18,6 @@ use Throwable;
 
 final readonly class CreateSale
 {
-    public function __construct(private CalculateTotalFromItems $calculateTotal) {}
-
     /**
      * @throws Throwable
      */
@@ -28,7 +26,7 @@ final readonly class CreateSale
         return DB::transaction(function () use ($data): Sale {
             $this->validateStockAvailability($data);
 
-            $totalAmount = $this->calculateTotal->handle($data->items, 'unit_price');
+            $totalAmount = $data->items->toCollection()->reduce(fn (int $total, SaleItemData $item) => $total + ($item->quantity * $item->unit_price), 0);
 
             $sale = Sale::query()->forceCreate([
                 'customer_id' => $data->customer_id,
