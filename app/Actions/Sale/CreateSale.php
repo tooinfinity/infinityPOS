@@ -29,7 +29,7 @@ final readonly class CreateSale
         return DB::transaction(function () use ($data): Sale {
             $this->validateStockForNewSale->handle($data->items, $data->warehouse_id);
 
-            $totalAmount = $data->items->toCollection()->reduce(fn (int $total, SaleItemData $item) => $total + ($item->quantity * $item->unit_price), 0);
+            $totalAmount = $data->items->toCollection()->reduce(fn (int $total, SaleItemData $item): int => $total + ($item->quantity * $item->unit_price), 0);
 
             $sale = Sale::query()->forceCreate([
                 'customer_id' => $data->customer_id,

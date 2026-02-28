@@ -22,7 +22,7 @@ final readonly class CreateSaleReturn
     public function handle(CreateSaleReturnData $data): SaleReturn
     {
         return DB::transaction(static function () use ($data): SaleReturn {
-            $totalAmount = $data->items->toCollection()->reduce(fn (int $total, SaleReturnItemData $item) => $total + ($item->quantity * $item->unit_price), 0);
+            $totalAmount = $data->items->toCollection()->reduce(fn (int $total, SaleReturnItemData $item): int => $total + ($item->quantity * $item->unit_price), 0);
 
             $saleReturn = SaleReturn::query()->forceCreate([
                 'sale_id' => $data->sale_id,

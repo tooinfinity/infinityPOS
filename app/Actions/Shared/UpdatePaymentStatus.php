@@ -37,11 +37,7 @@ final readonly class UpdatePaymentStatus
         ];
 
         if ($payable instanceof Sale) {
-            if ($newPaidAmount > $totalAmount) {
-                $updateData['change_amount'] = $newPaidAmount - $totalAmount;
-            } else {
-                $updateData['change_amount'] = 0;
-            }
+            $updateData['change_amount'] = $newPaidAmount > $totalAmount ? $newPaidAmount - $totalAmount : 0;
         }
 
         $payable->forceFill($updateData)->save();

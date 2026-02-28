@@ -22,7 +22,7 @@ final readonly class CreatePurchaseReturn
     public function handle(CreatePurchaseReturnData $data): PurchaseReturn
     {
         return DB::transaction(static function () use ($data): PurchaseReturn {
-            $totalAmount = $data->items->toCollection()->reduce(fn (int $total, PurchaseReturnItemData $item) => $total + ($item->quantity * $item->unit_cost), 0);
+            $totalAmount = $data->items->toCollection()->reduce(fn (int $total, PurchaseReturnItemData $item): int => $total + ($item->quantity * $item->unit_cost), 0);
 
             $purchaseReturn = PurchaseReturn::query()->forceCreate([
                 'purchase_id' => $data->purchase_id,

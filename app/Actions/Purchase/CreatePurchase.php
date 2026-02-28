@@ -35,7 +35,7 @@ final readonly class CreatePurchase
         try {
             return DB::transaction(static function () use ($data, $documentPath): Purchase {
 
-                $totalAmount = $data->items->toCollection()->reduce(fn (int $total, PurchaseItemData $item) => $total + ($item->quantity * $item->unit_cost), 0);
+                $totalAmount = $data->items->toCollection()->reduce(fn (int $total, PurchaseItemData $item): int => $total + ($item->quantity * $item->unit_cost), 0);
 
                 $purchase = Purchase::query()->forceCreate([
                     'supplier_id' => $data->supplier_id,
