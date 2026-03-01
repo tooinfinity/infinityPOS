@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Sale;
 
 use App\Actions\GenerateReferenceNo;
+use App\Actions\Shared\CalculateSaleTotal;
 use App\Actions\Stock\ValidateStockForNewSale;
 use App\Data\Sale\CreateSaleData;
-use App\Data\Sale\SaleItemData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
 use App\Models\Sale;
@@ -20,6 +20,7 @@ final readonly class CreateSale
     public function __construct(
         private ValidateStockForNewSale $validateStockForNewSale,
         private GenerateReferenceNo $generateReferenceNo,
+        private CalculateSaleTotal $calculateSaleTotal,
     ) {}
 
     /**
@@ -30,7 +31,7 @@ final readonly class CreateSale
         return DB::transaction(function () use ($data): Sale {
             $this->validateStockForNewSale->handle($data->items, $data->warehouse_id);
 
-            $totalAmount = $data->items->toCollection()->reduce(fn (int $total, SaleItemData $item): int => $total + ($item->quantity * $item->unit_price), 0);
+            $totalAmount = $this->calculateSaleTotal->handle($data->items);
 
             $sale = Sale::query()->forceCreate([
                 'customer_id' => $data->customer_id,

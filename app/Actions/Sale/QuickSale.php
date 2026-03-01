@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Actions\Sale;
 
 use App\Actions\GenerateReferenceNo;
+use App\Actions\Shared\CalculatePaymentStatus;
+use App\Actions\Shared\CalculateSaleTotal;
 use App\Actions\Stock\ValidateStockForNewSale;
 use App\Actions\StockMovement\RecordStockMovement;
 use App\Data\Sale\QuickSaleData;
 use App\Data\Sale\SaleItemData;
 use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\PaymentStateEnum;
-use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
 use App\Enums\StockMovementTypeEnum;
 use App\Exceptions\InvalidPaymentMethodException;
@@ -31,6 +32,8 @@ final readonly class QuickSale
         private RecordStockMovement $recordStockMovement,
         private ValidateStockForNewSale $validateStockForNewSale,
         private GenerateReferenceNo $generateReferenceNo,
+        private CalculateSaleTotal $calculateSaleTotal,
+        private CalculatePaymentStatus $calculatePaymentStatus,
     ) {}
 
     /**
@@ -67,7 +70,9 @@ final readonly class QuickSale
                 ->get()
                 ->keyBy('id');
 
-            $totalAmount = $this->calculateTotalAmount($data->items);
+            $totalAmount = $this->calculateSaleTotal->handle($data->items);
+
+            $paymentCalculation = $this->calculatePaymentStatus->handle($totalAmount, $data->paid_amount);
 
             $sale = Sale::query()->forceCreate([
                 'customer_id' => $data->customer_id,
@@ -78,10 +83,8 @@ final readonly class QuickSale
                 'sale_date' => $data->sale_date,
                 'total_amount' => $totalAmount,
                 'paid_amount' => min($data->paid_amount, $totalAmount),
-                'change_amount' => max(0, $data->paid_amount - $totalAmount),
-                'payment_status' => $data->paid_amount >= $totalAmount
-                    ? PaymentStatusEnum::Paid
-                    : ($data->paid_amount > 0 ? PaymentStatusEnum::Partial : PaymentStatusEnum::Unpaid),
+                'change_amount' => $paymentCalculation->changeAmount,
+                'payment_status' => $paymentCalculation->paymentStatus,
                 'note' => $data->note,
             ]);
 
@@ -160,20 +163,6 @@ final readonly class QuickSale
                 note: 'Quick sale - stock out',
             ));
         }
-    }
-
-    /**
-     * @param  DataCollection<int, SaleItemData>  $items
-     */
-    private function calculateTotalAmount(DataCollection $items): int
-    {
-        $total = 0;
-
-        foreach ($items as $item) {
-            $total += $item->quantity * $item->unit_price;
-        }
-
-        return $total;
     }
 
     private function recordPayment(Sale $sale, QuickSaleData $data): void

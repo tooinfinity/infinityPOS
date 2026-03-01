@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Sale;
 
+use App\Actions\Shared\CalculatePaymentStatus;
 use App\Actions\StockMovement\RecordStockMovement;
 use App\Data\Sale\CompleteSaleData;
 use App\Data\StockMovement\RecordStockMovementData;
-use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
 use App\Enums\StockMovementTypeEnum;
 use App\Exceptions\InsufficientStockException;
@@ -22,7 +22,10 @@ use Throwable;
 
 final readonly class CompleteSale
 {
-    public function __construct(private RecordStockMovement $recordStockMovement) {}
+    public function __construct(
+        private RecordStockMovement $recordStockMovement,
+        private CalculatePaymentStatus $calculatePaymentStatus,
+    ) {}
 
     /**
      * @throws Throwable
@@ -40,13 +43,13 @@ final readonly class CompleteSale
 
             $this->deductStock($sale);
 
-            $paymentStatus = $this->calculatePaymentStatus($sale);
+            $paymentCalculation = $this->calculatePaymentStatus->handle($sale->total_amount, $sale->paid_amount);
 
             $note = $data instanceof CompleteSaleData ? ($data->note ?? $sale->note) : $sale->note;
 
             $sale->forceFill([
                 'status' => SaleStatusEnum::Completed,
-                'payment_status' => $paymentStatus,
+                'payment_status' => $paymentCalculation->paymentStatus,
                 'note' => $note,
             ])->save();
 
@@ -154,18 +157,5 @@ final readonly class CompleteSale
                 );
             }
         }
-    }
-
-    private function calculatePaymentStatus(Sale $sale): PaymentStatusEnum
-    {
-        if ($sale->paid_amount >= $sale->total_amount) {
-            return PaymentStatusEnum::Paid;
-        }
-
-        if ($sale->paid_amount > 0) {
-            return PaymentStatusEnum::Partial;
-        }
-
-        return PaymentStatusEnum::Unpaid;
     }
 }
