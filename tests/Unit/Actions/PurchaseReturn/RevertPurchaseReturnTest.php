@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Actions\PurchaseReturn\RevertPurchaseReturn;
 use App\Data\PurchaseReturn\RevertPurchaseReturnData;
 use App\Enums\ReturnStatusEnum;
+use App\Exceptions\RefundNotAllowedException;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Payment;
 use App\Models\PurchaseReturn;
@@ -49,7 +51,7 @@ it('throws exception when cancelling return with refunds', function (): void {
     $action = resolve(RevertPurchaseReturn::class);
 
     $action->handle($purchaseReturn, new RevertPurchaseReturnData());
-})->throws(RuntimeException::class, 'existing refunds');
+})->throws(RefundNotAllowedException::class, 'Cannot refund purchase return. Cannot cancel a purchase return that has existing refunds. Please void the refunds first.');
 
 it('throws exception when cancelling non-completed return', function (): void {
     $purchaseReturn = PurchaseReturn::factory()->pending()->create();
@@ -57,7 +59,7 @@ it('throws exception when cancelling non-completed return', function (): void {
     $action = resolve(RevertPurchaseReturn::class);
 
     $action->handle($purchaseReturn, new RevertPurchaseReturnData());
-})->throws(RuntimeException::class, 'cannot be cancelled');
+})->throws(StateTransitionException::class, 'Invalid state transition from "pending" to "Pending"');
 
 it('skips items without batch when cancelling completed return', function (): void {
     $purchaseReturn = PurchaseReturn::factory()->completed()->create();

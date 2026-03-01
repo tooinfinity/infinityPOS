@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 use App\Actions\Sale\AddSaleItem;
 use App\Data\Sale\SaleItemData;
+use App\Exceptions\InsufficientStockException;
+use App\Exceptions\InvalidBatchException;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\Sale;
@@ -76,7 +79,7 @@ it('throws exception when sale is not pending', function (): void {
         unit_price: 500,
         unit_cost: 300,
     ));
-})->throws(RuntimeException::class, 'pending sales');
+})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "pending"');
 
 it('throws exception when insufficient stock', function (): void {
     $sale = Sale::factory()->pending()->create();
@@ -93,7 +96,7 @@ it('throws exception when insufficient stock', function (): void {
         unit_price: 500,
         unit_cost: 300,
     ));
-})->throws(RuntimeException::class, 'Insufficient stock');
+})->throws(InsufficientStockException::class, 'Insufficient stock');
 
 it('throws exception when batch not found', function (): void {
     $sale = Sale::factory()->pending()->create();
@@ -107,7 +110,7 @@ it('throws exception when batch not found', function (): void {
         unit_price: 500,
         unit_cost: 300,
     ));
-})->throws(RuntimeException::class, 'Batch not found');
+})->throws(InvalidBatchException::class, 'Batch 999: not found');
 
 it('throws exception when batch belongs to different product', function (): void {
     $sale = Sale::factory()->pending()->create();
@@ -125,7 +128,7 @@ it('throws exception when batch belongs to different product', function (): void
         unit_price: 500,
         unit_cost: 300,
     ));
-})->throws(RuntimeException::class, 'Batch does not belong to product');
+})->throws(InvalidBatchException::class, 'Batch 1: does not belong to product 2');
 
 it('throws exception when batch is in different warehouse', function (): void {
     $sale = Sale::factory()->pending()->create();
@@ -143,4 +146,4 @@ it('throws exception when batch is in different warehouse', function (): void {
         unit_price: 500,
         unit_cost: 300,
     ));
-})->throws(RuntimeException::class, "Batch is not in the sale's warehouse");
+})->throws(InvalidBatchException::class, "Batch 1: not in warehouse 1");

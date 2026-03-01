@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Batch\DeleteBatch;
+use App\Exceptions\InvalidOperationException;
 use App\Models\Batch;
 use App\Models\PurchaseItem;
 use App\Models\PurchaseReturnItem;
@@ -29,7 +30,7 @@ it('throws exception when batch has stock movements', function (): void {
     $action = resolve(DeleteBatch::class);
 
     expect(fn () => $action->handle($batch))
-        ->toThrow(RuntimeException::class, 'Cannot delete batch with existing stockMovements');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Batch. Cannot delete batch with existing stockMovements');
 });
 
 it('throws exception when batch has purchase items', function (): void {
@@ -39,7 +40,7 @@ it('throws exception when batch has purchase items', function (): void {
     $action = resolve(DeleteBatch::class);
 
     expect(fn () => $action->handle($batch))
-        ->toThrow(RuntimeException::class, 'Cannot delete batch with existing purchaseItems');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete batch with existing purchaseItems');
 });
 
 it('throws exception when batch has sale items', function (): void {
@@ -49,7 +50,7 @@ it('throws exception when batch has sale items', function (): void {
     $action = resolve(DeleteBatch::class);
 
     expect(fn () => $action->handle($batch))
-        ->toThrow(RuntimeException::class, 'Cannot delete batch with existing saleItems');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete batch with existing saleItems');
 });
 
 it('throws exception when batch has stock transfer items', function (): void {
@@ -59,7 +60,7 @@ it('throws exception when batch has stock transfer items', function (): void {
     $action = resolve(DeleteBatch::class);
 
     expect(fn () => $action->handle($batch))
-        ->toThrow(RuntimeException::class, 'Cannot delete batch with existing stockTransferItems');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete batch with existing stockTransferItems');
 });
 
 it('throws exception when batch has sale return items', function (): void {
@@ -69,7 +70,7 @@ it('throws exception when batch has sale return items', function (): void {
     $action = resolve(DeleteBatch::class);
 
     expect(fn () => $action->handle($batch))
-        ->toThrow(RuntimeException::class, 'Cannot delete batch with existing saleReturnItems');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete batch with existing saleReturnItems');
 });
 
 it('throws exception when batch has purchase return items', function (): void {
@@ -79,7 +80,7 @@ it('throws exception when batch has purchase return items', function (): void {
     $action = resolve(DeleteBatch::class);
 
     expect(fn () => $action->handle($batch))
-        ->toThrow(RuntimeException::class, 'Cannot delete batch with existing purchaseReturnItems');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete batch with existing purchaseReturnItems');
 });
 
 it('includes all related record types in exception message', function (): void {
@@ -90,7 +91,7 @@ it('includes all related record types in exception message', function (): void {
     $action = resolve(DeleteBatch::class);
 
     expect(fn () => $action->handle($batch))
-        ->toThrow(function (RuntimeException $e): void {
+        ->toThrow(function (InvalidOperationException $e): void {
             expect($e->getMessage())->toContain('stockMovements')
                 ->and($e->getMessage())->toContain('saleItems');
         });
@@ -104,8 +105,8 @@ it('does not delete batch when any related record exists', function (): void {
 
     try {
         $action->handle($batch);
-        test()->fail('Expected RuntimeException to be thrown');
-    } catch (RuntimeException) {
+        test()->fail('Expected InvalidOperationException to be thrown');
+    } catch (InvalidOperationException) {
         // Expected exception
     }
 
@@ -120,8 +121,8 @@ it('rolls back transaction when exception is thrown', function (): void {
 
     try {
         $action->handle($batch);
-        test()->fail('Expected RuntimeException to be thrown');
-    } catch (RuntimeException) {
+        test()->fail('Expected InvalidOperationException to be thrown');
+    } catch (InvalidOperationException) {
         // Expected exception
     }
 

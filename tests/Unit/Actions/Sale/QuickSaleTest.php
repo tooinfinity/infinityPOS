@@ -7,6 +7,8 @@ use App\Data\Sale\QuickSaleData;
 use App\Data\Sale\SaleItemData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
+use App\Exceptions\InsufficientStockException;
+use App\Exceptions\InvalidBatchException;
 use App\Models\Batch;
 use App\Models\Customer;
 use App\Models\Payment;
@@ -252,7 +254,7 @@ it('throws exception when insufficient stock', function () use (&$paymentMethod)
     );
 
     $action->handle($data);
-})->throws(RuntimeException::class, 'Insufficient stock');
+})->throws(InsufficientStockException::class, 'Insufficient stock in batch 1. Required: 10, Available: 5');
 
 it('handles no payment when paid_amount is zero', function () use (&$paymentMethod): void {
     $batch = Batch::factory()->withQuantity(100)->create();
@@ -315,4 +317,4 @@ it('throws exception when batch not found', function () use (&$paymentMethod): v
     );
 
     $action->handle($data);
-})->throws(RuntimeException::class, 'Batch not found');
+})->throws(InvalidBatchException::class, 'Batch 99999: not found');

@@ -9,10 +9,11 @@ use App\Data\SaleReturn\CompleteSaleReturnData;
 use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\ReturnStatusEnum;
 use App\Enums\StockMovementTypeEnum;
+use App\Exceptions\InvalidOperationException;
+use App\Exceptions\StateTransitionException;
 use App\Models\SaleReturn;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class CompleteSaleReturn
@@ -50,12 +51,19 @@ final readonly class CompleteSaleReturn
     private function validateSaleReturnCanBeCompleted(SaleReturn $saleReturn): void
     {
         if ($saleReturn->status !== ReturnStatusEnum::Pending) {
-            throw new RuntimeException(
-                "Sale return cannot be completed. Current status: {$saleReturn->status->value}"
+            throw new StateTransitionException(
+                $saleReturn->status->value,
+                'Completed'
             );
         }
 
-        throw_if($saleReturn->items()->count() === 0, RuntimeException::class, 'Cannot complete a sale return with no items.');
+        if ($saleReturn->items()->count() === 0) {
+            throw new InvalidOperationException(
+                'complete',
+                'SaleReturn',
+                'Sale return cannot be completed without items'
+            );
+        }
     }
 
     /**

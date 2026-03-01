@@ -6,18 +6,16 @@ namespace App\Actions\Payment;
 
 use App\Actions\Shared\UpdatePaymentStatus;
 use App\Data\Payment\VoidPaymentData;
+use App\Enums\PaymentStateEnum;
+use App\Exceptions\StateTransitionException;
 use App\Models\Payment;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
 use App\Models\Sale;
 use App\Models\SaleReturn;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
-/**
- * @param  Sale|SaleReturn|Purchase|PurchaseReturn  $payable
- */
 final readonly class VoidPayment
 {
     public function __construct(private UpdatePaymentStatus $updatePaymentStatus) {}
@@ -31,7 +29,7 @@ final readonly class VoidPayment
             $this->validatePaymentCanBeVoided($payment);
 
             $payment->forceFill([
-                'status' => \App\Enums\PaymentStateEnum::Voided,
+                'status' => PaymentStateEnum::Voided,
                 'voided_by' => $userId,
                 'voided_at' => now(),
                 'void_reason' => $data->void_reason,
@@ -47,11 +45,15 @@ final readonly class VoidPayment
         });
     }
 
+    /**
+     * @throws StateTransitionException
+     */
     private function validatePaymentCanBeVoided(Payment $payment): void
     {
         if (! $payment->canBeVoided()) {
-            throw new RuntimeException(
-                'Payment cannot be voided. Current status: '.$payment->status->value
+            throw new StateTransitionException(
+                $payment->status->value,
+                'Voided'
             );
         }
     }

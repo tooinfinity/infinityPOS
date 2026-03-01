@@ -5,6 +5,9 @@ declare(strict_types=1);
 use App\Actions\PurchaseReturn\ProcessPurchaseReturnRefund;
 use App\Data\PurchaseReturn\RefundPurchaseReturnData;
 use App\Enums\PaymentStatusEnum;
+use App\Exceptions\OverpaymentException;
+use App\Exceptions\RefundNotAllowedException;
+use App\Exceptions\StateTransitionException;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\PurchaseReturn;
@@ -56,7 +59,7 @@ it('throws exception when refunding non-completed return', function (): void {
         amount: 500,
         payment_date: now(),
     ));
-})->throws(RuntimeException::class, 'must be completed');
+})->throws(RefundNotAllowedException::class, 'must be completed');
 
 it('throws exception when over-refunding', function (): void {
     $paymentMethod = PaymentMethod::factory()->create();
@@ -71,7 +74,7 @@ it('throws exception when over-refunding', function (): void {
         amount: 1000,
         payment_date: now(),
     ));
-})->throws(RuntimeException::class, 'exceeds remaining');
+})->throws(RefundNotAllowedException::class, 'Cannot refund purchase return. Refund amount exceeds remaining refundable amount. Maximum: 500');
 
 it('throws exception for negative refund amount', function (): void {
     $paymentMethod = PaymentMethod::factory()->create();
@@ -86,7 +89,7 @@ it('throws exception for negative refund amount', function (): void {
         amount: -100,
         payment_date: now(),
     ));
-})->throws(RuntimeException::class, 'greater than zero');
+})->throws(RefundNotAllowedException::class, 'greater than zero');
 
 it('returns unpaid status when no negative payments exist', function (): void {
     $purchaseReturn = PurchaseReturn::factory()->completed()->create([

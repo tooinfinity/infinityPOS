@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 use App\Actions\StockTransfer\CompleteStockTransfer;
 use App\Enums\StockTransferStatusEnum;
+use App\Exceptions\InsufficientStockException;
+use App\Exceptions\InvalidBatchException;
+use App\Exceptions\InvalidOperationException;
 use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\StockMovement;
@@ -102,7 +105,7 @@ it('throws exception when source has insufficient stock', function (): void {
     $action = resolve(CompleteStockTransfer::class);
 
     expect(fn () => $action->handle($transfer))
-        ->toThrow(RuntimeException::class, 'Insufficient stock in batch');
+        ->toThrow(InsufficientStockException::class, 'Insufficient stock in batch '.$batch->id.'. Required: 10, Available: 5');
 });
 
 it('throws StateTransitionException when completing non-pending transfer', function (): void {
@@ -145,7 +148,7 @@ it('throws RuntimeException when item has no batch', function (): void {
     $action = resolve(CompleteStockTransfer::class);
 
     expect(fn () => $action->handle($transfer))
-        ->toThrow(RuntimeException::class, 'is missing a source batch');
+        ->toThrow(InvalidOperationException::class, 'is missing a source batch');
 });
 
 it('uses existing destination batch when available', function (): void {
@@ -197,5 +200,5 @@ it('throws RuntimeException when source batch is null', function (): void {
     $action = resolve(CompleteStockTransfer::class);
 
     expect(fn () => $action->handle($transfer))
-        ->toThrow(RuntimeException::class, 'is missing a source batch');
+        ->toThrow(InvalidOperationException::class, 'is missing a source batch');
 });

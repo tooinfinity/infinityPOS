@@ -16,19 +16,21 @@ use Throwable;
 
 final readonly class CreatePurchaseReturn
 {
+    public function __construct(private GenerateReferenceNo $generateReferenceNo) {}
+
     /**
      * @throws Throwable
      */
     public function handle(CreatePurchaseReturnData $data): PurchaseReturn
     {
-        return DB::transaction(static function () use ($data): PurchaseReturn {
+        return DB::transaction(function () use ($data): PurchaseReturn {
             $totalAmount = $data->items->toCollection()->reduce(fn (int $total, PurchaseReturnItemData $item): int => $total + ($item->quantity * $item->unit_cost), 0);
 
             $purchaseReturn = PurchaseReturn::query()->forceCreate([
                 'purchase_id' => $data->purchase_id,
                 'warehouse_id' => $data->warehouse_id,
                 'user_id' => $data->user_id,
-                'reference_no' => new GenerateReferenceNo('PUR-RETURN', PurchaseReturn::query())->handle(),
+                'reference_no' => $this->generateReferenceNo->handle('PUR-RETURN', PurchaseReturn::class),
                 'return_date' => $data->return_date,
                 'total_amount' => $totalAmount,
                 'paid_amount' => 0,

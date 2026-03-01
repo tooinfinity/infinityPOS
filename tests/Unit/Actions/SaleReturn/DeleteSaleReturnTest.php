@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\SaleReturn\DeleteSaleReturn;
+use App\Exceptions\RefundNotAllowedException;
+use App\Exceptions\StateTransitionException;
 use App\Models\Payment;
 use App\Models\SaleReturn;
 
@@ -37,7 +39,7 @@ it('throws exception when deleting non-pending sale return', function (): void {
     $action = resolve(DeleteSaleReturn::class);
 
     $action->handle($saleReturn);
-})->throws(RuntimeException::class, 'Can only delete pending sale returns');
+})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "Pending"');
 
 it('throws exception when sale return has refunds', function (): void {
     $paymentMethod = App\Models\PaymentMethod::factory()->create();
@@ -52,4 +54,4 @@ it('throws exception when sale return has refunds', function (): void {
     $action = resolve(DeleteSaleReturn::class);
 
     $action->handle($saleReturn);
-})->throws(RuntimeException::class, 'existing refunds');
+})->throws(RefundNotAllowedException::class, 'Cannot refund sale return. Cannot delete a sale return that has existing refunds. Please void the refunds first.');

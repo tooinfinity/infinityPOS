@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Payment\UnvoidPayment;
 use App\Enums\PaymentStateEnum;
 use App\Enums\PaymentStatusEnum;
+use App\Exceptions\StateTransitionException;
 use App\Models\Payment;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
@@ -59,7 +60,7 @@ it('throws exception when unvoiding active payment', function (): void {
     $action = resolve(UnvoidPayment::class);
 
     $action->handle($payment);
-})->throws(RuntimeException::class, 'Payment cannot be unvoided. Current status: active');
+})->throws(StateTransitionException::class, 'Invalid state transition from "active" to "Active"');
 
 it('updates payment status to partial when unvoiding one of multiple payments', function (): void {
     $sale = Sale::factory()->completed()->create([

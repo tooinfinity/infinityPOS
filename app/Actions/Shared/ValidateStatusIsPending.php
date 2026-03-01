@@ -8,42 +8,45 @@ use App\Enums\PurchaseStatusEnum;
 use App\Enums\ReturnStatusEnum;
 use App\Enums\SaleStatusEnum;
 use App\Enums\StockTransferStatusEnum;
+use App\Exceptions\StateTransitionException;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
 use App\Models\Sale;
 use App\Models\SaleReturn;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
-use RuntimeException;
+use BackedEnum;
 
 final readonly class ValidateStatusIsPending
 {
     /**
-     * @throws RuntimeException
+     * @throws StateTransitionException
      */
     public function handle(Sale|SaleReturn|Purchase|PurchaseReturn|StockTransfer $model, ?string $customMessage = null): void
     {
         $pendingStatus = $this->getPendingStatus($model);
 
-        throw_if(
-            $model->status !== $pendingStatus,
-            RuntimeException::class,
-            $customMessage ?? $this->getErrorMessage($model)
-        );
+        if ($model->status !== $pendingStatus) {
+            throw new StateTransitionException(
+                $model->status->value,
+                $pendingStatus instanceof BackedEnum ? $pendingStatus->value : 'Pending'
+            );
+        }
     }
 
     /**
-     * @throws RuntimeException
+     * @throws StateTransitionException
      */
     public function forItem(StockTransferItem $item, ?string $customMessage = null): void
     {
         $transfer = $item->stockTransfer;
 
-        throw_if(
-            $transfer->status !== StockTransferStatusEnum::Pending,
-            RuntimeException::class,
-            $customMessage ?? "Items can only be modified when transfer is pending. Current status: {$transfer->status->value}"
-        );
+        if ($transfer->status !== StockTransferStatusEnum::Pending) {
+            throw new StateTransitionException(
+                $transfer->status->value,
+                StockTransferStatusEnum::Pending->value
+            );
+        }
     }
 
     private function getPendingStatus(Sale|SaleReturn|Purchase|PurchaseReturn|StockTransfer $model): object

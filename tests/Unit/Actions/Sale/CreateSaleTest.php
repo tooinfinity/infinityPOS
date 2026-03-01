@@ -7,6 +7,8 @@ use App\Data\Sale\CreateSaleData;
 use App\Data\Sale\SaleItemData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
+use App\Exceptions\InsufficientStockException;
+use App\Exceptions\InvalidBatchException;
 use App\Models\Batch;
 use App\Models\Customer;
 use App\Models\Sale;
@@ -188,7 +190,7 @@ it('throws RuntimeException when batch is not found', function (): void {
     );
 
     expect(fn () => $action->handle($data))
-        ->toThrow(RuntimeException::class, 'Batch not found');
+        ->toThrow(InvalidBatchException::class, 'Batch 99999: not found');
 });
 
 it('throws RuntimeException when batch does not belong to product', function (): void {
@@ -219,7 +221,7 @@ it('throws RuntimeException when batch does not belong to product', function ():
     );
 
     expect(fn () => $action->handle($data))
-        ->toThrow(RuntimeException::class, 'Batch does not belong to product');
+        ->toThrow(InvalidBatchException::class, 'Batch '.$batch->id.': does not belong to product '.$otherProduct->id);
 });
 
 it('throws RuntimeException when batch is not in sale warehouse', function (): void {
@@ -250,7 +252,7 @@ it('throws RuntimeException when batch is not in sale warehouse', function (): v
     );
 
     expect(fn () => $action->handle($data))
-        ->toThrow(RuntimeException::class, 'Batch is not in the sale\'s warehouse');
+        ->toThrow(InvalidBatchException::class, 'Batch '.$batch->id.': not in warehouse '.$warehouse->id);
 });
 
 it('throws RuntimeException when insufficient stock', function (): void {
@@ -280,7 +282,7 @@ it('throws RuntimeException when insufficient stock', function (): void {
     );
 
     expect(fn () => $action->handle($data))
-        ->toThrow(RuntimeException::class, 'Insufficient stock in batch');
+        ->toThrow(InsufficientStockException::class, 'Insufficient stock in batch '.$batch->id.'. Required: 10, Available: 5');
 });
 
 it('stores sale in database', function (): void {

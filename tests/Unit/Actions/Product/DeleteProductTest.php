@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Product\DeleteProduct;
+use App\Exceptions\InvalidOperationException;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\PurchaseItem;
@@ -35,7 +36,7 @@ it('throws exception when product has batches', function (): void {
     $action = resolve(DeleteProduct::class);
 
     expect(fn () => $action->handle($product))
-        ->toThrow(RuntimeException::class, 'Cannot delete product with existing batches');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Product. Cannot delete product with existing batches');
 });
 
 it('throws exception when product has stock movements', function (): void {
@@ -45,7 +46,7 @@ it('throws exception when product has stock movements', function (): void {
     $action = resolve(DeleteProduct::class);
 
     expect(fn () => $action->handle($product))
-        ->toThrow(RuntimeException::class, 'Cannot delete product with existing stockMovements');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Product. Cannot delete product with existing stockMovements');
 });
 
 it('throws exception when product has purchase items', function (): void {
@@ -55,7 +56,7 @@ it('throws exception when product has purchase items', function (): void {
     $action = resolve(DeleteProduct::class);
 
     expect(fn () => $action->handle($product))
-        ->toThrow(RuntimeException::class, 'Cannot delete product with existing purchaseItems');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Product. Cannot delete product with existing purchaseItems');
 });
 
 it('throws exception when product has sale items', function (): void {
@@ -65,7 +66,7 @@ it('throws exception when product has sale items', function (): void {
     $action = resolve(DeleteProduct::class);
 
     expect(fn () => $action->handle($product))
-        ->toThrow(RuntimeException::class, 'Cannot delete product with existing saleItems');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Product. Cannot delete product with existing saleItems');
 });
 
 it('throws exception when product has stock transfer items', function (): void {
@@ -75,7 +76,7 @@ it('throws exception when product has stock transfer items', function (): void {
     $action = resolve(DeleteProduct::class);
 
     expect(fn () => $action->handle($product))
-        ->toThrow(RuntimeException::class, 'Cannot delete product with existing stockTransferItems');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Product. Cannot delete product with existing stockTransferItems');
 });
 
 it('throws exception when product has sale return items', function (): void {
@@ -85,7 +86,7 @@ it('throws exception when product has sale return items', function (): void {
     $action = resolve(DeleteProduct::class);
 
     expect(fn () => $action->handle($product))
-        ->toThrow(RuntimeException::class, 'Cannot delete product with existing saleReturnItems');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Product. Cannot delete product with existing saleReturnItems');
 });
 
 it('throws exception when product has purchase return items', function (): void {
@@ -95,7 +96,7 @@ it('throws exception when product has purchase return items', function (): void 
     $action = resolve(DeleteProduct::class);
 
     expect(fn () => $action->handle($product))
-        ->toThrow(RuntimeException::class, 'Cannot delete product with existing purchaseReturnItems');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Product. Cannot delete product with existing purchaseReturnItems');
 });
 
 it('includes all related record types in exception message', function (): void {
@@ -106,7 +107,7 @@ it('includes all related record types in exception message', function (): void {
     $action = resolve(DeleteProduct::class);
 
     expect(fn () => $action->handle($product))
-        ->toThrow(function (RuntimeException $e): void {
+        ->toThrow(function (InvalidOperationException $e): void {
             expect($e->getMessage())->toContain('batches')
                 ->and($e->getMessage())->toContain('purchaseItems');
         });
@@ -148,8 +149,8 @@ it('does not delete product when any related record exists', function (): void {
 
     try {
         $action->handle($product);
-        test()->fail('Expected RuntimeException to be thrown');
-    } catch (RuntimeException) {
+        test()->fail('Expected InvalidOperationException to be thrown');
+    } catch (InvalidOperationException) {
         // Expected exception
     }
 
@@ -168,8 +169,8 @@ it('rolls back transaction when exception is thrown', function (): void {
 
     try {
         $action->handle($product);
-        test()->fail('Expected RuntimeException to be thrown');
-    } catch (RuntimeException) {
+        test()->fail('Expected InvalidOperationException to be thrown');
+    } catch (InvalidOperationException) {
         // Expected exception
     }
 
@@ -185,5 +186,5 @@ it('prevents deletion when multiple related records exist', function (): void {
     $action = resolve(DeleteProduct::class);
 
     expect(fn () => $action->handle($product))
-        ->toThrow(RuntimeException::class);
+        ->toThrow(InvalidOperationException::class);
 });

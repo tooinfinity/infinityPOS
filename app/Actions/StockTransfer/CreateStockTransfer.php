@@ -7,26 +7,30 @@ namespace App\Actions\StockTransfer;
 use App\Actions\GenerateReferenceNo;
 use App\Data\StockTransfer\CreateStockTransferData;
 use App\Enums\StockTransferStatusEnum;
+use App\Exceptions\WarehouseSameException;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class CreateStockTransfer
 {
+    public function __construct(private GenerateReferenceNo $generateReferenceNo) {}
+
     /**
      * @throws Throwable
      */
     public function handle(CreateStockTransferData $data): StockTransfer
     {
-        return DB::transaction(static function () use ($data): StockTransfer {
-            throw_if($data->from_warehouse_id === $data->to_warehouse_id, RuntimeException::class, 'Source and destination warehouse cannot be the same.');
+        return DB::transaction(function () use ($data): StockTransfer {
+            if ($data->from_warehouse_id === $data->to_warehouse_id) {
+                throw new WarehouseSameException();
+            }
 
             $transfer = StockTransfer::query()->forceCreate([
                 'from_warehouse_id' => $data->from_warehouse_id,
                 'to_warehouse_id' => $data->to_warehouse_id,
-                'reference_no' => new GenerateReferenceNo('STK', StockTransfer::query())->handle(),
+                'reference_no' => $this->generateReferenceNo->handle('STK', StockTransfer::class),
                 'status' => StockTransferStatusEnum::Pending,
                 'note' => $data->note,
                 'transfer_date' => $data->transfer_date,

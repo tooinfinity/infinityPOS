@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\StockTransfer\UpdateStockTransferItem;
 use App\Data\StockTransfer\UpdateStockTransferItemData;
 use App\Enums\StockTransferStatusEnum;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
@@ -58,7 +59,7 @@ it('throws exception when updating item in non-pending transfer', function (): v
         quantity: 20,
     );
 
-    expect(fn () => $action->handle($item, $data))->toThrow(RuntimeException::class, 'Items can only be updated when transfer is pending.');
+    expect(fn () => $action->handle($item, $data))->toThrow(StateTransitionException::class, 'Invalid state transition from "completed" to "pending"');
 });
 
 it('throws exception when updating item in cancelled transfer', function (): void {
@@ -74,5 +75,5 @@ it('throws exception when updating item in cancelled transfer', function (): voi
         quantity: 20,
     );
 
-    expect(fn () => $action->handle($item, $data))->toThrow(RuntimeException::class, 'Items can only be updated when transfer is pending.');
+    expect(fn () => $action->handle($item, $data))->toThrow(StateTransitionException::class, 'Invalid state transition from "cancelled" to "pending"');
 });

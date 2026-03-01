@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Actions\StockTransfer\AddItemToStockTransfer;
 use App\Data\StockTransfer\StockTransferItemData;
 use App\Enums\StockTransferStatusEnum;
+use App\Exceptions\InvalidOperationException;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\StockTransfer;
@@ -59,7 +61,7 @@ it('throws exception when adding to non-pending transfer', function (): void {
         quantity: 10,
     );
 
-    expect(fn () => $action->handle($transfer, $itemData))->toThrow(RuntimeException::class, 'Items can only be added to pending transfers.');
+    expect(fn () => $action->handle($transfer, $itemData))->toThrow(InvalidOperationException::class, 'Items can only be added to pending transfers.');
 });
 
 it('throws exception when adding to cancelled transfer', function (): void {
@@ -76,5 +78,5 @@ it('throws exception when adding to cancelled transfer', function (): void {
         quantity: 10,
     );
 
-    expect(fn () => $action->handle($transfer, $itemData))->toThrow(RuntimeException::class, 'Items can only be added to pending transfers.');
+    expect(fn () => $action->handle($transfer, $itemData))->toThrow(InvalidOperationException::class, 'Items can only be added to pending transfers.');
 });

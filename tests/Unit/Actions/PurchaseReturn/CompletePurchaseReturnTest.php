@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\PurchaseReturn\CompletePurchaseReturn;
 use App\Data\PurchaseReturn\CompletePurchaseReturnData;
+use App\Exceptions\InsufficientStockException;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
@@ -31,7 +33,7 @@ it('throws exception when completing non-pending return', function (): void {
     $action = resolve(CompletePurchaseReturn::class);
 
     $action->handle($purchaseReturn, new CompletePurchaseReturnData());
-})->throws(RuntimeException::class, 'cannot be completed');
+})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "Completed"');
 
 it('throws exception when insufficient stock', function (): void {
     $batch = Batch::factory()->withQuantity(5)->create();
@@ -45,7 +47,7 @@ it('throws exception when insufficient stock', function (): void {
     $action = resolve(CompletePurchaseReturn::class);
 
     $action->handle($purchaseReturn, new CompletePurchaseReturnData());
-})->throws(RuntimeException::class, 'Insufficient stock');
+})->throws(InsufficientStockException::class, 'Insufficient stock');
 
 it('skips items without batch when completing return', function (): void {
     $purchaseReturn = PurchaseReturn::factory()->pending()->create();

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Purchase\MarkPurchaseAsOrdered;
 use App\Enums\PurchaseStatusEnum;
+use App\Exceptions\InvalidOperationException;
 use App\Exceptions\StateTransitionException;
 use App\Models\Product;
 use App\Models\Purchase;
@@ -40,7 +41,7 @@ it('throws exception when marking empty purchase as ordered', function (): void 
     $action = resolve(MarkPurchaseAsOrdered::class);
 
     expect(fn () => $action->handle($purchase))
-        ->toThrow(RuntimeException::class, 'Cannot order a purchase with no items.');
+        ->toThrow(InvalidOperationException::class, 'Cannot order a purchase with no items.');
 });
 
 it('persists status change to database', function (): void {

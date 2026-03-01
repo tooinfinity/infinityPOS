@@ -6,6 +6,8 @@ use App\Actions\Payment\RecordPayment;
 use App\Data\Payment\RecordPaymentData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\PurchaseStatusEnum;
+use App\Exceptions\InvalidPaymentMethodException;
+use App\Exceptions\StateTransitionException;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\Purchase;
@@ -129,7 +131,7 @@ it('throws exception for pending sale', function () use (&$paymentMethod): void 
         user_id: null,
         note: null,
     ));
-})->throws(RuntimeException::class, 'Cannot record payment');
+})->throws(StateTransitionException::class);
 
 it('throws exception for cancelled sale', function () use (&$paymentMethod): void {
     $sale = Sale::factory()->cancelled()->create();
@@ -143,7 +145,7 @@ it('throws exception for cancelled sale', function () use (&$paymentMethod): voi
         user_id: null,
         note: null,
     ));
-})->throws(RuntimeException::class, 'Cannot record payment');
+})->throws(StateTransitionException::class);
 
 it('generates unique payment reference', function () use (&$paymentMethod): void {
     $sale = Sale::factory()->completed()->create([
@@ -235,7 +237,7 @@ it('throws exception for pending sale return', function () use (&$paymentMethod)
         user_id: null,
         note: null,
     ));
-})->throws(RuntimeException::class, 'Cannot record payment');
+})->throws(StateTransitionException::class);
 
 it('throws exception for pending purchase', function () use (&$paymentMethod): void {
     $purchase = Purchase::factory()->create([
@@ -251,7 +253,7 @@ it('throws exception for pending purchase', function () use (&$paymentMethod): v
         user_id: null,
         note: null,
     ));
-})->throws(RuntimeException::class, 'Cannot record payment');
+})->throws(StateTransitionException::class);
 
 it('throws exception for non-existent payment method', function (): void {
     $sale = Sale::factory()->completed()->create([
@@ -268,7 +270,7 @@ it('throws exception for non-existent payment method', function (): void {
         user_id: null,
         note: null,
     ));
-})->throws(RuntimeException::class, 'Payment method is not active or does not exist');
+})->throws(InvalidPaymentMethodException::class);
 
 it('throws exception for inactive payment method', function (): void {
     $inactiveMethod = PaymentMethod::factory()->create([
@@ -289,7 +291,7 @@ it('throws exception for inactive payment method', function (): void {
         user_id: null,
         note: null,
     ));
-})->throws(RuntimeException::class, 'Payment method is not active or does not exist');
+})->throws(InvalidPaymentMethodException::class);
 
 it('calculates change amount for overpaid sale', function () use (&$paymentMethod): void {
     $sale = Sale::factory()->completed()->create([

@@ -19,7 +19,10 @@ use Throwable;
 
 final readonly class CreatePurchase
 {
-    public function __construct(private UploadImage $uploadImage) {}
+    public function __construct(
+        private UploadImage $uploadImage,
+        private GenerateReferenceNo $generateReferenceNo,
+    ) {}
 
     /**
      * @throws Throwable
@@ -33,7 +36,7 @@ final readonly class CreatePurchase
         }
 
         try {
-            return DB::transaction(static function () use ($data, $documentPath): Purchase {
+            return DB::transaction(function () use ($data, $documentPath): Purchase {
 
                 $totalAmount = $data->items->toCollection()->reduce(fn (int $total, PurchaseItemData $item): int => $total + ($item->quantity * $item->unit_cost), 0);
 
@@ -41,7 +44,7 @@ final readonly class CreatePurchase
                     'supplier_id' => $data->supplier_id,
                     'warehouse_id' => $data->warehouse_id,
                     'user_id' => $data->user_id,
-                    'reference_no' => new GenerateReferenceNo('PUR', Purchase::query())->handle(),
+                    'reference_no' => $this->generateReferenceNo->handle('PUR', Purchase::class),
                     'status' => PurchaseStatusEnum::Pending,
                     'purchase_date' => $data->purchase_date,
                     'total_amount' => $totalAmount,

@@ -7,6 +7,7 @@ use App\Actions\Purchase\RemovePurchaseItem;
 use App\Actions\Purchase\UpdatePurchaseItem;
 use App\Data\Purchase\PurchaseItemData;
 use App\Data\Purchase\UpdatePurchaseItemData;
+use App\Exceptions\StateTransitionException;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
@@ -73,7 +74,7 @@ it('throws exception when adding item to non-pending purchase', function (): voi
     );
 
     expect(fn () => $action->handle($purchase, $data))
-        ->toThrow(RuntimeException::class, 'Items can only be added to pending purchases.');
+        ->toThrow(StateTransitionException::class, 'Invalid state transition from "received" to "pending"');
 });
 
 it('may update item quantity', function (): void {
@@ -161,7 +162,7 @@ it('throws exception when updating item on non-pending purchase', function (): v
     );
 
     expect(fn () => $action->handle($item, $data))
-        ->toThrow(RuntimeException::class, 'Items can only be updated on pending purchases.');
+        ->toThrow(StateTransitionException::class, 'Invalid state transition from "ordered" to "pending"');
 });
 
 it('may remove item from pending purchase', function (): void {
@@ -227,7 +228,7 @@ it('throws exception when removing item from non-pending purchase', function ():
     $action = resolve(RemovePurchaseItem::class);
 
     expect(fn () => $action->handle($item))
-        ->toThrow(RuntimeException::class, 'Items can only be removed from pending purchases.');
+        ->toThrow(StateTransitionException::class, 'Invalid state transition from "cancelled" to "pending"');
 });
 
 it('recalculates total when removing item', function (): void {

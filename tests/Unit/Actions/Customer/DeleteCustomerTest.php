@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Customer\DeleteCustomer;
+use App\Exceptions\InvalidOperationException;
 use App\Models\Customer;
 use App\Models\Sale;
 
@@ -26,7 +27,7 @@ it('throws exception when deleting customer with sales', function (): void {
     $action = resolve(DeleteCustomer::class);
 
     expect(fn () => $action->handle($customer))
-        ->toThrow(RuntimeException::class, 'Cannot delete customer with associated sales.');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Customer. Cannot delete customer with associated sales.');
 });
 
 it('throws exception when deleting customer with multiple sales', function (): void {
@@ -38,7 +39,7 @@ it('throws exception when deleting customer with multiple sales', function (): v
     $action = resolve(DeleteCustomer::class);
 
     expect(fn () => $action->handle($customer))
-        ->toThrow(RuntimeException::class, 'Cannot delete customer with associated sales.');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Customer. Cannot delete customer with associated sales.');
 });
 
 it('deletes customer without sales', function (): void {
@@ -73,7 +74,7 @@ it('does not delete customer when sales exist', function (): void {
 
     try {
         $action->handle($customer);
-    } catch (RuntimeException) {
+    } catch (InvalidOperationException) {
         // Expected exception
     }
 

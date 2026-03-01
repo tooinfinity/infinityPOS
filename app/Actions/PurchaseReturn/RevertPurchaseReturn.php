@@ -9,10 +9,11 @@ use App\Data\PurchaseReturn\RevertPurchaseReturnData;
 use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\ReturnStatusEnum;
 use App\Enums\StockMovementTypeEnum;
+use App\Exceptions\RefundNotAllowedException;
+use App\Exceptions\StateTransitionException;
 use App\Models\PurchaseReturn;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class RevertPurchaseReturn
@@ -54,11 +55,17 @@ final readonly class RevertPurchaseReturn
             ->where('amount', '<', 0)
             ->exists();
 
-        throw_if($hasRefunds, RuntimeException::class, 'Cannot cancel a purchase return that has existing refunds. Please void the refunds first.');
+        if ($hasRefunds) {
+            throw new RefundNotAllowedException(
+                'purchase return',
+                'Cannot cancel a purchase return that has existing refunds. Please void the refunds first.'
+            );
+        }
 
         if ($purchaseReturn->status !== ReturnStatusEnum::Completed) {
-            throw new RuntimeException(
-                "Purchase return cannot be cancelled. Current status: {$purchaseReturn->status->value}"
+            throw new StateTransitionException(
+                $purchaseReturn->status->value,
+                'Pending'
             );
         }
     }

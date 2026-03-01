@@ -19,6 +19,7 @@ final readonly class CreateSale
 {
     public function __construct(
         private ValidateStockForNewSale $validateStockForNewSale,
+        private GenerateReferenceNo $generateReferenceNo,
     ) {}
 
     /**
@@ -35,7 +36,7 @@ final readonly class CreateSale
                 'customer_id' => $data->customer_id,
                 'warehouse_id' => $data->warehouse_id,
                 'user_id' => $data->user_id,
-                'reference_no' => new GenerateReferenceNo('SAL', Sale::query())->handle(),
+                'reference_no' => $this->generateReferenceNo->handle('SAL', Sale::class),
                 'status' => SaleStatusEnum::Pending,
                 'sale_date' => $data->sale_date,
                 'total_amount' => $totalAmount,

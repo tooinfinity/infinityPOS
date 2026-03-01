@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\SaleReturn\UpdateSaleReturnItem;
 use App\Data\SaleReturn\UpdateSaleReturnItemData;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\Sale;
@@ -96,4 +97,4 @@ it('throws exception when updating item in non-pending return', function (): voi
     $action->handle($item, new UpdateSaleReturnItemData(
         quantity: 10,
     ));
-})->throws(RuntimeException::class, 'Cannot update items in a non-pending sale return.');
+})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "pending"');

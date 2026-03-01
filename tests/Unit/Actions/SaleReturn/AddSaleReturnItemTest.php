@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 use App\Actions\SaleReturn\AddSaleReturnItem;
 use App\Data\SaleReturn\SaleReturnItemData;
+use App\Exceptions\InvalidOperationException;
+use App\Exceptions\ItemNotFoundException;
+use App\Exceptions\RefundNotAllowedException;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Sale;
 use App\Models\SaleItem;
@@ -100,7 +104,7 @@ it('throws exception when adding item to non-pending return', function (): void 
         quantity: 5,
         unit_price: 200,
     ));
-})->throws(RuntimeException::class, 'Cannot add items to a non-pending');
+})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "pending"');
 
 it('throws exception when product not in original sale', function (): void {
     $warehouse = Warehouse::factory()->create();
@@ -129,7 +133,7 @@ it('throws exception when product not in original sale', function (): void {
         quantity: 5,
         unit_price: 200,
     ));
-})->throws(RuntimeException::class, 'Product is not part of the original sale');
+})->throws(ItemNotFoundException::class, 'Product is not part of the original sale');
 
 it('throws exception when returning more than purchased', function (): void {
     $warehouse = Warehouse::factory()->create();
@@ -156,4 +160,4 @@ it('throws exception when returning more than purchased', function (): void {
         quantity: 10,
         unit_price: 200,
     ));
-})->throws(RuntimeException::class, 'Cannot return more than originally purchased');
+})->throws(InvalidOperationException::class, 'annot return item. Cannot return more than originally purchased. Original: 5, Already returned: 0, Remaining: 5');

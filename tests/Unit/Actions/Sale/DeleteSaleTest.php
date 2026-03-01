@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Sale\DeleteSale;
+use App\Exceptions\InvalidOperationException;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Sale;
 use App\Models\SaleItem;
@@ -45,7 +47,7 @@ it('throws exception when sale is not pending', function (): void {
     $action = resolve(DeleteSale::class);
 
     $action->handle($sale);
-})->throws(RuntimeException::class, 'pending sales');
+})->throws(InvalidOperationException::class, 'Cannot delete Sale. Current status: completed');
 
 it('throws exception when sale is cancelled', function (): void {
     $sale = Sale::factory()->cancelled()->create();
@@ -53,7 +55,7 @@ it('throws exception when sale is cancelled', function (): void {
     $action = resolve(DeleteSale::class);
 
     $action->handle($sale);
-})->throws(RuntimeException::class, 'pending sales');
+})->throws(InvalidOperationException::class, 'Cannot delete Sale. Current status: cancelled');
 
 it('deletes multiple items', function (): void {
     $sale = Sale::factory()->pending()->create();

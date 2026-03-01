@@ -7,11 +7,12 @@ namespace App\Actions\Purchase;
 use App\Actions\UploadImage;
 use App\Data\Purchase\UpdatePurchaseData;
 use App\Enums\PurchaseStatusEnum;
+use App\Exceptions\InvalidOperationException;
+use App\Exceptions\StateTransitionException;
 use App\Models\Purchase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use RuntimeException;
 use Spatie\LaravelData\Optional;
 use Throwable;
 
@@ -33,11 +34,12 @@ final readonly class UpdatePurchase
 
         try {
             return DB::transaction(static function () use ($purchase, $data, $uploadedDocumentPath, $oldDocument): Purchase {
-                throw_if(
-                    $purchase->status !== PurchaseStatusEnum::Pending,
-                    RuntimeException::class,
-                    'Only pending purchases can be updated.'
-                );
+                if ($purchase->status !== PurchaseStatusEnum::Pending) {
+                    throw new StateTransitionException(
+                        $purchase->status->value,
+                        'Pending'
+                    );
+                }
 
                 $updateData = [];
 
@@ -46,7 +48,13 @@ final readonly class UpdatePurchase
                 }
 
                 if (! $data->warehouse_id instanceof Optional) {
-                    throw_if($purchase->items()->exists(), RuntimeException::class, 'Cannot change warehouse after items have been added.');
+                    if ($purchase->items()->exists()) {
+                        throw new InvalidOperationException(
+                            'change',
+                            'warehouse',
+                            'Cannot change warehouse after items have been added.'
+                        );
+                    }
                     $updateData['warehouse_id'] = $data->warehouse_id;
                 }
 

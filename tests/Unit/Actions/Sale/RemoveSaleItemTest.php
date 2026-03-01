@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Sale\RemoveSaleItem;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Sale;
 use App\Models\SaleItem;
@@ -71,7 +72,7 @@ it('throws exception when sale is not pending', function (): void {
     $action = resolve(RemoveSaleItem::class);
 
     $action->handle($item);
-})->throws(RuntimeException::class, 'pending sales');
+})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "pending"');
 
 it('deletes item from database', function (): void {
     $sale = Sale::factory()->pending()->create();

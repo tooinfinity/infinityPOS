@@ -6,6 +6,7 @@ use App\Actions\Payment\VoidPayment;
 use App\Data\Payment\VoidPaymentData;
 use App\Enums\PaymentStateEnum;
 use App\Enums\PaymentStatusEnum;
+use App\Exceptions\StateTransitionException;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\Purchase;
@@ -104,7 +105,7 @@ it('throws exception when voiding already voided payment', function (): void {
     $action->handle($payment, new VoidPaymentData(
         void_reason: 'Test',
     ), $user->id);
-})->throws(RuntimeException::class, 'Payment cannot be voided. Current status: voided');
+})->throws(StateTransitionException::class, 'Invalid state transition from "voided" to "Voided"');
 
 it('updates payment status to partial when one of multiple payments is voided', function (): void {
     $user = User::factory()->create();

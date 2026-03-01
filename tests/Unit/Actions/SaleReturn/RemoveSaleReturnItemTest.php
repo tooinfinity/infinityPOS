@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\SaleReturn\RemoveSaleReturnItem;
+use App\Exceptions\StateTransitionException;
 use App\Models\SaleReturn;
 use App\Models\SaleReturnItem;
 
@@ -45,4 +46,4 @@ it('throws exception when removing item from non-pending return', function (): v
     $action = resolve(RemoveSaleReturnItem::class);
 
     $action->handle($item);
-})->throws(RuntimeException::class, 'Cannot remove items from a non-pending');
+})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "pending"');

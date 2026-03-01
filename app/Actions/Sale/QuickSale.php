@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Sale;
 
+use App\Actions\GenerateReferenceNo;
 use App\Actions\Stock\ValidateStockForNewSale;
 use App\Actions\StockMovement\RecordStockMovement;
 use App\Data\Sale\QuickSaleData;
@@ -13,6 +14,7 @@ use App\Enums\PaymentStateEnum;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
 use App\Enums\StockMovementTypeEnum;
+use App\Exceptions\InvalidPaymentMethodException;
 use App\Models\Batch;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
@@ -20,7 +22,6 @@ use App\Models\Sale;
 use App\Models\SaleItem;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
 
@@ -29,6 +30,7 @@ final readonly class QuickSale
     public function __construct(
         private RecordStockMovement $recordStockMovement,
         private ValidateStockForNewSale $validateStockForNewSale,
+        private GenerateReferenceNo $generateReferenceNo,
     ) {}
 
     /**
@@ -43,7 +45,12 @@ final readonly class QuickSale
                     ->where('is_active', true)
                     ->exists();
 
-                throw_unless($paymentMethodExists, RuntimeException::class, 'Payment method is not active or does not exist.');
+                if (! $paymentMethodExists) {
+                    throw new InvalidPaymentMethodException(
+                        $data->payment_method_id,
+                        'Payment method is not active or does not exist'
+                    );
+                }
             }
 
             $this->validateStockForNewSale->handle($data->items, $data->warehouse_id);
@@ -66,7 +73,7 @@ final readonly class QuickSale
                 'customer_id' => $data->customer_id,
                 'warehouse_id' => $data->warehouse_id,
                 'user_id' => $data->user_id,
-                'reference_no' => new \App\Actions\GenerateReferenceNo('SAL', Sale::query())->handle(),
+                'reference_no' => $this->generateReferenceNo->handle('SAL', Sale::class),
                 'status' => SaleStatusEnum::Completed,
                 'sale_date' => $data->sale_date,
                 'total_amount' => $totalAmount,
@@ -176,7 +183,7 @@ final readonly class QuickSale
         Payment::query()->forceCreate([
             'payment_method_id' => $data->payment_method_id,
             'user_id' => $data->user_id,
-            'reference_no' => new \App\Actions\GenerateReferenceNo('PAY', Payment::query())->handle(),
+            'reference_no' => $this->generateReferenceNo->handle('PAY', Payment::class),
             'payable_type' => Sale::class,
             'payable_id' => $sale->id,
             'amount' => $paidAmount,

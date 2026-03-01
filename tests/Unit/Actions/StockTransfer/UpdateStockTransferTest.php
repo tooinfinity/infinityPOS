@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\StockTransfer\UpdateStockTransfer;
 use App\Data\StockTransfer\UpdateStockTransferData;
+use App\Exceptions\InvalidOperationException;
+use App\Exceptions\StateTransitionException;
 use App\Models\StockTransfer;
 use App\Models\User;
 use Spatie\LaravelData\Optional;
@@ -74,7 +76,7 @@ it('throws exception when updating non-pending transfer', function (): void {
         user_id: Optional::create(),
     );
 
-    expect(fn () => $action->handle($transfer, $data))->toThrow(RuntimeException::class, 'Only pending transfers can be updated.');
+    expect(fn () => $action->handle($transfer, $data))->toThrow(InvalidOperationException::class, 'Only pending transfers can be updated.');
 });
 
 it('keeps unchanged fields intact', function (): void {

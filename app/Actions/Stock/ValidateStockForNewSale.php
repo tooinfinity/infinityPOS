@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\Stock;
 
 use App\Data\Sale\SaleItemData;
+use App\Exceptions\InsufficientStockException;
+use App\Exceptions\InvalidBatchException;
 use App\Models\Batch;
 use Illuminate\Database\Eloquent\Collection;
-use RuntimeException;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
 
@@ -66,7 +67,9 @@ final readonly class ValidateStockForNewSale
     private function validateBatchesExist(DataCollection $items, Collection $batches): void
     {
         foreach ($items as $item) {
-            throw_if(! $batches->has($item->batch_id), RuntimeException::class, "Batch not found: {$item->batch_id}");
+            if (! $batches->has($item->batch_id)) {
+                throw new InvalidBatchException($item->batch_id, 'not found');
+            }
         }
     }
 
@@ -82,8 +85,12 @@ final readonly class ValidateStockForNewSale
             /** @var Batch $batch */
             $batch = $batches->get($item->batch_id);
 
-            throw_if($batch->product_id !== $item->product_id, RuntimeException::class, "Batch does not belong to product {$item->product_id}");
-            throw_if($batch->warehouse_id !== $warehouseId, RuntimeException::class, "Batch is not in the sale's warehouse");
+            if ($batch->product_id !== $item->product_id) {
+                throw new InvalidBatchException($item->batch_id, "does not belong to product $item->product_id");
+            }
+            if ($batch->warehouse_id !== $warehouseId) {
+                throw new InvalidBatchException($item->batch_id, "not in warehouse $warehouseId");
+            }
         }
     }
 
@@ -99,11 +106,9 @@ final readonly class ValidateStockForNewSale
             /** @var Batch $batch */
             $batch = $batches->get($batchId);
 
-            throw_if(
-                $batch->quantity < $required['quantity'],
-                RuntimeException::class,
-                "Insufficient stock in batch. Required: {$required['quantity']}, Available: {$batch->quantity}"
-            );
+            if ($batch->quantity < $required['quantity']) {
+                throw new InsufficientStockException($required['quantity'], $batch->quantity, $batchId);
+            }
         }
     }
 }

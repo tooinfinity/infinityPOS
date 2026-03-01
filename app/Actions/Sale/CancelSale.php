@@ -9,10 +9,10 @@ use App\Data\Sale\CancelSaleData;
 use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\SaleStatusEnum;
 use App\Enums\StockMovementTypeEnum;
+use App\Exceptions\StateTransitionException;
 use App\Models\Sale;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class CancelSale
@@ -48,11 +48,15 @@ final readonly class CancelSale
         });
     }
 
+    /**
+     * @throws StateTransitionException
+     */
     private function validateSaleCanBeCancelled(Sale $sale): void
     {
         if (! $sale->status->canTransitionTo(SaleStatusEnum::Cancelled)) {
-            throw new RuntimeException(
-                "Sale cannot be cancelled. Current status: {$sale->status->value}"
+            throw new StateTransitionException(
+                $sale->status->value,
+                'Cancelled'
             );
         }
     }

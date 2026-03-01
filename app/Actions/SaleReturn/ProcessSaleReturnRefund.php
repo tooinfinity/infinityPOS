@@ -9,14 +9,16 @@ use App\Data\SaleReturn\RefundSaleReturnData;
 use App\Enums\PaymentStateEnum;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\ReturnStatusEnum;
+use App\Exceptions\RefundNotAllowedException;
 use App\Models\Payment;
 use App\Models\SaleReturn;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class ProcessSaleReturnRefund
 {
+    public function __construct(private GenerateReferenceNo $generateReferenceNo) {}
+
     /**
      * @throws Throwable
      */
@@ -33,7 +35,7 @@ final readonly class ProcessSaleReturnRefund
             $payment = Payment::query()->forceCreate([
                 'payment_method_id' => $data->payment_method_id,
                 'user_id' => $data->user_id,
-                'reference_no' => new GenerateReferenceNo('PAY-SAL-REFUND', Payment::query())->handle(),
+                'reference_no' => $this->generateReferenceNo->handle('PAY-SAL-REFUND', Payment::class),
                 'payable_type' => SaleReturn::class,
                 'payable_id' => $saleReturn->id,
                 'amount' => -$data->amount,
@@ -53,9 +55,13 @@ final readonly class ProcessSaleReturnRefund
      */
     private function validateRefund(SaleReturn $saleReturn, int $amount): void
     {
-        throw_if($saleReturn->status !== ReturnStatusEnum::Completed, RuntimeException::class, 'Sale return must be completed before issuing a refund.');
+        if ($saleReturn->status !== ReturnStatusEnum::Completed) {
+            throw new RefundNotAllowedException('sale return', 'Sale return must be completed before issuing a refund.');
+        }
 
-        throw_if($amount <= 0, RuntimeException::class, 'Refund amount must be greater than zero.');
+        if ($amount <= 0) {
+            throw new RefundNotAllowedException('sale return', 'Refund amount must be greater than zero.');
+        }
 
         $cumulativeRefunds = (int) $saleReturn->payments()
             ->where('amount', '<', 0)
@@ -63,7 +69,9 @@ final readonly class ProcessSaleReturnRefund
 
         $remainingRefundable = $saleReturn->total_amount + $cumulativeRefunds;
 
-        throw_if($amount > $remainingRefundable, RuntimeException::class, "Refund amount exceeds remaining refundable amount. Maximum: $remainingRefundable");
+        if ($amount > $remainingRefundable) {
+            throw new RefundNotAllowedException('sale return', "Refund amount exceeds remaining refundable amount. Maximum: $remainingRefundable");
+        }
     }
 
     private function updatePaymentStatus(SaleReturn $saleReturn): void

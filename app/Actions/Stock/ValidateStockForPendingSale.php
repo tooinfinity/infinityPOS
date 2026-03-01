@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\Stock;
 
+use App\Exceptions\InsufficientStockException;
+use App\Exceptions\InvalidBatchException;
 use App\Models\Batch;
 use App\Models\Sale;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class ValidateStockForPendingSale
@@ -23,13 +24,13 @@ final readonly class ValidateStockForPendingSale
             ->lockForUpdate()
             ->find($batchId);
 
-        throw_if($batch === null, RuntimeException::class, "Batch not found: $batchId");
+        throw_if($batch === null, InvalidBatchException::class, $batchId, 'not found');
 
-        if ($productId !== null) {
-            throw_if($batch->product_id !== $productId, RuntimeException::class, "Batch does not belong to product {$productId}");
+        throw_if($productId !== null && $batch->product_id !== $productId, InvalidBatchException::class, $batchId, "does not belong to product $productId");
+
+        if ($batch->warehouse_id !== $sale->warehouse_id) {
+            throw new InvalidBatchException($batchId, "not in warehouse $sale->warehouse_id");
         }
-
-        throw_if($batch->warehouse_id !== $sale->warehouse_id, RuntimeException::class, "Batch is not in the sale's warehouse");
 
         /** @var int $existingQuantity */
         $existingQuantity = $sale->items()
@@ -38,11 +39,8 @@ final readonly class ValidateStockForPendingSale
             ->sum('quantity');
 
         $totalRequired = $existingQuantity + $quantity;
+        $available = $batch->quantity - $existingQuantity;
 
-        throw_if(
-            $totalRequired > $batch->quantity,
-            RuntimeException::class,
-            "Insufficient stock in batch. Required: {$quantity}, Available: ".($batch->quantity - $existingQuantity)
-        );
+        throw_if($totalRequired > $batch->quantity, InsufficientStockException::class, $quantity, $available, $batchId);
     }
 }

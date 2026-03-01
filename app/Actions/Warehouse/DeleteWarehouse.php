@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Warehouse;
 
+use App\Exceptions\InvalidOperationException;
 use App\Models\Warehouse;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class DeleteWarehouse
@@ -39,11 +39,10 @@ final readonly class DeleteWarehouse
         $existingRelations = array_keys(array_filter($relations));
 
         if ($existingRelations !== []) {
-            throw new RuntimeException(
-                sprintf(
-                    'Cannot delete warehouse with existing %s',
-                    implode(', ', $existingRelations)
-                )
+            throw new InvalidOperationException(
+                'delete',
+                'Warehouse',
+                sprintf('Cannot delete warehouse with existing %s', implode(', ', $existingRelations))
             );
         }
     }

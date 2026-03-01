@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Product;
 
+use App\Exceptions\InvalidOperationException;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use RuntimeException;
 use Throwable;
 
 final readonly class DeleteProduct
@@ -33,6 +33,9 @@ final readonly class DeleteProduct
         });
     }
 
+    /**
+     * @throws InvalidOperationException
+     */
     private function ensureNoRelatedRecords(Product $product): void
     {
         $relations = [
@@ -48,11 +51,10 @@ final readonly class DeleteProduct
         $existingRelations = array_keys(array_filter($relations));
 
         if ($existingRelations !== []) {
-            throw new RuntimeException(
-                sprintf(
-                    'Cannot delete product with existing %s',
-                    implode(', ', $existingRelations)
-                )
+            throw new InvalidOperationException(
+                'delete',
+                'Product',
+                sprintf('Cannot delete product with existing %s', implode(', ', $existingRelations))
             );
         }
     }

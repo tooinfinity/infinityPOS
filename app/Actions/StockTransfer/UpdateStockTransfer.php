@@ -6,9 +6,9 @@ namespace App\Actions\StockTransfer;
 
 use App\Data\StockTransfer\UpdateStockTransferData;
 use App\Enums\StockTransferStatusEnum;
+use App\Exceptions\InvalidOperationException;
 use App\Models\StockTransfer;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Spatie\LaravelData\Optional;
 use Throwable;
 
@@ -20,7 +20,13 @@ final readonly class UpdateStockTransfer
     public function handle(StockTransfer $transfer, UpdateStockTransferData $data): StockTransfer
     {
         return DB::transaction(static function () use ($transfer, $data): StockTransfer {
-            throw_if($transfer->status !== StockTransferStatusEnum::Pending, RuntimeException::class, 'Only pending transfers can be updated.');
+            if ($transfer->status !== StockTransferStatusEnum::Pending) {
+                throw new InvalidOperationException(
+                    'update',
+                    'StockTransfer',
+                    'Only pending transfers can be updated.'
+                );
+            }
 
             $updateData = [];
 

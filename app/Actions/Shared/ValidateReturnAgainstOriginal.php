@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Shared;
 
+use App\Exceptions\InvalidOperationException;
+use App\Exceptions\ItemNotFoundException;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
 use App\Models\PurchaseReturn;
@@ -13,13 +15,12 @@ use App\Models\SaleItem;
 use App\Models\SaleReturn;
 use App\Models\SaleReturnItem;
 use Illuminate\Database\Eloquent\Builder;
-use RuntimeException;
 use Throwable;
 
 final readonly class ValidateReturnAgainstOriginal
 {
     /**
-     * @throws RuntimeException|Throwable
+     * @throws ItemNotFoundException|Throwable
      */
     public function handle(
         SaleReturnItem|PurchaseReturnItem $item,
@@ -34,21 +35,25 @@ final readonly class ValidateReturnAgainstOriginal
 
         $originalItem = $this->findOriginalItem($originalOrder, $productId, $batchId);
 
-        throw_if($originalItem === null, RuntimeException::class, 'Product is not part of the original order or batch does not match.');
+        if ($originalItem === null) {
+            throw new ItemNotFoundException('Product', 'original order', 'Product is not part of the original order or batch does not match.');
+        }
 
         $alreadyReturned = $this->getAlreadyReturnedQuantity($returnModel, $originalOrder, $productId, $batchId, $item instanceof SaleReturnItem ? SaleReturnItem::class : PurchaseReturnItem::class);
 
         $maxReturnable = $originalItem->quantity - $alreadyReturned;
 
-        throw_if(
-            $quantity > $maxReturnable,
-            RuntimeException::class,
-            "Cannot return more than originally purchased. Original: {$originalItem->quantity}, Already returned: {$alreadyReturned}, Remaining: {$maxReturnable}"
-        );
+        if ($quantity > $maxReturnable) {
+            throw new InvalidOperationException(
+                'return',
+                'item',
+                "Cannot return more than originally purchased. Original: $originalItem->quantity, Already returned: $alreadyReturned, Remaining: $maxReturnable"
+            );
+        }
     }
 
     /**
-     * @throws RuntimeException
+     * @throws ItemNotFoundException
      * @throws Throwable
      */
     public function validateNewReturn(
@@ -57,12 +62,13 @@ final readonly class ValidateReturnAgainstOriginal
         ?int $batchId,
         int $quantity,
     ): void {
-        /** @var Sale $sale */
         $sale = $saleReturn->sale;
 
         $originalItem = $this->findOriginalItem($sale, $productId, $batchId);
 
-        throw_if($originalItem === null, RuntimeException::class, 'Product is not part of the original sale or batch does not match.');
+        if ($originalItem === null) {
+            throw new ItemNotFoundException('Product', 'original sale', 'Product is not part of the original sale or batch does not match.');
+        }
 
         $alreadyReturned = SaleReturnItem::query()
             ->whereHas('saleReturn', fn (Builder $q) => $q->where('sale_id', $sale->id))
@@ -72,15 +78,17 @@ final readonly class ValidateReturnAgainstOriginal
 
         $maxReturnable = $originalItem->quantity - $alreadyReturned;
 
-        throw_if(
-            $quantity > $maxReturnable,
-            RuntimeException::class,
-            "Cannot return more than originally purchased. Original: {$originalItem->quantity}, Already returned: {$alreadyReturned}, Remaining: {$maxReturnable}"
-        );
+        if ($quantity > $maxReturnable) {
+            throw new InvalidOperationException(
+                'return',
+                'item',
+                "Cannot return more than originally purchased. Original: $originalItem->quantity, Already returned: $alreadyReturned, Remaining: $maxReturnable"
+            );
+        }
     }
 
     /**
-     * @throws RuntimeException
+     * @throws ItemNotFoundException
      * @throws Throwable
      */
     public function validateNewReturnForPurchase(
@@ -89,12 +97,13 @@ final readonly class ValidateReturnAgainstOriginal
         ?int $batchId,
         int $quantity,
     ): void {
-        /** @var Purchase $purchase */
         $purchase = $purchaseReturn->purchase;
 
         $originalItem = $this->findOriginalItem($purchase, $productId, $batchId);
 
-        throw_if($originalItem === null, RuntimeException::class, 'Product is not part of the original purchase or batch does not match.');
+        if ($originalItem === null) {
+            throw new ItemNotFoundException('Product', 'original purchase', 'Product is not part of the original purchase or batch does not match.');
+        }
 
         $alreadyReturned = PurchaseReturnItem::query()
             ->whereHas('purchaseReturn', fn (Builder $q) => $q->where('purchase_id', $purchase->id))
@@ -104,11 +113,13 @@ final readonly class ValidateReturnAgainstOriginal
 
         $maxReturnable = $originalItem->quantity - $alreadyReturned;
 
-        throw_if(
-            $quantity > $maxReturnable,
-            RuntimeException::class,
-            "Cannot return more than originally purchased. Original: {$originalItem->quantity}, Already returned: {$alreadyReturned}, Remaining: {$maxReturnable}"
-        );
+        if ($quantity > $maxReturnable) {
+            throw new InvalidOperationException(
+                'return',
+                'item',
+                "Cannot return more than originally purchased. Original: $originalItem->quantity, Already returned: $alreadyReturned, Remaining: $maxReturnable"
+            );
+        }
     }
 
     private function findOriginalItem(Sale|Purchase $order, int $productId, ?int $batchId): SaleItem|PurchaseItem|null
@@ -128,7 +139,6 @@ final readonly class ValidateReturnAgainstOriginal
         ?int $batchId,
         string $returnItemClass,
     ): int {
-        $query = SaleReturnItem::query();
 
         if ($returnItemClass === SaleReturnItem::class) {
             $query = SaleReturnItem::query()

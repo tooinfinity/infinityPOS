@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Warehouse\DeleteWarehouse;
+use App\Exceptions\InvalidOperationException;
 use App\Models\Batch;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
@@ -30,7 +31,7 @@ it('throws exception when warehouse has batches', function (): void {
     $action = resolve(DeleteWarehouse::class);
 
     expect(fn () => $action->handle($warehouse))
-        ->toThrow(RuntimeException::class, 'Cannot delete warehouse with existing batches');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Warehouse. Cannot delete warehouse with existing batches');
 });
 
 it('throws exception when warehouse has purchases', function (): void {
@@ -40,7 +41,7 @@ it('throws exception when warehouse has purchases', function (): void {
     $action = resolve(DeleteWarehouse::class);
 
     expect(fn () => $action->handle($warehouse))
-        ->toThrow(RuntimeException::class, 'Cannot delete warehouse with existing purchases');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Warehouse. Cannot delete warehouse with existing purchases');
 });
 
 it('throws exception when warehouse has sales', function (): void {
@@ -50,7 +51,7 @@ it('throws exception when warehouse has sales', function (): void {
     $action = resolve(DeleteWarehouse::class);
 
     expect(fn () => $action->handle($warehouse))
-        ->toThrow(RuntimeException::class, 'Cannot delete warehouse with existing sales');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Warehouse. Cannot delete warehouse with existing sales');
 });
 
 it('throws exception when warehouse has stock movements', function (): void {
@@ -60,7 +61,7 @@ it('throws exception when warehouse has stock movements', function (): void {
     $action = resolve(DeleteWarehouse::class);
 
     expect(fn () => $action->handle($warehouse))
-        ->toThrow(RuntimeException::class, 'Cannot delete warehouse with existing stockMovements');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Warehouse. Cannot delete warehouse with existing stockMovements');
 });
 
 it('throws exception when warehouse has transfers from', function (): void {
@@ -70,7 +71,7 @@ it('throws exception when warehouse has transfers from', function (): void {
     $action = resolve(DeleteWarehouse::class);
 
     expect(fn () => $action->handle($warehouse))
-        ->toThrow(RuntimeException::class, 'Cannot delete warehouse with existing transfersFrom');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Warehouse. Cannot delete warehouse with existing transfersFrom');
 });
 
 it('throws exception when warehouse has transfers to', function (): void {
@@ -80,7 +81,7 @@ it('throws exception when warehouse has transfers to', function (): void {
     $action = resolve(DeleteWarehouse::class);
 
     expect(fn () => $action->handle($warehouse))
-        ->toThrow(RuntimeException::class, 'Cannot delete warehouse with existing transfersTo');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Warehouse. Cannot delete warehouse with existing transfersTo');
 });
 
 it('throws exception when warehouse has sale returns', function (): void {
@@ -90,7 +91,7 @@ it('throws exception when warehouse has sale returns', function (): void {
     $action = resolve(DeleteWarehouse::class);
 
     expect(fn () => $action->handle($warehouse))
-        ->toThrow(RuntimeException::class, 'Cannot delete warehouse with existing saleReturns');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Warehouse. Cannot delete warehouse with existing saleReturns');
 });
 
 it('throws exception when warehouse has purchase returns', function (): void {
@@ -100,7 +101,7 @@ it('throws exception when warehouse has purchase returns', function (): void {
     $action = resolve(DeleteWarehouse::class);
 
     expect(fn () => $action->handle($warehouse))
-        ->toThrow(RuntimeException::class, 'Cannot delete warehouse with existing purchaseReturns');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Warehouse. Cannot delete warehouse with existing purchaseReturns');
 });
 
 it('includes all related record types in exception message', function (): void {
@@ -111,7 +112,7 @@ it('includes all related record types in exception message', function (): void {
     $action = resolve(DeleteWarehouse::class);
 
     expect(fn () => $action->handle($warehouse))
-        ->toThrow(function (RuntimeException $e): void {
+        ->toThrow(function (InvalidOperationException $e): void {
             expect($e->getMessage())->toContain('batches')
                 ->and($e->getMessage())->toContain('sales');
         });
@@ -125,8 +126,8 @@ it('does not delete warehouse when any related record exists', function (): void
 
     try {
         $action->handle($warehouse);
-        test()->fail('Expected RuntimeException to be thrown');
-    } catch (RuntimeException) {
+        test()->fail('Expected InvalidOperationException to be thrown');
+    } catch (InvalidOperationException) {
         // Expected exception
     }
 
@@ -141,8 +142,8 @@ it('rolls back transaction when exception is thrown', function (): void {
 
     try {
         $action->handle($warehouse);
-        test()->fail('Expected RuntimeException to be thrown');
-    } catch (RuntimeException) {
+        test()->fail('Expected InvalidOperationException to be thrown');
+    } catch (InvalidOperationException) {
         // Expected exception
     }
 
@@ -157,5 +158,5 @@ it('prevents deletion when multiple related records exist', function (): void {
     $action = resolve(DeleteWarehouse::class);
 
     expect(fn () => $action->handle($warehouse))
-        ->toThrow(RuntimeException::class);
+        ->toThrow(InvalidOperationException::class);
 });

@@ -9,9 +9,11 @@ use App\Data\PurchaseReturn\CompletePurchaseReturnData;
 use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\ReturnStatusEnum;
 use App\Enums\StockMovementTypeEnum;
+use App\Exceptions\InsufficientStockException;
+use App\Exceptions\InvalidOperationException;
+use App\Exceptions\StateTransitionException;
 use App\Models\PurchaseReturn;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class CompletePurchaseReturn
@@ -49,12 +51,19 @@ final readonly class CompletePurchaseReturn
     private function validatePurchaseReturnCanBeCompleted(PurchaseReturn $purchaseReturn): void
     {
         if ($purchaseReturn->status !== ReturnStatusEnum::Pending) {
-            throw new RuntimeException(
-                "Purchase return cannot be completed. Current status: {$purchaseReturn->status->value}"
+            throw new StateTransitionException(
+                $purchaseReturn->status->value,
+                'Completed'
             );
         }
 
-        throw_if($purchaseReturn->items->isEmpty(), RuntimeException::class, 'Cannot complete a purchase return with no items.');
+        if ($purchaseReturn->items->isEmpty()) {
+            throw new InvalidOperationException(
+                'complete',
+                'PurchaseReturn',
+                'Purchase return cannot be completed without items'
+            );
+        }
     }
 
     /**
@@ -74,8 +83,10 @@ final readonly class CompletePurchaseReturn
             $newQuantity = $batch->quantity - $item->quantity;
 
             if ($newQuantity < 0) {
-                throw new RuntimeException(
-                    "Cannot complete purchase return. Insufficient stock in batch. Available: $batch->quantity, Required: $item->quantity"
+                throw new InsufficientStockException(
+                    required: $item->quantity,
+                    available: $batch->quantity,
+                    batchId: $batch->id
                 );
             }
 

@@ -5,6 +5,9 @@ declare(strict_types=1);
 use App\Actions\SaleReturn\RevertSaleReturn;
 use App\Data\SaleReturn\RevertSaleReturnData;
 use App\Enums\ReturnStatusEnum;
+use App\Exceptions\InsufficientStockException;
+use App\Exceptions\RefundNotAllowedException;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Payment;
 use App\Models\SaleReturn;
@@ -52,7 +55,7 @@ it('throws exception when cancelling return with refunds', function (): void {
     $action = resolve(RevertSaleReturn::class);
 
     $action->handle($saleReturn, new RevertSaleReturnData());
-})->throws(RuntimeException::class, 'existing refunds');
+})->throws(RefundNotAllowedException::class, 'Cannot refund sale return. Cannot cancel a sale return that has existing refunds. Please void the refunds first.');
 
 it('throws exception when cancelling already cancelled return', function (): void {
     $saleReturn = SaleReturn::factory()->completed()->create();
@@ -62,7 +65,7 @@ it('throws exception when cancelling already cancelled return', function (): voi
     $action->handle($saleReturn, new RevertSaleReturnData());
 
     $action->handle($saleReturn, new RevertSaleReturnData());
-})->throws(RuntimeException::class, 'Can only cancel completed sale returns');
+})->throws(StateTransitionException::class, 'Invalid state transition from "pending" to "Pending"');
 
 it('throws exception when insufficient stock on cancellation', function (): void {
     $batch = Batch::factory()->withQuantity(5)->create();
@@ -76,7 +79,7 @@ it('throws exception when insufficient stock on cancellation', function (): void
     $action = resolve(RevertSaleReturn::class);
 
     $action->handle($saleReturn, new RevertSaleReturnData());
-})->throws(RuntimeException::class, 'Insufficient stock');
+})->throws(InsufficientStockException::class, 'Insufficient stock');
 
 it('skips items without batch when cancelling completed return', function (): void {
     $saleReturn = SaleReturn::factory()->completed()->create();

@@ -9,14 +9,16 @@ use App\Data\PurchaseReturn\RefundPurchaseReturnData;
 use App\Enums\PaymentStateEnum;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\ReturnStatusEnum;
+use App\Exceptions\RefundNotAllowedException;
 use App\Models\Payment;
 use App\Models\PurchaseReturn;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class ProcessPurchaseReturnRefund
 {
+    public function __construct(private GenerateReferenceNo $generateReferenceNo) {}
+
     /**
      * @throws Throwable
      */
@@ -32,7 +34,7 @@ final readonly class ProcessPurchaseReturnRefund
             $payment = Payment::query()->forceCreate([
                 'payment_method_id' => $data->payment_method_id,
                 'user_id' => $data->user_id,
-                'reference_no' => new GenerateReferenceNo('PAY-PUR-REFUND', Payment::query())->handle(),
+                'reference_no' => $this->generateReferenceNo->handle('PAY-PUR-REFUND', Payment::class),
                 'payable_type' => PurchaseReturn::class,
                 'payable_id' => $purchaseReturn->id,
                 'amount' => -$data->amount,
@@ -52,9 +54,13 @@ final readonly class ProcessPurchaseReturnRefund
      */
     private function validateRefund(PurchaseReturn $purchaseReturn, int $amount): void
     {
-        throw_if($purchaseReturn->status !== ReturnStatusEnum::Completed, RuntimeException::class, 'Purchase return must be completed before issuing a refund.');
+        if ($purchaseReturn->status !== ReturnStatusEnum::Completed) {
+            throw new RefundNotAllowedException('purchase return', 'Purchase return must be completed before issuing a refund.');
+        }
 
-        throw_if($amount <= 0, RuntimeException::class, 'Refund amount must be greater than zero.');
+        if ($amount <= 0) {
+            throw new RefundNotAllowedException('purchase return', 'Refund amount must be greater than zero.');
+        }
 
         $cumulativeRefunds = (int) $purchaseReturn->payments()
             ->where('amount', '<', 0)
@@ -62,7 +68,9 @@ final readonly class ProcessPurchaseReturnRefund
 
         $remainingRefundable = $purchaseReturn->total_amount + $cumulativeRefunds;
 
-        throw_if($amount > $remainingRefundable, RuntimeException::class, "Refund amount exceeds remaining refundable amount. Maximum: $remainingRefundable");
+        if ($amount > $remainingRefundable) {
+            throw new RefundNotAllowedException('purchase return', "Refund amount exceeds remaining refundable amount. Maximum: $remainingRefundable");
+        }
     }
 
     private function updatePaymentStatus(PurchaseReturn $purchaseReturn): void

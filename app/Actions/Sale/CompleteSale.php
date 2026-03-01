@@ -10,12 +10,14 @@ use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
 use App\Enums\StockMovementTypeEnum;
+use App\Exceptions\InsufficientStockException;
+use App\Exceptions\InvalidOperationException;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Sale;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class CompleteSale
@@ -58,12 +60,13 @@ final readonly class CompleteSale
     private function validateSaleCanBeCompleted(Sale $sale): void
     {
         if (! $sale->status->canTransitionTo(SaleStatusEnum::Completed)) {
-            throw new RuntimeException(
-                "Sale cannot be completed. Current status: {$sale->status->value}"
+            throw new StateTransitionException(
+                $sale->status->value,
+                'Completed'
             );
         }
 
-        throw_if($sale->items->isEmpty(), RuntimeException::class, 'Sale cannot be completed without items');
+        throw_if($sale->items->isEmpty(), InvalidOperationException::class, 'complete', 'Sale', 'Sale cannot be completed without items');
     }
 
     /**
@@ -143,11 +146,13 @@ final readonly class CompleteSale
 
             $newQuantity = $batch->quantity - $requiredQuantity;
 
-            throw_if(
-                $newQuantity < 0,
-                RuntimeException::class,
-                "Insufficient stock in batch. Available: {$batch->quantity}, Required: {$requiredQuantity}"
-            );
+            if ($newQuantity < 0) {
+                throw new InsufficientStockException(
+                    required: $requiredQuantity,
+                    available: $batch->quantity,
+                    batchId: $batchId
+                );
+            }
         }
     }
 

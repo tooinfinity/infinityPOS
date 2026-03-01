@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Actions\SaleReturn\CompleteSaleReturn;
 use App\Data\SaleReturn\CompleteSaleReturnData;
 use App\Enums\ReturnStatusEnum;
+use App\Exceptions\InvalidOperationException;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\SaleReturn;
 use App\Models\SaleReturnItem;
@@ -46,7 +48,7 @@ it('throws exception when completing non-pending return', function (): void {
     $action = resolve(CompleteSaleReturn::class);
 
     $action->handle($saleReturn, new CompleteSaleReturnData());
-})->throws(RuntimeException::class, 'cannot be completed');
+})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "Completed"');
 
 it('throws exception when completing return with no items', function (): void {
     $saleReturn = SaleReturn::factory()->pending()->create();
@@ -54,7 +56,7 @@ it('throws exception when completing return with no items', function (): void {
     $action = resolve(CompleteSaleReturn::class);
 
     $action->handle($saleReturn, new CompleteSaleReturnData());
-})->throws(RuntimeException::class, 'no items');
+})->throws(InvalidOperationException::class, 'Cannot complete SaleReturn. Sale return cannot be completed without items');
 
 it('skips items without batch when completing return', function (): void {
     $saleReturn = SaleReturn::factory()->pending()->create();

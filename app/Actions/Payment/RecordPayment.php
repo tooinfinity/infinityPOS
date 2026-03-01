@@ -11,6 +11,9 @@ use App\Enums\PaymentStateEnum;
 use App\Enums\PurchaseStatusEnum;
 use App\Enums\ReturnStatusEnum;
 use App\Enums\SaleStatusEnum;
+use App\Exceptions\InvalidPaymentMethodException;
+use App\Exceptions\OverpaymentException;
+use App\Exceptions\StateTransitionException;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\Purchase;
@@ -18,7 +21,6 @@ use App\Models\PurchaseReturn;
 use App\Models\Sale;
 use App\Models\SaleReturn;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 /**
@@ -26,7 +28,10 @@ use Throwable;
  */
 final readonly class RecordPayment
 {
-    public function __construct(private UpdatePaymentStatus $updatePaymentStatus) {}
+    public function __construct(
+        private UpdatePaymentStatus $updatePaymentStatus,
+        private GenerateReferenceNo $generateReferenceNo,
+    ) {}
 
     /**
      * @throws Throwable
@@ -51,7 +56,7 @@ final readonly class RecordPayment
             $payment = Payment::query()->forceCreate([
                 'payment_method_id' => $data->payment_method_id,
                 'user_id' => $data->user_id,
-                'reference_no' => new GenerateReferenceNo('PAY', Payment::query())->handle(),
+                'reference_no' => $this->generateReferenceNo->handle('PAY', Payment::class),
                 'payable_type' => $payable::class,
                 'payable_id' => $payable->id,
                 'amount' => $data->amount,
@@ -73,18 +78,21 @@ final readonly class RecordPayment
     {
         $paymentMethod = PaymentMethod::query()->find($paymentMethodId);
 
-        throw_if($paymentMethod === null || ! $paymentMethod->is_active, RuntimeException::class, 'Payment method is not active or does not exist.');
+        throw_if($paymentMethod === null || ! $paymentMethod->is_active, InvalidPaymentMethodException::class, $paymentMethodId);
     }
 
+    /**
+     * @throws StateTransitionException
+     */
     private function validatePayable(Sale|SaleReturn|Purchase|PurchaseReturn $payable): void
     {
         $canAcceptPayment = $this->checkCanAcceptPayment($payable);
 
         if (! $canAcceptPayment) {
-            $payableClass = $payable::class;
             $statusValue = $payable->status->value;
-            throw new RuntimeException(
-                "Cannot record payment for $payableClass with status: $statusValue"
+            throw new StateTransitionException(
+                $statusValue,
+                'Payment'
             );
         }
     }
@@ -94,8 +102,11 @@ final readonly class RecordPayment
      */
     private function validateNoOverpayment(Sale|SaleReturn|Purchase|PurchaseReturn $payable, RecordPaymentData $data): void
     {
-        throw_if($data->amount < 0, RuntimeException::class, 'Payment amount cannot be negative.');
+        if ($data->amount < 0) {
+            throw new InvalidPaymentMethodException($data->payment_method_id, 'Payment amount cannot be negative.');
+        }
 
+        /** @var int $currentPaid */
         $currentPaid = Payment::query()
             ->where('payable_type', $payable::class)
             ->where('payable_id', $payable->id)
@@ -105,16 +116,16 @@ final readonly class RecordPayment
 
         if ($payable instanceof Sale) {
             $maxAllowedPayment = $payable->total_amount * 2;
-            throw_if(
-                ($currentPaid + $data->amount) > $maxAllowedPayment,
-                RuntimeException::class,
-                'Payment amount exceeds the maximum allowed overpayment limit.'
-            );
+            if (($currentPaid + $data->amount) > $maxAllowedPayment) {
+                throw new OverpaymentException($data->amount, $maxAllowedPayment, $currentPaid);
+            }
 
             return;
         }
 
-        throw_if(($currentPaid + $data->amount) > $payable->total_amount, RuntimeException::class, 'Payment amount exceeds the outstanding balance.');
+        if (($currentPaid + $data->amount) > $payable->total_amount) {
+            throw new OverpaymentException($data->amount, $payable->total_amount, $currentPaid);
+        }
     }
 
     private function checkCanAcceptPayment(Sale|SaleReturn|Purchase|PurchaseReturn $payable): bool

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Payment\DeletePaymentMethod;
+use App\Exceptions\InvalidOperationException;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
 
@@ -39,4 +40,4 @@ it('throws exception when payment method has associated payments', function (): 
     $action = resolve(DeletePaymentMethod::class);
 
     $action->handle($paymentMethod);
-})->throws(RuntimeException::class, 'Cannot delete payment method with associated payments.');
+})->throws(InvalidOperationException::class);

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Supplier\DeleteSupplier;
+use App\Exceptions\InvalidOperationException;
 use App\Models\Purchase;
 use App\Models\Supplier;
 
@@ -26,7 +27,7 @@ it('throws exception when deleting supplier with purchases', function (): void {
     $action = resolve(DeleteSupplier::class);
 
     expect(fn () => $action->handle($supplier))
-        ->toThrow(RuntimeException::class, 'Cannot delete supplier with associated purchases.');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Supplier. Cannot delete supplier with associated purchases.');
 });
 
 it('throws exception when deleting supplier with multiple purchases', function (): void {
@@ -38,7 +39,7 @@ it('throws exception when deleting supplier with multiple purchases', function (
     $action = resolve(DeleteSupplier::class);
 
     expect(fn () => $action->handle($supplier))
-        ->toThrow(RuntimeException::class, 'Cannot delete supplier with associated purchases.');
+        ->toThrow(InvalidOperationException::class, 'Cannot delete Supplier. Cannot delete supplier with associated purchases.');
 });
 
 it('deletes supplier without purchases', function (): void {
@@ -73,7 +74,7 @@ it('does not delete supplier when purchases exist', function (): void {
 
     try {
         $action->handle($supplier);
-    } catch (RuntimeException) {
+    } catch (InvalidOperationException) {
         // Expected exception
     }
 

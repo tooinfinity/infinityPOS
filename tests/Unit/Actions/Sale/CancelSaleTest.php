@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Sale\CancelSale;
 use App\Data\Sale\CancelSaleData;
 use App\Enums\SaleStatusEnum;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Sale;
 use App\Models\SaleItem;
@@ -92,7 +93,7 @@ it('throws exception when cancelling already cancelled sale', function (): void 
     $action = resolve(CancelSale::class);
 
     $action->handle($sale, new CancelSaleData(restock_items: false, note: null));
-})->throws(RuntimeException::class, 'cannot be cancelled');
+})->throws(StateTransitionException::class, 'Invalid state transition from "cancelled" to "Cancelled"');
 
 it('updates note when cancelling', function (): void {
     $sale = Sale::factory()->pending()->create([

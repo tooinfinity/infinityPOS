@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\StockTransfer\CreateStockTransfer;
 use App\Data\StockTransfer\CreateStockTransferData;
 use App\Data\StockTransfer\StockTransferItemData;
+use App\Exceptions\WarehouseSameException;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\StockTransfer;
@@ -114,7 +115,7 @@ it('throws exception when source and destination are the same', function (): voi
         items: $items,
     );
 
-    expect(fn () => $action->handle($data))->toThrow(RuntimeException::class, 'Source and destination warehouse cannot be the same.');
+    expect(fn () => $action->handle($data))->toThrow(WarehouseSameException::class, 'Source and destination warehouse cannot be the same.');
 });
 
 it('creates transfer with items without batches', function (): void {

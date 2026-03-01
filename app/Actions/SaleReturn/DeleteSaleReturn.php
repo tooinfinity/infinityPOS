@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\SaleReturn;
 
 use App\Enums\ReturnStatusEnum;
+use App\Exceptions\RefundNotAllowedException;
+use App\Exceptions\StateTransitionException;
 use App\Models\SaleReturn;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class DeleteSaleReturn
@@ -31,8 +32,9 @@ final readonly class DeleteSaleReturn
     private function validateSaleReturnCanBeDeleted(SaleReturn $saleReturn): void
     {
         if ($saleReturn->status !== ReturnStatusEnum::Pending) {
-            throw new RuntimeException(
-                "Can only delete pending sale returns. Current status: {$saleReturn->status->value}"
+            throw new StateTransitionException(
+                $saleReturn->status->value,
+                'Pending'
             );
         }
 
@@ -40,6 +42,11 @@ final readonly class DeleteSaleReturn
             ->where('amount', '<', 0)
             ->exists();
 
-        throw_if($hasRefunds, RuntimeException::class, 'Cannot delete a sale return that has existing refunds. Please void the refunds first.');
+        if ($hasRefunds) {
+            throw new RefundNotAllowedException(
+                'sale return',
+                'Cannot delete a sale return that has existing refunds. Please void the refunds first.'
+            );
+        }
     }
 }

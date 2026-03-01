@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Actions\Payment;
 
 use App\Actions\Shared\UpdatePaymentStatus;
+use App\Enums\PaymentStateEnum;
+use App\Exceptions\StateTransitionException;
 use App\Models\Payment;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
 use App\Models\Sale;
 use App\Models\SaleReturn;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 /**
@@ -30,7 +31,7 @@ final readonly class UnvoidPayment
             $this->validatePaymentCanBeUnvoided($payment);
 
             $payment->forceFill([
-                'status' => \App\Enums\PaymentStateEnum::Active,
+                'status' => PaymentStateEnum::Active,
                 'voided_by' => null,
                 'voided_at' => null,
                 'void_reason' => null,
@@ -46,11 +47,15 @@ final readonly class UnvoidPayment
         });
     }
 
+    /**
+     * @throws StateTransitionException
+     */
     private function validatePaymentCanBeUnvoided(Payment $payment): void
     {
         if (! $payment->canBeUnvoided()) {
-            throw new RuntimeException(
-                'Payment cannot be unvoided. Current status: '.$payment->status->value
+            throw new StateTransitionException(
+                $payment->status->value,
+                'Active'
             );
         }
     }

@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\StockTransfer;
 
 use App\Data\StockTransfer\StockTransferItemData;
+use App\Exceptions\InvalidOperationException;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class AddItemToStockTransfer
@@ -19,7 +19,13 @@ final readonly class AddItemToStockTransfer
     public function handle(StockTransfer $transfer, StockTransferItemData $itemData): StockTransferItem
     {
         return DB::transaction(static function () use ($transfer, $itemData): StockTransferItem {
-            throw_if($transfer->status !== \App\Enums\StockTransferStatusEnum::Pending, RuntimeException::class, 'Items can only be added to pending transfers.');
+            if ($transfer->status !== \App\Enums\StockTransferStatusEnum::Pending) {
+                throw new InvalidOperationException(
+                    'add item to',
+                    'StockTransfer',
+                    'Items can only be added to pending transfers.'
+                );
+            }
 
             return StockTransferItem::query()->forceCreate([
                 'stock_transfer_id' => $transfer->id,

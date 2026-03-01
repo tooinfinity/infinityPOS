@@ -9,9 +9,11 @@ use App\Data\SaleReturn\RevertSaleReturnData;
 use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\ReturnStatusEnum;
 use App\Enums\StockMovementTypeEnum;
+use App\Exceptions\InsufficientStockException;
+use App\Exceptions\RefundNotAllowedException;
+use App\Exceptions\StateTransitionException;
 use App\Models\SaleReturn;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class RevertSaleReturn
@@ -50,11 +52,17 @@ final readonly class RevertSaleReturn
             ->where('amount', '<', 0)
             ->exists();
 
-        throw_if($hasRefunds, RuntimeException::class, 'Cannot cancel a sale return that has existing refunds. Please void the refunds first.');
+        if ($hasRefunds) {
+            throw new RefundNotAllowedException(
+                'sale return',
+                'Cannot cancel a sale return that has existing refunds. Please void the refunds first.'
+            );
+        }
 
         if ($saleReturn->status !== ReturnStatusEnum::Completed) {
-            throw new RuntimeException(
-                "Can only cancel completed sale returns. Use DeleteSaleReturn to delete pending returns. Current status: {$saleReturn->status->value}"
+            throw new StateTransitionException(
+                $saleReturn->status->value,
+                'Pending'
             );
         }
     }
@@ -76,8 +84,10 @@ final readonly class RevertSaleReturn
             $newQuantity = $batch->quantity - $item->quantity;
 
             if ($newQuantity < 0) {
-                throw new RuntimeException(
-                    "Cannot cancel sale return. Insufficient stock in batch. Available: $batch->quantity, Required: $item->quantity"
+                throw new InsufficientStockException(
+                    required: $item->quantity,
+                    available: $batch->quantity,
+                    batchId: $batch->id
                 );
             }
 

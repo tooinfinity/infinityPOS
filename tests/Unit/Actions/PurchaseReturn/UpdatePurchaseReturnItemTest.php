@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\PurchaseReturn\UpdatePurchaseReturnItem;
 use App\Data\PurchaseReturn\UpdatePurchaseReturnItemData;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\Purchase;
@@ -44,7 +45,7 @@ it('throws exception when updating item in non-pending return', function (): voi
     $action = resolve(UpdatePurchaseReturnItem::class);
 
     $action->handle($item, new UpdatePurchaseReturnItemData(quantity: 10));
-})->throws(RuntimeException::class, 'Cannot update items in a non-pending purchase return.');
+})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "pending"');
 
 it('updates item unit_cost in pending purchase return', function (): void {
     $purchaseReturn = PurchaseReturn::factory()->pending()->create();

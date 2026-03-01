@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Exceptions\InvalidOperationException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
-use RuntimeException;
 use Spatie\Image\Enums\Fit;
 use Spatie\Image\Enums\ImageDriver;
 use Spatie\Image\Exceptions\InvalidImageDriver;
@@ -39,10 +39,14 @@ final readonly class UploadImage
 
         try {
             $stream = fopen($tmpPath, 'rb');
-            throw_if($stream === false, RuntimeException::class, 'Failed to open processed image file');
+            if ($stream === false) {
+                throw new InvalidOperationException('process', 'image', 'Failed to open processed image file');
+            }
 
             $result = Storage::disk('public')->put($filename, $stream);
-            throw_if(! $result, RuntimeException::class, 'Failed to store image');
+            if (! $result) {
+                throw new InvalidOperationException('store', 'image', 'Failed to store image');
+            }
 
             if (is_resource($stream)) {
                 fclose($stream);

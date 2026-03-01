@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\Purchase;
 
 use App\Enums\PurchaseStatusEnum;
+use App\Exceptions\InvalidOperationException;
 use App\Exceptions\StateTransitionException;
 use App\Models\Purchase;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 use Throwable;
 
 final readonly class MarkPurchaseAsOrdered
@@ -24,18 +24,20 @@ final readonly class MarkPurchaseAsOrdered
                 ->lockForUpdate()
                 ->findOrFail($purchase->id);
 
-            throw_if(
-                ! $purchase->status->canTransitionTo(PurchaseStatusEnum::Ordered),
-                StateTransitionException::class,
-                $purchase->status->label(),
-                PurchaseStatusEnum::Ordered->label()
-            );
+            if (! $purchase->status->canTransitionTo(PurchaseStatusEnum::Ordered)) {
+                throw new StateTransitionException(
+                    $purchase->status->label(),
+                    PurchaseStatusEnum::Ordered->label()
+                );
+            }
 
-            throw_if(
-                $purchase->items()->count() === 0,
-                RuntimeException::class,
-                'Cannot order a purchase with no items.'
-            );
+            if ($purchase->items()->count() === 0) {
+                throw new InvalidOperationException(
+                    'order',
+                    'Purchase',
+                    'Cannot order a purchase with no items.'
+                );
+            }
 
             $purchase->forceFill(['status' => PurchaseStatusEnum::Ordered])->save();
 

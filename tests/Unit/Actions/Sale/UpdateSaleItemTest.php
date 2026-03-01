@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\Sale\UpdateSaleItem;
 use App\Data\Sale\UpdateSaleItemData;
+use App\Exceptions\InsufficientStockException;
+use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Sale;
 use App\Models\SaleItem;
@@ -77,7 +79,7 @@ it('throws exception when sale is not pending', function (): void {
         unit_price: null,
         unit_cost: null,
     ));
-})->throws(RuntimeException::class, 'pending sales');
+})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "pending"');
 
 it('validates stock when increasing quantity', function (): void {
     $sale = Sale::factory()->pending()->create();
@@ -101,7 +103,7 @@ it('validates stock when increasing quantity', function (): void {
         unit_price: null,
         unit_cost: null,
     ));
-})->throws(RuntimeException::class, 'Insufficient stock');
+})->throws(InsufficientStockException::class, 'Insufficient stock in batch 1. Required: 20, Available: 10');
 
 it('updates unit price correctly', function (): void {
     $sale = Sale::factory()->pending()->create();

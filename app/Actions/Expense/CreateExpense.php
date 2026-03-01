@@ -12,15 +12,17 @@ use Throwable;
 
 final readonly class CreateExpense
 {
+    public function __construct(private GenerateReferenceNo $generateReferenceNo) {}
+
     /**
      * @throws Throwable
      */
     public function handle(CreateExpenseData $data): Expense
     {
-        return DB::transaction(static fn (): Expense => Expense::query()->forceCreate([
+        return DB::transaction(fn (): Expense => Expense::query()->forceCreate([
             'expense_category_id' => $data->expense_category_id,
             'user_id' => $data->user_id,
-            'reference_no' => new GenerateReferenceNo('EXP', Expense::query())->handle(),
+            'reference_no' => $this->generateReferenceNo->handle('EXP', Expense::class),
             'amount' => $data->amount,
             'expense_date' => $data->expense_date,
             'description' => $data->description,

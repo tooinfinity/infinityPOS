@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\Purchase\UpdatePurchase;
 use App\Data\Purchase\UpdatePurchaseData;
+use App\Exceptions\InvalidOperationException;
+use App\Exceptions\StateTransitionException;
 use App\Models\Purchase;
 use App\Models\Supplier;
 use App\Models\Warehouse;
@@ -72,7 +74,7 @@ it('throws exception when changing warehouse with items', function (): void {
     );
 
     expect(fn () => $action->handle($purchase, $data))
-        ->toThrow(RuntimeException::class, 'Cannot change warehouse after items have been added.');
+        ->toThrow(InvalidOperationException::class, 'Cannot change warehouse. Cannot change warehouse after items have been added.');
 });
 
 it('may update all purchase fields', function (): void {
@@ -140,7 +142,7 @@ it('throws exception when updating non-pending purchase', function (): void {
     );
 
     expect(fn () => $action->handle($purchase, $data))
-        ->toThrow(RuntimeException::class, 'Only pending purchases can be updated.');
+        ->toThrow(StateTransitionException::class, 'Invalid state transition from "received" to "Pending"');
 });
 
 it('updates document and deletes old one', function (): void {

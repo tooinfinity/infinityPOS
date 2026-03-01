@@ -8,6 +8,8 @@ use App\Actions\StockMovement\RecordStockMovement;
 use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\StockMovementTypeEnum;
 use App\Enums\StockTransferStatusEnum;
+use App\Exceptions\InsufficientStockException;
+use App\Exceptions\InvalidOperationException;
 use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\StockTransfer;
@@ -16,7 +18,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use Random\RandomException;
-use RuntimeException;
 use Throwable;
 
 final readonly class CompleteStockTransfer
@@ -38,12 +39,12 @@ final readonly class CompleteStockTransfer
                 ])
                 ->findOrFail($transfer->id);
 
-            throw_if(
-                ! $transfer->status->canTransitionTo(StockTransferStatusEnum::Completed),
-                StateTransitionException::class,
-                $transfer->status->label(),
-                StockTransferStatusEnum::Completed->label()
-            );
+            if (! $transfer->status->canTransitionTo(StockTransferStatusEnum::Completed)) {
+                throw new StateTransitionException(
+                    $transfer->status->label(),
+                    StockTransferStatusEnum::Completed->label()
+                );
+            }
 
             $this->validateSufficientStock($transfer);
 
@@ -59,21 +60,18 @@ final readonly class CompleteStockTransfer
     {
         foreach ($transfer->items as $item) {
             if ($item->batch === null) {
-                throw new RuntimeException(
-                    sprintf(
-                        'Stock transfer item for product %d is missing a source batch.',
-                        $item->product_id
-                    )
+                throw new InvalidOperationException(
+                    'complete',
+                    'StockTransfer',
+                    sprintf('Stock transfer item for product %d is missing a source batch.', $item->product_id)
                 );
             }
 
             if ($item->batch->quantity < $item->quantity) {
-                throw new RuntimeException(
-                    sprintf(
-                        'Insufficient stock in batch. Required: %d, Available: %d',
-                        $item->quantity,
-                        $item->batch->quantity
-                    )
+                throw new InsufficientStockException(
+                    required: $item->quantity,
+                    available: $item->batch->quantity,
+                    batchId: $item->batch->id
                 );
             }
         }
