@@ -39,7 +39,6 @@ final readonly class QuickSale
             if ($data->paid_amount > 0) {
                 $paymentMethodExists = PaymentMethod::query()
                     ->where('id', $data->payment_method_id)
-                    ->where('is_active', true)
                     ->exists();
 
                 if (! $paymentMethodExists) {

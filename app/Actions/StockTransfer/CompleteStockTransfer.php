@@ -14,7 +14,6 @@ use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use Random\RandomException;
@@ -56,6 +55,10 @@ final readonly class CompleteStockTransfer
         });
     }
 
+    /**
+     * @throws InsufficientStockException
+     * @throws InvalidOperationException
+     */
     private function validateSufficientStock(StockTransfer $transfer): void
     {
         foreach ($transfer->items as $item) {
@@ -131,14 +134,7 @@ final readonly class CompleteStockTransfer
 
         $existingBatch = Batch::query()
             ->lockForUpdate()
-            ->where('product_id', $sourceBatch->product_id)
-            ->where('warehouse_id', $transfer->to_warehouse_id)
-            ->where('cost_amount', $sourceBatch->cost_amount)
-            ->when(
-                $expiresAt !== null,
-                fn (Builder $q) => $q->where('expires_at', $expiresAt),
-                fn (Builder $q) => $q->whereNull('expires_at'),
-            )
+            ->matching($sourceBatch->product_id, $transfer->to_warehouse_id, $sourceBatch->cost_amount, $expiresAt)
             ->first();
 
         return $existingBatch ?? Batch::query()->forceCreate([

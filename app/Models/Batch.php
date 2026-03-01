@@ -175,6 +175,28 @@ final class Batch extends Model
     }
 
     /**
+     * @param  Builder<Batch>  $query
+     * @return Builder<Batch>
+     */
+    #[Scope]
+    protected function matching(
+        Builder $query,
+        int $productId,
+        int $warehouseId,
+        int $costAmount,
+        ?CarbonInterface $expiresAt = null,
+    ): Builder {
+        return $query->where('product_id', $productId)
+            ->where('warehouse_id', $warehouseId)
+            ->where('cost_amount', $costAmount)
+            ->when(
+                $expiresAt instanceof CarbonInterface,
+                fn (Builder $q) => $q->where('expires_at', $expiresAt),
+                fn (Builder $q) => $q->whereNull('expires_at'),
+            );
+    }
+
+    /**
      * @return Attribute<bool, null>
      */
     protected function isExpired(): Attribute

@@ -60,7 +60,7 @@ final readonly class ProcessSaleReturnRefund
         throw_if($amount <= 0, RefundNotAllowedException::class, 'sale return', 'Refund amount must be greater than zero.');
 
         $cumulativeRefunds = (int) $saleReturn->payments()
-            ->where('amount', '<', 0)
+            ->refunds()
             ->sum('amount');
 
         $remainingRefundable = $saleReturn->total_amount + $cumulativeRefunds;
@@ -73,7 +73,7 @@ final readonly class ProcessSaleReturnRefund
         $saleReturn->refresh();
 
         $totalRefunds = (int) $saleReturn->payments()
-            ->where('amount', '<', 0)
+            ->refunds()
             ->sum('amount');
 
         $paymentStatus = match (true) {

@@ -36,7 +36,6 @@ final readonly class DeleteUnit
     private function getDefaultUnit(): ?Unit
     {
         return Unit::query()
-            ->where('is_active', true)
             ->where(function (Builder $query): void {
                 $query->where('short_name', 'pc')
                     ->orWhere('name', 'Piece');

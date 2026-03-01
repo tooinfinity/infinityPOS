@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Shared;
 
-use App\Enums\PaymentStateEnum;
 use App\Models\Payment;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
@@ -20,9 +19,8 @@ final readonly class UpdatePaymentStatus
     public function handle(Sale|SaleReturn|Purchase|PurchaseReturn $payable): void
     {
         $newPaidAmount = (int) Payment::query()
-            ->where('payable_type', $payable::class)
-            ->where('payable_id', $payable->id)
-            ->where('status', PaymentStateEnum::Active)
+            ->forPayable($payable::class, $payable->id)
+            ->active()
             ->lockForUpdate()
             ->sum('amount');
 

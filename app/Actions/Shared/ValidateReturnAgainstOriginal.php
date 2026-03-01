@@ -14,7 +14,6 @@ use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\SaleReturn;
 use App\Models\SaleReturnItem;
-use Illuminate\Database\Eloquent\Builder;
 use Throwable;
 
 final readonly class ValidateReturnAgainstOriginal
@@ -67,9 +66,9 @@ final readonly class ValidateReturnAgainstOriginal
         throw_if($originalItem === null, ItemNotFoundException::class, 'Product', 'original sale', 'Product is not part of the original sale or batch does not match.');
 
         $alreadyReturned = SaleReturnItem::query()
-            ->whereHas('saleReturn', fn (Builder $q) => $q->where('sale_id', $sale->id))
-            ->where('product_id', $productId)
-            ->where('batch_id', $batchId)
+            ->forOriginalSale($sale->id)
+            ->forProduct($productId)
+            ->forBatch($batchId)
             ->sum('quantity');
 
         $maxReturnable = $originalItem->quantity - $alreadyReturned;
@@ -100,9 +99,9 @@ final readonly class ValidateReturnAgainstOriginal
         throw_if($originalItem === null, ItemNotFoundException::class, 'Product', 'original purchase', 'Product is not part of the original purchase or batch does not match.');
 
         $alreadyReturned = PurchaseReturnItem::query()
-            ->whereHas('purchaseReturn', fn (Builder $q) => $q->where('purchase_id', $purchase->id))
-            ->where('product_id', $productId)
-            ->where('batch_id', $batchId)
+            ->forOriginalPurchase($purchase->id)
+            ->forProduct($productId)
+            ->forBatch($batchId)
             ->sum('quantity');
 
         $maxReturnable = $originalItem->quantity - $alreadyReturned;
@@ -136,15 +135,15 @@ final readonly class ValidateReturnAgainstOriginal
 
         if ($returnItemClass === SaleReturnItem::class) {
             $query = SaleReturnItem::query()
-                ->whereHas('saleReturn', fn (Builder $q) => $q->where('sale_id', $originalOrder->id))
-                ->where('product_id', $productId)
-                ->where('batch_id', $batchId);
+                ->forOriginalSale($originalOrder->id)
+                ->forProduct($productId)
+                ->forBatch($batchId);
 
         } else {
             $query = PurchaseReturnItem::query()
-                ->whereHas('purchaseReturn', fn (Builder $q) => $q->where('purchase_id', $originalOrder->id))
-                ->where('product_id', $productId)
-                ->where('batch_id', $batchId);
+                ->forOriginalPurchase($originalOrder->id)
+                ->forProduct($productId)
+                ->forBatch($batchId);
 
         }
         if (isset($returnModel->id)) {

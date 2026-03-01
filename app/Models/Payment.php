@@ -155,4 +155,25 @@ final class Payment extends Model
     {
         return $query->whereDate('payment_date', today());
     }
+
+    /**
+     * @param  Builder<Payment>  $query
+     * @return Builder<Payment>
+     */
+    #[Scope]
+    protected function refunds(Builder $query): Builder
+    {
+        return $query->where('amount', '<', 0);
+    }
+
+    /**
+     * @param  Builder<Payment>  $query
+     * @return Builder<Payment>
+     */
+    #[Scope]
+    protected function forPayable(Builder $query, string $payableType, int $payableId): Builder
+    {
+        return $query->where('payable_type', $payableType)
+            ->where('payable_id', $payableId);
+    }
 }

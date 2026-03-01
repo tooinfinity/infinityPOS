@@ -12,7 +12,6 @@ use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -95,14 +94,7 @@ final readonly class ReceivePurchase
 
         $existingBatch = Batch::query()
             ->lockForUpdate()
-            ->where('product_id', $item->product_id)
-            ->where('warehouse_id', $purchase->warehouse_id)
-            ->where('cost_amount', $item->unit_cost)
-            ->when(
-                $expiresAt !== null,
-                fn (Builder $q) => $q->where('expires_at', $expiresAt),
-                fn (Builder $q) => $q->whereNull('expires_at'),
-            )
+            ->matching($item->product_id, $purchase->warehouse_id, $item->unit_cost, $expiresAt)
             ->first();
 
         return $existingBatch ?? Batch::query()->forceCreate([

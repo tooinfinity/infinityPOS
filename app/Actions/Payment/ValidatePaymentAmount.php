@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Payment;
 
-use App\Enums\PaymentStateEnum;
 use App\Exceptions\InvalidPaymentMethodException;
 use App\Exceptions\OverpaymentException;
 use App\Models\Payment;
@@ -42,9 +41,8 @@ final readonly class ValidatePaymentAmount
     {
         /** @var int $amount */
         $amount = Payment::query()
-            ->where('payable_type', $payable::class)
-            ->where('payable_id', $payable->id)
-            ->where('status', PaymentStateEnum::Active)
+            ->forPayable($payable::class, $payable->id)
+            ->active()
             ->sum('amount');
 
         return $amount;
