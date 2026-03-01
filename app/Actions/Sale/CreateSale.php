@@ -11,13 +11,13 @@ use App\Data\Sale\CreateSaleData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
 use App\Models\Sale;
-use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
 final readonly class CreateSale
 {
     public function __construct(
+        private CreateSaleItems $createSaleItems,
         private ValidateStockForNewSale $validateStockForNewSale,
         private GenerateReferenceNo $generateReferenceNo,
         private CalculateSaleTotal $calculateSaleTotal,
@@ -47,17 +47,7 @@ final readonly class CreateSale
                 'note' => $data->note,
             ]);
 
-            foreach ($data->items as $item) {
-                SaleItem::query()->forceCreate([
-                    'sale_id' => $sale->id,
-                    'product_id' => $item->product_id,
-                    'batch_id' => $item->batch_id,
-                    'quantity' => $item->quantity,
-                    'unit_price' => $item->unit_price,
-                    'unit_cost' => $item->unit_cost,
-                    'subtotal' => $item->quantity * $item->unit_price,
-                ]);
-            }
+            $this->createSaleItems->handle($sale->id, $data->items);
 
             return $sale->refresh();
         });
