@@ -2,12 +2,23 @@
 
 declare(strict_types=1);
 
+use App\Exceptions\InsufficientStockException;
+use App\Exceptions\InvalidBatchException;
+use App\Exceptions\InvalidOperationException;
+use App\Exceptions\InvalidPaymentMethodException;
+use App\Exceptions\ItemNotFoundException;
+use App\Exceptions\OverpaymentException;
+use App\Exceptions\RefundNotAllowedException;
+use App\Exceptions\StateTransitionException;
+use App\Exceptions\WarehouseSameException;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -24,5 +35,23 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
+            $mappedExceptions = [
+                WarehouseSameException::class,
+                InvalidOperationException::class,
+                ItemNotFoundException::class,
+                RefundNotAllowedException::class,
+                OverpaymentException::class,
+                InvalidPaymentMethodException::class,
+                InvalidBatchException::class,
+                InsufficientStockException::class,
+                StateTransitionException::class,
+            ];
+
+            if (in_array($exception::class, $mappedExceptions)) {
+                return back()->with('error', $exception->getMessage());
+            }
+
+            return $response;
+        });
     })->create();
