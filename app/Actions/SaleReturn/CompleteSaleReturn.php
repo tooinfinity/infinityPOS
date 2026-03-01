@@ -9,8 +9,6 @@ use App\Data\SaleReturn\CompleteSaleReturnData;
 use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\ReturnStatusEnum;
 use App\Enums\StockMovementTypeEnum;
-use App\Exceptions\InvalidOperationException;
-use App\Exceptions\StateTransitionException;
 use App\Models\SaleReturn;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +16,10 @@ use Throwable;
 
 final readonly class CompleteSaleReturn
 {
-    public function __construct(private RecordStockMovement $recordStockMovement) {}
+    public function __construct(
+        private RecordStockMovement $recordStockMovement,
+        private ValidateSaleReturnCanBeCompleted $validateSaleReturnCanBeCompleted,
+    ) {}
 
     /**
      * @throws Throwable
@@ -32,7 +33,7 @@ final readonly class CompleteSaleReturn
                 ->with(['items.batch' => fn (Relation $q) => $q->lockForUpdate()])
                 ->findOrFail($saleReturn->id);
 
-            $this->validateSaleReturnCanBeCompleted($saleReturn);
+            $this->validateSaleReturnCanBeCompleted->handle($saleReturn);
 
             $this->addStockToBatches($saleReturn);
 
@@ -43,21 +44,6 @@ final readonly class CompleteSaleReturn
 
             return $saleReturn->refresh();
         });
-    }
-
-    /**
-     * @throws Throwable
-     */
-    private function validateSaleReturnCanBeCompleted(SaleReturn $saleReturn): void
-    {
-        if ($saleReturn->status !== ReturnStatusEnum::Pending) {
-            throw new StateTransitionException(
-                $saleReturn->status->value,
-                'Completed'
-            );
-        }
-
-        throw_if($saleReturn->items()->count() === 0, InvalidOperationException::class, 'complete', 'SaleReturn', 'Sale return cannot be completed without items');
     }
 
     /**

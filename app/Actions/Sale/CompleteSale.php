@@ -11,8 +11,6 @@ use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\SaleStatusEnum;
 use App\Enums\StockMovementTypeEnum;
 use App\Exceptions\InsufficientStockException;
-use App\Exceptions\InvalidOperationException;
-use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Sale;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -25,6 +23,7 @@ final readonly class CompleteSale
     public function __construct(
         private RecordStockMovement $recordStockMovement,
         private CalculatePaymentStatus $calculatePaymentStatus,
+        private ValidateSaleCompletion $validateSaleCompletion,
     ) {}
 
     /**
@@ -39,7 +38,7 @@ final readonly class CompleteSale
                 ->with(['items', 'items.batch' => fn (Relation $q) => $q->lockForUpdate()])
                 ->findOrFail($sale->id);
 
-            $this->validateSaleCanBeCompleted($sale);
+            $this->validateSaleCompletion->handle($sale);
 
             $this->deductStock($sale);
 
@@ -55,21 +54,6 @@ final readonly class CompleteSale
 
             return $sale->refresh();
         });
-    }
-
-    /**
-     * @throws Throwable
-     */
-    private function validateSaleCanBeCompleted(Sale $sale): void
-    {
-        if (! $sale->status->canTransitionTo(SaleStatusEnum::Completed)) {
-            throw new StateTransitionException(
-                $sale->status->value,
-                'Completed'
-            );
-        }
-
-        throw_if($sale->items->isEmpty(), InvalidOperationException::class, 'complete', 'Sale', 'Sale cannot be completed without items');
     }
 
     /**
