@@ -17,13 +17,7 @@ final readonly class DeleteSupplier
     public function handle(Supplier $supplier): bool
     {
         return DB::transaction(static function () use ($supplier): bool {
-            if ($supplier->purchases()->count() > 0) {
-                throw new InvalidOperationException(
-                    'delete',
-                    'Supplier',
-                    'Cannot delete supplier with associated purchases.'
-                );
-            }
+            throw_if($supplier->purchases()->count() > 0, InvalidOperationException::class, 'delete', 'Supplier', 'Cannot delete supplier with associated purchases.');
 
             return (bool) $supplier->delete();
         });

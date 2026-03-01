@@ -48,13 +48,7 @@ final readonly class UpdatePurchase
                 }
 
                 if (! $data->warehouse_id instanceof Optional) {
-                    if ($purchase->items()->exists()) {
-                        throw new InvalidOperationException(
-                            'change',
-                            'warehouse',
-                            'Cannot change warehouse after items have been added.'
-                        );
-                    }
+                    throw_if($purchase->items()->exists(), InvalidOperationException::class, 'change', 'warehouse', 'Cannot change warehouse after items have been added.');
                     $updateData['warehouse_id'] = $data->warehouse_id;
                 }
 

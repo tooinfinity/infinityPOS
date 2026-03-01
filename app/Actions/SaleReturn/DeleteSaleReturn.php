@@ -42,11 +42,6 @@ final readonly class DeleteSaleReturn
             ->where('amount', '<', 0)
             ->exists();
 
-        if ($hasRefunds) {
-            throw new RefundNotAllowedException(
-                'sale return',
-                'Cannot delete a sale return that has existing refunds. Please void the refunds first.'
-            );
-        }
+        throw_if($hasRefunds, RefundNotAllowedException::class, 'sale return', 'Cannot delete a sale return that has existing refunds. Please void the refunds first.');
     }
 }

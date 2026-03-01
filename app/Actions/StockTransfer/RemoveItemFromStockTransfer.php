@@ -29,21 +29,9 @@ final readonly class RemoveItemFromStockTransfer
                 ->lockForUpdate()
                 ->findOrFail($item->id);
 
-            if ($transfer->status !== StockTransferStatusEnum::Pending) {
-                throw new InvalidOperationException(
-                    'remove item from',
-                    'StockTransfer',
-                    'Items can only be removed from pending transfers.'
-                );
-            }
+            throw_if($transfer->status !== StockTransferStatusEnum::Pending, InvalidOperationException::class, 'remove item from', 'StockTransfer', 'Items can only be removed from pending transfers.');
 
-            if ($item->stock_transfer_id !== $transfer->id) {
-                throw new InvalidOperationException(
-                    'remove',
-                    'StockTransferItem',
-                    'Item does not belong to this transfer.'
-                );
-            }
+            throw_if($item->stock_transfer_id !== $transfer->id, InvalidOperationException::class, 'remove', 'StockTransferItem', 'Item does not belong to this transfer.');
 
             return (bool) $item->delete();
         });

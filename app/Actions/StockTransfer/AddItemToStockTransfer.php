@@ -19,13 +19,7 @@ final readonly class AddItemToStockTransfer
     public function handle(StockTransfer $transfer, StockTransferItemData $itemData): StockTransferItem
     {
         return DB::transaction(static function () use ($transfer, $itemData): StockTransferItem {
-            if ($transfer->status !== \App\Enums\StockTransferStatusEnum::Pending) {
-                throw new InvalidOperationException(
-                    'add item to',
-                    'StockTransfer',
-                    'Items can only be added to pending transfers.'
-                );
-            }
+            throw_if($transfer->status !== \App\Enums\StockTransferStatusEnum::Pending, InvalidOperationException::class, 'add item to', 'StockTransfer', 'Items can only be added to pending transfers.');
 
             return StockTransferItem::query()->forceCreate([
                 'stock_transfer_id' => $transfer->id,

@@ -35,9 +35,7 @@ final readonly class ValidateReturnAgainstOriginal
 
         $originalItem = $this->findOriginalItem($originalOrder, $productId, $batchId);
 
-        if ($originalItem === null) {
-            throw new ItemNotFoundException('Product', 'original order', 'Product is not part of the original order or batch does not match.');
-        }
+        throw_if($originalItem === null, ItemNotFoundException::class, 'Product', 'original order', 'Product is not part of the original order or batch does not match.');
 
         $alreadyReturned = $this->getAlreadyReturnedQuantity($returnModel, $originalOrder, $productId, $batchId, $item instanceof SaleReturnItem ? SaleReturnItem::class : PurchaseReturnItem::class);
 
@@ -66,9 +64,7 @@ final readonly class ValidateReturnAgainstOriginal
 
         $originalItem = $this->findOriginalItem($sale, $productId, $batchId);
 
-        if ($originalItem === null) {
-            throw new ItemNotFoundException('Product', 'original sale', 'Product is not part of the original sale or batch does not match.');
-        }
+        throw_if($originalItem === null, ItemNotFoundException::class, 'Product', 'original sale', 'Product is not part of the original sale or batch does not match.');
 
         $alreadyReturned = SaleReturnItem::query()
             ->whereHas('saleReturn', fn (Builder $q) => $q->where('sale_id', $sale->id))
@@ -101,9 +97,7 @@ final readonly class ValidateReturnAgainstOriginal
 
         $originalItem = $this->findOriginalItem($purchase, $productId, $batchId);
 
-        if ($originalItem === null) {
-            throw new ItemNotFoundException('Product', 'original purchase', 'Product is not part of the original purchase or batch does not match.');
-        }
+        throw_if($originalItem === null, ItemNotFoundException::class, 'Product', 'original purchase', 'Product is not part of the original purchase or batch does not match.');
 
         $alreadyReturned = PurchaseReturnItem::query()
             ->whereHas('purchaseReturn', fn (Builder $q) => $q->where('purchase_id', $purchase->id))

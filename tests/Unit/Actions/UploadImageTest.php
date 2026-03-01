@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\UploadImage;
+use App\Exceptions\InvalidOperationException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -220,4 +221,20 @@ it('handles null max width by using default', function (): void {
         ->toStartWith('uploads/')
         ->toEndWith('.webp')
         ->and(Storage::disk('public')->exists($path))->toBeTrue();
+});
+
+it('throws exception when storage fails to store image', function (): void {
+    Storage::shouldReceive('disk')
+        ->with('public')
+        ->andReturnSelf();
+
+    Storage::shouldReceive('put')
+        ->andReturn(false);
+
+    $action = resolve(UploadImage::class);
+
+    $file = UploadedFile::fake()->image('product.png', 800, 600);
+
+    expect(fn (): string => $action->handle($file, 'products'))
+        ->toThrow(InvalidOperationException::class, 'Failed to store image');
 });

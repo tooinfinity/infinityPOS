@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Actions\StockTransfer\RemoveItemFromStockTransfer;
 use App\Enums\StockTransferStatusEnum;
 use App\Exceptions\InvalidOperationException;
-use App\Exceptions\StateTransitionException;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
 

@@ -318,3 +318,68 @@ it('throws exception when batch not found', function () use (&$paymentMethod): v
 
     $action->handle($data);
 })->throws(InvalidBatchException::class, 'Batch 99999: not found');
+
+it('throws exception when payment method inactive', function (): void {
+    $batch = Batch::factory()->withQuantity(100)->create();
+    $customer = Customer::factory()->create();
+    $inactivePaymentMethod = PaymentMethod::factory()->create(['is_active' => false]);
+
+    $action = resolve(QuickSale::class);
+
+    $items = new DataCollection(SaleItemData::class, [
+        new SaleItemData(
+            product_id: $batch->product_id,
+            batch_id: $batch->id,
+            quantity: 10,
+            unit_price: 500,
+            unit_cost: 300,
+        ),
+    ]);
+
+    $data = new QuickSaleData(
+        customer_id: $customer->id,
+        warehouse_id: $batch->warehouse_id,
+        user_id: null,
+        payment_method_id: $inactivePaymentMethod->id,
+        sale_date: now(),
+        paid_amount: 5000,
+        note: null,
+        items: $items,
+    );
+
+    $action->handle($data);
+})->throws(App\Exceptions\InvalidPaymentMethodException::class);
+
+it('handles partial payment', function () use (&$paymentMethod): void {
+    $batch = Batch::factory()->withQuantity(100)->create();
+    $customer = Customer::factory()->create();
+
+    $action = resolve(QuickSale::class);
+
+    $items = new DataCollection(SaleItemData::class, [
+        new SaleItemData(
+            product_id: $batch->product_id,
+            batch_id: $batch->id,
+            quantity: 10,
+            unit_price: 500,
+            unit_cost: 300,
+        ),
+    ]);
+
+    $data = new QuickSaleData(
+        customer_id: $customer->id,
+        warehouse_id: $batch->warehouse_id,
+        user_id: null,
+        payment_method_id: $paymentMethod->id,
+        sale_date: now(),
+        paid_amount: 3000,
+        note: null,
+        items: $items,
+    );
+
+    $sale = $action->handle($data);
+
+    expect($sale->payment_status)->toBe(PaymentStatusEnum::Partial)
+        ->and($sale->paid_amount)->toBe(3000)
+        ->and($sale->change_amount)->toBe(0);
+});

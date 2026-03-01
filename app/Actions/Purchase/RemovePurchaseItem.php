@@ -34,7 +34,7 @@ final readonly class RemovePurchaseItem
                 ->lockForUpdate()
                 ->findOrFail($item->purchase_id);
 
-            $validateStatus->handle($purchase, 'Items can only be removed from pending purchases.');
+            $validateStatus->handle($purchase);
 
             $item->delete();
 

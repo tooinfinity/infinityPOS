@@ -20,13 +20,7 @@ final readonly class UpdateStockTransfer
     public function handle(StockTransfer $transfer, UpdateStockTransferData $data): StockTransfer
     {
         return DB::transaction(static function () use ($transfer, $data): StockTransfer {
-            if ($transfer->status !== StockTransferStatusEnum::Pending) {
-                throw new InvalidOperationException(
-                    'update',
-                    'StockTransfer',
-                    'Only pending transfers can be updated.'
-                );
-            }
+            throw_if($transfer->status !== StockTransferStatusEnum::Pending, InvalidOperationException::class, 'update', 'StockTransfer', 'Only pending transfers can be updated.');
 
             $updateData = [];
 

@@ -146,4 +146,4 @@ it('throws exception when batch is in different warehouse', function (): void {
         unit_price: 500,
         unit_cost: 300,
     ));
-})->throws(InvalidBatchException::class, "Batch 1: not in warehouse 1");
+})->throws(InvalidBatchException::class, 'Batch 1: not in warehouse 1');

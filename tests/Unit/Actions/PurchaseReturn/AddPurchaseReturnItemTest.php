@@ -6,7 +6,6 @@ use App\Actions\PurchaseReturn\AddPurchaseReturnItem;
 use App\Data\PurchaseReturn\PurchaseReturnItemData;
 use App\Exceptions\InvalidOperationException;
 use App\Exceptions\ItemNotFoundException;
-use App\Exceptions\RefundNotAllowedException;
 use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Purchase;

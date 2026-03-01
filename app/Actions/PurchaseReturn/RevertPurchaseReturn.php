@@ -55,12 +55,7 @@ final readonly class RevertPurchaseReturn
             ->where('amount', '<', 0)
             ->exists();
 
-        if ($hasRefunds) {
-            throw new RefundNotAllowedException(
-                'purchase return',
-                'Cannot cancel a purchase return that has existing refunds. Please void the refunds first.'
-            );
-        }
+        throw_if($hasRefunds, RefundNotAllowedException::class, 'purchase return', 'Cannot cancel a purchase return that has existing refunds. Please void the refunds first.');
 
         if ($purchaseReturn->status !== ReturnStatusEnum::Completed) {
             throw new StateTransitionException(

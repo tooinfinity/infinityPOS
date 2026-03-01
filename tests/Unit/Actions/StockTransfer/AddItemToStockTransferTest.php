@@ -6,7 +6,6 @@ use App\Actions\StockTransfer\AddItemToStockTransfer;
 use App\Data\StockTransfer\StockTransferItemData;
 use App\Enums\StockTransferStatusEnum;
 use App\Exceptions\InvalidOperationException;
-use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\StockTransfer;

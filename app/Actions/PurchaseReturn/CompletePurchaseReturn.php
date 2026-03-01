@@ -57,13 +57,7 @@ final readonly class CompletePurchaseReturn
             );
         }
 
-        if ($purchaseReturn->items->isEmpty()) {
-            throw new InvalidOperationException(
-                'complete',
-                'PurchaseReturn',
-                'Purchase return cannot be completed without items'
-            );
-        }
+        throw_if($purchaseReturn->items->isEmpty(), InvalidOperationException::class, 'complete', 'PurchaseReturn', 'Purchase return cannot be completed without items');
     }
 
     /**

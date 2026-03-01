@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\Sale\DeleteSale;
 use App\Exceptions\InvalidOperationException;
-use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Sale;
 use App\Models\SaleItem;

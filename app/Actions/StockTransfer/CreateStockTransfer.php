@@ -23,9 +23,7 @@ final readonly class CreateStockTransfer
     public function handle(CreateStockTransferData $data): StockTransfer
     {
         return DB::transaction(function () use ($data): StockTransfer {
-            if ($data->from_warehouse_id === $data->to_warehouse_id) {
-                throw new WarehouseSameException();
-            }
+            throw_if($data->from_warehouse_id === $data->to_warehouse_id, WarehouseSameException::class);
 
             $transfer = StockTransfer::query()->forceCreate([
                 'from_warehouse_id' => $data->from_warehouse_id,

@@ -17,13 +17,7 @@ final readonly class DeleteCustomer
     public function handle(Customer $customer): bool
     {
         return DB::transaction(static function () use ($customer): bool {
-            if ($customer->sales()->count() > 0) {
-                throw new InvalidOperationException(
-                    'delete',
-                    'Customer',
-                    'Cannot delete customer with associated sales.'
-                );
-            }
+            throw_if($customer->sales()->count() > 0, InvalidOperationException::class, 'delete', 'Customer', 'Cannot delete customer with associated sales.');
 
             return (bool) $customer->delete();
         });

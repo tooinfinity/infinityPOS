@@ -25,7 +25,7 @@ final readonly class RemoveSaleReturnItem
         return DB::transaction(function () use ($item): bool {
             $saleReturn = $item->saleReturn;
 
-            $this->validateStatus->handle($saleReturn, 'Cannot remove items from a non-pending sale return.');
+            $this->validateStatus->handle($saleReturn);
 
             $deleted = $item->delete();
 

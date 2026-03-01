@@ -21,7 +21,7 @@ final readonly class UpdateStockTransferItem
     public function handle(StockTransferItem $item, UpdateStockTransferItemData $data): StockTransferItem
     {
         return DB::transaction(function () use ($item, $data): StockTransferItem {
-            $this->validateStatus->forItem($item, 'Items can only be updated when transfer is pending.');
+            $this->validateStatus->forItem($item);
 
             $updateData = [];
 

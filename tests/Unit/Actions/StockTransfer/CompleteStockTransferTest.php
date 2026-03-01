@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Actions\StockTransfer\CompleteStockTransfer;
 use App\Enums\StockTransferStatusEnum;
 use App\Exceptions\InsufficientStockException;
-use App\Exceptions\InvalidBatchException;
 use App\Exceptions\InvalidOperationException;
 use App\Exceptions\StateTransitionException;
 use App\Models\Batch;

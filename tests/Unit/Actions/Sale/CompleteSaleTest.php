@@ -214,3 +214,41 @@ it('handles mixed items with and without batch', function (): void {
     expect($sale->fresh()->status)->toBe(SaleStatusEnum::Completed);
     expect($batch->fresh()->quantity)->toBe(90);
 });
+
+it('throws exception when insufficient stock', function (): void {
+    $sale = Sale::factory()->pending()->create();
+    $batch = Batch::factory()->withQuantity(5)->create([
+        'warehouse_id' => $sale->warehouse_id,
+    ]);
+    SaleItem::factory()->forSale($sale)->create([
+        'product_id' => $batch->product_id,
+        'batch_id' => $batch->id,
+        'quantity' => 10,
+        'unit_price' => 500,
+        'unit_cost' => 300,
+    ]);
+
+    $action = resolve(CompleteSale::class);
+    $action->handle($sale);
+})->throws(App\Exceptions\InsufficientStockException::class);
+
+it('keeps original note when data provided but note is null', function (): void {
+    $sale = Sale::factory()->pending()->create([
+        'note' => 'Original note',
+    ]);
+    $batch = Batch::factory()->withQuantity(100)->create([
+        'warehouse_id' => $sale->warehouse_id,
+    ]);
+    SaleItem::factory()->forSale($sale)->create([
+        'product_id' => $batch->product_id,
+        'batch_id' => $batch->id,
+        'quantity' => 10,
+        'unit_price' => 500,
+        'unit_cost' => 300,
+    ]);
+
+    $action = resolve(CompleteSale::class);
+    $action->handle($sale, new CompleteSaleData(note: null));
+
+    expect($sale->fresh()->note)->toBe('Original note');
+});

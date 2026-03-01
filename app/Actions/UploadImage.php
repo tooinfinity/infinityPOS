@@ -23,6 +23,11 @@ final readonly class UploadImage
 
     private const int DEFAULT_MAX_WIDTH = 400;
 
+    public function __construct(
+        private string $disk = 'public',
+        private ?string $tmpDir = null,
+    ) {}
+
     /**
      * Process and store image.
      *
@@ -39,14 +44,12 @@ final readonly class UploadImage
 
         try {
             $stream = fopen($tmpPath, 'rb');
-            if ($stream === false) {
-                throw new InvalidOperationException('process', 'image', 'Failed to open processed image file');
-            }
+            // @codeCoverageIgnoreStart
+            throw_if($stream === false, InvalidOperationException::class, 'process', 'image', 'Failed to open processed image file');
+            // @codeCoverageIgnoreEnd
+            $result = Storage::disk($this->disk)->put($filename, $stream);
 
-            $result = Storage::disk('public')->put($filename, $stream);
-            if (! $result) {
-                throw new InvalidOperationException('store', 'image', 'Failed to store image');
-            }
+            throw_unless($result, InvalidOperationException::class, 'store', 'image', 'Failed to store image');
 
             if (is_resource($stream)) {
                 fclose($stream);
@@ -57,8 +60,8 @@ final readonly class UploadImage
             }
         }
 
-        if ($existingImage !== null && Storage::disk('public')->exists($existingImage)) {
-            Storage::disk('public')->delete($existingImage);
+        if ($existingImage !== null && Storage::disk($this->disk)->exists($existingImage)) {
+            Storage::disk($this->disk)->delete($existingImage);
         }
 
         return $filename;
@@ -93,7 +96,8 @@ final readonly class UploadImage
     private function processImage(UploadedFile $file, int $maxWidth): string
     {
         $driver = extension_loaded('imagick') ? ImageDriver::Imagick : ImageDriver::Gd;
-        $tmpPath = sys_get_temp_dir().'/upload_'.Str::uuid()->toString().'.webp';
+        $dir = $this->tmpDir ?? sys_get_temp_dir();
+        $tmpPath = $dir.'/upload_'.Str::uuid()->toString().'.webp';
 
         Image::useImageDriver($driver)
             ->loadFile($file->getPathname())

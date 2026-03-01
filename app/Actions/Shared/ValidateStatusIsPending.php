@@ -22,14 +22,14 @@ final readonly class ValidateStatusIsPending
     /**
      * @throws StateTransitionException
      */
-    public function handle(Sale|SaleReturn|Purchase|PurchaseReturn|StockTransfer $model, ?string $customMessage = null): void
+    public function handle(Sale|SaleReturn|Purchase|PurchaseReturn|StockTransfer $model): void
     {
         $pendingStatus = $this->getPendingStatus($model);
 
         if ($model->status !== $pendingStatus) {
             throw new StateTransitionException(
                 $model->status->value,
-                $pendingStatus instanceof BackedEnum ? $pendingStatus->value : 'Pending'
+                $pendingStatus instanceof BackedEnum ? (string) $pendingStatus->value : 'Pending'
             );
         }
     }
@@ -37,7 +37,7 @@ final readonly class ValidateStatusIsPending
     /**
      * @throws StateTransitionException
      */
-    public function forItem(StockTransferItem $item, ?string $customMessage = null): void
+    public function forItem(StockTransferItem $item): void
     {
         $transfer = $item->stockTransfer;
 
@@ -57,17 +57,6 @@ final readonly class ValidateStatusIsPending
             Purchase::class => PurchaseStatusEnum::Pending,
             PurchaseReturn::class => ReturnStatusEnum::Pending,
             StockTransfer::class => StockTransferStatusEnum::Pending,
-        };
-    }
-
-    private function getErrorMessage(Sale|SaleReturn|Purchase|PurchaseReturn|StockTransfer $model): string
-    {
-        return match ($model::class) {
-            Sale::class => "Can only modify items in pending sales. Current status: {$model->status->value}",
-            SaleReturn::class => "Cannot add items to a non-pending sale return. Current status: {$model->status->value}",
-            Purchase::class => "Items can only be added to pending purchases. Current status: {$model->status->value}",
-            PurchaseReturn::class => "Cannot add items to a non-pending purchase return. Current status: {$model->status->value}",
-            StockTransfer::class => "Items can only be added to pending transfers. Current status: {$model->status->value}",
         };
     }
 }

@@ -34,7 +34,7 @@ final readonly class UpdateSaleReturnItem
 
             $saleReturn = $item->saleReturn;
 
-            $this->validateStatus->handle($saleReturn, 'Cannot update items in a non-pending sale return.');
+            $this->validateStatus->handle($saleReturn);
 
             $quantity = $data->quantity ?? $item->quantity;
             $unitPrice = $data->unit_price ?? $item->unit_price;

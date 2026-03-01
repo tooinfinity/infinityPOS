@@ -34,7 +34,7 @@ final readonly class UpdatePurchaseReturnItem
 
             $purchaseReturn = $item->purchaseReturn;
 
-            $this->validateStatus->handle($purchaseReturn, 'Cannot update items in a non-pending purchase return.');
+            $this->validateStatus->handle($purchaseReturn);
 
             $quantity = $data->quantity ?? $item->quantity;
             $unitCost = $data->unit_cost ?? $item->unit_cost;

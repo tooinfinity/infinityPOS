@@ -55,13 +55,9 @@ final readonly class ProcessSaleReturnRefund
      */
     private function validateRefund(SaleReturn $saleReturn, int $amount): void
     {
-        if ($saleReturn->status !== ReturnStatusEnum::Completed) {
-            throw new RefundNotAllowedException('sale return', 'Sale return must be completed before issuing a refund.');
-        }
+        throw_if($saleReturn->status !== ReturnStatusEnum::Completed, RefundNotAllowedException::class, 'sale return', 'Sale return must be completed before issuing a refund.');
 
-        if ($amount <= 0) {
-            throw new RefundNotAllowedException('sale return', 'Refund amount must be greater than zero.');
-        }
+        throw_if($amount <= 0, RefundNotAllowedException::class, 'sale return', 'Refund amount must be greater than zero.');
 
         $cumulativeRefunds = (int) $saleReturn->payments()
             ->where('amount', '<', 0)
@@ -69,9 +65,7 @@ final readonly class ProcessSaleReturnRefund
 
         $remainingRefundable = $saleReturn->total_amount + $cumulativeRefunds;
 
-        if ($amount > $remainingRefundable) {
-            throw new RefundNotAllowedException('sale return', "Refund amount exceeds remaining refundable amount. Maximum: $remainingRefundable");
-        }
+        throw_if($amount > $remainingRefundable, RefundNotAllowedException::class, 'sale return', "Refund amount exceeds remaining refundable amount. Maximum: $remainingRefundable");
     }
 
     private function updatePaymentStatus(SaleReturn $saleReturn): void

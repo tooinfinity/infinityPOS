@@ -52,12 +52,7 @@ final readonly class RevertSaleReturn
             ->where('amount', '<', 0)
             ->exists();
 
-        if ($hasRefunds) {
-            throw new RefundNotAllowedException(
-                'sale return',
-                'Cannot cancel a sale return that has existing refunds. Please void the refunds first.'
-            );
-        }
+        throw_if($hasRefunds, RefundNotAllowedException::class, 'sale return', 'Cannot cancel a sale return that has existing refunds. Please void the refunds first.');
 
         if ($saleReturn->status !== ReturnStatusEnum::Completed) {
             throw new StateTransitionException(

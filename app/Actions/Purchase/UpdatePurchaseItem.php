@@ -31,7 +31,7 @@ final readonly class UpdatePurchaseItem
                 ->lockForUpdate()
                 ->findOrFail($item->purchase_id);
 
-            $this->validateStatus->handle($purchase, 'Items can only be updated on pending purchases.');
+            $this->validateStatus->handle($purchase);
 
             $updateData = [];
 

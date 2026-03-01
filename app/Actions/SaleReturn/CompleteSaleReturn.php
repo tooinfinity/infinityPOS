@@ -57,13 +57,7 @@ final readonly class CompleteSaleReturn
             );
         }
 
-        if ($saleReturn->items()->count() === 0) {
-            throw new InvalidOperationException(
-                'complete',
-                'SaleReturn',
-                'Sale return cannot be completed without items'
-            );
-        }
+        throw_if($saleReturn->items()->count() === 0, InvalidOperationException::class, 'complete', 'SaleReturn', 'Sale return cannot be completed without items');
     }
 
     /**
