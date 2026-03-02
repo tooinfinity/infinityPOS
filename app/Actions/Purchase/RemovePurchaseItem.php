@@ -15,26 +15,22 @@ use Throwable;
 final readonly class RemovePurchaseItem
 {
     public function __construct(
-        private ?ValidateStatusIsPending $validateStatus = null,
-        private ?RecalculateParentTotal $recalculateTotal = null,
-        private ?bool $deleteIfEmpty = true,
+        private ValidateStatusIsPending $validateStatus,
+        private RecalculateParentTotal $recalculateTotal,
     ) {}
 
     /**
      * @throws Throwable
      */
-    public function handle(PurchaseItem $item): ?Purchase
+    public function handle(PurchaseItem $item, bool $deleteIfEmpty = true): ?Purchase
     {
-        $validateStatus = $this->validateStatus ?? new ValidateStatusIsPending();
-        $recalculateTotal = $this->recalculateTotal ?? new RecalculateParentTotal();
-
-        return DB::transaction(function () use ($item, $validateStatus, $recalculateTotal): ?Purchase {
+        return DB::transaction(function () use ($item, $deleteIfEmpty): ?Purchase {
             /** @var Purchase $purchase */
             $purchase = Purchase::query()
                 ->lockForUpdate()
                 ->findOrFail($item->purchase_id);
 
-            $validateStatus->handle($purchase);
+            $this->validateStatus->handle($purchase);
 
             $item->delete();
 
@@ -42,7 +38,7 @@ final readonly class RemovePurchaseItem
                 ->where('purchase_id', $purchase->id)
                 ->count();
 
-            if ($remainingItems === 0 && $this->deleteIfEmpty) {
+            if ($remainingItems === 0 && $deleteIfEmpty) {
                 if ($purchase->document !== null) {
                     Storage::disk('public')->delete($purchase->document);
                 }
@@ -51,7 +47,7 @@ final readonly class RemovePurchaseItem
                 return null;
             }
 
-            $recalculateTotal->handle($purchase);
+            $this->recalculateTotal->handle($purchase);
 
             return $purchase->refresh();
         });

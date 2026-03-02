@@ -9,7 +9,6 @@ use App\Exceptions\InvalidBatchException;
 use App\Models\Batch;
 use App\Models\Sale;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 use Throwable;
 
 final readonly class ValidateStockForPendingSale
@@ -20,7 +19,7 @@ final readonly class ValidateStockForPendingSale
     public function handle(Sale $sale, int $batchId, int $quantity, ?int $excludeItemId = null, ?int $productId = null): void
     {
         /** @var Batch|null $batch */
-        $batch = DB::table('batches')
+        $batch = Batch::query()
             ->lockForUpdate()
             ->find($batchId);
 

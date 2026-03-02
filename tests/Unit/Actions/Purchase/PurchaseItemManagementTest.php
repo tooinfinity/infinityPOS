@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Actions\Purchase\AddPurchaseItem;
 use App\Actions\Purchase\RemovePurchaseItem;
 use App\Actions\Purchase\UpdatePurchaseItem;
+use App\Actions\Shared\RecalculateParentTotal;
+use App\Actions\Shared\ValidateStatusIsPending;
 use App\Data\Purchase\PurchaseItemData;
 use App\Data\Purchase\UpdatePurchaseItemData;
 use App\Exceptions\StateTransitionException;
@@ -196,9 +198,12 @@ it('deletes purchase when removing last item', function (): void {
         'purchase_id' => $purchase->id,
     ]);
 
-    $action = new RemovePurchaseItem(deleteIfEmpty: true);
+    $action = new RemovePurchaseItem(
+        new ValidateStatusIsPending(),
+        new RecalculateParentTotal(),
+    );
 
-    $result = $action->handle($item);
+    $result = $action->handle($item, deleteIfEmpty: true);
 
     expect($result)->toBeNull();
     $this->assertDatabaseMissing('purchases', ['id' => $purchase->id]);
@@ -211,9 +216,12 @@ it('keeps purchase when removing last item with deleteIfEmpty false', function (
         'purchase_id' => $purchase->id,
     ]);
 
-    $action = new RemovePurchaseItem(deleteIfEmpty: false);
+    $action = new RemovePurchaseItem(
+        new ValidateStatusIsPending(),
+        new RecalculateParentTotal(),
+    );
 
-    $result = $action->handle($item);
+    $result = $action->handle($item, deleteIfEmpty: false);
 
     expect($result)->toBeInstanceOf(Purchase::class)
         ->and($result->total_amount)->toBe(0);

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Purchase;
 
 use App\Actions\GenerateReferenceNo;
+use App\Actions\Shared\RecalculateParentTotal;
 use App\Actions\UploadImage;
 use App\Data\Purchase\CreatePurchaseData;
-use App\Data\Purchase\PurchaseItemData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\PurchaseStatusEnum;
 use App\Models\Purchase;
@@ -22,6 +22,7 @@ final readonly class CreatePurchase
     public function __construct(
         private UploadImage $uploadImage,
         private GenerateReferenceNo $generateReferenceNo,
+        private RecalculateParentTotal $recalculateTotal,
     ) {}
 
     /**
@@ -38,8 +39,6 @@ final readonly class CreatePurchase
         try {
             return DB::transaction(function () use ($data, $documentPath): Purchase {
 
-                $totalAmount = $data->items->toCollection()->reduce(fn (int $total, PurchaseItemData $item): int => $total + ($item->quantity * $item->unit_cost), 0);
-
                 $purchase = Purchase::query()->forceCreate([
                     'supplier_id' => $data->supplier_id,
                     'warehouse_id' => $data->warehouse_id,
@@ -47,7 +46,7 @@ final readonly class CreatePurchase
                     'reference_no' => $this->generateReferenceNo->handle('PUR', Purchase::class),
                     'status' => PurchaseStatusEnum::Pending,
                     'purchase_date' => $data->purchase_date,
-                    'total_amount' => $totalAmount,
+                    'total_amount' => 0,
                     'paid_amount' => 0,
                     'payment_status' => PaymentStatusEnum::Unpaid,
                     'note' => $data->note,
@@ -64,6 +63,8 @@ final readonly class CreatePurchase
                         'subtotal' => $item->quantity * $item->unit_cost,
                     ]);
                 }
+
+                $this->recalculateTotal->handle($purchase);
 
                 return $purchase->refresh();
             });
