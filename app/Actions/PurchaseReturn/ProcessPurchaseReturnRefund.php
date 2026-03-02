@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\PurchaseReturn;
 
 use App\Actions\GenerateReferenceNo;
+use App\Actions\Shared\RecalculatePaymentSummary;
 use App\Data\PurchaseReturn\RefundPurchaseReturnData;
 use App\Enums\PaymentStateEnum;
-use App\Enums\PaymentStatusEnum;
 use App\Enums\ReturnStatusEnum;
 use App\Exceptions\RefundNotAllowedException;
 use App\Models\Payment;
@@ -17,7 +17,10 @@ use Throwable;
 
 final readonly class ProcessPurchaseReturnRefund
 {
-    public function __construct(private GenerateReferenceNo $generateReferenceNo) {}
+    public function __construct(
+        private GenerateReferenceNo $generateReferenceNo,
+        private RecalculatePaymentSummary $recalculatePaymentSummary,
+    ) {}
 
     /**
      * @throws Throwable
@@ -43,7 +46,7 @@ final readonly class ProcessPurchaseReturnRefund
                 'status' => PaymentStateEnum::Active,
             ]);
 
-            $this->updatePaymentStatus($purchaseReturn);
+            $this->recalculatePaymentSummary->handle($purchaseReturn, fromRefunds: true);
 
             return $payment->refresh();
         });
@@ -65,25 +68,5 @@ final readonly class ProcessPurchaseReturnRefund
         $remainingRefundable = $purchaseReturn->total_amount + $cumulativeRefunds;
 
         throw_if($amount > $remainingRefundable, RefundNotAllowedException::class, 'purchase return', "Refund amount exceeds remaining refundable amount. Maximum: $remainingRefundable");
-    }
-
-    private function updatePaymentStatus(PurchaseReturn $purchaseReturn): void
-    {
-        $purchaseReturn->refresh();
-
-        $totalRefunds = (int) $purchaseReturn->payments()
-            ->refunds()
-            ->sum('amount');
-
-        $paymentStatus = match (true) {
-            abs($totalRefunds) >= $purchaseReturn->total_amount => PaymentStatusEnum::Paid,
-            $totalRefunds < 0 => PaymentStatusEnum::Partial,
-            default => PaymentStatusEnum::Unpaid,
-        };
-
-        $purchaseReturn->forceFill([
-            'paid_amount' => abs($totalRefunds),
-            'payment_status' => $paymentStatus,
-        ])->save();
     }
 }

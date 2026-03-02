@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\SaleReturn;
 
 use App\Actions\GenerateReferenceNo;
+use App\Actions\Shared\RecalculatePaymentSummary;
 use App\Data\SaleReturn\RefundSaleReturnData;
 use App\Enums\PaymentStateEnum;
-use App\Enums\PaymentStatusEnum;
 use App\Enums\ReturnStatusEnum;
 use App\Exceptions\RefundNotAllowedException;
 use App\Models\Payment;
@@ -17,7 +17,10 @@ use Throwable;
 
 final readonly class ProcessSaleReturnRefund
 {
-    public function __construct(private GenerateReferenceNo $generateReferenceNo) {}
+    public function __construct(
+        private GenerateReferenceNo $generateReferenceNo,
+        private RecalculatePaymentSummary $recalculatePaymentSummary,
+    ) {}
 
     /**
      * @throws Throwable
@@ -44,7 +47,7 @@ final readonly class ProcessSaleReturnRefund
                 'status' => PaymentStateEnum::Active,
             ]);
 
-            $this->updatePaymentStatus($saleReturn);
+            $this->recalculatePaymentSummary->handle($saleReturn, fromRefunds: true);
 
             return $payment->refresh();
         });
@@ -66,25 +69,5 @@ final readonly class ProcessSaleReturnRefund
         $remainingRefundable = $saleReturn->total_amount + $cumulativeRefunds;
 
         throw_if($amount > $remainingRefundable, RefundNotAllowedException::class, 'sale return', "Refund amount exceeds remaining refundable amount. Maximum: $remainingRefundable");
-    }
-
-    private function updatePaymentStatus(SaleReturn $saleReturn): void
-    {
-        $saleReturn->refresh();
-
-        $totalRefunds = (int) $saleReturn->payments()
-            ->refunds()
-            ->sum('amount');
-
-        $paymentStatus = match (true) {
-            abs($totalRefunds) >= $saleReturn->total_amount => PaymentStatusEnum::Paid,
-            $totalRefunds < 0 => PaymentStatusEnum::Partial,
-            default => PaymentStatusEnum::Unpaid,
-        };
-
-        $saleReturn->forceFill([
-            'paid_amount' => abs($totalRefunds),
-            'payment_status' => $paymentStatus,
-        ])->save();
     }
 }

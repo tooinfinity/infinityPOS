@@ -59,7 +59,7 @@ final readonly class QuickSale
         if ($data->paid_amount > 0) {
             $this->recordPayment($sale, $data);
 
-            $this->applyPaymentSummary->handle($sale, $data->paid_amount, preserveExistingPaidAmount: true);
+            $this->applyPaymentSummary->handle($sale, $data->paid_amount, capPaidAmount: true);
         }
 
         $sale->load('items');
@@ -83,6 +83,5 @@ final readonly class QuickSale
             'note' => 'Quick sale payment',
             'status' => PaymentStateEnum::Active,
         ]);
-
     }
 }

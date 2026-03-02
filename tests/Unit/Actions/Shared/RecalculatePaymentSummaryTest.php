@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Shared\UpdatePaymentStatus;
+use App\Actions\Shared\RecalculatePaymentSummary;
 use App\Enums\PaymentStatusEnum;
 use App\Models\Payment;
 use App\Models\Purchase;
@@ -21,7 +21,7 @@ it('updates payment status to paid when fully paid', function (): void {
 
     Payment::factory()->forSale($sale)->create(['amount' => 1000]);
 
-    $action = resolve(UpdatePaymentStatus::class);
+    $action = resolve(RecalculatePaymentSummary::class);
     $action->handle($sale);
 
     $sale = $sale->fresh();
@@ -40,7 +40,7 @@ it('updates payment status to partial when partially paid', function (): void {
 
     Payment::factory()->forSale($sale)->create(['amount' => 500]);
 
-    $action = resolve(UpdatePaymentStatus::class);
+    $action = resolve(RecalculatePaymentSummary::class);
     $action->handle($sale);
 
     $sale = $sale->fresh();
@@ -56,7 +56,7 @@ it('updates payment status to unpaid when no payments', function (): void {
         'payment_status' => PaymentStatusEnum::Paid,
     ]);
 
-    $action = resolve(UpdatePaymentStatus::class);
+    $action = resolve(RecalculatePaymentSummary::class);
     $action->handle($sale);
 
     $sale = $sale->fresh();
@@ -74,7 +74,7 @@ it('calculates change amount for overpayment on sale', function (): void {
 
     Payment::factory()->forSale($sale)->create(['amount' => 1500]);
 
-    $action = resolve(UpdatePaymentStatus::class);
+    $action = resolve(RecalculatePaymentSummary::class);
     $action->handle($sale);
 
     $sale = $sale->fresh();
@@ -94,7 +94,7 @@ it('caps paid amount at total amount', function (): void {
     Payment::factory()->forSale($sale)->create(['amount' => 500]);
     Payment::factory()->forSale($sale)->create(['amount' => 1000]);
 
-    $action = resolve(UpdatePaymentStatus::class);
+    $action = resolve(RecalculatePaymentSummary::class);
     $action->handle($sale);
 
     $sale = $sale->fresh();
@@ -112,7 +112,7 @@ it('ignores voided payments', function (): void {
 
     Payment::factory()->forSale($sale)->voided()->create(['amount' => 1000]);
 
-    $action = resolve(UpdatePaymentStatus::class);
+    $action = resolve(RecalculatePaymentSummary::class);
     $action->handle($sale);
 
     $sale = $sale->fresh();
@@ -131,7 +131,7 @@ it('works with purchase return', function (): void {
 
     Payment::factory()->forPurchaseReturn($purchaseReturn)->create(['amount' => 1000]);
 
-    $action = resolve(UpdatePaymentStatus::class);
+    $action = resolve(RecalculatePaymentSummary::class);
     $action->handle($purchaseReturn);
 
     $purchaseReturn = $purchaseReturn->fresh();
@@ -149,7 +149,7 @@ it('does not set change amount for non-sale', function (): void {
 
     Payment::factory()->forPurchase($purchase)->create(['amount' => 1500]);
 
-    $action = resolve(UpdatePaymentStatus::class);
+    $action = resolve(RecalculatePaymentSummary::class);
     $action->handle($purchase);
 
     $purchase = $purchase->fresh();
@@ -168,7 +168,7 @@ it('handles sale return', function (): void {
 
     Payment::factory()->forSaleReturn($saleReturn)->create(['amount' => 500]);
 
-    $action = resolve(UpdatePaymentStatus::class);
+    $action = resolve(RecalculatePaymentSummary::class);
     $action->handle($saleReturn);
 
     $saleReturn = $saleReturn->fresh();

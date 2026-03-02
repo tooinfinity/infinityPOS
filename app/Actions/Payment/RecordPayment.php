@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Payment;
 
 use App\Actions\GenerateReferenceNo;
-use App\Actions\Shared\UpdatePaymentStatus;
+use App\Actions\Shared\RecalculatePaymentSummary;
 use App\Data\Payment\RecordPaymentData;
 use App\Enums\PaymentStateEnum;
 use App\Exceptions\InvalidPaymentMethodException;
@@ -24,7 +24,7 @@ use Throwable;
 final readonly class RecordPayment
 {
     public function __construct(
-        private UpdatePaymentStatus $updatePaymentStatus,
+        private RecalculatePaymentSummary $recalculatePaymentSummary,
         private GenerateReferenceNo $generateReferenceNo,
         private ValidatePayableCanAcceptPayment $validatePayableCanAcceptPayment,
         private ValidatePaymentAmount $validatePaymentAmount,
@@ -62,7 +62,7 @@ final readonly class RecordPayment
                 'status' => PaymentStateEnum::Active,
             ]);
 
-            $this->updatePaymentStatus->handle($payable);
+            $this->recalculatePaymentSummary->handle($payable);
 
             return $payment->refresh();
         });

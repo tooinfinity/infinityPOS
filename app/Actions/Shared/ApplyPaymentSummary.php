@@ -18,7 +18,6 @@ final readonly class ApplyPaymentSummary
     public function handle(
         Sale|SaleReturn|Purchase|PurchaseReturn $payable,
         int $paidAmount,
-        bool $preserveExistingPaidAmount = false,
         bool $capPaidAmount = false,
     ): void {
         $paymentCalculation = $this->calculatePaymentStatus->handle(
@@ -26,11 +25,9 @@ final readonly class ApplyPaymentSummary
             $paidAmount
         );
 
-        $finalPaidAmount = match (true) {
-            $preserveExistingPaidAmount => $payable->paid_amount,
-            $capPaidAmount => min($paidAmount, $payable->total_amount),
-            default => $paidAmount,
-        };
+        $finalPaidAmount = $capPaidAmount
+            ? min($paidAmount, $payable->total_amount)
+            : $paidAmount;
 
         $updateData = [
             'paid_amount' => $finalPaidAmount,

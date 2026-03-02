@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Payment;
 
-use App\Actions\Shared\UpdatePaymentStatus;
+use App\Actions\Shared\RecalculatePaymentSummary;
 use App\Enums\PaymentStateEnum;
 use App\Exceptions\StateTransitionException;
 use App\Models\Payment;
@@ -20,7 +20,7 @@ use Throwable;
  */
 final readonly class UnvoidPayment
 {
-    public function __construct(private UpdatePaymentStatus $updatePaymentStatus) {}
+    public function __construct(private RecalculatePaymentSummary $recalculatePaymentSummary) {}
 
     /**
      * @throws Throwable
@@ -40,7 +40,7 @@ final readonly class UnvoidPayment
             $payable = $payment->payable;
 
             if ($payable instanceof Sale || $payable instanceof SaleReturn || $payable instanceof Purchase || $payable instanceof PurchaseReturn) {
-                $this->updatePaymentStatus->handle($payable);
+                $this->recalculatePaymentSummary->handle($payable);
             }
 
             return $payment->refresh();

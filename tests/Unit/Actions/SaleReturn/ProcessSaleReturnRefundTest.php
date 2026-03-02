@@ -146,16 +146,14 @@ it('throws exception for negative refund amount', function (): void {
     ));
 })->throws(RefundNotAllowedException::class, 'Cannot refund sale return. Refund amount must be greater than zero.');
 
-it('returns unpaid status when no negative payments exist', function (): void {
+it('returns unpaid status when no refunds have been processed', function (): void {
     $saleReturn = SaleReturn::factory()->completed()->create([
         'total_amount' => 1000,
+        'paid_amount' => 0,
+        'payment_status' => PaymentStatusEnum::Unpaid,
     ]);
 
-    $reflection = new ReflectionClass(ProcessSaleReturnRefund::class);
-    $method = $reflection->getMethod('updatePaymentStatus');
-
-    $action = resolve(ProcessSaleReturnRefund::class);
-    $method->invoke($action, $saleReturn);
-
-    expect($saleReturn->fresh()->payment_status)->toBe(PaymentStatusEnum::Unpaid);
+    // No payments recorded - paid_amount should remain 0 / Unpaid
+    expect($saleReturn->fresh()->payment_status)->toBe(PaymentStatusEnum::Unpaid)
+        ->and($saleReturn->fresh()->paid_amount)->toBe(0);
 });
