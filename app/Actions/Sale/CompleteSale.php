@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Sale;
 
-use App\Actions\Shared\CalculatePaymentStatus;
+use App\Actions\Shared\ApplyPaymentSummary;
 use App\Actions\Stock\DeductSaleStock;
 use App\Data\Sale\CompleteSaleData;
 use App\Enums\SaleStatusEnum;
@@ -16,7 +16,7 @@ final readonly class CompleteSale
 {
     public function __construct(
         private DeductSaleStock $deductSaleStock,
-        private CalculatePaymentStatus $calculatePaymentStatus,
+        private ApplyPaymentSummary $applyPaymentSummary,
         private ValidateSaleCompletion $validateSaleCompletion,
     ) {}
 
@@ -40,15 +40,14 @@ final readonly class CompleteSale
                 validateAvailability: ! $skipStockValidation
             );
 
-            $paymentCalculation = $this->calculatePaymentStatus->handle($sale->total_amount, $sale->paid_amount);
-
             $note = $data instanceof CompleteSaleData ? ($data->note ?? $sale->note) : $sale->note;
 
             $sale->forceFill([
                 'status' => SaleStatusEnum::Completed,
-                'payment_status' => $paymentCalculation->paymentStatus,
                 'note' => $note,
             ])->save();
+
+            $this->applyPaymentSummary->handle($sale, $sale->paid_amount);
 
             return $sale->refresh();
         });

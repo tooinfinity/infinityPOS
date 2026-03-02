@@ -13,7 +13,7 @@ use App\Models\SaleReturn;
 final readonly class UpdatePaymentStatus
 {
     public function __construct(
-        private CalculatePaymentStatus $calculatePaymentStatus,
+        private ApplyPaymentSummary $applyPaymentSummary,
     ) {}
 
     public function handle(Sale|SaleReturn|Purchase|PurchaseReturn $payable): void
@@ -24,19 +24,6 @@ final readonly class UpdatePaymentStatus
             ->lockForUpdate()
             ->sum('amount');
 
-        $totalAmount = $payable->total_amount;
-
-        $paymentCalculation = $this->calculatePaymentStatus->handle($totalAmount, $newPaidAmount);
-
-        $updateData = [
-            'paid_amount' => $totalAmount - $paymentCalculation->dueAmount,
-            'payment_status' => $paymentCalculation->paymentStatus,
-        ];
-
-        if ($payable instanceof Sale) {
-            $updateData['change_amount'] = $paymentCalculation->changeAmount;
-        }
-
-        $payable->forceFill($updateData)->save();
+        $this->applyPaymentSummary->handle($payable, $newPaidAmount, capPaidAmount: true);
     }
 }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Sale;
 
 use App\Actions\GenerateReferenceNo;
-use App\Actions\Shared\CalculatePaymentStatus;
+use App\Actions\Shared\ApplyPaymentSummary;
 use App\Actions\Stock\DeductSaleStock;
 use App\Data\Sale\CreateSaleData;
 use App\Data\Sale\QuickSaleData;
@@ -22,7 +22,7 @@ final readonly class QuickSale
     public function __construct(
         private CreateSale $createSale,
         private DeductSaleStock $deductSaleStock,
-        private CalculatePaymentStatus $calculatePaymentStatus,
+        private ApplyPaymentSummary $applyPaymentSummary,
         private GenerateReferenceNo $generateReferenceNo,
     ) {}
 
@@ -59,10 +59,7 @@ final readonly class QuickSale
         if ($data->paid_amount > 0) {
             $this->recordPayment($sale, $data);
 
-            $paymentCalculation = $this->calculatePaymentStatus->handle($sale->total_amount, $sale->paid_amount);
-            $sale->forceFill([
-                'payment_status' => $paymentCalculation->paymentStatus,
-            ])->save();
+            $this->applyPaymentSummary->handle($sale, $data->paid_amount, preserveExistingPaidAmount: true);
         }
 
         $sale->load('items');
@@ -86,5 +83,6 @@ final readonly class QuickSale
             'note' => 'Quick sale payment',
             'status' => PaymentStateEnum::Active,
         ]);
+
     }
 }
