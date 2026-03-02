@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\PurchaseReturn;
 
-use App\Actions\StockMovement\RecordStockMovement;
+use App\Actions\Stock\AdjustBatchQuantity;
 use App\Data\PurchaseReturn\RevertPurchaseReturnData;
-use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\ReturnStatusEnum;
 use App\Enums\StockMovementTypeEnum;
 use App\Exceptions\RefundNotAllowedException;
@@ -18,7 +17,9 @@ use Throwable;
 
 final readonly class RevertPurchaseReturn
 {
-    public function __construct(private RecordStockMovement $recordStockMovement) {}
+    public function __construct(
+        private AdjustBatchQuantity $adjustBatchQuantity,
+    ) {}
 
     /**
      * @throws Throwable
@@ -77,23 +78,14 @@ final readonly class RevertPurchaseReturn
                 continue;
             }
 
-            $previousQuantity = $batch->quantity;
-
-            $batch->forceFill(['quantity' => $batch->quantity + $item->quantity])->save();
-
-            $this->recordStockMovement->handle(new RecordStockMovementData(
-                warehouse_id: $purchaseReturn->warehouse_id,
-                product_id: $item->product_id,
-                type: StockMovementTypeEnum::In,
-                quantity: $item->quantity,
-                previous_quantity: $previousQuantity,
-                current_quantity: $previousQuantity + $item->quantity,
-                reference_type: PurchaseReturn::class,
-                reference_id: $purchaseReturn->id,
-                batch_id: $batch->id,
-                user_id: $purchaseReturn->user_id,
-                note: 'Purchase return reverted - stock restored',
-            ));
+            $this->adjustBatchQuantity->handle(
+                $batch,
+                $item->quantity,
+                StockMovementTypeEnum::In,
+                $purchaseReturn,
+                'Purchase return reverted - stock restored',
+                $purchaseReturn->user_id,
+            );
         }
     }
 }

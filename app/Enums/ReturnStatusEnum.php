@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-enum ReturnStatusEnum: string
+enum ReturnStatusEnum: string implements HasStatusTransitions
 {
     case Pending = 'pending';
     case Completed = 'completed';
@@ -31,8 +31,12 @@ enum ReturnStatusEnum: string
         };
     }
 
-    public function canTransitionTo(self $newStatus): bool
+    public function canTransitionTo(HasStatusTransitions $newStatus): bool
     {
+        if (! $newStatus instanceof self) {
+            return false;
+        }
+
         return match ($this) {
             self::Pending => $newStatus === self::Completed,
             self::Completed => false,

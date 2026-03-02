@@ -2,7 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Enums\HasStatusTransitions;
 use App\Enums\PurchaseStatusEnum;
+use App\Enums\ReturnStatusEnum;
+use App\Enums\SaleStatusEnum;
+use App\Enums\StockTransferStatusEnum;
 
 it('purchase status to array', function (): void {
     expect(PurchaseStatusEnum::toArray())->toBeArray();
@@ -52,5 +56,17 @@ it('returns valid transitions for purchase status', function (): void {
         ->toBe([])
         ->and(PurchaseStatusEnum::Cancelled->getValidTransitions())->toHaveCount(1)
         ->toContain(PurchaseStatusEnum::Pending);
+});
 
+it('canTransitionTo returns false for different enum type', function (): void {
+    expect(PurchaseStatusEnum::Pending->canTransitionTo(SaleStatusEnum::Pending))->toBeFalse()
+        ->and(PurchaseStatusEnum::Pending->canTransitionTo(StockTransferStatusEnum::Pending))->toBeFalse()
+        ->and(PurchaseStatusEnum::Pending->canTransitionTo(ReturnStatusEnum::Pending))->toBeFalse()
+        ->and(PurchaseStatusEnum::Received->canTransitionTo(SaleStatusEnum::Completed))->toBeFalse()
+        ->and(PurchaseStatusEnum::Cancelled->canTransitionTo(StockTransferStatusEnum::Cancelled))->toBeFalse();
+});
+
+it('implements HasStatusTransitions interface', function (): void {
+    $enum = PurchaseStatusEnum::Pending;
+    expect($enum)->toBeInstanceOf(HasStatusTransitions::class);
 });

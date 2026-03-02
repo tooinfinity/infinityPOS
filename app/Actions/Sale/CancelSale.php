@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\Sale;
 
+use App\Actions\Shared\ValidateStatusIsPending;
 use App\Actions\StockMovement\RecordStockMovement;
 use App\Data\Sale\CancelSaleData;
 use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\SaleStatusEnum;
 use App\Enums\StockMovementTypeEnum;
-use App\Exceptions\StateTransitionException;
 use App\Models\Sale;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +17,10 @@ use Throwable;
 
 final readonly class CancelSale
 {
-    public function __construct(private RecordStockMovement $recordStockMovement) {}
+    public function __construct(
+        private RecordStockMovement $recordStockMovement,
+        private ValidateStatusIsPending $validateStatus,
+    ) {}
 
     /**
      * @throws Throwable
@@ -31,7 +34,11 @@ final readonly class CancelSale
                 ->with(['items.batch' => fn (Relation $query): Relation => $query->lockForUpdate()])
                 ->findOrFail($sale->id);
 
-            $this->validateSaleCanBeCancelled($sale);
+            $this->validateStatus->validateTransition(
+                $sale->status,
+                SaleStatusEnum::Cancelled,
+                'Sale'
+            );
 
             $shouldRestock = $data->restock_items && $sale->status === SaleStatusEnum::Completed;
 
@@ -46,19 +53,6 @@ final readonly class CancelSale
 
             return $sale->refresh();
         });
-    }
-
-    /**
-     * @throws StateTransitionException
-     */
-    private function validateSaleCanBeCancelled(Sale $sale): void
-    {
-        if (! $sale->status->canTransitionTo(SaleStatusEnum::Cancelled)) {
-            throw new StateTransitionException(
-                $sale->status->value,
-                'Cancelled'
-            );
-        }
     }
 
     /**

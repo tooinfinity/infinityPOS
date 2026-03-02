@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Shared;
 
+use App\Enums\HasStatusTransitions;
 use App\Enums\PurchaseStatusEnum;
 use App\Enums\ReturnStatusEnum;
 use App\Enums\SaleStatusEnum;
@@ -15,7 +16,6 @@ use App\Models\Sale;
 use App\Models\SaleReturn;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
-use BackedEnum;
 
 final readonly class ValidateStatusIsPending
 {
@@ -28,8 +28,8 @@ final readonly class ValidateStatusIsPending
 
         if ($model->status !== $pendingStatus) {
             throw new StateTransitionException(
-                $model->status->value,
-                $pendingStatus instanceof BackedEnum ? (string) $pendingStatus->value : 'Pending'
+                (string) $model->status->value,
+                (string) $pendingStatus->value
             );
         }
     }
@@ -49,7 +49,22 @@ final readonly class ValidateStatusIsPending
         }
     }
 
-    private function getPendingStatus(Sale|SaleReturn|Purchase|PurchaseReturn|StockTransfer $model): object
+    /**
+     * Validate that a status can transition to another status.
+     *
+     * @throws StateTransitionException
+     */
+    public function validateTransition(HasStatusTransitions $currentStatus, HasStatusTransitions $targetStatus, ?string $entityLabel = null): void
+    {
+        if (! $currentStatus->canTransitionTo($targetStatus)) {
+            throw new StateTransitionException(
+                $entityLabel ? "{$entityLabel} (".$currentStatus->value.')' : (string) $currentStatus->value,
+                (string) $targetStatus->value
+            );
+        }
+    }
+
+    private function getPendingStatus(Sale|SaleReturn|Purchase|PurchaseReturn|StockTransfer $model): HasStatusTransitions
     {
         return match ($model::class) {
             Sale::class => SaleStatusEnum::Pending,

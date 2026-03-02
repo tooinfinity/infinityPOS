@@ -41,8 +41,7 @@ final readonly class ValidatePaymentAmount
     {
         /** @var int $amount */
         $amount = Payment::query()
-            ->forPayable($payable::class, $payable->id)
-            ->active()
+            ->activeForPayable($payable::class, $payable->id)
             ->sum('amount');
 
         return $amount;

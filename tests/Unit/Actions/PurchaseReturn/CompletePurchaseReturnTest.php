@@ -34,7 +34,7 @@ it('throws exception when completing non-pending return', function (): void {
     $action = resolve(CompletePurchaseReturn::class);
 
     $action->handle($purchaseReturn, new CompletePurchaseReturnData());
-})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "Completed"');
+})->throws(StateTransitionException::class, 'Invalid state transition from "PurchaseReturn (completed)" to "completed"');
 
 it('throws exception when insufficient stock', function (): void {
     $batch = Batch::factory()->withQuantity(5)->create();

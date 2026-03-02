@@ -93,7 +93,7 @@ it('throws exception when cancelling already cancelled sale', function (): void 
     $action = resolve(CancelSale::class);
 
     $action->handle($sale, new CancelSaleData(restock_items: false, note: null));
-})->throws(StateTransitionException::class, 'Invalid state transition from "cancelled" to "Cancelled"');
+})->throws(StateTransitionException::class, 'Invalid state transition from "Sale (cancelled)" to "cancelled"');
 
 it('updates note when cancelling', function (): void {
     $sale = Sale::factory()->pending()->create([

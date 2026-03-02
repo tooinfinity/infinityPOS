@@ -4,21 +4,22 @@ declare(strict_types=1);
 
 namespace App\Actions\PurchaseReturn;
 
-use App\Actions\StockMovement\RecordStockMovement;
+use App\Actions\Shared\ValidateStatusIsPending;
+use App\Actions\Stock\AdjustBatchQuantity;
 use App\Data\PurchaseReturn\CompletePurchaseReturnData;
-use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\ReturnStatusEnum;
 use App\Enums\StockMovementTypeEnum;
-use App\Exceptions\InsufficientStockException;
 use App\Exceptions\InvalidOperationException;
-use App\Exceptions\StateTransitionException;
 use App\Models\PurchaseReturn;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
 final readonly class CompletePurchaseReturn
 {
-    public function __construct(private RecordStockMovement $recordStockMovement) {}
+    public function __construct(
+        private AdjustBatchQuantity $adjustBatchQuantity,
+        private ValidateStatusIsPending $validateStatus,
+    ) {}
 
     /**
      * @throws Throwable
@@ -50,12 +51,11 @@ final readonly class CompletePurchaseReturn
      */
     private function validatePurchaseReturnCanBeCompleted(PurchaseReturn $purchaseReturn): void
     {
-        if ($purchaseReturn->status !== ReturnStatusEnum::Pending) {
-            throw new StateTransitionException(
-                $purchaseReturn->status->value,
-                'Completed'
-            );
-        }
+        $this->validateStatus->validateTransition(
+            $purchaseReturn->status,
+            ReturnStatusEnum::Completed,
+            'PurchaseReturn'
+        );
 
         throw_if($purchaseReturn->items->isEmpty(), InvalidOperationException::class, 'complete', 'PurchaseReturn', 'Purchase return cannot be completed without items');
     }
@@ -72,33 +72,14 @@ final readonly class CompletePurchaseReturn
                 continue;
             }
 
-            $previousQuantity = $batch->quantity;
-
-            $newQuantity = $batch->quantity - $item->quantity;
-
-            if ($newQuantity < 0) {
-                throw new InsufficientStockException(
-                    required: $item->quantity,
-                    available: $batch->quantity,
-                    batchId: $batch->id
-                );
-            }
-
-            $batch->forceFill(['quantity' => $newQuantity])->save();
-
-            $this->recordStockMovement->handle(new RecordStockMovementData(
-                warehouse_id: $purchaseReturn->warehouse_id,
-                product_id: $item->product_id,
-                type: StockMovementTypeEnum::Out,
-                quantity: $item->quantity,
-                previous_quantity: $previousQuantity,
-                current_quantity: $newQuantity,
-                reference_type: PurchaseReturn::class,
-                reference_id: $purchaseReturn->id,
-                batch_id: $batch->id,
-                user_id: $purchaseReturn->user_id,
-                note: 'Purchase return completed - stock removed',
-            ));
+            $this->adjustBatchQuantity->handle(
+                $batch,
+                -$item->quantity,
+                StockMovementTypeEnum::Out,
+                $purchaseReturn,
+                'Purchase return completed - stock removed',
+                $purchaseReturn->user_id,
+            );
         }
     }
 }

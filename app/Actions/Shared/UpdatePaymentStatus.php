@@ -19,8 +19,7 @@ final readonly class UpdatePaymentStatus
     public function handle(Sale|SaleReturn|Purchase|PurchaseReturn $payable): void
     {
         $newPaidAmount = (int) Payment::query()
-            ->forPayable($payable::class, $payable->id)
-            ->active()
+            ->activeForPayable($payable::class, $payable->id)
             ->lockForUpdate()
             ->sum('amount');
 

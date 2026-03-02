@@ -171,9 +171,10 @@ final class Payment extends Model
      * @return Builder<Payment>
      */
     #[Scope]
-    protected function forPayable(Builder $query, string $payableType, int $payableId): Builder
+    protected function activeForPayable(Builder $query, string $payableType, int $payableId): Builder
     {
         return $query->where('payable_type', $payableType)
-            ->where('payable_id', $payableId);
+            ->where('payable_id', $payableId)
+            ->where('status', PaymentStateEnum::Active);
     }
 }

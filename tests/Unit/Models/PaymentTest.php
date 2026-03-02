@@ -207,3 +207,101 @@ it('has voidedBy relationship', function (): void {
         ->toBeInstanceOf(User::class)
         ->id->toBe($user->id);
 });
+
+it('filters by activeForPayable scope for Sale', function (): void {
+    $sale = Sale::factory()->create();
+    $otherSale = Sale::factory()->create();
+
+    Payment::factory()->create([
+        'payable_type' => Sale::class,
+        'payable_id' => $sale->id,
+    ]);
+    Payment::factory()->create([
+        'payable_type' => Sale::class,
+        'payable_id' => $sale->id,
+    ]);
+    Payment::factory()->create([
+        'payable_type' => Sale::class,
+        'payable_id' => $otherSale->id,
+    ]);
+
+    $results = Payment::query()->activeForPayable(Sale::class, $sale->id)->get();
+
+    expect($results)->toHaveCount(2);
+});
+
+it('filters by activeForPayable scope excludes voided payments', function (): void {
+    $sale = Sale::factory()->create();
+
+    Payment::factory()->create([
+        'payable_type' => Sale::class,
+        'payable_id' => $sale->id,
+    ]);
+    Payment::factory()->voided()->create([
+        'payable_type' => Sale::class,
+        'payable_id' => $sale->id,
+    ]);
+    Payment::factory()->create([
+        'payable_type' => Sale::class,
+        'payable_id' => $sale->id,
+    ]);
+
+    $results = Payment::query()->activeForPayable(Sale::class, $sale->id)->get();
+
+    expect($results)->toHaveCount(2);
+});
+
+it('filters by activeForPayable scope for Purchase', function (): void {
+    $purchase = Purchase::factory()->create();
+    $otherPurchase = Purchase::factory()->create();
+
+    Payment::factory()->create([
+        'payable_type' => Purchase::class,
+        'payable_id' => $purchase->id,
+    ]);
+    Payment::factory()->create([
+        'payable_type' => Purchase::class,
+        'payable_id' => $purchase->id,
+    ]);
+    Payment::factory()->create([
+        'payable_type' => Purchase::class,
+        'payable_id' => $otherPurchase->id,
+    ]);
+
+    $results = Payment::query()->activeForPayable(Purchase::class, $purchase->id)->get();
+
+    expect($results)->toHaveCount(2);
+});
+
+it('filters by activeForPayable scope returns empty when no matches', function (): void {
+    $sale = Sale::factory()->create();
+
+    Payment::factory()->create([
+        'payable_type' => Purchase::class,
+        'payable_id' => 999,
+    ]);
+
+    $results = Payment::query()->activeForPayable(Sale::class, $sale->id)->get();
+
+    expect($results)->toHaveCount(0);
+});
+
+it('filters by activeForPayable scope with mixed payable types', function (): void {
+    $sale = Sale::factory()->create();
+    $purchase = Purchase::factory()->create();
+
+    Payment::factory()->create([
+        'payable_type' => Sale::class,
+        'payable_id' => $sale->id,
+    ]);
+    Payment::factory()->create([
+        'payable_type' => Purchase::class,
+        'payable_id' => $purchase->id,
+    ]);
+
+    $saleResults = Payment::query()->activeForPayable(Sale::class, $sale->id)->get();
+    $purchaseResults = Payment::query()->activeForPayable(Purchase::class, $purchase->id)->get();
+
+    expect($saleResults)->toHaveCount(1)
+        ->and($purchaseResults)->toHaveCount(1);
+});

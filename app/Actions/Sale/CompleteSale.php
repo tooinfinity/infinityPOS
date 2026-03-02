@@ -23,9 +23,9 @@ final readonly class CompleteSale
     /**
      * @throws Throwable
      */
-    public function handle(Sale $sale, ?CompleteSaleData $data = null, bool $skipStockValidation = false): Sale
+    public function handle(Sale $sale, ?CompleteSaleData $data = null): Sale
     {
-        return DB::transaction(function () use ($sale, $data, $skipStockValidation): Sale {
+        return DB::transaction(function () use ($sale, $data): Sale {
             /** @var Sale $sale */
             $sale = Sale::query()
                 ->lockForUpdate()
@@ -37,7 +37,6 @@ final readonly class CompleteSale
             $this->deductSaleStock->handle(
                 $sale,
                 'Sale completed - stock out',
-                validateAvailability: ! $skipStockValidation
             );
 
             $note = $data instanceof CompleteSaleData ? ($data->note ?? $sale->note) : $sale->note;

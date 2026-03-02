@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-enum PurchaseStatusEnum: string
+enum PurchaseStatusEnum: string implements HasStatusTransitions
 {
     case Pending = 'pending';
     case Ordered = 'ordered';
@@ -35,8 +35,12 @@ enum PurchaseStatusEnum: string
         };
     }
 
-    public function canTransitionTo(self $newStatus): bool
+    public function canTransitionTo(HasStatusTransitions $newStatus): bool
     {
+        if (! $newStatus instanceof self) {
+            return false;
+        }
+
         return match ($this) {
             self::Pending => in_array($newStatus, [self::Ordered, self::Received, self::Cancelled], true),
             self::Ordered => in_array($newStatus, [self::Received, self::Cancelled], true),

@@ -4,24 +4,28 @@ declare(strict_types=1);
 
 namespace App\Actions\StockTransfer;
 
+use App\Actions\Batch\FindOrCreateBatch;
+use App\Actions\Shared\ValidateStatusIsPending;
 use App\Actions\StockMovement\RecordStockMovement;
 use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\StockMovementTypeEnum;
 use App\Enums\StockTransferStatusEnum;
 use App\Exceptions\InsufficientStockException;
 use App\Exceptions\InvalidOperationException;
-use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
-use Random\RandomException;
 use Throwable;
 
 final readonly class CompleteStockTransfer
 {
-    public function __construct(private RecordStockMovement $recordStockMovement) {}
+    public function __construct(
+        private RecordStockMovement $recordStockMovement,
+        private ValidateStatusIsPending $validateStatus,
+        private FindOrCreateBatch $findOrCreateBatch,
+    ) {}
 
     /**
      * @throws Throwable
@@ -38,12 +42,11 @@ final readonly class CompleteStockTransfer
                 ])
                 ->findOrFail($transfer->id);
 
-            if (! $transfer->status->canTransitionTo(StockTransferStatusEnum::Completed)) {
-                throw new StateTransitionException(
-                    $transfer->status->label(),
-                    StockTransferStatusEnum::Completed->label()
-                );
-            }
+            $this->validateStatus->validateTransition(
+                $transfer->status,
+                StockTransferStatusEnum::Completed,
+                'StockTransfer'
+            );
 
             $this->validateSufficientStock($transfer);
 
@@ -91,7 +94,12 @@ final readonly class CompleteStockTransfer
         $previousQuantity = $sourceBatch->quantity;
         $sourceBatch->forceFill(['quantity' => $sourceBatch->quantity - $item->quantity])->save();
 
-        $destinationBatch = $this->findOrCreateDestinationBatch($transfer, $sourceBatch);
+        $destinationBatch = $this->findOrCreateBatch->handle(
+            $sourceBatch->product_id,
+            $transfer->to_warehouse_id,
+            $sourceBatch->cost_amount,
+            $sourceBatch->expires_at,
+        );
 
         $this->recordStockMovement->handle(new RecordStockMovementData(
             warehouse_id: $transfer->from_warehouse_id,
@@ -123,27 +131,5 @@ final readonly class CompleteStockTransfer
             user_id: $transfer->user_id,
             note: 'Stock transfer in',
         ));
-    }
-
-    /**
-     * @throws RandomException
-     */
-    private function findOrCreateDestinationBatch(StockTransfer $transfer, Batch $sourceBatch): Batch
-    {
-        $expiresAt = $sourceBatch->expires_at;
-
-        $existingBatch = Batch::query()
-            ->lockForUpdate()
-            ->matching($sourceBatch->product_id, $transfer->to_warehouse_id, $sourceBatch->cost_amount, $expiresAt)
-            ->first();
-
-        return $existingBatch ?? Batch::query()->forceCreate([
-            'product_id' => $sourceBatch->product_id,
-            'warehouse_id' => $transfer->to_warehouse_id,
-            'batch_number' => 'BAT-'.now()->getTimestampMs().'-'.random_int(1000, 9999),
-            'cost_amount' => $sourceBatch->cost_amount,
-            'quantity' => 0,
-            'expires_at' => $sourceBatch->expires_at,
-        ]);
     }
 }

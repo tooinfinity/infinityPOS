@@ -4,22 +4,25 @@ declare(strict_types=1);
 
 namespace App\Actions\Purchase;
 
+use App\Actions\Batch\FindOrCreateBatch;
+use App\Actions\Shared\ValidateStatusIsPending;
 use App\Actions\StockMovement\RecordStockMovement;
 use App\Data\StockMovement\RecordStockMovementData;
 use App\Enums\PurchaseStatusEnum;
 use App\Enums\StockMovementTypeEnum;
-use App\Exceptions\StateTransitionException;
-use App\Models\Batch;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Throwable;
 
 final readonly class ReceivePurchase
 {
-    public function __construct(private RecordStockMovement $recordStockMovement) {}
+    public function __construct(
+        private RecordStockMovement $recordStockMovement,
+        private ValidateStatusIsPending $validateStatus,
+        private FindOrCreateBatch $findOrCreateBatch,
+    ) {}
 
     /**
      * @throws Throwable
@@ -33,11 +36,10 @@ final readonly class ReceivePurchase
                 ->with(['items.product', 'items.batch'])
                 ->findOrFail($purchase->id);
 
-            throw_if(
-                ! $purchase->status->canTransitionTo(PurchaseStatusEnum::Received),
-                StateTransitionException::class,
-                $purchase->status->label(),
-                PurchaseStatusEnum::Received->label()
+            $this->validateStatus->validateTransition(
+                $purchase->status,
+                PurchaseStatusEnum::Received,
+                'Purchase'
             );
 
             throw_if(
@@ -61,7 +63,12 @@ final readonly class ReceivePurchase
      */
     private function processItem(Purchase $purchase, PurchaseItem $item): void
     {
-        $batch = $this->findOrCreateBatch($purchase, $item);
+        $batch = $this->findOrCreateBatch->handle(
+            $item->product_id,
+            $purchase->warehouse_id,
+            $item->unit_cost,
+            $item->batch?->expires_at,
+        );
 
         $previousQuantity = $batch->quantity;
         $newQuantity = $previousQuantity + $item->quantity;
@@ -86,29 +93,5 @@ final readonly class ReceivePurchase
             user_id: $purchase->user_id,
             note: 'Purchase receipt',
         ));
-    }
-
-    private function findOrCreateBatch(Purchase $purchase, PurchaseItem $item): Batch
-    {
-        $expiresAt = $item->batch?->expires_at;
-
-        $existingBatch = Batch::query()
-            ->lockForUpdate()
-            ->matching($item->product_id, $purchase->warehouse_id, $item->unit_cost, $expiresAt)
-            ->first();
-
-        return $existingBatch ?? Batch::query()->forceCreate([
-            'product_id' => $item->product_id,
-            'warehouse_id' => $purchase->warehouse_id,
-            'batch_number' => $this->generateBatchNumber($item),
-            'cost_amount' => $item->unit_cost,
-            'quantity' => 0,
-            'expires_at' => $item->batch?->expires_at,
-        ]);
-    }
-
-    private function generateBatchNumber(PurchaseItem $item): string
-    {
-        return 'BAT-'.now()->format('YmdHis').'-'.$item->product_id.'-'.mb_strtoupper(Str::random(6));
     }
 }
