@@ -6,9 +6,8 @@ namespace App\Actions\Sale;
 
 use App\Actions\GenerateReferenceNo;
 use App\Actions\Shared\CalculatePaymentStatus;
-use App\Actions\Shared\CalculateSaleTotal;
 use App\Actions\Stock\DeductSaleStock;
-use App\Actions\Stock\ValidateStockForNewSale;
+use App\Data\Sale\CreateSaleData;
 use App\Data\Sale\QuickSaleData;
 use App\Enums\PaymentStateEnum;
 use App\Enums\SaleStatusEnum;
@@ -16,18 +15,15 @@ use App\Exceptions\InvalidPaymentMethodException;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\Sale;
-use Illuminate\Support\Facades\DB;
 use Throwable;
 
 final readonly class QuickSale
 {
     public function __construct(
-        private CreateSaleItems $createSaleItems,
+        private CreateSale $createSale,
         private DeductSaleStock $deductSaleStock,
-        private ValidateStockForNewSale $validateStockForNewSale,
-        private GenerateReferenceNo $generateReferenceNo,
-        private CalculateSaleTotal $calculateSaleTotal,
         private CalculatePaymentStatus $calculatePaymentStatus,
+        private GenerateReferenceNo $generateReferenceNo,
     ) {}
 
     /**
@@ -35,52 +31,44 @@ final readonly class QuickSale
      */
     public function handle(QuickSaleData $data): Sale
     {
-        return DB::transaction(function () use ($data): Sale {
-            if ($data->paid_amount > 0) {
-                $paymentMethodExists = PaymentMethod::query()
-                    ->where('id', $data->payment_method_id)
-                    ->exists();
+        if ($data->paid_amount > 0) {
+            $paymentMethodExists = PaymentMethod::query()
+                ->where('id', $data->payment_method_id)
+                ->exists();
 
-                if (! $paymentMethodExists) {
-                    throw new InvalidPaymentMethodException(
-                        $data->payment_method_id,
-                        'Payment method is not active or does not exist'
-                    );
-                }
+            if (! $paymentMethodExists) {
+                throw new InvalidPaymentMethodException(
+                    $data->payment_method_id,
+                    'Payment method is not active or does not exist'
+                );
             }
+        }
 
-            $this->validateStockForNewSale->handle($data->items, $data->warehouse_id);
+        $createSaleData = new CreateSaleData(
+            customer_id: $data->customer_id,
+            warehouse_id: $data->warehouse_id,
+            user_id: $data->user_id,
+            sale_date: $data->sale_date,
+            note: $data->note,
+            items: $data->items,
+            paid_amount: $data->paid_amount,
+        );
 
-            $totalAmount = $this->calculateSaleTotal->handle($data->items);
+        $sale = $this->createSale->handle($createSaleData, SaleStatusEnum::Completed);
 
-            $paymentCalculation = $this->calculatePaymentStatus->handle($totalAmount, $data->paid_amount);
+        if ($data->paid_amount > 0) {
+            $this->recordPayment($sale, $data);
 
-            $sale = Sale::query()->forceCreate([
-                'customer_id' => $data->customer_id,
-                'warehouse_id' => $data->warehouse_id,
-                'user_id' => $data->user_id,
-                'reference_no' => $this->generateReferenceNo->handle('SAL', Sale::class),
-                'status' => SaleStatusEnum::Completed,
-                'sale_date' => $data->sale_date,
-                'total_amount' => $totalAmount,
-                'paid_amount' => min($data->paid_amount, $totalAmount),
-                'change_amount' => $paymentCalculation->changeAmount,
+            $paymentCalculation = $this->calculatePaymentStatus->handle($sale->total_amount, $sale->paid_amount);
+            $sale->forceFill([
                 'payment_status' => $paymentCalculation->paymentStatus,
-                'note' => $data->note,
-            ]);
+            ])->save();
+        }
 
-            $this->createSaleItems->handle($sale->id, $data->items);
+        $sale->load('items');
+        $this->deductSaleStock->handle($sale, 'Quick sale - stock out', validateAvailability: false);
 
-            $sale->load('items');
-
-            if ($data->paid_amount > 0) {
-                $this->recordPayment($sale, $data);
-            }
-
-            $this->deductSaleStock->handle($sale, 'Quick sale - stock out', validateAvailability: false);
-
-            return $sale->refresh();
-        });
+        return $sale->refresh();
     }
 
     private function recordPayment(Sale $sale, QuickSaleData $data): void

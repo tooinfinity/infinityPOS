@@ -20,5 +20,6 @@ final class CreateSaleData extends Data
         public DateTimeInterface|string $sale_date,
         public ?string $note,
         public DataCollection $items,
+        public ?int $paid_amount = null,
     ) {}
 }

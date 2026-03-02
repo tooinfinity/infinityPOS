@@ -7,7 +7,6 @@ namespace App\Models;
 use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\PaymentMethodFactory;
-use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -59,15 +58,5 @@ final class PaymentMethod extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @param  Builder<PaymentMethod>  $query
-     * @return Builder<PaymentMethod>
-     */
-    #[Scope]
-    protected function active(Builder $query): Builder
-    {
-        return $query->where('is_active', true);
     }
 }
