@@ -7,10 +7,15 @@ namespace App\Actions\Batch;
 use App\Models\Batch;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Throwable;
 
 final readonly class FindOrCreateBatch
 {
+    public function __construct(private BatchNumberGenerator $generator) {}
+
+    /**
+     * @throws Throwable
+     */
     public function handle(
         int $productId,
         int $warehouseId,
@@ -26,16 +31,11 @@ final readonly class FindOrCreateBatch
             return $existingBatch ?? Batch::query()->forceCreate([
                 'product_id' => $productId,
                 'warehouse_id' => $warehouseId,
-                'batch_number' => $this->generateBatchNumber($productId),
+                'batch_number' => $this->generator->handle($productId),
                 'cost_amount' => $costAmount,
                 'quantity' => 0,
                 'expires_at' => $expiresAt,
             ]);
         });
-    }
-
-    private function generateBatchNumber(int $productId): string
-    {
-        return 'BAT-'.now()->format('Ymd-His').'-'.$productId.'-'.mb_strtoupper(Str::random(6));
     }
 }

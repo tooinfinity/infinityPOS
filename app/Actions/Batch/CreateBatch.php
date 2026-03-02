@@ -14,7 +14,10 @@ use Throwable;
 
 final readonly class CreateBatch
 {
-    public function __construct(private RecordStockMovement $recordStockMovement) {}
+    public function __construct(
+        private RecordStockMovement $recordStockMovement,
+        private BatchNumberGenerator $generator,
+    ) {}
 
     /**
      * @throws Throwable
@@ -22,12 +25,13 @@ final readonly class CreateBatch
     public function handle(CreateBatchData $data): Batch
     {
         $recordStockMovement = $this->recordStockMovement;
+        $generator = $this->generator;
 
-        return DB::transaction(static function () use ($data, $recordStockMovement): Batch {
+        return DB::transaction(static function () use ($data, $recordStockMovement, $generator): Batch {
             $batch = Batch::query()->forceCreate([
                 'product_id' => $data->product_id,
                 'warehouse_id' => $data->warehouse_id,
-                'batch_number' => $data->batch_number ?? 'BAT-'.now()->getTimestampMs().'-'.random_int(1000, 9999),
+                'batch_number' => $data->batch_number ?? $generator->handle($data->product_id),
                 'cost_amount' => $data->cost_amount,
                 'quantity' => $data->quantity,
                 'expires_at' => $data->expires_at,

@@ -15,7 +15,10 @@ use Throwable;
 
 final readonly class UpdateBatch
 {
-    public function __construct(private RecordStockMovement $recordStockMovement) {}
+    public function __construct(
+        private RecordStockMovement $recordStockMovement,
+        private BatchNumberGenerator $generator,
+    ) {}
 
     /**
      * @throws Throwable
@@ -23,13 +26,14 @@ final readonly class UpdateBatch
     public function handle(Batch $batch, UpdateBatchData $data, ?string $note = null): Batch
     {
         $recordStockMovement = $this->recordStockMovement;
+        $generator = $this->generator;
 
-        return DB::transaction(static function () use ($batch, $data, $note, $recordStockMovement): Batch {
+        return DB::transaction(static function () use ($batch, $data, $note, $recordStockMovement, $generator): Batch {
             $previousQuantity = $batch->quantity;
             $updateData = [];
 
             if (! $data->batch_number instanceof Optional) {
-                $updateData['batch_number'] = $data->batch_number ?? 'BAT-'.now()->getTimestampMs().'-'.random_int(1000, 9999);
+                $updateData['batch_number'] = $data->batch_number ?? $generator->handle($batch->product_id);
             }
             if (! $data->cost_amount instanceof Optional) {
                 $updateData['cost_amount'] = $data->cost_amount;
