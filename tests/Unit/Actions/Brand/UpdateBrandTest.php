@@ -24,7 +24,7 @@ it('may update a brand name', function (): void {
 
     $data = new UpdateBrandData(
         name: 'New Name',
-        slug: Optional::create(),
+        slug: 'new-name',
         logo: Optional::create(),
         is_active: Optional::create(),
     );
@@ -33,91 +33,6 @@ it('may update a brand name', function (): void {
 
     expect($updatedBrand->name)->toBe('New Name')
         ->and($updatedBrand->slug)->toBe('new-name');
-});
-
-it('updates slug when name changes and no slug provided', function (): void {
-    $brand = Brand::factory()->create([
-        'name' => 'Old Name',
-        'slug' => 'old-name',
-    ]);
-
-    $action = resolve(UpdateBrand::class);
-
-    $data = new UpdateBrandData(
-        name: 'New Name',
-        slug: Optional::create(),
-        logo: Optional::create(),
-        is_active: Optional::create(),
-    );
-
-    $updatedBrand = $action->handle($brand, $data);
-
-    expect($updatedBrand->slug)->toBe('new-name');
-});
-
-it('keeps existing slug when name changes but slug is provided', function (): void {
-    $brand = Brand::factory()->create([
-        'name' => 'Old Name',
-        'slug' => 'custom-slug',
-    ]);
-
-    $action = resolve(UpdateBrand::class);
-
-    $data = new UpdateBrandData(
-        name: 'New Name',
-        slug: 'custom-slug',
-        logo: Optional::create(),
-        is_active: Optional::create(),
-    );
-
-    $updatedBrand = $action->handle($brand, $data);
-
-    expect($updatedBrand->slug)->toBe('custom-slug');
-});
-
-it('generates unique slug when updating to existing slug', function (): void {
-    Brand::factory()->create([
-        'name' => 'Existing Brand',
-        'slug' => 'existing-slug',
-    ]);
-
-    $brand = Brand::factory()->create([
-        'name' => 'Another Brand',
-        'slug' => 'another-slug',
-    ]);
-
-    $action = resolve(UpdateBrand::class);
-
-    $data = new UpdateBrandData(
-        name: Optional::create(),
-        slug: 'existing-slug',
-        logo: Optional::create(),
-        is_active: Optional::create(),
-    );
-
-    $updatedBrand = $action->handle($brand, $data);
-
-    expect($updatedBrand->slug)->toBe('existing-slug-1');
-});
-
-it('allows keeping own slug unchanged', function (): void {
-    $brand = Brand::factory()->create([
-        'name' => 'Test Brand',
-        'slug' => 'test-slug',
-    ]);
-
-    $action = resolve(UpdateBrand::class);
-
-    $data = new UpdateBrandData(
-        name: 'Updated Brand',
-        slug: 'test-slug',
-        logo: Optional::create(),
-        is_active: Optional::create(),
-    );
-
-    $updatedBrand = $action->handle($brand, $data);
-
-    expect($updatedBrand->slug)->toBe('test-slug');
 });
 
 it('updates logo with uploaded file', function (): void {

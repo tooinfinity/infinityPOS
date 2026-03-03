@@ -4,21 +4,18 @@ declare(strict_types=1);
 
 namespace App\Actions\Brand;
 
-use App\Actions\EnsureUniqueSlug;
 use App\Actions\UploadImage;
 use App\Data\Brand\UpdateBrandData;
 use App\Models\Brand;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Spatie\LaravelData\Optional;
 use Throwable;
 
 final readonly class UpdateBrand
 {
     public function __construct(
-        private EnsureUniqueSlug $ensureUniqueSlug,
         private UploadImage $uploadImage,
     ) {}
 
@@ -35,18 +32,15 @@ final readonly class UpdateBrand
         }
         try {
 
-            $updatedBrand = DB::transaction(function () use ($brand, $data, $uploadedLogoPath, &$logoToDelete): Brand {
+            $updatedBrand = DB::transaction(static function () use ($brand, $data, $uploadedLogoPath, &$logoToDelete): Brand {
                 $updateData = [];
 
                 if (! $data->name instanceof Optional) {
-                    if ($data->name !== $brand->name && $data->slug instanceof Optional) {
-                        $updateData['slug'] = $this->ensureUniqueSlug->handle(Str::slug($data->name), Brand::class, $brand->id);
-                    }
                     $updateData['name'] = $data->name;
                 }
 
                 if (! $data->slug instanceof Optional) {
-                    $updateData['slug'] = $this->ensureUniqueSlug->handle($data->slug, Brand::class, $brand->id);
+                    $updateData['slug'] = $data->slug;
                 }
 
                 if (! $data->is_active instanceof Optional) {

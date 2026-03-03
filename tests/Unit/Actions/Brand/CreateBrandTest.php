@@ -19,7 +19,7 @@ it('may create a brand', function (): void {
 
     $data = new CreateBrandData(
         name: 'Test Brand',
-        slug: null,
+        slug: 'test-brand',
         logo: null,
         is_active: true,
     );
@@ -32,47 +32,12 @@ it('may create a brand', function (): void {
         ->and($brand->exists)->toBeTrue();
 });
 
-it('creates brand with custom slug', function (): void {
-    $action = resolve(CreateBrand::class);
-
-    $data = new CreateBrandData(
-        name: 'Test Brand',
-        slug: 'custom-slug',
-        logo: null,
-        is_active: true,
-    );
-
-    $brand = $action->handle($data);
-
-    expect($brand->slug)->toBe('custom-slug');
-});
-
-it('generates unique slug when duplicate exists', function (): void {
-    Brand::factory()->create([
-        'name' => 'Test Brand',
-        'slug' => 'test-brand',
-    ]);
-
-    $action = resolve(CreateBrand::class);
-
-    $data = new CreateBrandData(
-        name: 'Test Brand',
-        slug: null,
-        logo: null,
-        is_active: true,
-    );
-
-    $brand = $action->handle($data);
-
-    expect($brand->slug)->toBe('test-brand-1');
-});
-
 it('creates brand with string logo path', function (): void {
     $action = resolve(CreateBrand::class);
 
     $data = new CreateBrandData(
         name: 'Test Brand',
-        slug: null,
+        slug: 'test-brand',
         logo: 'brands/test-logo.png',
         is_active: true,
     );
@@ -89,7 +54,7 @@ it('creates brand with uploaded file logo', function (): void {
 
     $data = new CreateBrandData(
         name: 'Test Brand',
-        slug: null,
+        slug: 'test-brand',
         logo: $file,
         is_active: true,
     );
@@ -107,7 +72,7 @@ it('creates brand with is_active flag', function (): void {
 
     $data = new CreateBrandData(
         name: 'Test Brand',
-        slug: null,
+        slug: 'test-brand',
         logo: null,
         is_active: false,
     );
@@ -117,27 +82,13 @@ it('creates brand with is_active flag', function (): void {
     expect($brand->is_active)->toBeFalse();
 });
 
-it('generates slug from name when not provided', function (): void {
-    $action = resolve(CreateBrand::class);
-
-    $data = new CreateBrandData(
-        name: 'My Special Brand',
-        slug: null,
-        logo: null,
-        is_active: true,
-    );
-
-    $brand = $action->handle($data);
-
-    expect($brand->slug)->toBe(Str::slug('My Special Brand'));
-});
 
 it('defaults is_active to true when not provided', function (): void {
     $action = resolve(CreateBrand::class);
 
     $data = new CreateBrandData(
         name: 'Test Brand',
-        slug: null,
+        slug: 'test-brand',
         logo: null,
         is_active: true,
     );
