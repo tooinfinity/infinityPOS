@@ -38,7 +38,7 @@ it('validates state transitions for purchase status', function (): void {
         ->and(PurchaseStatusEnum::Received->canTransitionTo(PurchaseStatusEnum::Ordered))->toBeFalse()
         ->and(PurchaseStatusEnum::Received->canTransitionTo(PurchaseStatusEnum::Cancelled))->toBeFalse()
         ->and(PurchaseStatusEnum::Received->canTransitionTo(PurchaseStatusEnum::Received))->toBeFalse()
-        ->and(PurchaseStatusEnum::Cancelled->canTransitionTo(PurchaseStatusEnum::Pending))->toBeTrue()
+        ->and(PurchaseStatusEnum::Cancelled->canTransitionTo(PurchaseStatusEnum::Pending))->toBeFalse()
         ->and(PurchaseStatusEnum::Cancelled->canTransitionTo(PurchaseStatusEnum::Ordered))->toBeFalse()
         ->and(PurchaseStatusEnum::Cancelled->canTransitionTo(PurchaseStatusEnum::Received))->toBeFalse()
         ->and(PurchaseStatusEnum::Cancelled->canTransitionTo(PurchaseStatusEnum::Cancelled))->toBeFalse();

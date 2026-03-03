@@ -11,7 +11,6 @@ use App\Data\Purchase\CreatePurchaseData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\PurchaseStatusEnum;
 use App\Models\Purchase;
-use App\Models\PurchaseItem;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -21,6 +20,7 @@ final readonly class CreatePurchase
 {
     public function __construct(
         private UploadImage $uploadImage,
+        private CreatePurchaseItems $createPurchaseItems,
         private GenerateReferenceNo $generateReferenceNo,
         private RecalculateParentTotal $recalculateTotal,
     ) {}
@@ -30,15 +30,14 @@ final readonly class CreatePurchase
      */
     public function handle(CreatePurchaseData $data): Purchase
     {
-        $documentPath = null;
+        $uploadedDocumentPath = null;
 
         if ($data->document instanceof UploadedFile) {
-            $documentPath = $this->uploadImage->handle($data->document, 'purchases/documents');
+            $uploadedDocumentPath = $this->uploadImage->handle($data->document, 'purchases/documents');
         }
 
         try {
-            return DB::transaction(function () use ($data, $documentPath): Purchase {
-
+            return DB::transaction(function () use ($data, $uploadedDocumentPath): Purchase {
                 $purchase = Purchase::query()->forceCreate([
                     'supplier_id' => $data->supplier_id,
                     'warehouse_id' => $data->warehouse_id,
@@ -50,27 +49,18 @@ final readonly class CreatePurchase
                     'paid_amount' => 0,
                     'payment_status' => PaymentStatusEnum::Unpaid,
                     'note' => $data->note,
-                    'document' => $documentPath,
+                    'document' => $uploadedDocumentPath,
                 ]);
 
-                foreach ($data->items as $item) {
-                    PurchaseItem::query()->forceCreate([
-                        'purchase_id' => $purchase->id,
-                        'product_id' => $item->product_id,
-                        'quantity' => $item->quantity,
-                        'received_quantity' => 0,
-                        'unit_cost' => $item->unit_cost,
-                        'subtotal' => $item->quantity * $item->unit_cost,
-                    ]);
-                }
+                $this->createPurchaseItems->handle($purchase->id, $data->items);
 
                 $this->recalculateTotal->handle($purchase);
 
                 return $purchase->refresh();
             });
         } catch (Throwable $e) {
-            if ($documentPath !== null) {
-                Storage::disk('public')->delete($documentPath);
+            if ($uploadedDocumentPath !== null) {
+                Storage::disk('public')->delete($uploadedDocumentPath);
             }
 
             throw $e;

@@ -8,7 +8,10 @@ use App\Actions\GenerateReferenceNo;
 use App\Actions\Shared\RecalculateParentTotal;
 use App\Data\PurchaseReturn\CreatePurchaseReturnData;
 use App\Enums\PaymentStatusEnum;
+use App\Enums\PurchaseStatusEnum;
 use App\Enums\ReturnStatusEnum;
+use App\Exceptions\InvalidOperationException;
+use App\Models\Purchase;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +30,19 @@ final readonly class CreatePurchaseReturn
     public function handle(CreatePurchaseReturnData $data): PurchaseReturn
     {
         return DB::transaction(function () use ($data): PurchaseReturn {
+            /** @var Purchase $purchase */
+            $purchase = Purchase::query()
+                ->lockForUpdate()
+                ->findOrFail($data->purchase_id);
+
+            throw_if(
+                $purchase->status !== PurchaseStatusEnum::Received,
+                InvalidOperationException::class,
+                'create return',
+                'Purchase',
+                'Can only create a return for a received purchase.'
+            );
+
             $purchaseReturn = PurchaseReturn::query()->forceCreate([
                 'purchase_id' => $data->purchase_id,
                 'warehouse_id' => $data->warehouse_id,

@@ -34,6 +34,11 @@ final readonly class UpdatePurchase
 
         try {
             return DB::transaction(static function () use ($purchase, $data, $uploadedDocumentPath, $oldDocument): Purchase {
+                /** @var Purchase $purchase */
+                $purchase = Purchase::query()
+                    ->lockForUpdate()
+                    ->findOrFail($purchase->id);
+
                 if ($purchase->status !== PurchaseStatusEnum::Pending) {
                     throw new StateTransitionException(
                         $purchase->status->value,

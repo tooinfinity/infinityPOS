@@ -10,7 +10,6 @@ use App\Enums\ReturnStatusEnum;
 use App\Exceptions\RefundNotAllowedException;
 use App\Exceptions\StateTransitionException;
 use App\Models\PurchaseReturn;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -29,7 +28,7 @@ final readonly class RevertPurchaseReturn
             /** @var PurchaseReturn $purchaseReturn */
             $purchaseReturn = PurchaseReturn::query()
                 ->lockForUpdate()
-                ->with(['items.batch' => fn (Relation $query) => $query->lockForUpdate()])
+                ->with(['items.batch' => fn ($query) => $query->lockForUpdate()])
                 ->findOrFail($purchaseReturn->id);
             $this->validatePurchaseReturnCanBeCancelled($purchaseReturn);
 
@@ -51,18 +50,19 @@ final readonly class RevertPurchaseReturn
      */
     private function validatePurchaseReturnCanBeCancelled(PurchaseReturn $purchaseReturn): void
     {
-        $hasRefunds = $purchaseReturn->payments()
-            ->where('amount', '<', 0)
-            ->exists();
-
-        throw_if($hasRefunds, RefundNotAllowedException::class, 'purchase return', 'Cannot cancel a purchase return that has existing refunds. Please void the refunds first.');
-
         if ($purchaseReturn->status !== ReturnStatusEnum::Completed) {
             throw new StateTransitionException(
                 $purchaseReturn->status->value,
                 'Pending'
             );
         }
+
+        $hasActiveRefunds = $purchaseReturn->payments()
+            ->active()
+            ->refunds()
+            ->exists();
+
+        throw_if($hasActiveRefunds, RefundNotAllowedException::class, 'purchase return', 'Cannot cancel a purchase return that has existing refunds. Please void the refunds first.');
     }
 
     /**

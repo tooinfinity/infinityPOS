@@ -32,7 +32,7 @@ final readonly class MarkPurchaseAsOrdered
                 'Purchase'
             );
 
-            throw_if($purchase->items()->count() === 0, InvalidOperationException::class, 'order', 'Purchase', 'Cannot order a purchase with no items.');
+            throw_if(! $purchase->items()->exists(), InvalidOperationException::class, 'order', 'Purchase', 'Cannot order a purchase with no items.');
 
             $purchase->forceFill(['status' => PurchaseStatusEnum::Ordered])->save();
 

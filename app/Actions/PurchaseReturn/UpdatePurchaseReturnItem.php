@@ -10,6 +10,7 @@ use App\Actions\Shared\ValidateStatusIsPending;
 use App\Data\PurchaseReturn\UpdatePurchaseReturnItemData;
 use App\Models\PurchaseReturnItem;
 use Illuminate\Support\Facades\DB;
+use Spatie\LaravelData\Optional;
 use Throwable;
 
 final readonly class UpdatePurchaseReturnItem
@@ -36,10 +37,10 @@ final readonly class UpdatePurchaseReturnItem
 
             $this->validateStatus->handle($purchaseReturn);
 
-            $quantity = $data->quantity ?? $item->quantity;
-            $unitCost = $data->unit_cost ?? $item->unit_cost;
+            $quantity = $data->quantity instanceof Optional ? $item->quantity : $data->quantity;
+            $unitCost = $data->unit_cost instanceof Optional ? $item->unit_cost : $data->unit_cost;
 
-            if ($data->quantity !== null) {
+            if (! $data->quantity instanceof Optional) {
                 $this->validateReturn->handle($item, $item->product_id, $item->batch_id, $quantity);
             }
 

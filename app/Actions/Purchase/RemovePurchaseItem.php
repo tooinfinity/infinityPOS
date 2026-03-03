@@ -34,11 +34,7 @@ final readonly class RemovePurchaseItem
 
             $item->delete();
 
-            $remainingItems = PurchaseItem::query()
-                ->where('purchase_id', $purchase->id)
-                ->count();
-
-            if ($remainingItems === 0 && $deleteIfEmpty) {
+            if (! $purchase->items()->exists() && $deleteIfEmpty) {
                 if ($purchase->document !== null) {
                     Storage::disk('public')->delete($purchase->document);
                 }

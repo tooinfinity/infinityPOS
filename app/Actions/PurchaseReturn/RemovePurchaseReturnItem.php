@@ -6,6 +6,7 @@ namespace App\Actions\PurchaseReturn;
 
 use App\Actions\Shared\RecalculateParentTotal;
 use App\Actions\Shared\ValidateStatusIsPending;
+use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -23,7 +24,10 @@ final readonly class RemovePurchaseReturnItem
     public function handle(PurchaseReturnItem $item): bool
     {
         return DB::transaction(function () use ($item): bool {
-            $purchaseReturn = $item->purchaseReturn;
+            /** @var PurchaseReturn $purchaseReturn */
+            $purchaseReturn = PurchaseReturn::query()
+                ->lockForUpdate()
+                ->findOrFail($item->purchase_return_id);
 
             $this->validateStatus->handle($purchaseReturn);
 

@@ -47,7 +47,7 @@ final readonly class AddPurchaseReturnItem
 
             $this->recalculateTotal->handle($purchaseReturn);
 
-            return $item;
+            return $item->refresh();
         });
     }
 }

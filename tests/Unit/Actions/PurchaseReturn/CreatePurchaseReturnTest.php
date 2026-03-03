@@ -6,7 +6,9 @@ use App\Actions\PurchaseReturn\CreatePurchaseReturn;
 use App\Data\PurchaseReturn\CreatePurchaseReturnData;
 use App\Data\PurchaseReturn\PurchaseReturnItemData;
 use App\Enums\PaymentStatusEnum;
+use App\Enums\PurchaseStatusEnum;
 use App\Enums\ReturnStatusEnum;
+use App\Exceptions\InvalidOperationException;
 use App\Models\Batch;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
@@ -15,7 +17,7 @@ use App\Models\Warehouse;
 use Spatie\LaravelData\DataCollection;
 
 it('creates a pending purchase return with items', function (): void {
-    $purchase = Purchase::factory()->create();
+    $purchase = Purchase::factory()->received()->create();
     $warehouse = Warehouse::factory()->create();
     $batch = Batch::factory()->withQuantity(100)->create();
 
@@ -53,7 +55,7 @@ it('creates a pending purchase return with items', function (): void {
 });
 
 it('auto-generates unique reference number', function (): void {
-    $purchase = Purchase::factory()->create();
+    $purchase = Purchase::factory()->received()->create();
     $warehouse = Warehouse::factory()->create();
     $batch = Batch::factory()->withQuantity(100)->create();
 
@@ -85,7 +87,7 @@ it('auto-generates unique reference number', function (): void {
 });
 
 it('creates purchase return with multiple items', function (): void {
-    $purchase = Purchase::factory()->create();
+    $purchase = Purchase::factory()->received()->create();
     $warehouse = Warehouse::factory()->create();
     $batch1 = Batch::factory()->withQuantity(100)->create();
     $batch2 = Batch::factory()->withQuantity(100)->create();
@@ -121,3 +123,26 @@ it('creates purchase return with multiple items', function (): void {
     expect(PurchaseReturnItem::query()->where('purchase_return_id', $purchaseReturn->id)->count())->toBe(2)
         ->and($purchaseReturn->total_amount)->toBe(2000);
 });
+
+it('throws exception when creating return for a non-received purchase', function (PurchaseStatusEnum $status): void {
+    $purchase = Purchase::factory()->create(['status' => $status]);
+    $warehouse = Warehouse::factory()->create();
+
+    $data = new CreatePurchaseReturnData(
+        purchase_id: $purchase->id,
+        warehouse_id: $warehouse->id,
+        user_id: null,
+        return_date: now(),
+        note: null,
+        items: new DataCollection(PurchaseReturnItemData::class, []),
+    );
+
+    $action = resolve(CreatePurchaseReturn::class);
+
+    expect(fn () => $action->handle($data))
+        ->toThrow(InvalidOperationException::class);
+})->with([
+    [PurchaseStatusEnum::Pending],
+    [PurchaseStatusEnum::Ordered],
+    [PurchaseStatusEnum::Cancelled],
+]);

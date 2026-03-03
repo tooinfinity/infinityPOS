@@ -8,10 +8,10 @@ use App\Actions\Batch\FindOrCreateBatch;
 use App\Actions\Shared\ValidateStatusIsPending;
 use App\Actions\StockMovement\CreateStockMovement;
 use App\Enums\PurchaseStatusEnum;
+use App\Exceptions\InvalidOperationException;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
 use Throwable;
 
 final readonly class ReceivePurchase
@@ -31,7 +31,7 @@ final readonly class ReceivePurchase
             /** @var Purchase $purchase */
             $purchase = Purchase::query()
                 ->lockForUpdate()
-                ->with(['items.product', 'items.batch'])
+                ->with(['items.product'])
                 ->findOrFail($purchase->id);
 
             $this->validateStatus->validateTransition(
@@ -41,8 +41,10 @@ final readonly class ReceivePurchase
             );
 
             throw_if(
-                $purchase->items->count() === 0,
-                InvalidArgumentException::class,
+                $purchase->items->isEmpty(),
+                InvalidOperationException::class,
+                'receive',
+                'Purchase',
                 'Cannot receive a purchase with no items.'
             );
 

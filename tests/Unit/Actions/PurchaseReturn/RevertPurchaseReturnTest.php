@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\PurchaseReturn\RevertPurchaseReturn;
 use App\Data\PurchaseReturn\RevertPurchaseReturnData;
+use App\Enums\PaymentStateEnum;
 use App\Enums\ReturnStatusEnum;
 use App\Exceptions\RefundNotAllowedException;
 use App\Exceptions\StateTransitionException;
@@ -60,6 +61,24 @@ it('throws exception when cancelling non-completed return', function (): void {
 
     $action->handle($purchaseReturn, new RevertPurchaseReturnData());
 })->throws(StateTransitionException::class, 'Invalid state transition from "pending" to "Pending"');
+
+it('allows revert when refunds are voided', function (): void {
+    $paymentMethod = App\Models\PaymentMethod::factory()->create();
+    $purchaseReturn = PurchaseReturn::factory()->completed()->create([
+        'total_amount' => 1000,
+    ]);
+    Payment::factory()->forPurchaseReturn($purchaseReturn)->create([
+        'payment_method_id' => $paymentMethod->id,
+        'amount' => -500,
+        'status' => PaymentStateEnum::Voided,
+    ]);
+
+    $action = resolve(RevertPurchaseReturn::class);
+
+    $result = $action->handle($purchaseReturn, new RevertPurchaseReturnData());
+
+    expect($result->status)->toBe(ReturnStatusEnum::Pending);
+});
 
 it('skips items without batch when cancelling completed return', function (): void {
     $purchaseReturn = PurchaseReturn::factory()->completed()->create();
