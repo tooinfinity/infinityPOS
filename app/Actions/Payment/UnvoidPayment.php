@@ -37,7 +37,7 @@ final readonly class UnvoidPayment
                 'void_reason' => null,
             ])->save();
 
-            $payable = $payment->payable;
+            $payable = $payment->payable()->lockForUpdate()->first();
 
             if ($payable instanceof Sale || $payable instanceof SaleReturn || $payable instanceof Purchase || $payable instanceof PurchaseReturn) {
                 $this->recalculatePaymentSummary->handle($payable);

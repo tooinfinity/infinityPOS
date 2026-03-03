@@ -46,7 +46,7 @@ final readonly class ProcessPurchaseReturnRefund
                 'status' => PaymentStateEnum::Active,
             ]);
 
-            $this->recalculatePaymentSummary->handle($purchaseReturn, fromRefunds: true);
+            $this->recalculatePaymentSummary->handle($purchaseReturn);
 
             return $payment->refresh();
         });
@@ -62,6 +62,7 @@ final readonly class ProcessPurchaseReturnRefund
         throw_if($amount <= 0, RefundNotAllowedException::class, 'purchase return', 'Refund amount must be greater than zero.');
 
         $cumulativeRefunds = (int) $purchaseReturn->payments()
+            ->active()
             ->refunds()
             ->sum('amount');
 

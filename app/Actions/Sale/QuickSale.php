@@ -15,6 +15,7 @@ use App\Exceptions\InvalidPaymentMethodException;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\Sale;
+use Illuminate\Support\Facades\DB;
 use Throwable;
 
 final readonly class QuickSale
@@ -31,41 +32,44 @@ final readonly class QuickSale
      */
     public function handle(QuickSaleData $data): Sale
     {
-        if ($data->paid_amount > 0) {
-            $paymentMethodExists = PaymentMethod::query()
-                ->where('id', $data->payment_method_id)
-                ->exists();
+        return DB::transaction(function () use ($data): Sale {
+            if ($data->paid_amount > 0) {
+                $paymentMethod = PaymentMethod::query()
+                    ->where('id', $data->payment_method_id)
+                    ->where('is_active', true)
+                    ->first();
 
-            if (! $paymentMethodExists) {
-                throw new InvalidPaymentMethodException(
-                    $data->payment_method_id,
-                    'Payment method is not active or does not exist'
-                );
+                if ($paymentMethod === null) {
+                    throw new InvalidPaymentMethodException(
+                        $data->payment_method_id,
+                        'Payment method is not active or does not exist'
+                    );
+                }
             }
-        }
 
-        $createSaleData = new CreateSaleData(
-            customer_id: $data->customer_id,
-            warehouse_id: $data->warehouse_id,
-            user_id: $data->user_id,
-            sale_date: $data->sale_date,
-            note: $data->note,
-            items: $data->items,
-            paid_amount: $data->paid_amount,
-        );
+            $createSaleData = new CreateSaleData(
+                customer_id: $data->customer_id,
+                warehouse_id: $data->warehouse_id,
+                user_id: $data->user_id,
+                sale_date: $data->sale_date,
+                note: $data->note,
+                items: $data->items,
+                paid_amount: $data->paid_amount,
+            );
 
-        $sale = $this->createSale->handle($createSaleData, SaleStatusEnum::Completed);
+            $sale = $this->createSale->handle($createSaleData, SaleStatusEnum::Completed);
 
-        if ($data->paid_amount > 0) {
-            $this->recordPayment($sale, $data);
+            if ($data->paid_amount > 0) {
+                $this->recordPayment($sale, $data);
 
-            $this->applyPaymentSummary->handle($sale, $data->paid_amount, capPaidAmount: true);
-        }
+                $this->applyPaymentSummary->handle($sale, $data->paid_amount, capPaidAmount: true);
+            }
 
-        $sale->load('items');
-        $this->deductSaleStock->handle($sale);
+            $sale->load('items');
+            $this->deductSaleStock->handle($sale);
 
-        return $sale->refresh();
+            return $sale->refresh();
+        });
     }
 
     private function recordPayment(Sale $sale, QuickSaleData $data): void

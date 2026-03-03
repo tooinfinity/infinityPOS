@@ -6,6 +6,7 @@ use App\Actions\Payment\RecordPayment;
 use App\Data\Payment\RecordPaymentData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\PurchaseStatusEnum;
+use App\Exceptions\InvalidOperationException;
 use App\Exceptions\InvalidPaymentMethodException;
 use App\Exceptions\OverpaymentException;
 use App\Exceptions\StateTransitionException;
@@ -346,7 +347,7 @@ it('throws exception for negative payment amount', function () use (&$paymentMet
         user_id: null,
         note: null,
     ));
-})->throws(InvalidPaymentMethodException::class);
+})->throws(InvalidOperationException::class);
 
 it('throws exception for purchase overpayment', function () use (&$paymentMethod): void {
     $purchase = Purchase::factory()->received()->create([

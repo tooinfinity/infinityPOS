@@ -16,11 +16,11 @@ final readonly class RecalculatePaymentSummary
         private ApplyPaymentSummary $applyPaymentSummary,
     ) {}
 
-    public function handle(Sale|SaleReturn|Purchase|PurchaseReturn $payable, bool $fromRefunds = false): void
+    public function handle(Sale|SaleReturn|Purchase|PurchaseReturn $payable): void
     {
         $newPaidAmount = Payment::sumForPayable($payable, lockForUpdate: true);
 
-        if ($fromRefunds) {
+        if ($payable instanceof SaleReturn || $payable instanceof PurchaseReturn) {
             $newPaidAmount = abs($newPaidAmount);
         }
 

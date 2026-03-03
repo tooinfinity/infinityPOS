@@ -47,7 +47,7 @@ final readonly class ProcessSaleReturnRefund
                 'status' => PaymentStateEnum::Active,
             ]);
 
-            $this->recalculatePaymentSummary->handle($saleReturn, fromRefunds: true);
+            $this->recalculatePaymentSummary->handle($saleReturn);
 
             return $payment->refresh();
         });
@@ -63,6 +63,7 @@ final readonly class ProcessSaleReturnRefund
         throw_if($amount <= 0, RefundNotAllowedException::class, 'sale return', 'Refund amount must be greater than zero.');
 
         $cumulativeRefunds = (int) $saleReturn->payments()
+            ->active()
             ->refunds()
             ->sum('amount');
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Payment;
 
-use App\Exceptions\InvalidPaymentMethodException;
+use App\Exceptions\InvalidOperationException;
 use App\Exceptions\OverpaymentException;
 use App\Models\Payment;
 use App\Models\Purchase;
@@ -18,9 +18,9 @@ final readonly class ValidatePaymentAmount
     /**
      * @throws Throwable
      */
-    public function handle(Sale|SaleReturn|Purchase|PurchaseReturn $payable, float $amount): void
+    public function handle(Sale|SaleReturn|Purchase|PurchaseReturn $payable, int $amount): void
     {
-        throw_if($amount < 0, InvalidPaymentMethodException::class, 0, 'Payment amount cannot be negative.');
+        throw_if($amount < 0, InvalidOperationException::class, 'record payment', 'Payment', 'Amount cannot be negative.');
 
         $currentPaid = Payment::sumForPayable($payable);
 

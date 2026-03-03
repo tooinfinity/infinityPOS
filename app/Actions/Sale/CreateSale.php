@@ -41,7 +41,7 @@ final readonly class CreateSale
                 'status' => $status,
                 'sale_date' => $data->sale_date,
                 'total_amount' => 0,
-                'paid_amount' => min($data->paid_amount ?? 0, 0),
+                'paid_amount' => 0,
                 'change_amount' => 0,
                 'payment_status' => PaymentStatusEnum::Unpaid,
                 'note' => $data->note,
@@ -57,16 +57,10 @@ final readonly class CreateSale
 
             $paymentCalculation = $this->calculatePaymentStatus->handle($totalAmount, $data->paid_amount ?? 0);
 
-            $paymentStatus = match ($status) {
-                SaleStatusEnum::Completed => $data->paid_amount > 0 ? PaymentStatusEnum::Unpaid : PaymentStatusEnum::Unpaid,
-                default => PaymentStatusEnum::Unpaid,
-            };
-
             $sale->forceFill([
                 'total_amount' => $totalAmount,
                 'paid_amount' => min($data->paid_amount ?? 0, $totalAmount),
                 'change_amount' => $paymentCalculation->changeAmount,
-                'payment_status' => $paymentStatus,
             ])->save();
 
             return $sale->refresh();
