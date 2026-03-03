@@ -41,7 +41,7 @@ final readonly class ReceivePurchase
             );
 
             throw_if(
-                $purchase->items()->count() === 0,
+                $purchase->items->count() === 0,
                 InvalidArgumentException::class,
                 'Cannot receive a purchase with no items.'
             );

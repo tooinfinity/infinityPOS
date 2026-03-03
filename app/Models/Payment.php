@@ -41,6 +41,23 @@ final class Payment extends Model
     use HasFactory;
 
     /**
+     * Sum active payments for a given payable.
+     */
+    public static function sumForPayable(Sale|SaleReturn|Purchase|PurchaseReturn $payable, bool $lockForUpdate = false): int
+    {
+        $query = self::query()->activeForPayable($payable::class, $payable->id);
+
+        if ($lockForUpdate) {
+            $query->lockForUpdate();
+        }
+
+        /** @var int $amount */
+        $amount = $query->sum('amount');
+
+        return $amount;
+    }
+
+    /**
      * @return MorphTo<Model, $this>
      */
     public function payable(): MorphTo

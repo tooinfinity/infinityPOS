@@ -22,7 +22,7 @@ final readonly class ValidatePaymentAmount
     {
         throw_if($amount < 0, InvalidPaymentMethodException::class, 0, 'Payment amount cannot be negative.');
 
-        $currentPaid = $this->getCurrentPaidAmount($payable);
+        $currentPaid = Payment::sumForPayable($payable);
 
         if ($payable instanceof Sale) {
             $maxAllowedPayment = $payable->total_amount * 2;
@@ -35,15 +35,5 @@ final readonly class ValidatePaymentAmount
         if (($currentPaid + $amount) > $payable->total_amount) {
             throw new OverpaymentException($amount, $payable->total_amount, $currentPaid);
         }
-    }
-
-    private function getCurrentPaidAmount(Sale|SaleReturn|Purchase|PurchaseReturn $payable): int
-    {
-        /** @var int $amount */
-        $amount = Payment::query()
-            ->activeForPayable($payable::class, $payable->id)
-            ->sum('amount');
-
-        return $amount;
     }
 }

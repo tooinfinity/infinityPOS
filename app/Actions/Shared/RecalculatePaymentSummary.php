@@ -18,10 +18,7 @@ final readonly class RecalculatePaymentSummary
 
     public function handle(Sale|SaleReturn|Purchase|PurchaseReturn $payable, bool $fromRefunds = false): void
     {
-        $newPaidAmount = (int) Payment::query()
-            ->activeForPayable($payable::class, $payable->id)
-            ->lockForUpdate()
-            ->sum('amount');
+        $newPaidAmount = Payment::sumForPayable($payable, lockForUpdate: true);
 
         if ($fromRefunds) {
             $newPaidAmount = abs($newPaidAmount);
