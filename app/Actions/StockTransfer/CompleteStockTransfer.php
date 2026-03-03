@@ -6,8 +6,7 @@ namespace App\Actions\StockTransfer;
 
 use App\Actions\Batch\FindOrCreateBatch;
 use App\Actions\Shared\ValidateStatusIsPending;
-use App\Actions\StockMovement\RecordStockMovement;
-use App\Data\StockMovement\RecordStockMovementData;
+use App\Actions\StockMovement\CreateStockMovement;
 use App\Enums\StockMovementTypeEnum;
 use App\Enums\StockTransferStatusEnum;
 use App\Exceptions\InsufficientStockException;
@@ -22,7 +21,7 @@ use Throwable;
 final readonly class CompleteStockTransfer
 {
     public function __construct(
-        private RecordStockMovement $recordStockMovement,
+        private CreateStockMovement $createStockMovement,
         private ValidateStatusIsPending $validateStatus,
         private FindOrCreateBatch $findOrCreateBatch,
     ) {}
@@ -101,35 +100,13 @@ final readonly class CompleteStockTransfer
             $sourceBatch->expires_at,
         );
 
-        $this->recordStockMovement->handle(new RecordStockMovementData(
-            warehouse_id: $transfer->from_warehouse_id,
-            product_id: $item->product_id,
-            type: StockMovementTypeEnum::Transfer,
-            quantity: $item->quantity,
-            previous_quantity: $previousQuantity,
-            current_quantity: $previousQuantity - $item->quantity,
-            reference_type: StockTransfer::class,
-            reference_id: $transfer->id,
-            batch_id: $sourceBatch->id,
-            user_id: $transfer->user_id,
-            note: 'Stock transfer out',
-        ));
+        $this->createStockMovement->recordTransfer($sourceBatch, $item->quantity, $previousQuantity,
+            StockMovementTypeEnum::Out, $transfer, $transfer->user_id);
 
         $previousDestQuantity = $destinationBatch->quantity;
         $destinationBatch->forceFill(['quantity' => $destinationBatch->quantity + $item->quantity])->save();
 
-        $this->recordStockMovement->handle(new RecordStockMovementData(
-            warehouse_id: $transfer->to_warehouse_id,
-            product_id: $item->product_id,
-            type: StockMovementTypeEnum::Transfer,
-            quantity: $item->quantity,
-            previous_quantity: $previousDestQuantity,
-            current_quantity: $previousDestQuantity + $item->quantity,
-            reference_type: StockTransfer::class,
-            reference_id: $transfer->id,
-            batch_id: $destinationBatch->id,
-            user_id: $transfer->user_id,
-            note: 'Stock transfer in',
-        ));
+        $this->createStockMovement->recordTransfer($destinationBatch, $item->quantity, $previousDestQuantity,
+            StockMovementTypeEnum::In, $transfer, $transfer->user_id);
     }
 }

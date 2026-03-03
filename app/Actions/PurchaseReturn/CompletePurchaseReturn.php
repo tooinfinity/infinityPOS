@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\PurchaseReturn;
 
 use App\Actions\Shared\ValidateStatusIsPending;
-use App\Actions\Stock\AdjustBatchQuantity;
+use App\Actions\StockMovement\CreateStockMovement;
 use App\Data\PurchaseReturn\CompletePurchaseReturnData;
 use App\Enums\ReturnStatusEnum;
-use App\Enums\StockMovementTypeEnum;
+use App\Exceptions\InsufficientStockException;
 use App\Exceptions\InvalidOperationException;
 use App\Models\PurchaseReturn;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +17,7 @@ use Throwable;
 final readonly class CompletePurchaseReturn
 {
     public function __construct(
-        private AdjustBatchQuantity $adjustBatchQuantity,
+        private CreateStockMovement $createStockMovement,
         private ValidateStatusIsPending $validateStatus,
     ) {}
 
@@ -72,13 +72,26 @@ final readonly class CompletePurchaseReturn
                 continue;
             }
 
-            $this->adjustBatchQuantity->handle(
+            $previousQuantity = $batch->quantity;
+            $newQuantity = $previousQuantity - $item->quantity;
+
+            if ($newQuantity < 0) {
+                throw new InsufficientStockException(
+                    required: $item->quantity,
+                    available: $previousQuantity,
+                    batchId: $batch->id,
+                );
+            }
+
+            $batch->forceFill(['quantity' => $newQuantity])->save();
+
+            $this->createStockMovement->recordOut(
                 $batch,
-                -$item->quantity,
-                StockMovementTypeEnum::Out,
+                $item->quantity,
+                $previousQuantity,
                 $purchaseReturn,
-                'Purchase return completed - stock removed',
                 $purchaseReturn->user_id,
+                'Purchase return completed - stock removed',
             );
         }
     }

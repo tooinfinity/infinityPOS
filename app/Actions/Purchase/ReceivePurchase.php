@@ -6,10 +6,8 @@ namespace App\Actions\Purchase;
 
 use App\Actions\Batch\FindOrCreateBatch;
 use App\Actions\Shared\ValidateStatusIsPending;
-use App\Actions\StockMovement\RecordStockMovement;
-use App\Data\StockMovement\RecordStockMovementData;
+use App\Actions\StockMovement\CreateStockMovement;
 use App\Enums\PurchaseStatusEnum;
-use App\Enums\StockMovementTypeEnum;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +17,7 @@ use Throwable;
 final readonly class ReceivePurchase
 {
     public function __construct(
-        private RecordStockMovement $recordStockMovement,
+        private CreateStockMovement $createStockMovement,
         private ValidateStatusIsPending $validateStatus,
         private FindOrCreateBatch $findOrCreateBatch,
     ) {}
@@ -80,18 +78,6 @@ final readonly class ReceivePurchase
             'received_quantity' => $item->quantity,
         ])->save();
 
-        $this->recordStockMovement->handle(new RecordStockMovementData(
-            warehouse_id: $purchase->warehouse_id,
-            product_id: $item->product_id,
-            type: StockMovementTypeEnum::In,
-            quantity: $item->quantity,
-            previous_quantity: $previousQuantity,
-            current_quantity: $newQuantity,
-            reference_type: Purchase::class,
-            reference_id: $purchase->id,
-            batch_id: $batch->id,
-            user_id: $purchase->user_id,
-            note: 'Purchase receipt',
-        ));
+        $this->createStockMovement->recordIn($batch, $item->quantity, $previousQuantity, $purchase, $purchase->user_id);
     }
 }

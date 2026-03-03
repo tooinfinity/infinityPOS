@@ -63,7 +63,7 @@ final readonly class QuickSale
         }
 
         $sale->load('items');
-        $this->deductSaleStock->handle($sale, 'Quick sale - stock out');
+        $this->deductSaleStock->handle($sale);
 
         return $sale->refresh();
     }

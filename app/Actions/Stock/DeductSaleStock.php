@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Stock;
 
-use App\Enums\StockMovementTypeEnum;
+use App\Actions\StockMovement\CreateStockMovement;
+use App\Exceptions\InsufficientStockException;
 use App\Models\Batch;
 use App\Models\Sale;
 use Illuminate\Database\Eloquent\Collection;
@@ -14,13 +15,13 @@ use Throwable;
 final readonly class DeductSaleStock
 {
     public function __construct(
-        private AdjustBatchQuantity $adjustBatchQuantity,
+        private CreateStockMovement $createStockMovement,
     ) {}
 
     /**
      * @throws Throwable
      */
-    public function handle(Sale $sale, string $note): void
+    public function handle(Sale $sale): void
     {
         $batchIds = $sale->items
             ->pluck('batch_id')
@@ -33,7 +34,7 @@ final readonly class DeductSaleStock
             return;
         }
 
-        DB::transaction(function () use ($sale, $batchIds, $note): void {
+        DB::transaction(function () use ($sale, $batchIds): void {
             /** @var Collection<int, Batch> $batches */
             $batches = Batch::query()
                 ->lockForUpdate()
@@ -49,12 +50,24 @@ final readonly class DeductSaleStock
                 /** @var Batch $batch */
                 $batch = $batches->get($item->batch_id);
 
-                $this->adjustBatchQuantity->handle(
+                $previousQuantity = $batch->quantity;
+                $newQuantity = $previousQuantity - $item->quantity;
+
+                if ($newQuantity < 0) {
+                    throw new InsufficientStockException(
+                        required: $item->quantity,
+                        available: $previousQuantity,
+                        batchId: $batch->id,
+                    );
+                }
+
+                $batch->forceFill(['quantity' => $newQuantity])->save();
+
+                $this->createStockMovement->recordOut(
                     $batch,
-                    -$item->quantity,
-                    StockMovementTypeEnum::Out,
+                    $item->quantity,
+                    $previousQuantity,
                     $sale,
-                    $note,
                     $sale->user_id,
                 );
             }

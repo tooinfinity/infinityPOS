@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\SaleReturn;
 
-use App\Actions\Stock\AdjustBatchQuantity;
+use App\Actions\StockMovement\CreateStockMovement;
 use App\Data\SaleReturn\RevertSaleReturnData;
 use App\Enums\ReturnStatusEnum;
-use App\Enums\StockMovementTypeEnum;
+use App\Exceptions\InsufficientStockException;
 use App\Exceptions\RefundNotAllowedException;
 use App\Exceptions\StateTransitionException;
 use App\Models\SaleReturn;
@@ -17,7 +17,7 @@ use Throwable;
 final readonly class RevertSaleReturn
 {
     public function __construct(
-        private AdjustBatchQuantity $adjustBatchQuantity,
+        private CreateStockMovement $createStockMovement,
     ) {}
 
     /**
@@ -74,13 +74,26 @@ final readonly class RevertSaleReturn
                 continue;
             }
 
-            $this->adjustBatchQuantity->handle(
+            $previousQuantity = $batch->quantity;
+            $newQuantity = $previousQuantity - $item->quantity;
+
+            if ($newQuantity < 0) {
+                throw new InsufficientStockException(
+                    required: $item->quantity,
+                    available: $previousQuantity,
+                    batchId: $batch->id,
+                );
+            }
+
+            $batch->forceFill(['quantity' => $newQuantity])->save();
+
+            $this->createStockMovement->recordOut(
                 $batch,
-                -$item->quantity,
-                StockMovementTypeEnum::Out,
+                $item->quantity,
+                $previousQuantity,
                 $saleReturn,
-                'Sale return cancelled - stock removed',
                 $saleReturn->user_id,
+                'Sale return cancelled - stock removed',
             );
         }
     }

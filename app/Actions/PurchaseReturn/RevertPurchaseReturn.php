@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\PurchaseReturn;
 
-use App\Actions\Stock\AdjustBatchQuantity;
+use App\Actions\StockMovement\CreateStockMovement;
 use App\Data\PurchaseReturn\RevertPurchaseReturnData;
 use App\Enums\ReturnStatusEnum;
-use App\Enums\StockMovementTypeEnum;
 use App\Exceptions\RefundNotAllowedException;
 use App\Exceptions\StateTransitionException;
 use App\Models\PurchaseReturn;
@@ -18,7 +17,7 @@ use Throwable;
 final readonly class RevertPurchaseReturn
 {
     public function __construct(
-        private AdjustBatchQuantity $adjustBatchQuantity,
+        private CreateStockMovement $createStockMovement,
     ) {}
 
     /**
@@ -78,13 +77,16 @@ final readonly class RevertPurchaseReturn
                 continue;
             }
 
-            $this->adjustBatchQuantity->handle(
+            $previousQuantity = $batch->quantity;
+            $batch->forceFill(['quantity' => $previousQuantity + $item->quantity])->save();
+
+            $this->createStockMovement->recordIn(
                 $batch,
                 $item->quantity,
-                StockMovementTypeEnum::In,
+                $previousQuantity,
                 $purchaseReturn,
-                'Purchase return reverted - stock restored',
                 $purchaseReturn->user_id,
+                'Purchase return reverted - stock restored',
             );
         }
     }

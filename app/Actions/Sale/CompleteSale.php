@@ -34,10 +34,7 @@ final readonly class CompleteSale
 
             $this->validateSaleCompletion->handle($sale);
 
-            $this->deductSaleStock->handle(
-                $sale,
-                'Sale completed - stock out',
-            );
+            $this->deductSaleStock->handle($sale);
 
             $note = $data instanceof CompleteSaleData ? ($data->note ?? $sale->note) : $sale->note;
 

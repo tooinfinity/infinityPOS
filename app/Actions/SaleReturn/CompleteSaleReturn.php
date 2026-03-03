@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\SaleReturn;
 
-use App\Actions\Stock\AdjustBatchQuantity;
+use App\Actions\StockMovement\CreateStockMovement;
 use App\Data\SaleReturn\CompleteSaleReturnData;
 use App\Enums\ReturnStatusEnum;
-use App\Enums\StockMovementTypeEnum;
 use App\Models\SaleReturn;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +15,7 @@ use Throwable;
 final readonly class CompleteSaleReturn
 {
     public function __construct(
-        private AdjustBatchQuantity $adjustBatchQuantity,
+        private CreateStockMovement $createStockMovement,
         private ValidateSaleReturnCanBeCompleted $validateSaleReturnCanBeCompleted,
     ) {}
 
@@ -57,13 +56,16 @@ final readonly class CompleteSaleReturn
                 continue;
             }
 
-            $this->adjustBatchQuantity->handle(
+            $previousQuantity = $batch->quantity;
+            $batch->forceFill(['quantity' => $previousQuantity + $item->quantity])->save();
+
+            $this->createStockMovement->recordIn(
                 $batch,
                 $item->quantity,
-                StockMovementTypeEnum::In,
+                $previousQuantity,
                 $saleReturn,
-                'Sale return completed - stock returned',
                 $saleReturn->user_id,
+                'Sale return completed - stock returned',
             );
         }
     }
