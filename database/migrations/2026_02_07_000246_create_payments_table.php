@@ -21,6 +21,10 @@ return new class extends Migration
             $table->unsignedBigInteger('amount');
             $table->date('payment_date');
             $table->text('note')->nullable();
+            $table->string('status');
+            $table->foreignId('voided_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('voided_at')->nullable();
+            $table->text('void_reason')->nullable();
 
             $table->timestamps();
 

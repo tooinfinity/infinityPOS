@@ -46,3 +46,17 @@ test('category has many products', function (): void {
 
     expect($category->products)->toHaveCount(2);
 });
+
+test('withInactive returns both active and inactive categories', function (): void {
+    Category::factory()->count(2)->create([
+        'is_active' => true,
+    ]);
+    Category::factory()->count(2)->create([
+        'is_active' => false,
+    ]);
+
+    $categories = Category::withInactive()->get();
+
+    expect($categories)
+        ->toHaveCount(4);
+});

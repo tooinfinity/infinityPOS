@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -28,18 +29,35 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read string|null $image
  * @property-read int $cost_price
  * @property-read int $selling_price
- * @property-read int $quantity
  * @property-read int $alert_quantity
  * @property-read bool $track_inventory
  * @property-read bool $is_active
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read Category|null $category
+ * @property-read Brand|null $brand
+ * @property-read Unit $unit
+ * @property-read Collection<int, Batch> $batches
+ * @property-read Collection<int, StockMovement> $stockMovements
+ * @property-read Collection<int, PurchaseItem> $purchaseItems
+ * @property-read Collection<int, SaleItem> $saleItems
+ * @property-read Collection<int, StockTransferItem> $stockTransferItems
+ * @property-read Collection<int, SaleReturnItem> $saleReturnItems
+ * @property-read Collection<int, PurchaseReturnItem> $purchaseReturnItems
  */
 #[ScopedBy([ActiveScope::class])]
 final class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
     use HasFactory;
+
+    /**
+     * @return Builder<self>
+     */
+    public static function withInactive(): Builder
+    {
+        return self::query()->withoutGlobalScope(ActiveScope::class);
+    }
 
     /**
      * @return BelongsTo<Category, $this>
@@ -138,7 +156,6 @@ final class Product extends Model
             'image' => 'string',
             'cost_price' => 'integer',
             'selling_price' => 'integer',
-            'quantity' => 'integer',
             'alert_quantity' => 'integer',
             'track_inventory' => 'boolean',
             'is_active' => 'boolean',
@@ -154,8 +171,9 @@ final class Product extends Model
     #[Scope]
     protected function lowStock(Builder $query): Builder
     {
-        return $query->whereColumn('quantity', '<=', 'alert_quantity')
-            ->where('track_inventory', true);
+        return $query->whereRaw(
+            '(SELECT COALESCE(SUM(quantity), 0) FROM batches WHERE batches.product_id = products.id) <= products.alert_quantity'
+        )->where('track_inventory', true);
     }
 
     /**
@@ -165,8 +183,9 @@ final class Product extends Model
     #[Scope]
     protected function outOfStock(Builder $query): Builder
     {
-        return $query->where('quantity', '<=', 0)
-            ->where('track_inventory', true);
+        return $query->whereRaw(
+            '(SELECT COALESCE(SUM(quantity), 0) FROM batches WHERE batches.product_id = products.id) <= 0'
+        )->where('track_inventory', true);
     }
 
     /**
@@ -194,12 +213,39 @@ final class Product extends Model
     }
 
     /**
+     * @param  Builder<Product>  $query
+     * @return Builder<Product>
+     */
+    #[Scope]
+    protected function withStockQuantity(Builder $query): Builder
+    {
+        return $query->addSelect([
+            'stock_quantity' => Batch::query()->selectRaw('COALESCE(SUM(quantity), 0)')
+                ->whereColumn('batches.product_id', 'products.id'),
+        ]);
+    }
+
+    /**
      * @return Attribute<bool, null>
      */
     protected function isLowStock(): Attribute
     {
         return Attribute::make(
-            get: fn (): bool => $this->track_inventory && $this->quantity <= $this->alert_quantity,
+            get: function (): bool {
+                if (! $this->track_inventory) {
+                    return false;
+                }
+
+                if (array_key_exists('stock_quantity', $this->attributes)) {
+                    /** @var int $stockQuantity */
+                    $stockQuantity = $this->attributes['stock_quantity'];
+                    $quantity = $stockQuantity;
+                } else {
+                    $quantity = $this->getTotalQuantity();
+                }
+
+                return $quantity <= $this->alert_quantity;
+            },
         );
     }
 
@@ -209,8 +255,40 @@ final class Product extends Model
     protected function isOutOfStock(): Attribute
     {
         return Attribute::make(
-            get: fn (): bool => $this->track_inventory && $this->quantity <= 0,
+            get: function (): bool {
+                if (! $this->track_inventory) {
+                    return false;
+                }
+
+                if (array_key_exists('stock_quantity', $this->attributes)) {
+                    /** @var int $stockQuantity */
+                    $stockQuantity = $this->attributes['stock_quantity'];
+                    $quantity = $stockQuantity;
+                } else {
+                    $quantity = $this->getTotalQuantity();
+                }
+
+                return $quantity <= 0;
+            },
         );
+    }
+
+    /**
+     * Get total quantity from all batches
+     */
+    protected function getTotalQuantity(): int
+    {
+        if (array_key_exists('stock_quantity', $this->attributes)) {
+            /** @var int $stockQuantity */
+            $stockQuantity = $this->attributes['stock_quantity'];
+
+            return $stockQuantity;
+        }
+
+        /** @var int|null $sum */
+        $sum = $this->batches()->sum('quantity');
+
+        return (int) ($sum ?? 0);
     }
 
     /**

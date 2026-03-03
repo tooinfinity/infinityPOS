@@ -17,21 +17,18 @@ return new class extends Migration
             $table->foreignId('unit_id')->constrained();
 
             $table->string('name')->unique();
-            $table->string('sku');
-            $table->string('barcode');
+            $table->string('sku')->unique();
+            $table->string('barcode')->unique();
             $table->text('description')->nullable();
             $table->string('image')->nullable();
             $table->unsignedBigInteger('cost_price');
             $table->unsignedBigInteger('selling_price');
-            $table->unsignedInteger('quantity');
             $table->unsignedInteger('alert_quantity');
             $table->boolean('track_inventory');
             $table->boolean('is_active');
 
             $table->timestamps();
 
-            $table->index('sku');
-            $table->index('barcode');
             $table->index('category_id');
             $table->index('brand_id');
             $table->index('is_active');

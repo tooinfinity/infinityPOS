@@ -17,3 +17,15 @@ it('payment status label', function (): void {
         ->and(PaymentStatusEnum::Partial->label())->toBe($value2)
         ->and(PaymentStatusEnum::Paid->label())->toBe($value3);
 });
+
+it('can accept payment returns true for unpaid', function (): void {
+    expect(PaymentStatusEnum::Unpaid->canAcceptPayment())->toBeTrue();
+});
+
+it('can accept payment returns true for partial', function (): void {
+    expect(PaymentStatusEnum::Partial->canAcceptPayment())->toBeTrue();
+});
+
+it('can accept payment returns false for paid', function (): void {
+    expect(PaymentStatusEnum::Paid->canAcceptPayment())->toBeFalse();
+});

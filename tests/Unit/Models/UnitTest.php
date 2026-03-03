@@ -41,3 +41,17 @@ test('unit has many products', function (): void {
 
     expect($unit->products)->toHaveCount(1);
 });
+
+test('withInactive returns both active and inactive units', function (): void {
+    Unit::factory()->count(2)->create([
+        'is_active' => true,
+    ]);
+    Unit::factory()->count(2)->create([
+        'is_active' => false,
+    ]);
+
+    $units = Unit::withInactive()->get();
+
+    expect($units)
+        ->toHaveCount(4);
+});

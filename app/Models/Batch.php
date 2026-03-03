@@ -9,6 +9,7 @@ use Database\Factories\BatchFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,6 +25,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read CarbonInterface|null $expires_at
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read Product $product
+ * @property-read Warehouse $warehouse
+ * @property-read Collection<int, StockMovement> $stockMovements
+ * @property-read Collection<int, PurchaseItem> $purchaseItems
+ * @property-read Collection<int, SaleItem> $saleItems
+ * @property-read Collection<int, StockTransferItem> $stockTransferItems
+ * @property-read Collection<int, SaleReturnItem> $saleReturnItems
+ * @property-read Collection<int, PurchaseReturnItem> $purchaseReturnItems
  */
 final class Batch extends Model
 {
@@ -163,6 +172,28 @@ final class Batch extends Model
     protected function fefo(Builder $query): Builder
     {
         return $query->orderByRaw('expires_at IS NULL, expires_at ASC');
+    }
+
+    /**
+     * @param  Builder<Batch>  $query
+     * @return Builder<Batch>
+     */
+    #[Scope]
+    protected function matching(
+        Builder $query,
+        int $productId,
+        int $warehouseId,
+        int $costAmount,
+        ?CarbonInterface $expiresAt = null,
+    ): Builder {
+        return $query->where('product_id', $productId)
+            ->where('warehouse_id', $warehouseId)
+            ->where('cost_amount', $costAmount)
+            ->when(
+                $expiresAt instanceof CarbonInterface,
+                fn (Builder $q) => $q->where('expires_at', $expiresAt),
+                fn (Builder $q) => $q->whereNull('expires_at'),
+            );
     }
 
     /**

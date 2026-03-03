@@ -11,11 +11,13 @@ use Database\Factories\SaleFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property-read int $id
@@ -27,11 +29,19 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read CarbonInterface $sale_date
  * @property-read int $total_amount
  * @property-read int $paid_amount
+ * @property-read int $due_amount
  * @property-read int $change_amount
  * @property-read PaymentStatusEnum $payment_status
  * @property-read string|null $note
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read Customer|null $customer
+ * @property-read Warehouse $warehouse
+ * @property-read User|null $user
+ * @property-read Collection<int, SaleItem> $items
+ * @property-read Collection<int, Payment> $payments
+ * @property-read Collection<int, StockMovement> $stockMovements
+ * @property-read Collection<int, SaleReturn> $returns
  */
 final class Sale extends Model
 {
@@ -76,6 +86,14 @@ final class Sale extends Model
     public function payments(): MorphMany
     {
         return $this->morphMany(Payment::class, 'payable');
+    }
+
+    /**
+     * @return MorphMany<Payment, $this>
+     */
+    public function activePayments(): MorphMany
+    {
+        return $this->morphMany(Payment::class, 'payable')->active();
     }
 
     /**
@@ -124,7 +142,7 @@ final class Sale extends Model
     #[Scope]
     protected function pending(Builder $query): Builder
     {
-        return $query->where('status', SaleStatusEnum::Pending->value);
+        return $query->where('status', SaleStatusEnum::Pending);
     }
 
     /**
@@ -134,7 +152,7 @@ final class Sale extends Model
     #[Scope]
     protected function completed(Builder $query): Builder
     {
-        return $query->where('status', SaleStatusEnum::Completed->value);
+        return $query->where('status', SaleStatusEnum::Completed);
     }
 
     /**
@@ -144,7 +162,7 @@ final class Sale extends Model
     #[Scope]
     protected function cancelled(Builder $query): Builder
     {
-        return $query->where('status', SaleStatusEnum::Cancelled->value);
+        return $query->where('status', SaleStatusEnum::Cancelled);
     }
 
     /**
@@ -154,7 +172,7 @@ final class Sale extends Model
     #[Scope]
     protected function unpaid(Builder $query): Builder
     {
-        return $query->where('payment_status', PaymentStatusEnum::Unpaid->value);
+        return $query->where('payment_status', PaymentStatusEnum::Unpaid);
     }
 
     /**
@@ -164,7 +182,7 @@ final class Sale extends Model
     #[Scope]
     protected function partiallyPaid(Builder $query): Builder
     {
-        return $query->where('payment_status', PaymentStatusEnum::Partial->value);
+        return $query->where('payment_status', PaymentStatusEnum::Partial);
     }
 
     /**
@@ -174,7 +192,7 @@ final class Sale extends Model
     #[Scope]
     protected function paid(Builder $query): Builder
     {
-        return $query->where('payment_status', PaymentStatusEnum::Paid->value);
+        return $query->where('payment_status', PaymentStatusEnum::Paid);
     }
 
     /**
@@ -198,12 +216,30 @@ final class Sale extends Model
     }
 
     /**
+     * @param  Builder<Sale>  $query
+     * @return Builder<Sale>
+     */
+    #[Scope]
+    protected function withDueAmount(Builder $query): Builder
+    {
+        return $query->select('*')->addSelect([
+            'due_amount' => DB::raw('CASE WHEN total_amount > paid_amount THEN total_amount - paid_amount ELSE 0 END'),
+        ]);
+    }
+
+    /**
      * @return Attribute<int, null>
      */
     protected function profit(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->items->sum(fn (SaleItem $item): int => ($item->unit_price - $item->unit_cost) * $item->quantity),
+            get: function (): int {
+                if (! $this->relationLoaded('items')) {
+                    return 0;
+                }
+
+                return $this->items->sum(fn (SaleItem $item): int => ($item->unit_price - $item->unit_cost) * $item->quantity);
+            },
         );
     }
 }

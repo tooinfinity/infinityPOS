@@ -103,3 +103,17 @@ it('filters by search scope on phone', function (): void {
     expect($results)->toHaveCount(1)
         ->first()->phone->toBe('1234567890');
 });
+
+test('withInactive returns both active and inactive suppliers', function (): void {
+    Supplier::factory()->count(2)->create([
+        'is_active' => true,
+    ]);
+    Supplier::factory()->count(2)->create([
+        'is_active' => false,
+    ]);
+
+    $suppliers = Supplier::withInactive()->get();
+
+    expect($suppliers)
+        ->toHaveCount(4);
+});

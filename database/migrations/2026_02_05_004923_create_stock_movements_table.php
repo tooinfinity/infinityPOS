@@ -18,14 +18,14 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained();
 
             $table->string('type');
-            $table->Integer('quantity');
-            $table->Integer('previous_quantity');
-            $table->Integer('current_quantity');
+            $table->integer('quantity');
+            $table->unsignedInteger('previous_quantity');
+            $table->unsignedInteger('current_quantity');
             $table->string('reference_type')->nullable();
             $table->unsignedBigInteger('reference_id')->nullable();
             $table->text('note')->nullable();
 
-            $table->timestamp('created_at');
+            $table->timestamps();
 
             $table->index(['warehouse_id', 'product_id']);
             $table->index('batch_id');

@@ -6,6 +6,8 @@ namespace App\Models;
 
 use Carbon\CarbonInterface;
 use Database\Factories\PurchaseReturnItemFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,6 +22,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read int $subtotal
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read PurchaseReturn $purchaseReturn
+ * @property-read Product $product
+ * @property-read Batch|null $batch
  */
 final class PurchaseReturnItem extends Model
 {
@@ -66,5 +71,37 @@ final class PurchaseReturnItem extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @param  Builder<PurchaseReturnItem>  $query
+     * @return Builder<PurchaseReturnItem>
+     */
+    #[Scope]
+    protected function forProduct(Builder $query, int $productId): Builder
+    {
+        return $query->where('product_id', $productId);
+    }
+
+    /**
+     * @param  Builder<PurchaseReturnItem>  $query
+     * @return Builder<PurchaseReturnItem>
+     */
+    #[Scope]
+    protected function forBatch(Builder $query, ?int $batchId): Builder
+    {
+        return $batchId !== null
+            ? $query->where('batch_id', $batchId)
+            : $query->whereNull('batch_id');
+    }
+
+    /**
+     * @param  Builder<PurchaseReturnItem>  $query
+     * @return Builder<PurchaseReturnItem>
+     */
+    #[Scope]
+    protected function forOriginalPurchase(Builder $query, int $purchaseId): Builder
+    {
+        return $query->whereHas('purchaseReturn', fn (Builder $q) => $q->where('purchase_id', $purchaseId));
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-enum StockTransferStatusEnum: string
+enum StockTransferStatusEnum: string implements HasStatusTransitions
 {
     case Pending = 'pending';
     case Completed = 'completed';
@@ -30,6 +30,29 @@ enum StockTransferStatusEnum: string
             self::Pending => 'Pending',
             self::Completed => 'Completed',
             self::Cancelled => 'Cancelled'
+        };
+    }
+
+    public function canTransitionTo(HasStatusTransitions $newStatus): bool
+    {
+        if (! $newStatus instanceof self) {
+            return false;
+        }
+
+        return match ($this) {
+            self::Pending => in_array($newStatus, [self::Completed, self::Cancelled], true),
+            self::Completed, self::Cancelled => false,
+        };
+    }
+
+    /**
+     * @return list<self>
+     */
+    public function getValidTransitions(): array
+    {
+        return match ($this) {
+            self::Pending => [self::Completed, self::Cancelled],
+            self::Completed, self::Cancelled => [],
         };
     }
 }

@@ -15,6 +15,7 @@ use App\Models\StockTransferItem;
 use App\Models\Unit;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 test('to array', function (): void {
@@ -33,7 +34,6 @@ test('to array', function (): void {
             'image',
             'cost_price',
             'selling_price',
-            'quantity',
             'alert_quantity',
             'track_inventory',
             'is_active',
@@ -128,46 +128,70 @@ it('counts {relation} correctly', function (array $config): void {
 })->with('has_many_relationships');
 
 it('filters by low stock scope', function (): void {
-    Product::factory()->create([
-        'quantity' => 5,
+    $lowStockProduct = Product::factory()->create([
         'alert_quantity' => 10,
         'track_inventory' => true,
     ]);
-    Product::factory()->create([
+    Batch::factory()->create([
+        'product_id' => $lowStockProduct->id,
+        'quantity' => 5,
+    ]);
+
+    $normalStockProduct = Product::factory()->create([
+        'alert_quantity' => 10,
+        'track_inventory' => true,
+    ]);
+    Batch::factory()->create([
+        'product_id' => $normalStockProduct->id,
         'quantity' => 15,
-        'alert_quantity' => 10,
-        'track_inventory' => true,
     ]);
-    Product::factory()->create([
-        'quantity' => 5,
+
+    $notTrackedProduct = Product::factory()->create([
         'alert_quantity' => 10,
         'track_inventory' => false,
+    ]);
+    Batch::factory()->create([
+        'product_id' => $notTrackedProduct->id,
+        'quantity' => 5,
     ]);
 
     $results = Product::lowStock()->get();
 
     expect($results)->toHaveCount(1)
-        ->first()->quantity->toBe(5);
+        ->first()->id->toBe($lowStockProduct->id);
 });
 
 it('filters by out of stock scope', function (): void {
-    Product::factory()->create([
-        'quantity' => 0,
+    $outOfStockProduct = Product::factory()->create([
         'track_inventory' => true,
     ]);
-    Product::factory()->create([
+    Batch::factory()->create([
+        'product_id' => $outOfStockProduct->id,
+        'quantity' => 0,
+    ]);
+
+    $inStockProduct = Product::factory()->create([
+        'track_inventory' => true,
+    ]);
+    Batch::factory()->create([
+        'product_id' => $inStockProduct->id,
         'quantity' => 5,
+    ]);
+
+    $noBatchProduct = Product::factory()->create([
         'track_inventory' => true,
     ]);
-    Product::factory()->create([
-        'quantity' => 0,
+
+    $notTrackedProduct = Product::factory()->create([
         'track_inventory' => false,
     ]);
 
     $results = Product::outOfStock()->get();
 
-    expect($results)->toHaveCount(1)
-        ->first()->quantity->toBe(0);
+    expect($results)->toHaveCount(2)
+        ->pluck('id')
+        ->toContain($outOfStockProduct->id, $noBatchProduct->id)
+        ->not->toContain($inStockProduct->id, $notTrackedProduct->id);
 });
 
 it('filters by search scope', function (): void {
@@ -193,21 +217,30 @@ it('filters by tracked scope', function (): void {
 
 it('calculates is low stock accessor', function (): void {
     $lowStockProduct = Product::factory()->create([
-        'quantity' => 5,
         'alert_quantity' => 10,
         'track_inventory' => true,
+    ]);
+    Batch::factory()->create([
+        'product_id' => $lowStockProduct->id,
+        'quantity' => 5,
     ]);
 
     $normalStockProduct = Product::factory()->create([
-        'quantity' => 15,
         'alert_quantity' => 10,
         'track_inventory' => true,
     ]);
+    Batch::factory()->create([
+        'product_id' => $normalStockProduct->id,
+        'quantity' => 15,
+    ]);
 
     $notTrackedProduct = Product::factory()->create([
-        'quantity' => 5,
         'alert_quantity' => 10,
         'track_inventory' => false,
+    ]);
+    Batch::factory()->create([
+        'product_id' => $notTrackedProduct->id,
+        'quantity' => 5,
     ]);
 
     expect($lowStockProduct->is_low_stock)->toBeTrue()
@@ -217,17 +250,22 @@ it('calculates is low stock accessor', function (): void {
 
 it('calculates is out of stock accessor', function (): void {
     $outOfStockProduct = Product::factory()->create([
-        'quantity' => 0,
         'track_inventory' => true,
+    ]);
+    Batch::factory()->create([
+        'product_id' => $outOfStockProduct->id,
+        'quantity' => 0,
     ]);
 
     $inStockProduct = Product::factory()->create([
-        'quantity' => 5,
         'track_inventory' => true,
+    ]);
+    Batch::factory()->create([
+        'product_id' => $inStockProduct->id,
+        'quantity' => 5,
     ]);
 
     $notTrackedProduct = Product::factory()->create([
-        'quantity' => 0,
         'track_inventory' => false,
     ]);
 
@@ -252,4 +290,94 @@ it('returns zero profit margin when selling price is zero', function (): void {
     ]);
 
     expect($product->profit_margin)->toBe(0);
+});
+
+it('calculates is out of stock with eager loaded stock_quantity', function (): void {
+    $outOfStockProduct = Product::factory()->create([
+        'track_inventory' => true,
+    ]);
+    Batch::factory()->create([
+        'product_id' => $outOfStockProduct->id,
+        'quantity' => 0,
+    ]);
+
+    // Load withStockQuantity to populate stock_quantity attribute
+    $productWithStock = Product::withStockQuantity()->find($outOfStockProduct->id);
+
+    expect($productWithStock->is_out_of_stock)->toBeTrue();
+});
+
+it('uses eager loaded stock_quantity via profit_margin accessor', function (): void {
+    $product = Product::factory()->create([
+        'cost_price' => 60,
+        'selling_price' => 100,
+        'track_inventory' => true,
+    ]);
+    Batch::factory()->create([
+        'product_id' => $product->id,
+        'quantity' => 5,
+    ]);
+
+    // Load withStockQuantity to populate stock_quantity attribute
+    $productWithStock = Product::withStockQuantity()->find($product->id);
+
+    // This verifies that stock_quantity attribute is accessible with proper type
+    expect($productWithStock->profit_margin)->toBe(40.0);
+});
+
+it('getTotalQuantity uses eager loaded stock_quantity when available', function (): void {
+    $product = Product::factory()->create([
+        'track_inventory' => true,
+    ]);
+    Batch::factory()->create([
+        'product_id' => $product->id,
+        'quantity' => 10,
+    ]);
+
+    // Load withStockQuantity to populate stock_quantity attribute
+    $productWithStock = Product::withStockQuantity()->find($product->id);
+
+    // Access is_low_stock which will call getTotalQuantity internally when needed
+    // Actually, we need to force getTotalQuantity to be called with stock_quantity in attributes
+    // Let's use a scenario where getTotalQuantity is called directly
+    $reflection = new ReflectionClass($productWithStock);
+    $method = $reflection->getMethod('getTotalQuantity');
+
+    expect($method->invoke($productWithStock))->toBe(10);
+});
+
+it('avoids N+1 queries when using withStockQuantity scope', function (): void {
+    Product::factory()->count(5)->create(['track_inventory' => true])->each(function ($product): void {
+        Batch::factory()->create([
+            'product_id' => $product->id,
+            'quantity' => 10,
+        ]);
+    });
+
+    $queries = [];
+    DB::listen(function ($query) use (&$queries): void {
+        $queries[] = $query->sql;
+    });
+
+    $products = Product::withStockQuantity()->get();
+
+    // Access is_low_stock on all products
+    $products->each(fn ($p) => $p->is_low_stock);
+
+    // Should only have 1 query: products with stock_quantity subquery
+    expect($queries)->toHaveCount(1);
+});
+
+test('withInactive returns both active and inactive products', function (): void {
+    Product::factory()->count(2)->create([
+        'is_active' => true,
+    ]);
+    Product::factory()->count(2)->create([
+        'is_active' => false,
+    ]);
+
+    $products = Product::withInactive()->get();
+
+    expect($products)
+        ->toHaveCount(4);
 });

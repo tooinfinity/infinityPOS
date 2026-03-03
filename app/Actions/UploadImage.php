@@ -1,0 +1,111 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions;
+
+use App\Exceptions\InvalidOperationException;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use InvalidArgumentException;
+use Spatie\Image\Enums\Fit;
+use Spatie\Image\Enums\ImageDriver;
+use Spatie\Image\Exceptions\InvalidImageDriver;
+use Spatie\Image\Image;
+use Throwable;
+
+final readonly class UploadImage
+{
+    private const array ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp'];
+
+    private const int MAX_SIZE_BYTES = 2097152;
+
+    private const int DEFAULT_MAX_WIDTH = 400;
+
+    public function __construct(
+        private string $disk = 'public',
+        private ?string $tmpDir = null,
+    ) {}
+
+    /**
+     * Process and store image.
+     *
+     * @throws InvalidArgumentException|Throwable
+     */
+    public function handle(UploadedFile $file, string $directory, ?string $existingImage = null, ?int $maxWidth = null): string
+    {
+        $this->validateFile($file);
+
+        $filename = $this->generateFilename($directory);
+        $targetWidth = $maxWidth ?? self::DEFAULT_MAX_WIDTH;
+
+        $tmpPath = $this->processImage($file, $targetWidth);
+
+        try {
+            $stream = fopen($tmpPath, 'rb');
+            // @codeCoverageIgnoreStart
+            throw_if($stream === false, InvalidOperationException::class, 'process', 'image', 'Failed to open processed image file');
+            // @codeCoverageIgnoreEnd
+            $result = Storage::disk($this->disk)->put($filename, $stream);
+
+            throw_unless($result, InvalidOperationException::class, 'store', 'image', 'Failed to store image');
+
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+        } finally {
+            if (file_exists($tmpPath)) {
+                unlink($tmpPath);
+            }
+        }
+
+        if ($existingImage !== null && Storage::disk($this->disk)->exists($existingImage)) {
+            Storage::disk($this->disk)->delete($existingImage);
+        }
+
+        return $filename;
+    }
+
+    /**
+     * @throws Throwable
+     */
+    private function validateFile(UploadedFile $file): void
+    {
+        $extension = mb_strtolower($file->getClientOriginalExtension());
+
+        if (! in_array($extension, self::ALLOWED_EXTENSIONS, true)) {
+            throw new InvalidArgumentException(
+                'Invalid image format. Allowed formats: '.implode(', ', self::ALLOWED_EXTENSIONS)
+            );
+        }
+
+        $size = $file->getSize();
+        throw_if($size === false, InvalidArgumentException::class, 'Unable to determine image file size');
+        throw_if($size > self::MAX_SIZE_BYTES, InvalidArgumentException::class, 'Image size exceeds maximum allowed size of 2MB');
+    }
+
+    private function generateFilename(string $directory): string
+    {
+        return $directory.'/'.Str::uuid()->toString().'.webp';
+    }
+
+    /**
+     * @throws InvalidImageDriver|Throwable
+     */
+    private function processImage(UploadedFile $file, int $maxWidth): string
+    {
+        $driver = extension_loaded('imagick') ? ImageDriver::Imagick : ImageDriver::Gd;
+        $dir = $this->tmpDir ?? sys_get_temp_dir();
+        $tmpPath = $dir.'/upload_'.Str::uuid()->toString().'.webp';
+
+        Image::useImageDriver($driver)
+            ->loadFile($file->getPathname())
+            ->fit(fit: Fit::Max, desiredWidth: $maxWidth)
+            ->optimize()
+            ->format('webp')
+            ->save($tmpPath);
+
+        return $tmpPath;
+    }
+}

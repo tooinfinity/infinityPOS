@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "nunomaduro/laravel-starter-kit-inertia-react",
+    "name": "tooinfinity/infinity-pos",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "point of sale and inventory management system",
     "keywords": [
         "laravel",
         "framework"
@@ -16,6 +16,8 @@
         "laravel/tinker": "^2.11.0",
         "laravel/wayfinder": "dev-next",
         "nunomaduro/essentials": "^1.0.1",
+        "spatie/image": "^3.9.1",
+        "spatie/laravel-data": "^4.19",
         "spatie/laravel-permission": "^6.24"
     },
     "require-dev": {

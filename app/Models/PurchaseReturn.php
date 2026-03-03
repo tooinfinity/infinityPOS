@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\PaymentStatusEnum;
 use App\Enums\ReturnStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\PurchaseReturnFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property-read int $id
@@ -23,10 +27,19 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read string $reference_no
  * @property-read CarbonInterface $return_date
  * @property-read int $total_amount
+ * @property-read int $paid_amount
+ * @property-read PaymentStatusEnum $payment_status
+ * @property-read int $due_amount
  * @property-read ReturnStatusEnum $status
  * @property-read string|null $note
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read Purchase $purchase
+ * @property-read Warehouse $warehouse
+ * @property-read User|null $user
+ * @property-read Collection<int, PurchaseReturnItem> $items
+ * @property-read Collection<int, StockMovement> $stockMovements
+ * @property-read Collection<int, Payment> $payments
  */
 final class PurchaseReturn extends Model
 {
@@ -74,6 +87,22 @@ final class PurchaseReturn extends Model
     }
 
     /**
+     * @return MorphMany<Payment, $this>
+     */
+    public function payments(): MorphMany
+    {
+        return $this->morphMany(Payment::class, 'payable');
+    }
+
+    /**
+     * @return MorphMany<Payment, $this>
+     */
+    public function activePayments(): MorphMany
+    {
+        return $this->morphMany(Payment::class, 'payable')->active();
+    }
+
+    /**
      * @return array<string, string>
      */
     public function casts(): array
@@ -86,6 +115,8 @@ final class PurchaseReturn extends Model
             'reference_no' => 'string',
             'return_date' => 'datetime',
             'total_amount' => 'integer',
+            'paid_amount' => 'integer',
+            'payment_status' => PaymentStatusEnum::class,
             'status' => ReturnStatusEnum::class,
             'note' => 'string',
             'created_at' => 'datetime',
@@ -100,7 +131,7 @@ final class PurchaseReturn extends Model
     #[Scope]
     protected function pending(Builder $query): Builder
     {
-        return $query->where('status', ReturnStatusEnum::Pending->value);
+        return $query->where('status', ReturnStatusEnum::Pending);
     }
 
     /**
@@ -110,6 +141,58 @@ final class PurchaseReturn extends Model
     #[Scope]
     protected function completed(Builder $query): Builder
     {
-        return $query->where('status', ReturnStatusEnum::Completed->value);
+        return $query->where('status', ReturnStatusEnum::Completed);
+    }
+
+    /**
+     * @param  Builder<PurchaseReturn>  $query
+     * @return Builder<PurchaseReturn>
+     */
+    #[Scope]
+    protected function unpaid(Builder $query): Builder
+    {
+        return $query->where('payment_status', PaymentStatusEnum::Unpaid);
+    }
+
+    /**
+     * @param  Builder<PurchaseReturn>  $query
+     * @return Builder<PurchaseReturn>
+     */
+    #[Scope]
+    protected function partiallyPaid(Builder $query): Builder
+    {
+        return $query->where('payment_status', PaymentStatusEnum::Partial);
+    }
+
+    /**
+     * @param  Builder<PurchaseReturn>  $query
+     * @return Builder<PurchaseReturn>
+     */
+    #[Scope]
+    protected function paid(Builder $query): Builder
+    {
+        return $query->where('payment_status', PaymentStatusEnum::Paid);
+    }
+
+    /**
+     * @return Attribute<int, null>
+     */
+    protected function dueAmount(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): int => max(0, $this->total_amount - $this->paid_amount),
+        );
+    }
+
+    /**
+     * @param  Builder<PurchaseReturn>  $query
+     * @return Builder<PurchaseReturn>
+     */
+    #[Scope]
+    protected function withDueAmount(Builder $query): Builder
+    {
+        return $query->select('*')->addSelect([
+            'due_amount' => DB::raw('CASE WHEN total_amount > paid_amount THEN total_amount - paid_amount ELSE 0 END'),
+        ]);
     }
 }

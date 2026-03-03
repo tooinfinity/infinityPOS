@@ -78,6 +78,9 @@ final class SaleFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'status' => SaleStatusEnum::Completed,
+            'payment_status' => PaymentStatusEnum::Unpaid,
+            'paid_amount' => 0,
+            'change_amount' => 0,
         ]);
     }
 

@@ -14,7 +14,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('product_id')->constrained();
             $table->foreignId('warehouse_id')->constrained();
-            $table->string('batch_number')->nullable();
+            $table->string('batch_number')->unique();
             $table->unsignedBigInteger('cost_amount');
             $table->unsignedInteger('quantity');
             $table->date('expires_at')->nullable();
@@ -24,6 +24,7 @@ return new class extends Migration
             $table->index('product_id');
             $table->index('warehouse_id');
             $table->index(['product_id', 'warehouse_id']);
+            $table->unique(['product_id', 'warehouse_id', 'batch_number']);
             $table->index(['warehouse_id', 'expires_at']);
             $table->index(['expires_at', 'quantity']);
         });

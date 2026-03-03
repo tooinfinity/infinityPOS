@@ -8,24 +8,39 @@ use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\BrandFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @property-read int $id
  * @property-read string $name
  * @property-read string $slug
  * @property-read string|null $logo
+ * @property-read string|null $logo_url
  * @property-read bool $is_active
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Product> $products
  */
 #[ScopedBy([ActiveScope::class])]
 final class Brand extends Model
 {
     /** @use HasFactory<BrandFactory> */
     use HasFactory;
+
+    protected $appends = ['logo_url'];
+
+    /**
+     * @return Builder<self>
+     */
+    public static function withInactive(): Builder
+    {
+        return self::query()->withoutGlobalScope(ActiveScope::class);
+    }
 
     /**
      * @return HasMany<Product, $this>
@@ -49,5 +64,21 @@ final class Brand extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return Attribute<string|null, null>
+     */
+    protected function logoUrl(): Attribute
+    {
+        return Attribute::make(
+            get: function (): ?string {
+                if ($this->logo === null) {
+                    return null;
+                }
+
+                return Storage::disk('public')->url($this->logo);
+            },
+        );
     }
 }

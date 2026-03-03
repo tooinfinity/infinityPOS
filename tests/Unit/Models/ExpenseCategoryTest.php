@@ -58,3 +58,17 @@ it('returns empty collection when no expenses exist', function (): void {
         ->toBeEmpty()
         ->toBeInstanceOf(Collection::class);
 });
+
+test('withInactive returns both active and inactive expense categories', function (): void {
+    ExpenseCategory::factory()->count(2)->create([
+        'is_active' => true,
+    ]);
+    ExpenseCategory::factory()->count(2)->create([
+        'is_active' => false,
+    ]);
+
+    $expenseCategories = ExpenseCategory::withInactive()->get();
+
+    expect($expenseCategories)
+        ->toHaveCount(4);
+});

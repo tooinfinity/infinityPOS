@@ -139,6 +139,33 @@ it('can create stockMovements', function (): void {
         ->each->toBeInstanceOf(StockMovement::class);
 });
 
+it('has morphMany activePayments', function (): void {
+    $purchase = new Purchase();
+
+    expect($purchase->activePayments())
+        ->toBeInstanceOf(MorphMany::class);
+});
+
+it('can create activePayments', function (): void {
+    $purchase = Purchase::factory()->create();
+    Payment::factory()->count(2)->create([
+        'payable_type' => Purchase::class,
+        'payable_id' => $purchase->id,
+    ]);
+    Payment::factory()->count(3)->voided()->create([
+        'payable_type' => Purchase::class,
+        'payable_id' => $purchase->id,
+    ]);
+
+    expect($purchase->activePayments)->toHaveCount(2);
+});
+
+it('returns empty collection when no activePayments exist', function (): void {
+    $purchase = Purchase::factory()->create();
+
+    expect($purchase->activePayments)->toBeEmpty();
+});
+
 it('filters by pending scope', function (): void {
     Purchase::factory()->create(['status' => 'pending']);
     Purchase::factory()->count(2)->create(['status' => 'received']);
@@ -225,4 +252,26 @@ it('returns zero due amount when overpaid', function (): void {
     ]);
 
     expect($purchase->due_amount)->toBe(0);
+});
+
+it('filters by withDueAmount scope', function (): void {
+    $purchaseWithDue = Purchase::factory()->create([
+        'total_amount' => 1000,
+        'paid_amount' => 400,
+    ]);
+
+    $result = Purchase::withDueAmount()->find($purchaseWithDue->id);
+
+    expect($result->due_amount)->toBe(600);
+});
+
+it('returns zero due amount with scope when overpaid', function (): void {
+    $purchaseOverpaid = Purchase::factory()->create([
+        'total_amount' => 1000,
+        'paid_amount' => 1200,
+    ]);
+
+    $result = Purchase::withDueAmount()->find($purchaseOverpaid->id);
+
+    expect($result->due_amount)->toBe(0);
 });

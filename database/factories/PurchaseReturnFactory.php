@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\PaymentStatusEnum;
 use App\Enums\ReturnStatusEnum;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
@@ -30,7 +31,9 @@ final class PurchaseReturnFactory extends Factory
             'reference_no' => $this->faker->uuid(),
             'return_date' => $this->faker->dateTimeThisYear(),
             'total_amount' => $this->faker->numberBetween(1000, 100000),
-            'status' => $this->faker->randomElement(ReturnStatusEnum::cases()),
+            'paid_amount' => 0,
+            'payment_status' => PaymentStatusEnum::Unpaid,
+            'status' => ReturnStatusEnum::Pending,
             'note' => $this->faker->sentence(),
         ];
     }
@@ -88,6 +91,49 @@ final class PurchaseReturnFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'note' => null,
+        ]);
+    }
+
+    public function unpaid(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'paid_amount' => 0,
+            'payment_status' => PaymentStatusEnum::Unpaid,
+        ]);
+    }
+
+    public function partiallyPaid(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'paid_amount' => is_numeric($attributes['total_amount'] ?? null)
+                ? (int) $attributes['total_amount'] * 0.5
+                : 0,
+            'payment_status' => PaymentStatusEnum::Partial,
+        ]);
+    }
+
+    public function paid(): self
+    {
+        return $this->state(function (array $attributes): array {
+            $totalAmount = $attributes['total_amount'] ?? 0;
+
+            return [
+                'total_amount' => $totalAmount,
+                'paid_amount' => $totalAmount,
+                'payment_status' => PaymentStatusEnum::Paid,
+            ];
+        });
+    }
+
+    public function withPaidAmount(int $amount): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'paid_amount' => $amount,
+            'payment_status' => match (true) {
+                $amount >= ($attributes['total_amount'] ?? 0) => PaymentStatusEnum::Paid,
+                $amount > 0 => PaymentStatusEnum::Partial,
+                default => PaymentStatusEnum::Unpaid,
+            },
         ]);
     }
 }

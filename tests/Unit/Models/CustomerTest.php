@@ -92,3 +92,17 @@ it('filters by search scope on phone', function (): void {
     expect($results)->toHaveCount(1)
         ->first()->phone->toBe('1234567890');
 });
+
+test('withInactive returns both active and inactive customers', function (): void {
+    Customer::factory()->count(2)->create([
+        'is_active' => true,
+    ]);
+    Customer::factory()->count(2)->create([
+        'is_active' => false,
+    ]);
+
+    $customers = Customer::withInactive()->get();
+
+    expect($customers)
+        ->toHaveCount(4);
+});

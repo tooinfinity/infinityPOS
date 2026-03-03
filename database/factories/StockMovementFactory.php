@@ -42,7 +42,6 @@ final class StockMovementFactory extends Factory
             'reference_type' => $this->faker->randomElement(['Sale', 'Purchase', 'Sale_Return', 'Purchase_Return']),
             'reference_id' => $this->faker->numberBetween(1, 100),
             'note' => $this->faker->sentence(),
-            'created_at' => now(),
         ];
     }
 

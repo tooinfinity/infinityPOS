@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\PaymentStateEnum;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\Purchase;
+use App\Models\PurchaseReturn;
 use App\Models\Sale;
+use App\Models\SaleReturn;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
@@ -33,7 +36,15 @@ final class PaymentFactory extends Factory
             'amount' => $this->faker->numberBetween(1000, 10000),
             'payment_date' => $this->faker->date(),
             'note' => $this->faker->sentence(),
+            'status' => PaymentStateEnum::Active,
         ];
+    }
+
+    public function voided(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'status' => PaymentStateEnum::Voided,
+        ]);
     }
 
     public function forPayable(Model $payable): self
@@ -57,6 +68,22 @@ final class PaymentFactory extends Factory
         return $this->state(fn (array $attributes): array => [
             'payable_type' => Sale::class,
             'payable_id' => $sale instanceof Sale ? $sale->id : Sale::factory(),
+        ]);
+    }
+
+    public function forSaleReturn(?SaleReturn $saleReturn = null): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'payable_type' => SaleReturn::class,
+            'payable_id' => $saleReturn instanceof SaleReturn ? $saleReturn->id : SaleReturn::factory(),
+        ]);
+    }
+
+    public function forPurchaseReturn(?PurchaseReturn $purchaseReturn = null): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'payable_type' => PurchaseReturn::class,
+            'payable_id' => $purchaseReturn instanceof PurchaseReturn ? $purchaseReturn->id : PurchaseReturn::factory(),
         ]);
     }
 

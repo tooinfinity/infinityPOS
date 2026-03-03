@@ -28,13 +28,17 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property-read int $reference_id
  * @property-read string $note
  * @property-read CarbonInterface $created_at
+ * @property-read CarbonInterface $updated_at
+ * @property-read Warehouse $warehouse
+ * @property-read Product $product
+ * @property-read Batch|null $batch
+ * @property-read User|null $user
+ * @property-read Model $reference
  */
 final class StockMovement extends Model
 {
     /** @use HasFactory<StockMovementFactory> */
     use HasFactory;
-
-    public $timestamps = false;
 
     /**
      * @return BelongsTo<Warehouse, $this>
@@ -95,6 +99,7 @@ final class StockMovement extends Model
             'reference_id' => 'integer',
             'note' => 'string',
             'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ];
     }
 
@@ -105,7 +110,7 @@ final class StockMovement extends Model
     #[Scope]
     protected function in(Builder $query): Builder
     {
-        return $query->where('type', StockMovementTypeEnum::In->value);
+        return $query->where('type', StockMovementTypeEnum::In);
     }
 
     /**
@@ -115,7 +120,7 @@ final class StockMovement extends Model
     #[Scope]
     protected function out(Builder $query): Builder
     {
-        return $query->where('type', StockMovementTypeEnum::Out->value);
+        return $query->where('type', StockMovementTypeEnum::Out);
     }
 
     /**
@@ -125,7 +130,7 @@ final class StockMovement extends Model
     #[Scope]
     protected function transfer(Builder $query): Builder
     {
-        return $query->where('type', StockMovementTypeEnum::Transfer->value);
+        return $query->where('type', StockMovementTypeEnum::Transfer);
     }
 
     /**
@@ -135,7 +140,7 @@ final class StockMovement extends Model
     #[Scope]
     protected function adjustment(Builder $query): Builder
     {
-        return $query->where('type', StockMovementTypeEnum::Adjustment->value);
+        return $query->where('type', StockMovementTypeEnum::Adjustment);
     }
 
     /**

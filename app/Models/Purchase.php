@@ -11,11 +11,13 @@ use Database\Factories\PurchaseFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property-read int $id
@@ -27,11 +29,19 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read CarbonInterface $purchase_date
  * @property-read int $total_amount
  * @property-read int $paid_amount
+ * @property-read int $due_amount
  * @property-read PaymentStatusEnum $payment_status
  * @property-read string|null $note
  * @property-read string|null $document
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
+ * @property-read Supplier $supplier
+ * @property-read Warehouse $warehouse
+ * @property-read User|null $user
+ * @property-read Collection<int, PurchaseItem> $items
+ * @property-read Collection<int, Payment> $payments
+ * @property-read Collection<int, StockMovement> $stockMovements
+ * @property-read Collection<int, PurchaseReturn> $returns
  */
 final class Purchase extends Model
 {
@@ -76,6 +86,14 @@ final class Purchase extends Model
     public function payments(): MorphMany
     {
         return $this->morphMany(Payment::class, 'payable');
+    }
+
+    /**
+     * @return MorphMany<Payment, $this>
+     */
+    public function activePayments(): MorphMany
+    {
+        return $this->morphMany(Payment::class, 'payable')->active();
     }
 
     /**
@@ -124,7 +142,7 @@ final class Purchase extends Model
     #[Scope]
     protected function pending(Builder $query): Builder
     {
-        return $query->where('status', PurchaseStatusEnum::Pending->value);
+        return $query->where('status', PurchaseStatusEnum::Pending);
     }
 
     /**
@@ -134,7 +152,7 @@ final class Purchase extends Model
     #[Scope]
     protected function ordered(Builder $query): Builder
     {
-        return $query->where('status', PurchaseStatusEnum::Ordered->value);
+        return $query->where('status', PurchaseStatusEnum::Ordered);
     }
 
     /**
@@ -144,7 +162,7 @@ final class Purchase extends Model
     #[Scope]
     protected function received(Builder $query): Builder
     {
-        return $query->where('status', PurchaseStatusEnum::Received->value);
+        return $query->where('status', PurchaseStatusEnum::Received);
     }
 
     /**
@@ -154,7 +172,7 @@ final class Purchase extends Model
     #[Scope]
     protected function cancelled(Builder $query): Builder
     {
-        return $query->where('status', PurchaseStatusEnum::Cancelled->value);
+        return $query->where('status', PurchaseStatusEnum::Cancelled);
     }
 
     /**
@@ -164,7 +182,7 @@ final class Purchase extends Model
     #[Scope]
     protected function unpaid(Builder $query): Builder
     {
-        return $query->where('payment_status', PaymentStatusEnum::Unpaid->value);
+        return $query->where('payment_status', PaymentStatusEnum::Unpaid);
     }
 
     /**
@@ -174,7 +192,7 @@ final class Purchase extends Model
     #[Scope]
     protected function partiallyPaid(Builder $query): Builder
     {
-        return $query->where('payment_status', PaymentStatusEnum::Partial->value);
+        return $query->where('payment_status', PaymentStatusEnum::Partial);
     }
 
     /**
@@ -184,7 +202,7 @@ final class Purchase extends Model
     #[Scope]
     protected function paid(Builder $query): Builder
     {
-        return $query->where('payment_status', PaymentStatusEnum::Paid->value);
+        return $query->where('payment_status', PaymentStatusEnum::Paid);
     }
 
     /**
@@ -195,5 +213,17 @@ final class Purchase extends Model
         return Attribute::make(
             get: fn (): int => max(0, $this->total_amount - $this->paid_amount),
         );
+    }
+
+    /**
+     * @param  Builder<Purchase>  $query
+     * @return Builder<Purchase>
+     */
+    #[Scope]
+    protected function withDueAmount(Builder $query): Builder
+    {
+        return $query->select('*')->addSelect([
+            'due_amount' => DB::raw('CASE WHEN total_amount > paid_amount THEN total_amount - paid_amount ELSE 0 END'),
+        ]);
     }
 }

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Payment;
 use App\Models\Sale;
 use App\Models\SaleReturn;
 use App\Models\SaleReturnItem;
@@ -25,6 +26,8 @@ test('to array', function (): void {
             'reference_no',
             'return_date',
             'total_amount',
+            'paid_amount',
+            'payment_status',
             'status',
             'note',
             'created_at',
@@ -99,6 +102,58 @@ it('can create stockMovements', function (): void {
         ->each->toBeInstanceOf(StockMovement::class);
 });
 
+it('has morphMany payments', function (): void {
+    $saleReturn = new SaleReturn();
+
+    expect($saleReturn->payments())
+        ->toBeInstanceOf(MorphMany::class);
+});
+
+it('can create payments', function (): void {
+    $saleReturn = SaleReturn::factory()->create();
+    Payment::factory()->count(2)->create([
+        'payable_type' => SaleReturn::class,
+        'payable_id' => $saleReturn->id,
+    ]);
+
+    expect($saleReturn->payments)
+        ->toHaveCount(2)
+        ->each->toBeInstanceOf(Payment::class);
+});
+
+it('returns empty collection when no payments exist', function (): void {
+    $saleReturn = SaleReturn::factory()->create();
+
+    expect($saleReturn->payments)->toBeEmpty();
+});
+
+it('has morphMany activePayments', function (): void {
+    $saleReturn = new SaleReturn();
+
+    expect($saleReturn->activePayments())
+        ->toBeInstanceOf(MorphMany::class);
+});
+
+it('can create activePayments', function (): void {
+    $saleReturn = SaleReturn::factory()->create();
+    Payment::factory()->count(2)->create([
+        'payable_type' => SaleReturn::class,
+        'payable_id' => $saleReturn->id,
+    ]);
+    Payment::factory()->count(3)->voided()->create([
+        'payable_type' => SaleReturn::class,
+        'payable_id' => $saleReturn->id,
+    ]);
+
+    expect($saleReturn->activePayments)->toHaveCount(2);
+});
+
+it('returns empty collection when no activePayments exist', function (): void {
+    $saleReturn = SaleReturn::factory()->create();
+
+    expect($saleReturn->activePayments)->toBeEmpty();
+});
+
 it('filters by pending scope', function (): void {
     SaleReturn::factory()->create(['status' => 'pending']);
     SaleReturn::factory()->count(2)->create(['status' => 'completed']);
@@ -117,4 +172,69 @@ it('filters by completed scope', function (): void {
 
     expect($results)->toHaveCount(1)
         ->first()->status->value->toBe('completed');
+});
+
+it('filters by unpaid scope', function (): void {
+    SaleReturn::factory()->unpaid()->create();
+    SaleReturn::factory()->count(2)->paid()->create();
+
+    $results = SaleReturn::unpaid()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->payment_status->value->toBe('unpaid');
+});
+
+it('filters by partiallyPaid scope', function (): void {
+    SaleReturn::factory()->partiallyPaid(1000)->create(['total_amount' => 1000]);
+    SaleReturn::factory()->count(2)->paid()->create();
+
+    $results = SaleReturn::partiallyPaid()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->payment_status->value->toBe('partial');
+});
+
+it('filters by paid scope', function (): void {
+    SaleReturn::factory()->paid()->create();
+    SaleReturn::factory()->count(2)->unpaid()->create();
+
+    $results = SaleReturn::paid()->get();
+
+    expect($results)->toHaveCount(1)
+        ->first()->payment_status->value->toBe('paid');
+});
+
+it('calculates due_amount accessor', function (): void {
+    $unpaidReturn = SaleReturn::factory()->unpaid()->create(['total_amount' => 1000]);
+    $partiallyPaidReturn = SaleReturn::factory()->create([
+        'total_amount' => 1000,
+        'paid_amount' => 300,
+    ]);
+    $paidReturn = SaleReturn::factory()->paid(1000)->create(['total_amount' => 1000]);
+
+    expect($unpaidReturn->due_amount)->toBe(1000)
+        ->and($partiallyPaidReturn->due_amount)->toBe(700)
+        ->and($paidReturn->due_amount)->toBe(0);
+});
+
+it('filters by withDueAmount scope', function (): void {
+    $saleReturnWithDue = SaleReturn::factory()->create([
+        'total_amount' => 1000,
+        'paid_amount' => 400,
+    ]);
+
+    $result = SaleReturn::withDueAmount()->find($saleReturnWithDue->id);
+
+    expect($result->due_amount)->toBe(600);
+});
+
+it('returns zero due amount with scope when overpaid', function (): void {
+    $saleReturnOverpaid = SaleReturn::factory()->create([
+        'total_amount' => 1000,
+        'paid_amount' => 1200,
+    ]);
+
+    $result = SaleReturn::withDueAmount()->find($saleReturnOverpaid->id);
+
+    expect($result->due_amount)->toBe(0);
 });

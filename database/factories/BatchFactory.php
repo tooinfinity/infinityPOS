@@ -25,7 +25,7 @@ final class BatchFactory extends Factory
         return [
             'product_id' => Product::factory(),
             'warehouse_id' => Warehouse::factory(),
-            'batch_number' => mb_strtoupper(Str::random(8)),
+            'batch_number' => 'BAT-'.now()->format('Ymd-His').'-'.$this->faker->unique()->numberBetween(1, 99999).'-'.mb_strtoupper(Str::random(6)),
             'cost_amount' => $this->faker->randomNumber(6),
             'quantity' => $this->faker->randomNumber(2),
             'expires_at' => now()->addMonths(12),
