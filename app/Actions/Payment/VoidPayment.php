@@ -35,11 +35,7 @@ final readonly class VoidPayment
                 'void_reason' => $data->void_reason,
             ])->save();
 
-            $payable = $payment->payable()->lockForUpdate()->first();
-
-            if ($payable instanceof Sale || $payable instanceof SaleReturn || $payable instanceof Purchase || $payable instanceof PurchaseReturn) {
-                $this->recalculatePaymentSummary->handle($payable);
-            }
+            $this->recalculateSummaryIfNeeded($payment);
 
             return $payment->refresh();
         });
@@ -55,6 +51,15 @@ final readonly class VoidPayment
                 $payment->status->value,
                 'Voided'
             );
+        }
+    }
+
+    private function recalculateSummaryIfNeeded(Payment $payment): void
+    {
+        $payable = $payment->payable()->lockForUpdate()->first();
+
+        if ($payable !== null && in_array($payable::class, [Sale::class, SaleReturn::class, Purchase::class, PurchaseReturn::class])) {
+            $this->recalculatePaymentSummary->handle($payable);
         }
     }
 }

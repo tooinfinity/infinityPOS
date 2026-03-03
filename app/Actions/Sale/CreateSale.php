@@ -6,7 +6,6 @@ namespace App\Actions\Sale;
 
 use App\Actions\GenerateReferenceNo;
 use App\Actions\Shared\CalculatePaymentStatus;
-use App\Actions\Shared\RecalculateParentTotal;
 use App\Actions\Stock\ValidateStockForNewSale;
 use App\Data\Sale\CreateSaleData;
 use App\Enums\PaymentStatusEnum;
@@ -21,7 +20,6 @@ final readonly class CreateSale
         private CreateSaleItems $createSaleItems,
         private ValidateStockForNewSale $validateStockForNewSale,
         private GenerateReferenceNo $generateReferenceNo,
-        private RecalculateParentTotal $recalculateTotal,
         private CalculatePaymentStatus $calculatePaymentStatus,
     ) {}
 
@@ -49,11 +47,11 @@ final readonly class CreateSale
 
             $this->createSaleItems->handle($sale->id, $data->items);
 
-            $this->recalculateTotal->handle($sale);
-
-            $sale = $sale->refresh();
-
-            $totalAmount = $sale->total_amount;
+            /** @var int $totalAmount */
+            $totalAmount = Sale::query()
+                ->findOrFail($sale->id)
+                ->items()
+                ->sum('subtotal');
 
             $paymentCalculation = $this->calculatePaymentStatus->handle($totalAmount, $data->paid_amount ?? 0);
 
@@ -61,6 +59,7 @@ final readonly class CreateSale
                 'total_amount' => $totalAmount,
                 'paid_amount' => min($data->paid_amount ?? 0, $totalAmount),
                 'change_amount' => $paymentCalculation->changeAmount,
+                'payment_status' => $paymentCalculation->paymentStatus,
             ])->save();
 
             return $sale->refresh();

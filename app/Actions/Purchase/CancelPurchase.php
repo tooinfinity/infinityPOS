@@ -18,15 +18,15 @@ final readonly class CancelPurchase
      */
     public function handle(Purchase $purchase): Purchase
     {
-        $documentPath = null;
+        $purchase->refresh();
 
-        $cancelledPurchase = DB::transaction(static function () use ($purchase, &$documentPath): Purchase {
+        $documentPath = $purchase->document;
+
+        $cancelledPurchase = DB::transaction(function () use ($purchase): Purchase {
             /** @var Purchase $purchase */
             $purchase = Purchase::query()
                 ->lockForUpdate()
                 ->findOrFail($purchase->id);
-
-            $documentPath = $purchase->document;
 
             throw_if(
                 ! $purchase->status->canTransitionTo(PurchaseStatusEnum::Cancelled),

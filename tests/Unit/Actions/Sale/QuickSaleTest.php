@@ -254,7 +254,7 @@ it('throws exception when insufficient stock', function () use (&$paymentMethod)
     );
 
     $action->handle($data);
-})->throws(InsufficientStockException::class, 'Insufficient stock in batch 1. Required: 10, Available: 5');
+})->throws(InsufficientStockException::class, 'Insufficient stock in batch 1 for product');
 
 it('handles no payment when paid_amount is zero', function () use (&$paymentMethod): void {
     $batch = Batch::factory()->withQuantity(100)->create();

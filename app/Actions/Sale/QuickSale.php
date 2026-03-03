@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Sale;
 
 use App\Actions\GenerateReferenceNo;
-use App\Actions\Shared\ApplyPaymentSummary;
 use App\Actions\Stock\DeductSaleStock;
 use App\Data\Sale\CreateSaleData;
 use App\Data\Sale\QuickSaleData;
@@ -23,7 +22,6 @@ final readonly class QuickSale
     public function __construct(
         private CreateSale $createSale,
         private DeductSaleStock $deductSaleStock,
-        private ApplyPaymentSummary $applyPaymentSummary,
         private GenerateReferenceNo $generateReferenceNo,
     ) {}
 
@@ -34,17 +32,7 @@ final readonly class QuickSale
     {
         return DB::transaction(function () use ($data): Sale {
             if ($data->paid_amount > 0) {
-                $paymentMethod = PaymentMethod::query()
-                    ->where('id', $data->payment_method_id)
-                    ->where('is_active', true)
-                    ->first();
-
-                if ($paymentMethod === null) {
-                    throw new InvalidPaymentMethodException(
-                        $data->payment_method_id,
-                        'Payment method is not active or does not exist'
-                    );
-                }
+                $this->validatePaymentMethod($data->payment_method_id);
             }
 
             $createSaleData = new CreateSaleData(
@@ -61,8 +49,6 @@ final readonly class QuickSale
 
             if ($data->paid_amount > 0) {
                 $this->recordPayment($sale, $data);
-
-                $this->applyPaymentSummary->handle($sale, $data->paid_amount, capPaidAmount: true);
             }
 
             $sale->load('items');
@@ -70,6 +56,17 @@ final readonly class QuickSale
 
             return $sale->refresh();
         });
+    }
+
+    /**
+     * @throws InvalidPaymentMethodException
+     * @throws Throwable
+     */
+    private function validatePaymentMethod(int $paymentMethodId): void
+    {
+        $paymentMethod = PaymentMethod::query()->find($paymentMethodId);
+
+        throw_if($paymentMethod === null || ! $paymentMethod->is_active, InvalidPaymentMethodException::class, $paymentMethodId);
     }
 
     private function recordPayment(Sale $sale, QuickSaleData $data): void

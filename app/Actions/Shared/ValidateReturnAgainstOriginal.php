@@ -117,9 +117,7 @@ final readonly class ValidateReturnAgainstOriginal
 
     private function findOriginalItem(Sale|Purchase $order, int $productId, ?int $batchId): SaleItem|PurchaseItem|null
     {
-        $items = $order instanceof Sale ? $order->items : $order->items;
-
-        return $items
+        return $order->items
             ->where('product_id', $productId)
             ->where('batch_id', $batchId)
             ->first();

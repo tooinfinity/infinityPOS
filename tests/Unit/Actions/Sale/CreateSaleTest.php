@@ -221,7 +221,7 @@ it('throws RuntimeException when batch does not belong to product', function ():
     );
 
     expect(fn () => $action->handle($data))
-        ->toThrow(InvalidBatchException::class, 'Batch '.$batch->id.': does not belong to product '.$otherProduct->id);
+        ->toThrow(InvalidBatchException::class, 'Batch '.$batch->id.': does not belong to product "'.$batch->product->name.'"');
 });
 
 it('throws RuntimeException when batch is not in sale warehouse', function (): void {
@@ -252,7 +252,7 @@ it('throws RuntimeException when batch is not in sale warehouse', function (): v
     );
 
     expect(fn () => $action->handle($data))
-        ->toThrow(InvalidBatchException::class, 'Batch '.$batch->id.': not in warehouse '.$warehouse->id);
+        ->toThrow(InvalidBatchException::class, 'Batch '.$batch->id.': not in warehouse ID '.$warehouse->id);
 });
 
 it('throws RuntimeException when insufficient stock', function (): void {
@@ -282,7 +282,7 @@ it('throws RuntimeException when insufficient stock', function (): void {
     );
 
     expect(fn () => $action->handle($data))
-        ->toThrow(InsufficientStockException::class, 'Insufficient stock in batch '.$batch->id.'. Required: 10, Available: 5');
+        ->toThrow(InsufficientStockException::class, 'Insufficient stock in batch '.$batch->id.' for product "'.$batch->product->name.'". Required: 10, Available: 5');
 });
 
 it('stores sale in database', function (): void {

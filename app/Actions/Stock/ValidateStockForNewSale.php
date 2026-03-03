@@ -22,11 +22,12 @@ final readonly class ValidateStockForNewSale
     public function handle(DataCollection $items, int $warehouseId): void
     {
         $itemsArray = $items->toArray();
-        $batchIds = array_unique(array_column($itemsArray, 'batch_id'));
+        $batchIds = array_filter(array_unique(array_column($itemsArray, 'batch_id')));
 
         /** @var Collection<int, Batch> $batches */
         $batches = Batch::query()
             ->lockForUpdate()
+            ->with('product')
             ->whereIn('id', $batchIds)
             ->get()
             ->keyBy('id');
@@ -86,10 +87,11 @@ final readonly class ValidateStockForNewSale
             $batch = $batches->get($item->batch_id);
 
             if ($batch->product_id !== $item->product_id) {
-                throw new InvalidBatchException($item->batch_id, "does not belong to product $item->product_id");
+                $productName = $batch->product->name;
+                throw new InvalidBatchException($item->batch_id, "does not belong to product \"{$productName}\"");
             }
             if ($batch->warehouse_id !== $warehouseId) {
-                throw new InvalidBatchException($item->batch_id, "not in warehouse $warehouseId");
+                throw new InvalidBatchException($item->batch_id, "not in warehouse ID {$warehouseId}");
             }
         }
     }
@@ -107,7 +109,13 @@ final readonly class ValidateStockForNewSale
             $batch = $batches->get($batchId);
 
             if ($batch->quantity < $required['quantity']) {
-                throw new InsufficientStockException($required['quantity'], $batch->quantity, $batchId);
+                $productName = $batch->product->name;
+                throw new InsufficientStockException(
+                    required: $required['quantity'],
+                    available: $batch->quantity,
+                    batchId: $batchId,
+                    productName: $productName,
+                );
             }
         }
     }

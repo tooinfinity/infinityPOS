@@ -10,6 +10,7 @@ use App\Enums\ReturnStatusEnum;
 use App\Exceptions\RefundNotAllowedException;
 use App\Exceptions\StateTransitionException;
 use App\Models\PurchaseReturn;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -28,7 +29,7 @@ final readonly class RevertPurchaseReturn
             /** @var PurchaseReturn $purchaseReturn */
             $purchaseReturn = PurchaseReturn::query()
                 ->lockForUpdate()
-                ->with(['items.batch' => fn ($query) => $query->lockForUpdate()])
+                ->with(['items.batch' => fn (Relation $query) => $query->lockForUpdate()])
                 ->findOrFail($purchaseReturn->id);
             $this->validatePurchaseReturnCanBeCancelled($purchaseReturn);
 
