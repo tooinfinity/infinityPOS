@@ -19,7 +19,7 @@ final readonly class CreateUnit
         return DB::transaction(static fn (): Unit => Unit::query()->forceCreate([
             'name' => $data->name,
             'short_name' => $data->short_name,
-            'is_active' => $data->is_active ?? true,
+            'is_active' => $data->is_active,
         ])->refresh());
     }
 }
