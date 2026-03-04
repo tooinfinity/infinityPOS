@@ -29,8 +29,6 @@ final readonly class CreateProduct
     {
         $sku = $data->sku ?? $this->generateSku->handle();
         $barcode = $data->barcode ?? $this->generateBarcode->handle();
-        $trackInventory = $data->track_inventory ?? true;
-        $isActive = $data->is_active ?? true;
 
         $image = $data->image;
         $uploadedImagePath = null;
@@ -54,8 +52,8 @@ final readonly class CreateProduct
                 'cost_price' => $data->cost_price,
                 'selling_price' => $data->selling_price,
                 'alert_quantity' => $data->alert_quantity,
-                'track_inventory' => $trackInventory,
-                'is_active' => $isActive,
+                'track_inventory' => $data->track_inventory,
+                'is_active' => $data->is_active,
             ])->refresh());
         } catch (Throwable $e) {
             if ($uploadedImagePath !== null && $image instanceof UploadedFile) {
