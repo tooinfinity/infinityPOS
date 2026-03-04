@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests\Brands;
+namespace App\Http\Requests\Brand;
 
 use App\Models\Brand;
 use Illuminate\Contracts\Validation\ValidationRule;
