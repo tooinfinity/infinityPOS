@@ -16,19 +16,15 @@ final readonly class CreateSupplier
      */
     public function handle(CreateSupplierData $data): Supplier
     {
-        return DB::transaction(static function () use ($data): Supplier {
-            $isActive = $data->is_active ?? true;
-
-            return Supplier::query()->forceCreate([
-                'name' => $data->name,
-                'company_name' => $data->company_name,
-                'email' => $data->email,
-                'phone' => $data->phone,
-                'address' => $data->address,
-                'city' => $data->city,
-                'country' => $data->country,
-                'is_active' => $isActive,
-            ])->refresh();
-        });
+        return DB::transaction(static fn (): Supplier => Supplier::query()->forceCreate([
+            'name' => $data->name,
+            'company_name' => $data->company_name,
+            'email' => $data->email,
+            'phone' => $data->phone,
+            'address' => $data->address,
+            'city' => $data->city,
+            'country' => $data->country,
+            'is_active' => $data->is_active,
+        ])->refresh());
     }
 }
