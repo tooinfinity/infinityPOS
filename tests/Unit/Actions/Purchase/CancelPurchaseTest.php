@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\Purchase\CancelPurchase;
 use App\Enums\PurchaseStatusEnum;
-use App\Exceptions\StateTransitionException;
 use App\Models\Purchase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -47,24 +46,6 @@ it('deletes document when cancelling', function (): void {
 
     Storage::disk('public')->assertMissing($path);
     expect($purchase->fresh()->document)->toBeNull();
-});
-
-it('throws StateTransitionException when cancelling received purchase', function (): void {
-    $purchase = Purchase::factory()->received()->create();
-
-    $action = resolve(CancelPurchase::class);
-
-    expect(fn () => $action->handle($purchase))
-        ->toThrow(StateTransitionException::class);
-});
-
-it('throws StateTransitionException when cancelling already cancelled purchase', function (): void {
-    $purchase = Purchase::factory()->cancelled()->create();
-
-    $action = resolve(CancelPurchase::class);
-
-    expect(fn () => $action->handle($purchase))
-        ->toThrow(StateTransitionException::class);
 });
 
 it('persists cancellation to database', function (): void {

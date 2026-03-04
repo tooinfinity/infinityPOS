@@ -11,7 +11,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
-final class UpdatePurchaseRequest extends FormRequest
+final class AddPurchaseItemRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -24,12 +24,9 @@ final class UpdatePurchaseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'supplier_id' => ['required', 'integer', 'exists:suppliers,id'],
-            'warehouse_id' => ['required', 'integer', 'exists:warehouses,id'],
-            'user_id' => ['nullable', 'integer', 'exists:users,id'],
-            'purchase_date' => ['required', 'date'],
-            'note' => ['nullable', 'string', 'max:1000'],
-            'document' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:5120'],
+            'product_id' => ['required', 'integer', 'exists:products,id'],
+            'quantity' => ['required', 'integer', 'min:1'],
+            'unit_cost' => ['required', 'integer', 'min:0'],
         ];
     }
 
@@ -42,19 +39,11 @@ final class UpdatePurchaseRequest extends FormRequest
             function (Validator $validator): void {
                 /** @var Purchase $purchase */
                 $purchase = $this->route('purchase');
-                $data = $validator->validated();
 
                 if ($purchase->status !== PurchaseStatusEnum::Pending) {
                     $validator->errors()->add(
                         'status',
-                        'Purchase can only be updated when status is Pending. Current status: '.$purchase->status->label()
-                    );
-                }
-
-                if (isset($data['warehouse_id']) && $purchase->items()->exists()) {
-                    $validator->errors()->add(
-                        'warehouse_id',
-                        'Cannot change warehouse after items have been added.'
+                        'Items can only be added to a purchase with Pending status. Current status: '.$purchase->status->label()
                     );
                 }
             },

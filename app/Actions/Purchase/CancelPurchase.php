@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Purchase;
 
 use App\Enums\PurchaseStatusEnum;
-use App\Exceptions\StateTransitionException;
 use App\Models\Purchase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -27,13 +26,6 @@ final readonly class CancelPurchase
             $purchase = Purchase::query()
                 ->lockForUpdate()
                 ->findOrFail($purchase->id);
-
-            throw_if(
-                ! $purchase->status->canTransitionTo(PurchaseStatusEnum::Cancelled),
-                StateTransitionException::class,
-                $purchase->status->label(),
-                PurchaseStatusEnum::Cancelled->label()
-            );
 
             $purchase->forceFill([
                 'status' => PurchaseStatusEnum::Cancelled,

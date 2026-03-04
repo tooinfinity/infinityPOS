@@ -6,9 +6,6 @@ namespace App\Actions\Purchase;
 
 use App\Actions\UploadImage;
 use App\Data\Purchase\UpdatePurchaseData;
-use App\Enums\PurchaseStatusEnum;
-use App\Exceptions\InvalidOperationException;
-use App\Exceptions\StateTransitionException;
 use App\Models\Purchase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -39,13 +36,6 @@ final readonly class UpdatePurchase
                     ->lockForUpdate()
                     ->findOrFail($purchase->id);
 
-                if ($purchase->status !== PurchaseStatusEnum::Pending) {
-                    throw new StateTransitionException(
-                        $purchase->status->value,
-                        'Pending'
-                    );
-                }
-
                 $updateData = [];
 
                 if (! $data->supplier_id instanceof Optional) {
@@ -53,7 +43,6 @@ final readonly class UpdatePurchase
                 }
 
                 if (! $data->warehouse_id instanceof Optional) {
-                    throw_if($purchase->items()->exists(), InvalidOperationException::class, 'change', 'warehouse', 'Cannot change warehouse after items have been added.');
                     $updateData['warehouse_id'] = $data->warehouse_id;
                 }
 

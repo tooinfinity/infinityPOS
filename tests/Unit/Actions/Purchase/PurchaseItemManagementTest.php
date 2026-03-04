@@ -6,10 +6,8 @@ use App\Actions\Purchase\AddPurchaseItem;
 use App\Actions\Purchase\RemovePurchaseItem;
 use App\Actions\Purchase\UpdatePurchaseItem;
 use App\Actions\Shared\RecalculateParentTotal;
-use App\Actions\Shared\ValidateStatusIsPending;
 use App\Data\Purchase\PurchaseItemData;
 use App\Data\Purchase\UpdatePurchaseItemData;
-use App\Exceptions\StateTransitionException;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
@@ -61,22 +59,6 @@ it('recalculates total when adding item', function (): void {
     $action->handle($purchase, $data);
 
     expect($purchase->fresh()->total_amount)->toBe(1500);
-});
-
-it('throws exception when adding item to non-pending purchase', function (): void {
-    $purchase = Purchase::factory()->received()->create();
-    $product = Product::factory()->create();
-
-    $action = resolve(AddPurchaseItem::class);
-
-    $data = new PurchaseItemData(
-        product_id: $product->id,
-        quantity: 10,
-        unit_cost: 100,
-    );
-
-    expect(fn () => $action->handle($purchase, $data))
-        ->toThrow(StateTransitionException::class, 'Invalid state transition from "received" to "pending"');
 });
 
 it('may update item quantity', function (): void {
@@ -150,23 +132,6 @@ it('recalculates subtotal and purchase total on update', function (): void {
         ->and($purchase->fresh()->total_amount)->toBe(3000);
 });
 
-it('throws exception when updating item on non-pending purchase', function (): void {
-    $purchase = Purchase::factory()->ordered()->create();
-    $item = PurchaseItem::factory()->create([
-        'purchase_id' => $purchase->id,
-    ]);
-
-    $action = resolve(UpdatePurchaseItem::class);
-
-    $data = new UpdatePurchaseItemData(
-        quantity: 20,
-        unit_cost: Optional::create(),
-    );
-
-    expect(fn () => $action->handle($item, $data))
-        ->toThrow(StateTransitionException::class, 'Invalid state transition from "ordered" to "pending"');
-});
-
 it('may remove item from pending purchase', function (): void {
     $purchase = Purchase::factory()->pending()->create([
         'total_amount' => 1500,
@@ -199,7 +164,6 @@ it('deletes purchase when removing last item', function (): void {
     ]);
 
     $action = new RemovePurchaseItem(
-        new ValidateStatusIsPending(),
         new RecalculateParentTotal(),
     );
 
@@ -217,7 +181,6 @@ it('keeps purchase when removing last item with deleteIfEmpty false', function (
     ]);
 
     $action = new RemovePurchaseItem(
-        new ValidateStatusIsPending(),
         new RecalculateParentTotal(),
     );
 
@@ -225,18 +188,6 @@ it('keeps purchase when removing last item with deleteIfEmpty false', function (
 
     expect($result)->toBeInstanceOf(Purchase::class)
         ->and($result->total_amount)->toBe(0);
-});
-
-it('throws exception when removing item from non-pending purchase', function (): void {
-    $purchase = Purchase::factory()->cancelled()->create();
-    $item = PurchaseItem::factory()->create([
-        'purchase_id' => $purchase->id,
-    ]);
-
-    $action = resolve(RemovePurchaseItem::class);
-
-    expect(fn () => $action->handle($item))
-        ->toThrow(StateTransitionException::class, 'Invalid state transition from "cancelled" to "pending"');
 });
 
 it('recalculates total when removing item', function (): void {

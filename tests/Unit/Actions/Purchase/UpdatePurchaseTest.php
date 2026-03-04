@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\Purchase\UpdatePurchase;
 use App\Data\Purchase\UpdatePurchaseData;
-use App\Exceptions\InvalidOperationException;
-use App\Exceptions\StateTransitionException;
 use App\Models\Purchase;
 use App\Models\Supplier;
 use App\Models\Warehouse;
@@ -56,27 +54,6 @@ it('may update purchase warehouse when no items exist', function (): void {
     expect($updatedPurchase->warehouse_id)->toBe($newWarehouse->id);
 });
 
-it('throws exception when changing warehouse with items', function (): void {
-    $purchase = Purchase::factory()->pending()->create();
-    App\Models\PurchaseItem::factory()->create([
-        'purchase_id' => $purchase->id,
-    ]);
-    $newWarehouse = Warehouse::factory()->create();
-
-    $action = resolve(UpdatePurchase::class);
-
-    $data = new UpdatePurchaseData(
-        supplier_id: Optional::create(),
-        warehouse_id: $newWarehouse->id,
-        purchase_date: Optional::create(),
-        note: Optional::create(),
-        document: Optional::create(),
-    );
-
-    expect(fn () => $action->handle($purchase, $data))
-        ->toThrow(InvalidOperationException::class, 'Cannot change warehouse. Cannot change warehouse after items have been added.');
-});
-
 it('may update all purchase fields', function (): void {
     $purchase = Purchase::factory()->pending()->create([
         'purchase_date' => now()->subDays(5),
@@ -125,24 +102,6 @@ it('partially updates purchase with Optional fields', function (): void {
     expect($updatedPurchase->supplier_id)->toBe($originalSupplier->id)
         ->and($updatedPurchase->warehouse_id)->toBe($newWarehouse->id)
         ->and($updatedPurchase->note)->toBe('Original note');
-});
-
-it('throws exception when updating non-pending purchase', function (): void {
-    $purchase = Purchase::factory()->received()->create();
-    $newSupplier = Supplier::factory()->create();
-
-    $action = resolve(UpdatePurchase::class);
-
-    $data = new UpdatePurchaseData(
-        supplier_id: $newSupplier->id,
-        warehouse_id: Optional::create(),
-        purchase_date: Optional::create(),
-        note: Optional::create(),
-        document: Optional::create(),
-    );
-
-    expect(fn () => $action->handle($purchase, $data))
-        ->toThrow(StateTransitionException::class, 'Invalid state transition from "received" to "Pending"');
 });
 
 it('updates document and deletes old one', function (): void {

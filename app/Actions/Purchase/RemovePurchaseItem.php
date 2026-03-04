@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Purchase;
 
 use App\Actions\Shared\RecalculateParentTotal;
-use App\Actions\Shared\ValidateStatusIsPending;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +14,6 @@ use Throwable;
 final readonly class RemovePurchaseItem
 {
     public function __construct(
-        private ValidateStatusIsPending $validateStatus,
         private RecalculateParentTotal $recalculateTotal,
     ) {}
 
@@ -29,8 +27,6 @@ final readonly class RemovePurchaseItem
             $purchase = Purchase::query()
                 ->lockForUpdate()
                 ->findOrFail($item->purchase_id);
-
-            $this->validateStatus->handle($purchase);
 
             $item->delete();
 

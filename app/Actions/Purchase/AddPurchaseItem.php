@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Purchase;
 
 use App\Actions\Shared\RecalculateParentTotal;
-use App\Actions\Shared\ValidateStatusIsPending;
 use App\Data\Purchase\PurchaseItemData;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
@@ -15,7 +14,6 @@ use Throwable;
 final readonly class AddPurchaseItem
 {
     public function __construct(
-        private ValidateStatusIsPending $validateStatus,
         private RecalculateParentTotal $recalculateTotal,
     ) {}
 
@@ -29,8 +27,6 @@ final readonly class AddPurchaseItem
             $purchase = Purchase::query()
                 ->lockForUpdate()
                 ->findOrFail($purchase->id);
-
-            $this->validateStatus->handle($purchase);
 
             $item = PurchaseItem::query()->forceCreate([
                 'purchase_id' => $purchase->id,

@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace App\Actions\Purchase;
 
 use App\Actions\Batch\FindOrCreateBatch;
-use App\Actions\Shared\ValidateStatusIsPending;
 use App\Actions\StockMovement\CreateStockMovement;
 use App\Enums\PurchaseStatusEnum;
-use App\Exceptions\InvalidOperationException;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +16,6 @@ final readonly class ReceivePurchase
 {
     public function __construct(
         private CreateStockMovement $createStockMovement,
-        private ValidateStatusIsPending $validateStatus,
         private FindOrCreateBatch $findOrCreateBatch,
     ) {}
 
@@ -33,20 +30,6 @@ final readonly class ReceivePurchase
                 ->lockForUpdate()
                 ->with(['items.product'])
                 ->findOrFail($purchase->id);
-
-            $this->validateStatus->validateTransition(
-                $purchase->status,
-                PurchaseStatusEnum::Received,
-                'Purchase'
-            );
-
-            throw_if(
-                $purchase->items->isEmpty(),
-                InvalidOperationException::class,
-                'receive',
-                'Purchase',
-                'Cannot receive a purchase with no items.'
-            );
 
             foreach ($purchase->items as $item) {
                 $this->processItem($purchase, $item);

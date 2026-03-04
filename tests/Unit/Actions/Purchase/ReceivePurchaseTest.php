@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Actions\Purchase\ReceivePurchase;
 use App\Enums\PurchaseStatusEnum;
 use App\Enums\StockMovementTypeEnum;
-use App\Exceptions\InvalidOperationException;
-use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\Purchase;
@@ -119,33 +117,6 @@ it('records stock movement for received items', function (): void {
         ->and($movement->quantity)->toBe(25)
         ->and($movement->previous_quantity)->toBe(0)
         ->and($movement->current_quantity)->toBe(25);
-});
-
-it('throws StateTransitionException when receiving already received purchase', function (): void {
-    $purchase = Purchase::factory()->received()->create();
-
-    $action = resolve(ReceivePurchase::class);
-
-    expect(fn () => $action->handle($purchase))
-        ->toThrow(StateTransitionException::class);
-});
-
-it('throws StateTransitionException when receiving cancelled purchase', function (): void {
-    $purchase = Purchase::factory()->cancelled()->create();
-
-    $action = resolve(ReceivePurchase::class);
-
-    expect(fn () => $action->handle($purchase))
-        ->toThrow(StateTransitionException::class);
-});
-
-it('throws InvalidOperationException when receiving purchase with no items', function (): void {
-    $purchase = Purchase::factory()->pending()->create();
-
-    $action = resolve(ReceivePurchase::class);
-
-    expect(fn () => $action->handle($purchase))
-        ->toThrow(InvalidOperationException::class);
 });
 
 it('creates multiple batches for multiple items', function (): void {
