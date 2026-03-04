@@ -8,7 +8,6 @@ use App\Models\Brand;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 beforeEach(function (): void {
     Storage::fake('public');
@@ -81,7 +80,6 @@ it('creates brand with is_active flag', function (): void {
 
     expect($brand->is_active)->toBeFalse();
 });
-
 
 it('defaults is_active to true when not provided', function (): void {
     $action = resolve(CreateBrand::class);
