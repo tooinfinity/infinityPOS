@@ -19,7 +19,7 @@ final class StoreBrandRequest extends FormRequest
     {
         /** @var string $name */
         $name = $this->input('name');
-        if ($this->filled('name') && ! $this->filled('slug')) {
+        if ($this->filled('name') && (! $this->filled('slug') || $this->input('slug') === null)) {
             $this->merge([
                 'slug' => Str::slug($name),
             ]);
