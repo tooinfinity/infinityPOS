@@ -24,7 +24,7 @@ final readonly class CreateWarehouse
             'address' => $data->address,
             'city' => $data->city,
             'country' => $data->country,
-            'is_active' => $data->is_active ?? true,
+            'is_active' => $data->is_active,
         ]))->refresh();
     }
 }
