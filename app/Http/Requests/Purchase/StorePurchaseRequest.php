@@ -22,6 +22,7 @@ final class StorePurchaseRequest extends FormRequest
         return [
             'supplier_id' => ['required', 'integer', 'exists:suppliers,id'],
             'warehouse_id' => ['required', 'integer', 'exists:warehouses,id'],
+            'user_id' => ['nullable', 'integer', 'exists:users,id'],
             'purchase_date' => ['required', 'date'],
             'note' => ['nullable', 'string', 'max:1000'],
             'document' => ['nullable', 'file', 'mimes:pdf,doc,docx,jpg,jpeg,png', 'max:5120'],
