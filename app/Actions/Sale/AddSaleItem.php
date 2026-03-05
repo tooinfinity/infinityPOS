@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Sale;
 
 use App\Actions\Shared\RecalculateParentTotal;
-use App\Actions\Shared\ValidateStatusIsPending;
 use App\Actions\Stock\ValidateStockForPendingSale;
 use App\Data\Sale\SaleItemData;
 use App\Models\Sale;
@@ -16,7 +15,6 @@ use Throwable;
 final readonly class AddSaleItem
 {
     public function __construct(
-        private ValidateStatusIsPending $validateStatus,
         private RecalculateParentTotal $recalculateTotal,
         private ValidateStockForPendingSale $validateStockForPendingSale,
     ) {}
@@ -27,8 +25,6 @@ final readonly class AddSaleItem
     public function handle(Sale $sale, SaleItemData $data): SaleItem
     {
         return DB::transaction(function () use ($sale, $data): SaleItem {
-            $this->validateStatus->handle($sale);
-
             $this->validateStockForPendingSale->handle($sale, $data->batch_id, $data->quantity, null, $data->product_id);
 
             $item = SaleItem::query()->forceCreate([
