@@ -6,7 +6,6 @@ namespace App\Actions\SaleReturn;
 
 use App\Actions\Shared\RecalculateParentTotal;
 use App\Actions\Shared\ValidateReturnAgainstOriginal;
-use App\Actions\Shared\ValidateStatusIsPending;
 use App\Data\SaleReturn\UpdateSaleReturnItemData;
 use App\Models\SaleReturnItem;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +14,6 @@ use Throwable;
 final readonly class UpdateSaleReturnItem
 {
     public function __construct(
-        private ValidateStatusIsPending $validateStatus,
         private ValidateReturnAgainstOriginal $validateReturn,
         private RecalculateParentTotal $recalculateTotal,
     ) {}
@@ -33,8 +31,6 @@ final readonly class UpdateSaleReturnItem
                 ->findOrFail($item->id);
 
             $saleReturn = $item->saleReturn;
-
-            $this->validateStatus->handle($saleReturn);
 
             $quantity = $data->quantity ?? $item->quantity;
             $unitPrice = $data->unit_price ?? $item->unit_price;
