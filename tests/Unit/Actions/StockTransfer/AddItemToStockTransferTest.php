@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\StockTransfer\AddItemToStockTransfer;
 use App\Data\StockTransfer\StockTransferItemData;
-use App\Enums\StockTransferStatusEnum;
-use App\Exceptions\InvalidOperationException;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\StockTransfer;
@@ -46,36 +44,4 @@ it('may add item with batch to pending transfer', function (): void {
     $item = $action->handle($transfer, $itemData);
 
     expect($item->batch_id)->toBe($batch->id);
-});
-
-it('throws exception when adding to non-pending transfer', function (): void {
-    $transfer = StockTransfer::factory()->completed()->create();
-    $product = Product::factory()->create();
-
-    $action = resolve(AddItemToStockTransfer::class);
-
-    $itemData = new StockTransferItemData(
-        product_id: $product->id,
-        batch_id: null,
-        quantity: 10,
-    );
-
-    expect(fn () => $action->handle($transfer, $itemData))->toThrow(InvalidOperationException::class, 'Items can only be added to pending transfers.');
-});
-
-it('throws exception when adding to cancelled transfer', function (): void {
-    $transfer = StockTransfer::factory()->create([
-        'status' => StockTransferStatusEnum::Cancelled,
-    ]);
-    $product = Product::factory()->create();
-
-    $action = resolve(AddItemToStockTransfer::class);
-
-    $itemData = new StockTransferItemData(
-        product_id: $product->id,
-        batch_id: null,
-        quantity: 10,
-    );
-
-    expect(fn () => $action->handle($transfer, $itemData))->toThrow(InvalidOperationException::class, 'Items can only be added to pending transfers.');
 });

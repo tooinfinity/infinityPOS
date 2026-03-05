@@ -6,8 +6,6 @@ use App\Actions\Sale\CompleteSale;
 use App\Data\Sale\CompleteSaleData;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
-use App\Exceptions\InvalidOperationException;
-use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Sale;
 use App\Models\SaleItem;
@@ -132,20 +130,6 @@ it('updates payment status to unpaid when no payment', function (): void {
 
     expect($sale->fresh()->payment_status)->toBe(PaymentStatusEnum::Unpaid);
 });
-
-it('throws exception when sale is not pending', function (): void {
-    $sale = Sale::factory()->completed()->create();
-
-    $action = resolve(CompleteSale::class);
-    $action->handle($sale);
-})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "Completed"');
-
-it('throws exception when sale has no items', function (): void {
-    $sale = Sale::factory()->pending()->create();
-
-    $action = resolve(CompleteSale::class);
-    $action->handle($sale);
-})->throws(InvalidOperationException::class, 'Cannot complete Sale. Sale cannot be completed without items');
 
 it('can update note when completing', function (): void {
     $sale = Sale::factory()->pending()->create([

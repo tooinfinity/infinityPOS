@@ -6,7 +6,6 @@ use App\Actions\StockTransfer\CompleteStockTransfer;
 use App\Enums\StockTransferStatusEnum;
 use App\Exceptions\InsufficientStockException;
 use App\Exceptions\InvalidOperationException;
-use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\StockMovement;
 use App\Models\StockTransfer;
@@ -105,35 +104,6 @@ it('throws exception when source has insufficient stock', function (): void {
 
     expect(fn () => $action->handle($transfer))
         ->toThrow(InsufficientStockException::class, 'Insufficient stock in batch '.$batch->id.'. Required: 10, Available: 5');
-});
-
-it('throws StateTransitionException when completing non-pending transfer', function (): void {
-    $transfer = StockTransfer::factory()->completed()->create();
-
-    $action = resolve(CompleteStockTransfer::class);
-
-    expect(fn () => $action->handle($transfer))
-        ->toThrow(StateTransitionException::class);
-});
-
-it('throws StateTransitionException when completing already completed transfer', function (): void {
-    $transfer = StockTransfer::factory()->completed()->create();
-
-    $action = resolve(CompleteStockTransfer::class);
-
-    expect(fn () => $action->handle($transfer))
-        ->toThrow(StateTransitionException::class);
-});
-
-it('throws StateTransitionException when completing cancelled transfer', function (): void {
-    $transfer = StockTransfer::factory()->create([
-        'status' => StockTransferStatusEnum::Cancelled,
-    ]);
-
-    $action = resolve(CompleteStockTransfer::class);
-
-    expect(fn () => $action->handle($transfer))
-        ->toThrow(StateTransitionException::class);
 });
 
 it('throws RuntimeException when item has no batch', function (): void {

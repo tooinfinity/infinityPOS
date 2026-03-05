@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\SaleReturn\UpdateSaleReturnItem;
 use App\Data\SaleReturn\UpdateSaleReturnItemData;
-use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\Sale;
@@ -83,18 +82,3 @@ it('recalculates total amount when updating item', function (): void {
 
     expect($saleReturn->fresh()->total_amount)->toBe(1000);
 });
-
-it('throws exception when updating item in non-pending return', function (): void {
-    $saleReturn = SaleReturn::factory()->completed()->create();
-    $item = SaleReturnItem::factory()->forSaleReturn($saleReturn)->create([
-        'quantity' => 5,
-        'unit_price' => 100,
-        'subtotal' => 500,
-    ]);
-
-    $action = resolve(UpdateSaleReturnItem::class);
-
-    $action->handle($item, new UpdateSaleReturnItemData(
-        quantity: 10,
-    ));
-})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "pending"');

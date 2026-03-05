@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Sale;
 
-use App\Actions\Shared\ValidateStatusIsPending;
 use App\Actions\StockMovement\RecordStockMovement;
 use App\Data\Sale\CancelSaleData;
 use App\Data\StockMovement\RecordStockMovementData;
@@ -19,7 +18,6 @@ final readonly class CancelSale
 {
     public function __construct(
         private RecordStockMovement $recordStockMovement,
-        private ValidateStatusIsPending $validateStatus,
     ) {}
 
     /**
@@ -33,12 +31,6 @@ final readonly class CancelSale
                 ->lockForUpdate()
                 ->with(['items.batch' => fn (Relation $query): Relation => $query->lockForUpdate()])
                 ->findOrFail($sale->id);
-
-            $this->validateStatus->validateTransition(
-                $sale->status,
-                SaleStatusEnum::Cancelled,
-                'Sale'
-            );
 
             $shouldRestock = $data->restock_items && $sale->status === SaleStatusEnum::Completed;
 

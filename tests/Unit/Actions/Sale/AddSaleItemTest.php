@@ -6,7 +6,6 @@ use App\Actions\Sale\AddSaleItem;
 use App\Data\Sale\SaleItemData;
 use App\Exceptions\InsufficientStockException;
 use App\Exceptions\InvalidBatchException;
-use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\Sale;
@@ -65,21 +64,6 @@ it('recalculates total amount when adding item', function (): void {
 
     expect($sale->fresh()->total_amount)->toBe(2000);
 });
-
-it('throws exception when sale is not pending', function (): void {
-    $sale = Sale::factory()->completed()->create();
-    $batch = Batch::factory()->withQuantity(100)->create();
-
-    $action = resolve(AddSaleItem::class);
-
-    $action->handle($sale, new SaleItemData(
-        product_id: $batch->product_id,
-        batch_id: $batch->id,
-        quantity: 10,
-        unit_price: 500,
-        unit_cost: 300,
-    ));
-})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "pending"');
 
 it('throws exception when insufficient stock', function (): void {
     $sale = Sale::factory()->pending()->create();

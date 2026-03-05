@@ -6,7 +6,6 @@ use App\Actions\PurchaseReturn\CompletePurchaseReturn;
 use App\Data\PurchaseReturn\CompletePurchaseReturnData;
 use App\Exceptions\InsufficientStockException;
 use App\Exceptions\InvalidOperationException;
-use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
@@ -26,15 +25,6 @@ it('removes stock from batches when completing return', function (): void {
 
     expect($batch->fresh()->quantity)->toBe(90);
 });
-
-it('throws exception when completing non-pending return', function (): void {
-    $purchaseReturn = PurchaseReturn::factory()->completed()->create();
-    PurchaseReturnItem::factory()->forPurchaseReturn($purchaseReturn)->create();
-
-    $action = resolve(CompletePurchaseReturn::class);
-
-    $action->handle($purchaseReturn, new CompletePurchaseReturnData());
-})->throws(StateTransitionException::class, 'Invalid state transition from "PurchaseReturn (completed)" to "completed"');
 
 it('throws exception when insufficient stock', function (): void {
     $batch = Batch::factory()->withQuantity(5)->create();

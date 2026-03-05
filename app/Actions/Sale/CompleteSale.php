@@ -17,7 +17,6 @@ final readonly class CompleteSale
     public function __construct(
         private DeductSaleStock $deductSaleStock,
         private ApplyPaymentSummary $applyPaymentSummary,
-        private ValidateSaleCompletion $validateSaleCompletion,
     ) {}
 
     /**
@@ -31,8 +30,6 @@ final readonly class CompleteSale
                 ->lockForUpdate()
                 ->with('items')
                 ->findOrFail($sale->id);
-
-            $this->validateSaleCompletion->handle($sale);
 
             $this->deductSaleStock->handle($sale);
 

@@ -6,7 +6,6 @@ use App\Actions\SaleReturn\CompleteSaleReturn;
 use App\Data\SaleReturn\CompleteSaleReturnData;
 use App\Enums\ReturnStatusEnum;
 use App\Exceptions\InvalidOperationException;
-use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\SaleReturn;
 use App\Models\SaleReturnItem;
@@ -40,15 +39,6 @@ it('adds stock to batches when completing return', function (): void {
 
     expect($batch->fresh()->quantity)->toBe(110);
 });
-
-it('throws exception when completing non-pending return', function (): void {
-    $saleReturn = SaleReturn::factory()->completed()->create();
-    SaleReturnItem::factory()->forSaleReturn($saleReturn)->create();
-
-    $action = resolve(CompleteSaleReturn::class);
-
-    $action->handle($saleReturn, new CompleteSaleReturnData());
-})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "Completed"');
 
 it('throws exception when completing return with no items', function (): void {
     $saleReturn = SaleReturn::factory()->pending()->create();

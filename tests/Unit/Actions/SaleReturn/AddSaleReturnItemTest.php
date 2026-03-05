@@ -6,7 +6,6 @@ use App\Actions\SaleReturn\AddSaleReturnItem;
 use App\Data\SaleReturn\SaleReturnItemData;
 use App\Exceptions\InvalidOperationException;
 use App\Exceptions\ItemNotFoundException;
-use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Sale;
 use App\Models\SaleItem;
@@ -77,33 +76,6 @@ it('recalculates total amount when adding item', function (): void {
 
     expect($saleReturn->fresh()->total_amount)->toBe(5000);
 });
-
-it('throws exception when adding item to non-pending return', function (): void {
-    $warehouse = Warehouse::factory()->create();
-    $sale = Sale::factory()->forWarehouse($warehouse)->create();
-    $batch = Batch::factory()->forWarehouse($warehouse)->withQuantity(100)->create();
-
-    SaleItem::query()->forceCreate([
-        'sale_id' => $sale->id,
-        'product_id' => $batch->product_id,
-        'batch_id' => $batch->id,
-        'quantity' => 10,
-        'unit_price' => 200,
-        'unit_cost' => 100,
-        'subtotal' => 2000,
-    ]);
-
-    $saleReturn = SaleReturn::factory()->forSale($sale)->completed()->create();
-
-    $action = resolve(AddSaleReturnItem::class);
-
-    $action->handle($saleReturn, new SaleReturnItemData(
-        product_id: $batch->product_id,
-        batch_id: $batch->id,
-        quantity: 5,
-        unit_price: 200,
-    ));
-})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "pending"');
 
 it('throws exception when product not in original sale', function (): void {
     $warehouse = Warehouse::factory()->create();

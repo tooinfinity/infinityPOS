@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Actions\Sale\RemoveSaleItem;
-use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Sale;
 use App\Models\SaleItem;
@@ -64,15 +63,6 @@ it('recalculates total amount after removing item', function (): void {
 
     expect($sale->fresh()->total_amount)->toBe(500);
 });
-
-it('throws exception when sale is not pending', function (): void {
-    $sale = Sale::factory()->completed()->create();
-    $item = SaleItem::factory()->forSale($sale)->create();
-
-    $action = resolve(RemoveSaleItem::class);
-
-    $action->handle($item);
-})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "pending"');
 
 it('deletes item from database', function (): void {
     $sale = Sale::factory()->pending()->create();

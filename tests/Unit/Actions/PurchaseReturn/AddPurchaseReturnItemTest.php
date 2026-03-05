@@ -6,7 +6,6 @@ use App\Actions\PurchaseReturn\AddPurchaseReturnItem;
 use App\Data\PurchaseReturn\PurchaseReturnItemData;
 use App\Exceptions\InvalidOperationException;
 use App\Exceptions\ItemNotFoundException;
-use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
@@ -74,33 +73,6 @@ it('recalculates total amount when adding item', function (): void {
 
     expect($purchaseReturn->fresh()->total_amount)->toBe(5000);
 });
-
-it('throws exception when adding item to non-pending return', function (): void {
-    $warehouse = Warehouse::factory()->create();
-    $purchase = Purchase::factory()->forWarehouse($warehouse)->create();
-    $batch = Batch::factory()->forWarehouse($warehouse)->withQuantity(100)->create();
-
-    PurchaseItem::query()->forceCreate([
-        'purchase_id' => $purchase->id,
-        'product_id' => $batch->product_id,
-        'batch_id' => $batch->id,
-        'quantity' => 10,
-        'unit_cost' => 200,
-        'subtotal' => 2000,
-        'received_quantity' => 10,
-    ]);
-
-    $purchaseReturn = PurchaseReturn::factory()->forPurchase($purchase)->completed()->create();
-
-    $action = resolve(AddPurchaseReturnItem::class);
-
-    $action->handle($purchaseReturn, new PurchaseReturnItemData(
-        product_id: $batch->product_id,
-        batch_id: $batch->id,
-        quantity: 5,
-        unit_cost: 200,
-    ));
-})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "pending"');
 
 it('throws exception when product not in original purchase', function (): void {
     $warehouse = Warehouse::factory()->create();

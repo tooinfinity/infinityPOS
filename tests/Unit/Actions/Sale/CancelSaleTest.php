@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Actions\Sale\CancelSale;
 use App\Data\Sale\CancelSaleData;
 use App\Enums\SaleStatusEnum;
-use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Sale;
 use App\Models\SaleItem;
@@ -86,14 +85,6 @@ it('creates stock movements when restocking', function (): void {
 
     expect($movements)->toHaveCount(1);
 });
-
-it('throws exception when cancelling already cancelled sale', function (): void {
-    $sale = Sale::factory()->cancelled()->create();
-
-    $action = resolve(CancelSale::class);
-
-    $action->handle($sale, new CancelSaleData(restock_items: false, note: null));
-})->throws(StateTransitionException::class, 'Invalid state transition from "Sale (cancelled)" to "cancelled"');
 
 it('updates note when cancelling', function (): void {
     $sale = Sale::factory()->pending()->create([

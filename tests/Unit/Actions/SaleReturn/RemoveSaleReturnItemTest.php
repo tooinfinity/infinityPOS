@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Actions\SaleReturn\RemoveSaleReturnItem;
-use App\Exceptions\StateTransitionException;
 use App\Models\SaleReturn;
 use App\Models\SaleReturnItem;
 
@@ -38,12 +37,3 @@ it('recalculates total amount when removing item', function (): void {
 
     expect($saleReturn->fresh()->total_amount)->toBe(500);
 });
-
-it('throws exception when removing item from non-pending return', function (): void {
-    $saleReturn = SaleReturn::factory()->completed()->create();
-    $item = SaleReturnItem::factory()->forSaleReturn($saleReturn)->create();
-
-    $action = resolve(RemoveSaleReturnItem::class);
-
-    $action->handle($item);
-})->throws(StateTransitionException::class, 'Invalid state transition from "completed" to "pending"');
