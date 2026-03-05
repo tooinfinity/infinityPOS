@@ -6,7 +6,6 @@ namespace App\Actions\PurchaseReturn;
 
 use App\Actions\Shared\RecalculateParentTotal;
 use App\Actions\Shared\ValidateReturnAgainstOriginal;
-use App\Actions\Shared\ValidateStatusIsPending;
 use App\Data\PurchaseReturn\PurchaseReturnItemData;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnItem;
@@ -16,7 +15,6 @@ use Throwable;
 final readonly class AddPurchaseReturnItem
 {
     public function __construct(
-        private ValidateStatusIsPending $validateStatus,
         private ValidateReturnAgainstOriginal $validateReturn,
         private RecalculateParentTotal $recalculateTotal,
     ) {}
@@ -33,7 +31,6 @@ final readonly class AddPurchaseReturnItem
                 ->with('purchase.items')
                 ->findOrFail($purchaseReturn->id);
 
-            $this->validateStatus->handle($purchaseReturn);
             $this->validateReturn->validateNewReturnForPurchase($purchaseReturn, $data->product_id, $data->batch_id, $data->quantity);
 
             $item = PurchaseReturnItem::query()->forceCreate([

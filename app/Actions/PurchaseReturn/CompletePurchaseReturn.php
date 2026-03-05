@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\PurchaseReturn;
 
-use App\Actions\Shared\ValidateStatusIsPending;
 use App\Actions\StockMovement\CreateStockMovement;
 use App\Data\PurchaseReturn\CompletePurchaseReturnData;
 use App\Enums\ReturnStatusEnum;
@@ -18,7 +17,6 @@ final readonly class CompletePurchaseReturn
 {
     public function __construct(
         private CreateStockMovement $createStockMovement,
-        private ValidateStatusIsPending $validateStatus,
     ) {}
 
     /**
@@ -51,12 +49,6 @@ final readonly class CompletePurchaseReturn
      */
     private function validatePurchaseReturnCanBeCompleted(PurchaseReturn $purchaseReturn): void
     {
-        $this->validateStatus->validateTransition(
-            $purchaseReturn->status,
-            ReturnStatusEnum::Completed,
-            'PurchaseReturn'
-        );
-
         throw_if($purchaseReturn->items->isEmpty(), InvalidOperationException::class, 'complete', 'PurchaseReturn', 'Purchase return cannot be completed without items');
     }
 

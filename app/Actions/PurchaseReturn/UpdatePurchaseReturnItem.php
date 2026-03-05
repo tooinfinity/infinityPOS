@@ -6,7 +6,6 @@ namespace App\Actions\PurchaseReturn;
 
 use App\Actions\Shared\RecalculateParentTotal;
 use App\Actions\Shared\ValidateReturnAgainstOriginal;
-use App\Actions\Shared\ValidateStatusIsPending;
 use App\Data\PurchaseReturn\UpdatePurchaseReturnItemData;
 use App\Models\PurchaseReturnItem;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +15,6 @@ use Throwable;
 final readonly class UpdatePurchaseReturnItem
 {
     public function __construct(
-        private ValidateStatusIsPending $validateStatus,
         private ValidateReturnAgainstOriginal $validateReturn,
         private RecalculateParentTotal $recalculateTotal,
     ) {}
@@ -34,8 +32,6 @@ final readonly class UpdatePurchaseReturnItem
                 ->findOrFail($item->id);
 
             $purchaseReturn = $item->purchaseReturn;
-
-            $this->validateStatus->handle($purchaseReturn);
 
             $quantity = $data->quantity instanceof Optional ? $item->quantity : $data->quantity;
             $unitCost = $data->unit_cost instanceof Optional ? $item->unit_cost : $data->unit_cost;
