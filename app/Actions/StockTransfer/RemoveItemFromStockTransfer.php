@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\StockTransfer;
 
-use App\Enums\StockTransferStatusEnum;
 use App\Exceptions\InvalidOperationException;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
@@ -28,8 +27,6 @@ final readonly class RemoveItemFromStockTransfer
             $item = StockTransferItem::query()
                 ->lockForUpdate()
                 ->findOrFail($item->id);
-
-            throw_if($transfer->status !== StockTransferStatusEnum::Pending, InvalidOperationException::class, 'remove item from', 'StockTransfer', 'Items can only be removed from pending transfers.');
 
             throw_if($item->stock_transfer_id !== $transfer->id, InvalidOperationException::class, 'remove', 'StockTransferItem', 'Item does not belong to this transfer.');
 

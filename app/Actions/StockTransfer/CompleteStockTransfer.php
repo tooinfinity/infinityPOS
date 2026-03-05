@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\StockTransfer;
 
 use App\Actions\Batch\FindOrCreateBatch;
-use App\Actions\Shared\ValidateStatusIsPending;
 use App\Actions\StockMovement\CreateStockMovement;
 use App\Enums\StockMovementTypeEnum;
 use App\Enums\StockTransferStatusEnum;
@@ -22,7 +21,6 @@ final readonly class CompleteStockTransfer
 {
     public function __construct(
         private CreateStockMovement $createStockMovement,
-        private ValidateStatusIsPending $validateStatus,
         private FindOrCreateBatch $findOrCreateBatch,
     ) {}
 
@@ -40,12 +38,6 @@ final readonly class CompleteStockTransfer
                     'items.batch' => fn (Relation $query): Relation => $query->lockForUpdate(),
                 ])
                 ->findOrFail($transfer->id);
-
-            $this->validateStatus->validateTransition(
-                $transfer->status,
-                StockTransferStatusEnum::Completed,
-                'StockTransfer'
-            );
 
             $this->validateSufficientStock($transfer);
 
