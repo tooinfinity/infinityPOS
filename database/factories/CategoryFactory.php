@@ -24,7 +24,6 @@ final class CategoryFactory extends Factory
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name),
             'description' => $this->faker->paragraph(),
             'is_active' => true,
         ];
@@ -48,7 +47,6 @@ final class CategoryFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'name' => $name,
-            'slug' => Str::slug($name),
         ]);
     }
 

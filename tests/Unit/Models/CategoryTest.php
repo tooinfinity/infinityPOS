@@ -12,7 +12,6 @@ test('to array', function (): void {
         ->toBe([
             'id',
             'name',
-            'slug',
             'description',
             'is_active',
             'created_at',

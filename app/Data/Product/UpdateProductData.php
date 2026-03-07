@@ -18,7 +18,6 @@ final class UpdateProductData extends Data
         public int|Optional|null $category_id,
         public int|Optional|null $brand_id,
         public string|Optional|null $description,
-        public UploadedFile|string|null|Optional $image,
         public int|Optional $cost_price,
         public int|Optional $selling_price,
         public int|Optional $alert_quantity,

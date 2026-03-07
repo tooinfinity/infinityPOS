@@ -31,7 +31,6 @@ test('to array', function (): void {
             'paid_amount',
             'payment_status',
             'note',
-            'document',
             'created_at',
             'updated_at',
         ]);

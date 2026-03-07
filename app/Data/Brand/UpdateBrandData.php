@@ -12,8 +12,6 @@ final class UpdateBrandData extends Data
 {
     public function __construct(
         public string|Optional $name,
-        public string|Optional $slug,
-        public UploadedFile|string|null|Optional $logo,
         public bool|Optional $is_active,
     ) {}
 }

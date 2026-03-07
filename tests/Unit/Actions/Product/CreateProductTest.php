@@ -28,7 +28,6 @@ it('may create a product with required fields', function (): void {
         category_id: null,
         brand_id: null,
         description: null,
-        image: null,
         cost_price: 5000,
         selling_price: 7500,
         alert_quantity: 10,
@@ -60,7 +59,6 @@ it('auto-generates SKU when not provided', function (): void {
         category_id: null,
         brand_id: null,
         description: null,
-        image: null,
         cost_price: 5000,
         selling_price: 7500,
         alert_quantity: 10,
@@ -88,7 +86,6 @@ it('auto-generates barcode when not provided', function (): void {
         category_id: null,
         brand_id: null,
         description: null,
-        image: null,
         cost_price: 5000,
         selling_price: 7500,
         alert_quantity: 10,
@@ -116,7 +113,6 @@ it('creates product with custom SKU and barcode', function (): void {
         category_id: null,
         brand_id: null,
         description: null,
-        image: null,
         cost_price: 5000,
         selling_price: 7500,
         alert_quantity: 10,
@@ -145,7 +141,6 @@ it('creates product with category and brand', function (): void {
         category_id: $category->id,
         brand_id: $brand->id,
         description: null,
-        image: null,
         cost_price: 5000,
         selling_price: 7500,
         alert_quantity: 10,
@@ -172,7 +167,6 @@ it('creates product with description', function (): void {
         category_id: null,
         brand_id: null,
         description: 'This is a test product description',
-        image: null,
         cost_price: 5000,
         selling_price: 7500,
         alert_quantity: 10,
@@ -183,63 +177,6 @@ it('creates product with description', function (): void {
     $product = $action->handle($data);
 
     expect($product->description)->toBe('This is a test product description');
-});
-
-it('creates product with uploaded image', function (): void {
-    $unit = Unit::factory()->create();
-
-    $action = resolve(CreateProduct::class);
-
-    $file = UploadedFile::fake()->image('product.png', 800, 600);
-
-    $data = new CreateProductData(
-        name: 'Test Product',
-        sku: null,
-        barcode: null,
-        unit_id: $unit->id,
-        category_id: null,
-        brand_id: null,
-        description: null,
-        image: $file,
-        cost_price: 5000,
-        selling_price: 7500,
-        alert_quantity: 10,
-        track_inventory: true,
-        is_active: true,
-    );
-
-    $product = $action->handle($data);
-
-    expect($product->image)
-        ->toStartWith('products/')
-        ->toEndWith('.webp')
-        ->and(Storage::disk('public')->exists($product->image))->toBeTrue();
-});
-
-it('creates product with string image path', function (): void {
-    $unit = Unit::factory()->create();
-
-    $action = resolve(CreateProduct::class);
-
-    $data = new CreateProductData(
-        name: 'Test Product',
-        sku: null,
-        barcode: null,
-        unit_id: $unit->id,
-        category_id: null,
-        brand_id: null,
-        description: null,
-        image: 'products/test-image.jpg',
-        cost_price: 5000,
-        selling_price: 7500,
-        alert_quantity: 10,
-        track_inventory: true,
-        is_active: true,
-    );
-
-    $product = $action->handle($data);
-
-    expect($product->image)->toBe('products/test-image.jpg');
 });
 
 it('defaults track_inventory to true when not provided', function (): void {
@@ -255,7 +192,6 @@ it('defaults track_inventory to true when not provided', function (): void {
         category_id: null,
         brand_id: null,
         description: null,
-        image: null,
         cost_price: 5000,
         selling_price: 7500,
         alert_quantity: 10,
@@ -281,7 +217,6 @@ it('defaults is_active to true when not provided', function (): void {
         category_id: null,
         brand_id: null,
         description: null,
-        image: null,
         cost_price: 5000,
         selling_price: 7500,
         alert_quantity: 10,
@@ -307,7 +242,6 @@ it('creates product with track_inventory set to false', function (): void {
         category_id: null,
         brand_id: null,
         description: null,
-        image: null,
         cost_price: 5000,
         selling_price: 7500,
         alert_quantity: 10,
@@ -333,7 +267,6 @@ it('creates product with is_active set to false', function (): void {
         category_id: null,
         brand_id: null,
         description: null,
-        image: null,
         cost_price: 5000,
         selling_price: 7500,
         alert_quantity: 10,
@@ -359,7 +292,6 @@ it('creates product without category_id and brand_id', function (): void {
         category_id: null,
         brand_id: null,
         description: null,
-        image: null,
         cost_price: 5000,
         selling_price: 7500,
         alert_quantity: 10,
@@ -391,7 +323,6 @@ it('rolls back transaction on failure', function (): void {
         category_id: null,
         brand_id: null,
         description: null,
-        image: null,
         cost_price: 5000,
         selling_price: 7500,
         alert_quantity: 10,
@@ -406,44 +337,4 @@ it('rolls back transaction on failure', function (): void {
     }
 
     expect(Product::query()->where('name', 'Test Product')->exists())->toBeFalse();
-});
-
-it('deletes uploaded image when transaction fails', function (): void {
-    $unit = Unit::factory()->create();
-
-    Product::factory()->create([
-        'sku' => 'PRD-DUPLICATE',
-    ]);
-
-    $action = resolve(CreateProduct::class);
-
-    $file = UploadedFile::fake()->image('product.png', 800, 600);
-
-    $data = new CreateProductData(
-        name: 'Test Product',
-        sku: 'PRD-DUPLICATE',
-        barcode: null,
-        unit_id: $unit->id,
-        category_id: null,
-        brand_id: null,
-        description: null,
-        image: $file,
-        cost_price: 5000,
-        selling_price: 7500,
-        alert_quantity: 10,
-        track_inventory: true,
-        is_active: true,
-    );
-
-    $filesBefore = Storage::disk('public')->files('products');
-
-    try {
-        $action->handle($data);
-    } catch (Throwable) {
-        // Expected to fail due to unique constraint
-    }
-
-    $filesAfter = Storage::disk('public')->files('products');
-
-    expect($filesBefore)->toBe($filesAfter);
 });

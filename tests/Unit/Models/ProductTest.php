@@ -31,7 +31,6 @@ test('to array', function (): void {
             'sku',
             'barcode',
             'description',
-            'image',
             'cost_price',
             'selling_price',
             'alert_quantity',

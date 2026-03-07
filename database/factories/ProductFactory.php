@@ -34,7 +34,6 @@ final class ProductFactory extends Factory
             'sku' => mb_strtoupper(Str::random(8)),
             'barcode' => $this->faker->unique()->ean13(),
             'description' => $this->faker->paragraph(),
-            'image' => $this->faker->url(),
             'cost_price' => $cost_price,
             'selling_price' => $selling_price,
             'alert_quantity' => $this->faker->randomDigitNotZero(),

@@ -17,7 +17,6 @@ final class CreateProductData extends Data
         public ?int $category_id,
         public ?int $brand_id,
         public ?string $description,
-        public UploadedFile|string|null $image,
         public int $cost_price,
         public int $selling_price,
         public int $alert_quantity,

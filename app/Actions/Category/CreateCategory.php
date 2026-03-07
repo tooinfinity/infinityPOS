@@ -18,7 +18,6 @@ final readonly class CreateCategory
     {
         return DB::transaction(static fn (): Category => Category::query()->forceCreate([
             'name' => $data->name,
-            'slug' => $data->slug,
             'description' => $data->description,
             'is_active' => $data->is_active,
         ])->refresh());

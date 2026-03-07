@@ -11,7 +11,6 @@ it('may create a category', function (): void {
 
     $data = new CreateCategoryData(
         name: 'Test Category',
-        slug: 'test-category',
         description: null,
         is_active: true,
     );
@@ -20,7 +19,6 @@ it('may create a category', function (): void {
 
     expect($category)->toBeInstanceOf(Category::class)
         ->and($category->name)->toBe('Test Category')
-        ->and($category->slug)->toBe('test-category')
         ->and($category->exists)->toBeTrue();
 });
 
@@ -29,7 +27,6 @@ it('creates category with description', function (): void {
 
     $data = new CreateCategoryData(
         name: 'Test Category',
-        slug: 'test-category',
         description: 'Test description',
         is_active: true,
     );
@@ -44,7 +41,6 @@ it('creates category with is_active flag', function (): void {
 
     $data = new CreateCategoryData(
         name: 'Test Category',
-        slug: 'test-category',
         description: null,
         is_active: false,
     );

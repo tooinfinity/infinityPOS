@@ -113,34 +113,6 @@ it('includes all related record types in exception message', function (): void {
         });
 });
 
-it('deletes product image when deleting product', function (): void {
-    Storage::disk('public')->put('products/test-image.jpg', 'fake-content');
-
-    $product = Product::factory()->create([
-        'image' => 'products/test-image.jpg',
-    ]);
-
-    expect(Storage::disk('public')->exists('products/test-image.jpg'))->toBeTrue();
-
-    $action = resolve(DeleteProduct::class);
-    $action->handle($product);
-
-    expect(Storage::disk('public')->exists('products/test-image.jpg'))->toBeFalse();
-});
-
-it('deletes product without image', function (): void {
-    $product = Product::factory()->create([
-        'image' => null,
-    ]);
-
-    $action = resolve(DeleteProduct::class);
-
-    $result = $action->handle($product);
-
-    expect($result)->toBeTrue()
-        ->and(Product::query()->find($product->id))->toBeNull();
-});
-
 it('does not delete product when any related record exists', function (): void {
     $product = Product::factory()->create();
     Batch::factory()->create(['product_id' => $product->id]);
@@ -155,27 +127,6 @@ it('does not delete product when any related record exists', function (): void {
     }
 
     expect(Product::query()->find($product->id))->not->toBeNull();
-});
-
-it('rolls back transaction when exception is thrown', function (): void {
-    Storage::disk('public')->put('products/test-image.jpg', 'fake-content');
-
-    $product = Product::factory()->create([
-        'image' => 'products/test-image.jpg',
-    ]);
-    Batch::factory()->create(['product_id' => $product->id]);
-
-    $action = resolve(DeleteProduct::class);
-
-    try {
-        $action->handle($product);
-        test()->fail('Expected InvalidOperationException to be thrown');
-    } catch (InvalidOperationException) {
-        // Expected exception
-    }
-
-    expect(Product::query()->find($product->id))->not->toBeNull()
-        ->and(Storage::disk('public')->exists('products/test-image.jpg'))->toBeTrue();
 });
 
 it('prevents deletion when multiple related records exist', function (): void {

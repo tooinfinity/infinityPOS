@@ -7,21 +7,15 @@ use App\Models\Product;
 use Illuminate\Support\Facades\Storage;
 
 test('to array', function (): void {
-    Storage::fake('public');
-    $brand = Brand::factory()->create([
-        'logo' => 'brands/test-logo.webp',
-    ])->refresh();
+    $brand = Brand::factory()->create()->refresh();
 
     expect(array_keys($brand->toArray()))
         ->toBe([
             'id',
             'name',
-            'slug',
-            'logo',
             'is_active',
             'created_at',
             'updated_at',
-            'logo_url',
         ]);
 });
 
@@ -48,27 +42,6 @@ test('brand has many products', function (): void {
     expect($brand->products)->toHaveCount(1);
 });
 
-test('logo url returns null when no logo', function (): void {
-    $brand = Brand::factory()->create([
-        'logo' => null,
-    ]);
-
-    expect($brand->logo_url)->toBeNull();
-});
-
-test('logo url returns full url when logo exists', function (): void {
-    Storage::fake('public');
-
-    $brand = Brand::factory()->create([
-        'logo' => 'brands/test-logo.webp',
-    ]);
-
-    Storage::disk('public')->put('brands/test-logo.webp', 'fake-content');
-
-    expect($brand->logo_url)
-        ->not->toBeNull()
-        ->toContain('brands/test-logo.webp');
-});
 
 test('withInactive returns both active and inactive brands', function (): void {
     Brand::factory()->count(2)->create([

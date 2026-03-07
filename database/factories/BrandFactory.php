@@ -24,7 +24,6 @@ final class BrandFactory extends Factory
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name),
             'is_active' => true,
         ];
     }
@@ -47,7 +46,6 @@ final class BrandFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'name' => $name,
-            'slug' => Str::slug($name),
         ]);
     }
 }

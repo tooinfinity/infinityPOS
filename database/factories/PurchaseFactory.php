@@ -35,7 +35,6 @@ final class PurchaseFactory extends Factory
             'paid_amount' => $this->faker->randomNumber(6),
             'payment_status' => $this->faker->randomElement(PaymentStatusEnum::cases()),
             'note' => $this->faker->text(),
-            'document' => $this->faker->text(),
         ];
     }
 
