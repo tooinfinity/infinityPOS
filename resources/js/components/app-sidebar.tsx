@@ -13,7 +13,14 @@ import {
 import { type NavItem } from '@/types';
 import { dashboard } from '@/wayfinder/routes';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import {
+    BookOpen,
+    Folder,
+    LayoutGrid,
+    RotateCcw,
+    ShoppingCart,
+    Users,
+} from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -21,6 +28,26 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'POS Terminal',
+        href: '/pos',
+        icon: ShoppingCart,
+    },
+    {
+        title: 'Sales',
+        href: '/sales',
+        icon: ShoppingCart,
+    },
+    {
+        title: 'Returns',
+        href: '/returns',
+        icon: RotateCcw,
+    },
+    {
+        title: 'Customers',
+        href: '/customers',
+        icon: Users,
     },
 ];
 

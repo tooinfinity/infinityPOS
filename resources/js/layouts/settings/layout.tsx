@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 import { type NavItem } from '@/types';
 import { edit as editAppearance } from '@/wayfinder/routes/appearance';
 import { edit as editPassword } from '@/wayfinder/routes/password';
-import { show } from '@/wayfinder/routes/two-factor';
 import { edit } from '@/wayfinder/routes/user-profile';
 import { Link } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
@@ -19,11 +18,6 @@ const sidebarNavItems: NavItem[] = [
     {
         title: 'Password',
         href: editPassword(),
-        icon: null,
-    },
-    {
-        title: 'Two-Factor Auth',
-        href: show(),
         icon: null,
     },
     {

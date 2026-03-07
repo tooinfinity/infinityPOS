@@ -53,26 +53,6 @@ it('may create a session with remember me', function (): void {
     $this->assertAuthenticatedAs($user);
 });
 
-it('redirects to two-factor challenge when enabled', function (): void {
-    $user = User::factory()->create([
-        'email' => 'test@example.com',
-        'password' => Hash::make('password'),
-        'two_factor_secret' => encrypt('secret'),
-        'two_factor_recovery_codes' => encrypt(json_encode(['code1', 'code2'])),
-        'two_factor_confirmed_at' => now(),
-    ]);
-
-    $response = $this->fromRoute('login')
-        ->post(route('login.store'), [
-            'email' => 'test@example.com',
-            'password' => 'password',
-        ]);
-
-    $response->assertRedirectToRoute('two-factor.login');
-
-    $this->assertGuest();
-});
-
 it('fails with invalid credentials', function (): void {
     User::factory()->create([
         'email' => 'test@example.com',

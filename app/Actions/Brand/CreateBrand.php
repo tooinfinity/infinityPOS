@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Brand;
 
 use App\Actions\UploadImage;
+use App\Data\Brand\BrandData;
 use App\Data\Brand\CreateBrandData;
 use App\Models\Brand;
 use Illuminate\Http\UploadedFile;
@@ -21,7 +22,7 @@ final readonly class CreateBrand
     /**
      * @throws Throwable
      */
-    public function handle(CreateBrandData $data): Brand
+    public function handle(BrandData $data): Brand
     {
         $logo = $data->logo;
         if ($logo instanceof UploadedFile) {
