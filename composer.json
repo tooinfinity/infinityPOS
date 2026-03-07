@@ -18,6 +18,7 @@
         "nunomaduro/essentials": "^1.2.0",
         "spatie/image": "^3.9.3",
         "spatie/laravel-data": "^4.20",
+        "spatie/laravel-medialibrary": "*",
         "spatie/laravel-permission": "^6.24.1"
     },
     "require-dev": {

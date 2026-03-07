@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\MediaCollection;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\PurchaseStatusEnum;
 use Carbon\CarbonInterface;
@@ -18,6 +19,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\DB;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
  * @property-read int $id
@@ -32,7 +35,6 @@ use Illuminate\Support\Facades\DB;
  * @property-read int $due_amount
  * @property-read PaymentStatusEnum $payment_status
  * @property-read string|null $note
- * @property-read string|null $document
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Supplier $supplier
@@ -43,10 +45,12 @@ use Illuminate\Support\Facades\DB;
  * @property-read Collection<int, StockMovement> $stockMovements
  * @property-read Collection<int, PurchaseReturn> $returns
  */
-final class Purchase extends Model
+final class Purchase extends Model implements HasMedia
 {
     /** @use HasFactory<PurchaseFactory> */
     use HasFactory;
+
+    use InteractsWithMedia;
 
     /**
      * @return BelongsTo<Supplier, $this>
@@ -129,10 +133,16 @@ final class Purchase extends Model
             'paid_amount' => 'integer',
             'payment_status' => PaymentStatusEnum::class,
             'note' => 'string',
-            'document' => 'string',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection(MediaCollection::PurchaseAttachment->value)
+            ->acceptsMimeTypes(MediaCollection::PurchaseAttachment->allowedMimeTypes())
+            ->singleFile();
     }
 
     /**
@@ -225,5 +235,27 @@ final class Purchase extends Model
         return $query->select('*')->addSelect([
             'due_amount' => DB::raw('CASE WHEN total_amount > paid_amount THEN total_amount - paid_amount ELSE 0 END'),
         ]);
+    }
+
+    /**
+     * @return array{id: int, name: string, url: string, size: string, mime: string, extension: string, is_image: bool}|null
+     */
+    protected function getAttachmentAttribute(): ?array
+    {
+        $media = $this->getFirstMedia(MediaCollection::PurchaseAttachment->value);
+
+        if (! $media instanceof \Spatie\MediaLibrary\MediaCollections\Models\Media) {
+            return null;
+        }
+
+        return [
+            'id' => $media->id,
+            'name' => $media->file_name,
+            'url' => $media->getUrl(),
+            'size' => $media->human_readable_size,
+            'mime' => $media->mime_type,
+            'extension' => $media->extension,
+            'is_image' => str_starts_with($media->mime_type, 'image/'),
+        ];
     }
 }

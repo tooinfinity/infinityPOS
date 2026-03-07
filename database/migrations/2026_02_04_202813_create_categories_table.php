@@ -12,15 +12,13 @@ return new class extends Migration
     {
         Schema::create('categories', static function (Blueprint $table): void {
             $table->id();
-            $table->string('name');
-            $table->string('slug');
+            $table->string('name')->unique();
             $table->text('description')->nullable();
             $table->boolean('is_active');
 
             $table->timestamps();
 
-            $table->unique(['name', 'slug']);
-            $table->index('slug');
+            $table->index('name');
             $table->index('is_active');
         });
     }

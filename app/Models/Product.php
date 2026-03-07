@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\MediaCollection;
 use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\ProductFactory;
@@ -16,6 +17,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * @property-read int $id
@@ -26,7 +30,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read string $sku
  * @property-read string $barcode
  * @property-read string|null $description
- * @property-read string|null $image
  * @property-read int $cost_price
  * @property-read int $selling_price
  * @property-read int $alert_quantity
@@ -46,10 +49,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, PurchaseReturnItem> $purchaseReturnItems
  */
 #[ScopedBy([ActiveScope::class])]
-final class Product extends Model
+final class Product extends Model implements HasMedia
 {
     /** @use HasFactory<ProductFactory> */
     use HasFactory;
+
+    use InteractsWithMedia;
 
     /**
      * @return Builder<self>
@@ -153,7 +158,6 @@ final class Product extends Model
             'sku' => 'string',
             'barcode' => 'string',
             'description' => 'string',
-            'image' => 'string',
             'cost_price' => 'integer',
             'selling_price' => 'integer',
             'alert_quantity' => 'integer',
@@ -161,6 +165,46 @@ final class Product extends Model
             'is_active' => 'boolean',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
+        ];
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection(MediaCollection::ProductThumbnail->value)
+            ->acceptsMimeTypes(MediaCollection::ProductThumbnail->allowedMimeTypes())
+            ->singleFile();
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->performOnCollections(MediaCollection::ProductThumbnail->value)
+            ->width(400)
+            ->height(400)
+            ->sharpen(5);
+    }
+
+    protected function getThumbnailUrlAttribute(): string
+    {
+        return $this->getFirstMediaUrl(MediaCollection::ProductThumbnail->value, 'thumb');
+    }
+
+    /**
+     * @return array{id: int, url: string, thumb: string, size: string}|null
+     */
+    protected function getThumbnailAttribute(): ?array
+    {
+        $media = $this->getFirstMedia(MediaCollection::ProductThumbnail->value);
+
+        if (! $media instanceof Media) {
+            return null;
+        }
+
+        return [
+            'id' => $media->id,
+            'url' => $media->getUrl(),
+            'thumb' => $media->getUrl('thumb'),
+            'size' => $media->human_readable_size,
         ];
     }
 

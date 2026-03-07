@@ -4,36 +4,35 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\MediaCollection;
 use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\BrandFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * @property-read int $id
  * @property-read string $name
- * @property-read string $slug
- * @property-read string|null $logo
- * @property-read string|null $logo_url
  * @property-read bool $is_active
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Collection<int, Product> $products
  */
 #[ScopedBy([ActiveScope::class])]
-final class Brand extends Model
+final class Brand extends Model implements HasMedia
 {
     /** @use HasFactory<BrandFactory> */
     use HasFactory;
 
-    protected $appends = ['logo_url'];
+    use InteractsWithMedia;
 
     /**
      * @return Builder<self>
@@ -59,27 +58,50 @@ final class Brand extends Model
         return [
             'id' => 'integer',
             'name' => 'string',
-            'slug' => 'string',
-            'logo' => 'string',
             'is_active' => 'boolean',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
     }
 
-    /**
-     * @return Attribute<string|null, null>
-     */
-    protected function logoUrl(): Attribute
+    public function registerMediaCollections(): void
     {
-        return Attribute::make(
-            get: function (): ?string {
-                if ($this->logo === null) {
-                    return null;
-                }
+        $this->addMediaCollection(MediaCollection::BrandLogo->value)
+            ->acceptsMimeTypes(MediaCollection::BrandLogo->allowedMimeTypes())
+            ->singleFile();
+    }
 
-                return Storage::disk('public')->url($this->logo);
-            },
-        );
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->performOnCollections(MediaCollection::BrandLogo->value)
+            ->width(200)
+            ->height(200)
+            ->sharpen(10);
+    }
+
+    protected function getLogoUrlAttribute(): string
+    {
+        return $this->getFirstMediaUrl(MediaCollection::BrandLogo->value, 'thumb')
+            ?: $this->getFirstMediaUrl(MediaCollection::BrandLogo->value);
+    }
+
+    /**
+     * @return array{id: int, url: string, thumb: string, size: string}|null
+     */
+    protected function getLogoAttribute(): ?array
+    {
+        $media = $this->getFirstMedia(MediaCollection::BrandLogo->value);
+
+        if (! $media instanceof Media) {
+            return null;
+        }
+
+        return [
+            'id' => $media->id,
+            'url' => $media->getUrl(),
+            'thumb' => $media->getUrl('thumb'),
+            'size' => $media->human_readable_size,
+        ];
     }
 }

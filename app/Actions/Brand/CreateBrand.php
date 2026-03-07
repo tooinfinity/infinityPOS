@@ -6,7 +6,6 @@ namespace App\Actions\Brand;
 
 use App\Actions\UploadImage;
 use App\Data\Brand\BrandData;
-use App\Data\Brand\CreateBrandData;
 use App\Models\Brand;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;

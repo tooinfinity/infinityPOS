@@ -23,7 +23,6 @@ return new class extends Migration
             $table->unsignedBigInteger('paid_amount');
             $table->string('payment_status');
             $table->text('note')->nullable();
-            $table->string('document')->nullable();
 
             $table->timestamps();
 

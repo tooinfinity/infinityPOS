@@ -5,6 +5,9 @@ declare(strict_types=1);
 use App\Http\Controllers\Payments\PaymentController;
 use App\Http\Controllers\Payments\UnvoidPayment;
 use App\Http\Controllers\Payments\VoidPayment;
+use App\Http\Controllers\Products\BrandMediaController;
+use App\Http\Controllers\Products\ProductMediaController;
+use App\Http\Controllers\Purchases\PurchaseAttachmentController;
 use App\Http\Controllers\Sales\CancelSaleController;
 use App\Http\Controllers\Sales\CompleteReturnController;
 use App\Http\Controllers\Sales\CompleteSaleController;
@@ -14,7 +17,6 @@ use App\Http\Controllers\Sales\RevertReturnController;
 use App\Http\Controllers\Sales\SaleController;
 use App\Http\Controllers\Sales\SaleItemController;
 use App\Http\Controllers\Sales\SaleReturnController;
-use App\Http\Controllers\Sales\SearchCustomerController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserEmailResetNotificationController;
@@ -29,6 +31,27 @@ Route::get('/', static fn () => Inertia::render('welcome'))->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', static fn () => Inertia::render('dashboard'))->name('dashboard');
+
+    // Brand Logo
+    Route::post('brands/{brand}/logo', [BrandMediaController::class, 'store'])
+        ->name('brands.logo.store');
+
+    Route::delete('brands/{brand}/logo', [BrandMediaController::class, 'destroy'])
+        ->name('brands.logo.destroy');
+
+    // Product Thumbnail
+    Route::post('products/{product}/thumbnail', [ProductMediaController::class, 'store'])
+        ->name('products.thumbnail.store');
+
+    Route::delete('products/{product}/thumbnail', [ProductMediaController::class, 'destroy'])
+        ->name('products.thumbnail.destroy');
+
+    // Purchase Attachment
+    Route::post('purchases/{purchase}/attachment', [PurchaseAttachmentController::class, 'store'])
+        ->name('purchases.attachment.store');
+
+    Route::delete('purchases/{purchase}/attachment', [PurchaseAttachmentController::class, 'destroy'])
+        ->name('purchases.attachment.destroy');
 
     // POS
     Route::get('pos', [SaleController::class, 'create'])->name('pos.create');
@@ -68,7 +91,6 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::get('/', [CustomerController::class, 'index'])->name('customers.index');
         Route::post('/', [CustomerController::class, 'store'])->name('customers.store');
         Route::get('/create', [CustomerController::class, 'create'])->name('customers.create');
-        Route::get('/search', SearchCustomerController::class)->name('customers.search');
         Route::get('/{customer}', [CustomerController::class, 'show'])->name('customers.show');
         Route::get('/{customer}/edit', [CustomerController::class, 'edit'])->name('customers.edit');
         Route::patch('/{customer}', [CustomerController::class, 'update'])->name('customers.update');
