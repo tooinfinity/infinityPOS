@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Category;
 
-use App\Data\Category\CreateCategoryData;
+use App\Data\Category\CategoryData;
 use App\Models\Category;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -14,7 +14,7 @@ final readonly class CreateCategory
     /**
      * @throws Throwable
      */
-    public function handle(CreateCategoryData $data): Category
+    public function handle(CategoryData $data): Category
     {
         return DB::transaction(static fn (): Category => Category::query()->forceCreate([
             'name' => $data->name,

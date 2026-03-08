@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 use App\Actions\Category\CreateCategory;
-use App\Data\Category\CreateCategoryData;
+use App\Data\Category\CategoryData;
 use App\Models\Category;
 
 it('may create a category', function (): void {
     $action = resolve(CreateCategory::class);
 
-    $data = new CreateCategoryData(
+    $data = new CategoryData(
         name: 'Test Category',
         description: null,
         is_active: true,
@@ -25,7 +25,7 @@ it('may create a category', function (): void {
 it('creates category with description', function (): void {
     $action = resolve(CreateCategory::class);
 
-    $data = new CreateCategoryData(
+    $data = new CategoryData(
         name: 'Test Category',
         description: 'Test description',
         is_active: true,
@@ -39,7 +39,7 @@ it('creates category with description', function (): void {
 it('creates category with is_active flag', function (): void {
     $action = resolve(CreateCategory::class);
 
-    $data = new CreateCategoryData(
+    $data = new CategoryData(
         name: 'Test Category',
         description: null,
         is_active: false,

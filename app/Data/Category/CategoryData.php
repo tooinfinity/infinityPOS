@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Data\Brand;
+namespace App\Data\Category;
 
-use Illuminate\Http\UploadedFile;
 use Spatie\LaravelData\Data;
 
-final class CreateBrandData extends Data
+final class CategoryData extends Data
 {
     public function __construct(
         public string $name,
+        public ?string $description,
         public bool $is_active,
     ) {}
 }

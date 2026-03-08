@@ -3,12 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Brand\UpdateBrand;
-use App\Data\Brand\UpdateBrandData;
+use App\Data\Brand\BrandData;
 use App\Models\Brand;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Spatie\LaravelData\Optional;
 
 it('may update a brand name', function (): void {
     $brand = Brand::factory()->create([
@@ -17,9 +13,9 @@ it('may update a brand name', function (): void {
 
     $action = resolve(UpdateBrand::class);
 
-    $data = new UpdateBrandData(
+    $data = new BrandData(
         name: 'New Name',
-        is_active: Optional::create(),
+        is_active: true,
     );
 
     $updatedBrand = $action->handle($brand, $data);
@@ -34,8 +30,8 @@ it('updates is_active status', function (): void {
 
     $action = resolve(UpdateBrand::class);
 
-    $data = new UpdateBrandData(
-        name: Optional::create(),
+    $data = new BrandData(
+        name: $brand->name,
         is_active: false,
     );
 

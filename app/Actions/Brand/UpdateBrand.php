@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Brand;
 
-use App\Actions\UploadImage;
 use App\Data\Brand\BrandData;
-use App\Data\Brand\UpdateBrandData;
 use App\Models\Brand;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 final readonly class UpdateBrand
@@ -17,7 +14,7 @@ final readonly class UpdateBrand
     /**
      * @throws Throwable
      */
-    public function handle(Brand $brand, UpdateBrandData $data): Brand
+    public function handle(Brand $brand, BrandData $data): Brand
     {
         return DB::transaction(static function () use ($brand, $data): Brand {
             $brand->update([

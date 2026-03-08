@@ -3,9 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Category\UpdateCategory;
-use App\Data\Category\UpdateCategoryData;
+use App\Data\Category\CategoryData;
 use App\Models\Category;
-use Spatie\LaravelData\Optional;
 
 it('may update a category name', function (): void {
     $category = Category::factory()->create([
@@ -14,10 +13,10 @@ it('may update a category name', function (): void {
 
     $action = resolve(UpdateCategory::class);
 
-    $data = new UpdateCategoryData(
+    $data = new CategoryData(
         name: 'New Name',
-        description: Optional::create(),
-        is_active: Optional::create(),
+        description: $category->description,
+        is_active: $category->is_active,
     );
 
     $updatedCategory = $action->handle($category, $data);
@@ -32,10 +31,10 @@ it('updates description', function (): void {
 
     $action = resolve(UpdateCategory::class);
 
-    $data = new UpdateCategoryData(
-        name: Optional::create(),
+    $data = new CategoryData(
+        name: $category->name,
         description: 'New description',
-        is_active: Optional::create(),
+        is_active: $category->is_active,
     );
 
     $updatedCategory = $action->handle($category, $data);
@@ -50,9 +49,9 @@ it('updates is_active status', function (): void {
 
     $action = resolve(UpdateCategory::class);
 
-    $data = new UpdateCategoryData(
-        name: Optional::create(),
-        description: Optional::create(),
+    $data = new CategoryData(
+        name: $category->name,
+        description: $category->description,
         is_active: false,
     );
 
