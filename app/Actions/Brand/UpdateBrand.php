@@ -17,10 +17,12 @@ final readonly class UpdateBrand
     public function handle(Brand $brand, BrandData $data): Brand
     {
         return DB::transaction(static function () use ($brand, $data): Brand {
-            $brand->update([
+            $updateData = [
                 'name' => $data->name ?? $brand->name,
                 'is_active' => $data->is_active ?? $brand->is_active,
-            ]);
+            ];
+
+            $brand->update($updateData);
 
             return $brand->refresh();
         });

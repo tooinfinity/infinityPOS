@@ -17,7 +17,7 @@ final readonly class UpdateCustomer
     public function handle(Customer $customer, CustomerData $data): Customer
     {
         return DB::transaction(static function () use ($customer, $data): Customer {
-            $customer->update([
+            $updateData = [
                 'name' => $data->name ?? $customer->name,
                 'email' => $data->email ?? $customer->email,
                 'phone' => $data->phone ?? $customer->phone,
@@ -25,7 +25,9 @@ final readonly class UpdateCustomer
                 'city' => $data->city ?? $customer->city,
                 'country' => $data->country ?? $customer->country,
                 'is_active' => $data->is_active ?? $customer->is_active,
-            ]);
+            ];
+
+            $customer->update($updateData);
 
             return $customer->refresh();
         });

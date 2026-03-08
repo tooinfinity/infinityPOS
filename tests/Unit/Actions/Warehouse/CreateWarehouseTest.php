@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 use App\Actions\Warehouse\CreateWarehouse;
-use App\Data\Warehouse\CreateWarehouseData;
+use App\Data\Warehouse\WarehouseData;
 use App\Models\Warehouse;
 
 it('may create a warehouse with required fields', function (): void {
     $action = resolve(CreateWarehouse::class);
 
-    $data = new CreateWarehouseData(
+    $data = new WarehouseData(
         name: 'Main Warehouse',
         code: 'WH-001',
         email: null,
@@ -31,7 +31,7 @@ it('may create a warehouse with required fields', function (): void {
 it('creates warehouse with all optional fields', function (): void {
     $action = resolve(CreateWarehouse::class);
 
-    $data = new CreateWarehouseData(
+    $data = new WarehouseData(
         name: 'Central Warehouse',
         code: 'WH-CENTRAL',
         email: 'warehouse@example.com',
@@ -57,7 +57,7 @@ it('creates warehouse with all optional fields', function (): void {
 it('creates warehouse with is_active set to false', function (): void {
     $action = resolve(CreateWarehouse::class);
 
-    $data = new CreateWarehouseData(
+    $data = new WarehouseData(
         name: 'Inactive Warehouse',
         code: 'WH-INACTIVE',
         email: null,
@@ -76,7 +76,7 @@ it('creates warehouse with is_active set to false', function (): void {
 it('creates warehouse with various code formats', function (): void {
     $action = resolve(CreateWarehouse::class);
 
-    $data = new CreateWarehouseData(
+    $data = new WarehouseData(
         name: 'Test Warehouse',
         code: 'WH-ABC-123-XYZ',
         email: null,
@@ -95,7 +95,7 @@ it('creates warehouse with various code formats', function (): void {
 it('creates warehouse with null optional fields', function (): void {
     $action = resolve(CreateWarehouse::class);
 
-    $data = new CreateWarehouseData(
+    $data = new WarehouseData(
         name: 'Minimal Warehouse',
         code: 'WH-MIN',
         email: null,

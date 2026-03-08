@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 use App\Actions\Supplier\CreateSupplier;
-use App\Data\Supplier\CreateSupplierData;
+use App\Data\Supplier\SupplierData;
 use App\Models\Supplier;
 
 it('may create a supplier', function (): void {
     $action = resolve(CreateSupplier::class);
 
-    $data = new CreateSupplierData(
+    $data = new SupplierData(
         name: 'Test Supplier',
         company_name: 'Test Company',
         email: 'test@example.com',
@@ -37,7 +37,7 @@ it('may create a supplier', function (): void {
 it('creates supplier with minimal fields', function (): void {
     $action = resolve(CreateSupplier::class);
 
-    $data = new CreateSupplierData(
+    $data = new SupplierData(
         name: 'Minimal Supplier',
         company_name: null,
         email: null,
@@ -63,7 +63,7 @@ it('creates supplier with minimal fields', function (): void {
 it('creates supplier with is_active false', function (): void {
     $action = resolve(CreateSupplier::class);
 
-    $data = new CreateSupplierData(
+    $data = new SupplierData(
         name: 'Inactive Supplier',
         company_name: null,
         email: null,
@@ -82,7 +82,7 @@ it('creates supplier with is_active false', function (): void {
 it('stores supplier in database', function (): void {
     $action = resolve(CreateSupplier::class);
 
-    $data = new CreateSupplierData(
+    $data = new SupplierData(
         name: 'Database Supplier',
         company_name: 'DB Company',
         email: 'db@example.com',

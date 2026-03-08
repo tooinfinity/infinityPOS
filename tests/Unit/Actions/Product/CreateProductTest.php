@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Product\CreateProduct;
-use App\Data\Product\CreateProductData;
+use App\Data\Product\ProductData;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
@@ -19,7 +19,7 @@ it('may create a product with required fields', function (): void {
 
     $action = resolve(CreateProduct::class);
 
-    $data = new CreateProductData(
+    $data = new ProductData(
         name: 'Test Product',
         sku: null,
         barcode: null,
@@ -50,7 +50,7 @@ it('auto-generates SKU when not provided', function (): void {
 
     $action = resolve(CreateProduct::class);
 
-    $data = new CreateProductData(
+    $data = new ProductData(
         name: 'Test Product',
         sku: null,
         barcode: null,
@@ -77,7 +77,7 @@ it('auto-generates barcode when not provided', function (): void {
 
     $action = resolve(CreateProduct::class);
 
-    $data = new CreateProductData(
+    $data = new ProductData(
         name: 'Test Product',
         sku: null,
         barcode: null,
@@ -104,7 +104,7 @@ it('creates product with custom SKU and barcode', function (): void {
 
     $action = resolve(CreateProduct::class);
 
-    $data = new CreateProductData(
+    $data = new ProductData(
         name: 'Test Product',
         sku: 'PRD-CUSTOM01',
         barcode: '9781234567890',
@@ -132,7 +132,7 @@ it('creates product with category and brand', function (): void {
 
     $action = resolve(CreateProduct::class);
 
-    $data = new CreateProductData(
+    $data = new ProductData(
         name: 'Test Product',
         sku: null,
         barcode: null,
@@ -158,7 +158,7 @@ it('creates product with description', function (): void {
 
     $action = resolve(CreateProduct::class);
 
-    $data = new CreateProductData(
+    $data = new ProductData(
         name: 'Test Product',
         sku: null,
         barcode: null,
@@ -183,7 +183,7 @@ it('defaults track_inventory to true when not provided', function (): void {
 
     $action = resolve(CreateProduct::class);
 
-    $data = new CreateProductData(
+    $data = new ProductData(
         name: 'Test Product',
         sku: null,
         barcode: null,
@@ -208,7 +208,7 @@ it('defaults is_active to true when not provided', function (): void {
 
     $action = resolve(CreateProduct::class);
 
-    $data = new CreateProductData(
+    $data = new ProductData(
         name: 'Test Product',
         sku: null,
         barcode: null,
@@ -233,7 +233,7 @@ it('creates product with track_inventory set to false', function (): void {
 
     $action = resolve(CreateProduct::class);
 
-    $data = new CreateProductData(
+    $data = new ProductData(
         name: 'Test Product',
         sku: null,
         barcode: null,
@@ -258,7 +258,7 @@ it('creates product with is_active set to false', function (): void {
 
     $action = resolve(CreateProduct::class);
 
-    $data = new CreateProductData(
+    $data = new ProductData(
         name: 'Test Product',
         sku: null,
         barcode: null,
@@ -283,7 +283,7 @@ it('creates product without category_id and brand_id', function (): void {
 
     $action = resolve(CreateProduct::class);
 
-    $data = new CreateProductData(
+    $data = new ProductData(
         name: 'Test Product',
         sku: null,
         barcode: null,
@@ -314,7 +314,7 @@ it('rolls back transaction on failure', function (): void {
 
     $action = resolve(CreateProduct::class);
 
-    $data = new CreateProductData(
+    $data = new ProductData(
         name: 'Test Product',
         sku: 'PRD-DUPLICATE',
         barcode: '9780000000000',

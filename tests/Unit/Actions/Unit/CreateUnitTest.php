@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 use App\Actions\Unit\CreateUnit;
-use App\Data\Unit\CreateUnitData;
+use App\Data\Unit\UnitData;
 use App\Models\Unit;
 
 it('may create a unit', function (): void {
     $action = resolve(CreateUnit::class);
 
-    $data = new CreateUnitData(
+    $data = new UnitData(
         name: 'Kilogram',
         short_name: 'kg',
         is_active: true,
@@ -26,7 +26,7 @@ it('may create a unit', function (): void {
 it('creates unit with is_active flag', function (): void {
     $action = resolve(CreateUnit::class);
 
-    $data = new CreateUnitData(
+    $data = new UnitData(
         name: 'Piece',
         short_name: 'pc',
         is_active: false,
@@ -40,7 +40,7 @@ it('creates unit with is_active flag', function (): void {
 it('defaults is_active to true when not provided', function (): void {
     $action = resolve(CreateUnit::class);
 
-    $data = new CreateUnitData(
+    $data = new UnitData(
         name: 'Liter',
         short_name: 'l',
         is_active: true,
@@ -54,7 +54,7 @@ it('defaults is_active to true when not provided', function (): void {
 it('creates unit with various names', function (): void {
     $action = resolve(CreateUnit::class);
 
-    $data = new CreateUnitData(
+    $data = new UnitData(
         name: 'Box',
         short_name: 'box',
         is_active: true,
@@ -69,7 +69,7 @@ it('creates unit with various names', function (): void {
 it('creates unit with uppercase short name', function (): void {
     $action = resolve(CreateUnit::class);
 
-    $data = new CreateUnitData(
+    $data = new UnitData(
         name: 'Dozen',
         short_name: 'DZ',
         is_active: true,

@@ -6,7 +6,7 @@ namespace App\Actions\Product;
 
 use App\Actions\GenerateUniqueBarcode;
 use App\Actions\GenerateUniqueSku;
-use App\Data\Product\CreateProductData;
+use App\Data\Product\ProductData;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -21,7 +21,7 @@ final readonly class CreateProduct
     /**
      * @throws Throwable
      */
-    public function handle(CreateProductData $data): Product
+    public function handle(ProductData $data): Product
     {
         $sku = $data->sku ?? $this->generateSku->handle();
         $barcode = $data->barcode ?? $this->generateBarcode->handle();

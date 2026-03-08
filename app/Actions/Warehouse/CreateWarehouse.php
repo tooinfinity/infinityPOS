@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Warehouse;
 
-use App\Data\Warehouse\CreateWarehouseData;
+use App\Data\Warehouse\WarehouseData;
 use App\Models\Warehouse;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -14,7 +14,7 @@ final readonly class CreateWarehouse
     /**
      * @throws Throwable
      */
-    public function handle(CreateWarehouseData $data): Warehouse
+    public function handle(WarehouseData $data): Warehouse
     {
         return DB::transaction(static fn (): Warehouse => Warehouse::query()->forceCreate([
             'name' => $data->name,

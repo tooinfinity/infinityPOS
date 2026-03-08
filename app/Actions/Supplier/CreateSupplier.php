@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Supplier;
 
-use App\Data\Supplier\CreateSupplierData;
+use App\Data\Supplier\SupplierData;
 use App\Models\Supplier;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -14,7 +14,7 @@ final readonly class CreateSupplier
     /**
      * @throws Throwable
      */
-    public function handle(CreateSupplierData $data): Supplier
+    public function handle(SupplierData $data): Supplier
     {
         return DB::transaction(static fn (): Supplier => Supplier::query()->forceCreate([
             'name' => $data->name,

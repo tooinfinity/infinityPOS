@@ -17,11 +17,13 @@ final readonly class UpdateCategory
     public function handle(Category $category, CategoryData $data): Category
     {
         return DB::transaction(static function () use ($category, $data): Category {
-            $category->update([
+            $updatedData = [
                 'name' => $data->name ?? $category->name,
                 'description' => $data->description ?? $category->description,
                 'is_active' => $data->is_active ?? $category->is_active,
-            ]);
+            ];
+
+            $category->update($updatedData);
 
             return $category->refresh();
         });
