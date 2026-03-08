@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Data\Product;
 
-use Illuminate\Http\UploadedFile;
 use Spatie\LaravelData\Data;
 
 final class CreateProductData extends Data

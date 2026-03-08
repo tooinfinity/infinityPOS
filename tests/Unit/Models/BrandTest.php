@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Models\Brand;
 use App\Models\Product;
-use Illuminate\Support\Facades\Storage;
 
 test('to array', function (): void {
     $brand = Brand::factory()->create()->refresh();
@@ -41,7 +40,6 @@ test('brand has many products', function (): void {
 
     expect($brand->products)->toHaveCount(1);
 });
-
 
 test('withInactive returns both active and inactive brands', function (): void {
     Brand::factory()->count(2)->create([

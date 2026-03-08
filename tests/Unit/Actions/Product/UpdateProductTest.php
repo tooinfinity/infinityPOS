@@ -8,7 +8,6 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Unit;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelData\Optional;
 
@@ -272,7 +271,6 @@ it('updates is_active status', function (): void {
 
     expect($updatedProduct->is_active)->toBeFalse();
 });
-
 
 it('updates multiple fields at once', function (): void {
     $product = Product::factory()->create([

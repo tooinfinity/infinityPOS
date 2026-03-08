@@ -3,9 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Customer\UpdateCustomer;
-use App\Data\Customer\UpdateCustomerData;
+use App\Data\Customer\CustomerData;
 use App\Models\Customer;
-use Spatie\LaravelData\Optional;
 
 it('may update a customer name', function (): void {
     $customer = Customer::factory()->create([
@@ -14,14 +13,14 @@ it('may update a customer name', function (): void {
 
     $action = resolve(UpdateCustomer::class);
 
-    $data = new UpdateCustomerData(
+    $data = new CustomerData(
         name: 'New Name',
-        email: Optional::create(),
-        phone: Optional::create(),
-        address: Optional::create(),
-        city: Optional::create(),
-        country: Optional::create(),
-        is_active: Optional::create(),
+        email: $customer->email,
+        phone: $customer->phone,
+        address: $customer->address,
+        city: $customer->city,
+        country: $customer->country,
+        is_active: $customer->is_active,
     );
 
     $updatedCustomer = $action->handle($customer, $data);
@@ -42,7 +41,7 @@ it('may update all customer fields', function (): void {
 
     $action = resolve(UpdateCustomer::class);
 
-    $data = new UpdateCustomerData(
+    $data = new CustomerData(
         name: 'New Name',
         email: 'new@example.com',
         phone: '2222222222',
@@ -73,13 +72,13 @@ it('partially updates customer with Optional fields', function (): void {
 
     $action = resolve(UpdateCustomer::class);
 
-    $data = new UpdateCustomerData(
-        name: Optional::create(),
+    $data = new CustomerData(
+        name: $customer->name,
         email: 'updated@example.com',
-        phone: Optional::create(),
-        address: Optional::create(),
-        city: Optional::create(),
-        country: Optional::create(),
+        phone: $customer->phone,
+        address: $customer->address,
+        city: $customer->city,
+        country: $customer->country,
         is_active: false,
     );
 
@@ -91,32 +90,6 @@ it('partially updates customer with Optional fields', function (): void {
         ->and($updatedCustomer->is_active)->toBeFalse();
 });
 
-it('updates nullable fields to null', function (): void {
-    $customer = Customer::factory()->create([
-        'email' => 'email@example.com',
-        'phone' => '4444444444',
-        'address' => 'Some Address',
-    ]);
-
-    $action = resolve(UpdateCustomer::class);
-
-    $data = new UpdateCustomerData(
-        name: Optional::create(),
-        email: null,
-        phone: null,
-        address: null,
-        city: Optional::create(),
-        country: Optional::create(),
-        is_active: Optional::create(),
-    );
-
-    $updatedCustomer = $action->handle($customer, $data);
-
-    expect($updatedCustomer->email)->toBeNull()
-        ->and($updatedCustomer->phone)->toBeNull()
-        ->and($updatedCustomer->address)->toBeNull();
-});
-
 it('persists updates to database', function (): void {
     $customer = Customer::factory()->create([
         'name' => 'Original Name',
@@ -124,14 +97,14 @@ it('persists updates to database', function (): void {
 
     $action = resolve(UpdateCustomer::class);
 
-    $data = new UpdateCustomerData(
+    $data = new CustomerData(
         name: 'Persisted Name',
-        email: Optional::create(),
-        phone: Optional::create(),
-        address: Optional::create(),
-        city: Optional::create(),
-        country: Optional::create(),
-        is_active: Optional::create(),
+        email: $customer->email,
+        phone: $customer->phone,
+        address: $customer->address,
+        city: $customer->city,
+        country: $customer->country,
+        is_active: $customer->is_active,
     );
 
     $action->handle($customer, $data);

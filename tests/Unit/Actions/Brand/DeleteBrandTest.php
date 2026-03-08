@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Actions\Brand\DeleteBrand;
 use App\Models\Brand;
 use App\Models\Product;
-use Illuminate\Support\Facades\Storage;
 
 it('may delete a brand', function (): void {
     $brand = Brand::factory()->create();

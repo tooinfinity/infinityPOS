@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Actions\Brand\CreateBrand;
 use App\Data\Brand\BrandData;
 use App\Models\Brand;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function (): void {
@@ -27,7 +25,6 @@ it('may create a brand', function (): void {
         ->and($brand->name)->toBe('Test Brand')
         ->and($brand->exists)->toBeTrue();
 });
-
 
 it('creates brand with is_active flag', function (): void {
     $action = resolve(CreateBrand::class);

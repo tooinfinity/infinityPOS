@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Product;
 
-use App\Actions\UploadImage;
 use App\Data\Product\UpdateProductData;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;

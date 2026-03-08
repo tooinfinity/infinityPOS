@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Customer;
 
-use App\Data\Customer\CreateCustomerData;
+use App\Data\Customer\CustomerData;
 use App\Models\Customer;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -14,7 +14,7 @@ final readonly class CreateCustomer
     /**
      * @throws Throwable
      */
-    public function handle(CreateCustomerData $data): Customer
+    public function handle(CustomerData $data): Customer
     {
         return DB::transaction(static fn (): Customer => Customer::query()->forceCreate([
             'name' => $data->name,

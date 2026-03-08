@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 use App\Actions\Customer\CreateCustomer;
-use App\Data\Customer\CreateCustomerData;
+use App\Data\Customer\CustomerData;
 use App\Models\Customer;
 
 it('may create a customer', function (): void {
     $action = resolve(CreateCustomer::class);
 
-    $data = new CreateCustomerData(
+    $data = new CustomerData(
         name: 'Test Customer',
         email: 'test@example.com',
         phone: '1234567890',
@@ -35,7 +35,7 @@ it('may create a customer', function (): void {
 it('creates customer with minimal fields', function (): void {
     $action = resolve(CreateCustomer::class);
 
-    $data = new CreateCustomerData(
+    $data = new CustomerData(
         name: 'Minimal Customer',
         email: null,
         phone: null,
@@ -59,7 +59,7 @@ it('creates customer with minimal fields', function (): void {
 it('creates customer with is_active false', function (): void {
     $action = resolve(CreateCustomer::class);
 
-    $data = new CreateCustomerData(
+    $data = new CustomerData(
         name: 'Inactive Customer',
         email: null,
         phone: null,
@@ -77,7 +77,7 @@ it('creates customer with is_active false', function (): void {
 it('stores customer in database', function (): void {
     $action = resolve(CreateCustomer::class);
 
-    $data = new CreateCustomerData(
+    $data = new CustomerData(
         name: 'Database Customer',
         email: 'db@example.com',
         phone: '5555555555',

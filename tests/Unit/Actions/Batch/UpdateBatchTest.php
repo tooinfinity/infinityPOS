@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Actions\Batch\UpdateBatch;
 use App\Data\Batch\BatchData;
 use App\Models\Batch;
-use App\Models\Product;
-use Spatie\LaravelData\Optional;
 
 it('may update a batch batch_number', function (): void {
     $batch = Batch::factory()->create([

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Brand;
 
-use App\Actions\UploadImage;
 use App\Data\Brand\BrandData;
 use App\Models\Brand;
 use Illuminate\Support\Facades\DB;

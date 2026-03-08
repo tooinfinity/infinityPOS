@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Customer;
 
-use App\Data\Customer\UpdateCustomerData;
+use App\Data\Customer\CustomerData;
 use App\Models\Customer;
 use Illuminate\Support\Facades\DB;
-use Spatie\LaravelData\Optional;
 use Throwable;
 
 final readonly class UpdateCustomer
@@ -15,40 +14,18 @@ final readonly class UpdateCustomer
     /**
      * @throws Throwable
      */
-    public function handle(Customer $customer, UpdateCustomerData $data): Customer
+    public function handle(Customer $customer, CustomerData $data): Customer
     {
         return DB::transaction(static function () use ($customer, $data): Customer {
-            $updateData = [];
-
-            if (! $data->name instanceof Optional) {
-                $updateData['name'] = $data->name;
-            }
-
-            if (! $data->email instanceof Optional) {
-                $updateData['email'] = $data->email;
-            }
-
-            if (! $data->phone instanceof Optional) {
-                $updateData['phone'] = $data->phone;
-            }
-
-            if (! $data->address instanceof Optional) {
-                $updateData['address'] = $data->address;
-            }
-
-            if (! $data->city instanceof Optional) {
-                $updateData['city'] = $data->city;
-            }
-
-            if (! $data->country instanceof Optional) {
-                $updateData['country'] = $data->country;
-            }
-
-            if (! $data->is_active instanceof Optional) {
-                $updateData['is_active'] = $data->is_active;
-            }
-
-            $customer->update($updateData);
+            $customer->update([
+                'name' => $data->name ?? $customer->name,
+                'email' => $data->email ?? $customer->email,
+                'phone' => $data->phone ?? $customer->phone,
+                'address' => $data->address ?? $customer->address,
+                'city' => $data->city ?? $customer->city,
+                'country' => $data->country ?? $customer->country,
+                'is_active' => $data->is_active ?? $customer->is_active,
+            ]);
 
             return $customer->refresh();
         });
