@@ -53,6 +53,7 @@ final readonly class TransferStock
                 );
             }
 
+            $previousSourceQuantity = $source->quantity;
             $source->decrement('quantity', $quantity);
 
             $this->recorder->handle(
@@ -60,6 +61,7 @@ final readonly class TransferStock
                 type: StockMovementTypeEnum::Transfer,
                 quantity: -$quantity,
                 reference: $transfer,
+                previousQuantity: $previousSourceQuantity,
                 note: sprintf(
                     'Transfer %s → warehouse #%d',
                     $transfer->reference_no,
@@ -78,6 +80,7 @@ final readonly class TransferStock
                 ->lockForUpdate()
                 ->findOrFail($destination->id);
 
+            $previousDestinationQuantity = $destination->quantity;
             $destination->increment('quantity', $quantity);
 
             $this->recorder->handle(
@@ -85,6 +88,7 @@ final readonly class TransferStock
                 type: StockMovementTypeEnum::Transfer,
                 quantity: $quantity,
                 reference: $transfer,
+                previousQuantity: $previousDestinationQuantity,
                 note: sprintf(
                     'Transfer %s ← warehouse #%d',
                     $transfer->reference_no,

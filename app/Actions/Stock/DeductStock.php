@@ -37,6 +37,7 @@ final readonly class DeductStock
             );
         }
 
+        $previousQuantity = $batch->quantity;
         $batch->decrement('quantity', $quantity);
 
         $this->recorder->handle(
@@ -44,6 +45,7 @@ final readonly class DeductStock
             type: StockMovementTypeEnum::Out,
             quantity: -$quantity, // stored as negative
             reference: $reference,
+            previousQuantity: $previousQuantity,
             note: $note,
         );
 

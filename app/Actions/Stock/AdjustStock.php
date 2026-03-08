@@ -45,6 +45,7 @@ final readonly class AdjustStock
                 return $batch;
             }
 
+            $previousQuantity = $batch->quantity;
             $batch->forceFill(['quantity' => $newQuantity])->save();
 
             $this->recorder->handle(
@@ -52,6 +53,7 @@ final readonly class AdjustStock
                 type: StockMovementTypeEnum::Adjustment,
                 quantity: $difference, // positive = stock added, negative = stock removed
                 reference: $reference,
+                previousQuantity: $previousQuantity,
                 note: $note ?? sprintf(
                     'Manual adjustment: %s%d units',
                     $difference > 0 ? '+' : '',

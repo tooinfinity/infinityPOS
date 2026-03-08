@@ -24,6 +24,7 @@ final readonly class AddStock
             ->lockForUpdate()
             ->findOrFail($batch->id);
 
+        $previousQuantity = $batch->quantity;
         $batch->increment('quantity', $quantity);
 
         $this->recorder->handle(
@@ -31,6 +32,7 @@ final readonly class AddStock
             type: StockMovementTypeEnum::In,
             quantity: $quantity, // stored as positive
             reference: $reference,
+            previousQuantity: $previousQuantity,
             note: $note,
         );
 

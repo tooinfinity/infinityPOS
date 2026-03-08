@@ -16,6 +16,7 @@ final readonly class RecordStockMovement
         StockMovementTypeEnum $type,
         int $quantity,
         Model $reference,
+        int $previousQuantity,
         ?string $note = null,
     ): StockMovement {
         return StockMovement::query()->forceCreate([
@@ -25,7 +26,7 @@ final readonly class RecordStockMovement
             'user_id' => auth()->id(),
             'type' => $type,
             'quantity' => $quantity,
-            'previous_quantity' => $batch->quantity,
+            'previous_quantity' => $previousQuantity,
             'current_quantity' => $batch->quantity + $quantity, // negative for Out
             'reference_type' => $reference->getMorphClass(),
             'reference_id' => $reference->getKey(),
