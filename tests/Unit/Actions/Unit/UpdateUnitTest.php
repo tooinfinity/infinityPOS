@@ -3,9 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Unit\UpdateUnit;
-use App\Data\Unit\UpdateUnitData;
+use App\Data\Unit\UnitData;
 use App\Models\Unit;
-use Spatie\LaravelData\Optional;
 
 it('may update a unit name', function (): void {
     $unit = Unit::factory()->create([
@@ -15,10 +14,10 @@ it('may update a unit name', function (): void {
 
     $action = resolve(UpdateUnit::class);
 
-    $data = new UpdateUnitData(
+    $data = new UnitData(
         name: 'New Name',
-        short_name: Optional::create(),
-        is_active: Optional::create(),
+        short_name: $unit->short_name,
+        is_active: $unit->is_active,
     );
 
     $updatedUnit = $action->handle($unit, $data);
@@ -35,10 +34,10 @@ it('may update a unit short_name', function (): void {
 
     $action = resolve(UpdateUnit::class);
 
-    $data = new UpdateUnitData(
-        name: Optional::create(),
+    $data = new UnitData(
+        name: $unit->name,
         short_name: 'KG',
-        is_active: Optional::create(),
+        is_active: $unit->is_active,
     );
 
     $updatedUnit = $action->handle($unit, $data);
@@ -55,10 +54,10 @@ it('updates both name and short_name', function (): void {
 
     $action = resolve(UpdateUnit::class);
 
-    $data = new UpdateUnitData(
+    $data = new UnitData(
         name: 'New Unit',
         short_name: 'nu',
-        is_active: Optional::create(),
+        is_active: $unit->is_active,
     );
 
     $updatedUnit = $action->handle($unit, $data);
@@ -74,9 +73,9 @@ it('updates is_active status', function (): void {
 
     $action = resolve(UpdateUnit::class);
 
-    $data = new UpdateUnitData(
-        name: Optional::create(),
-        short_name: Optional::create(),
+    $data = new UnitData(
+        name: $unit->name,
+        short_name: $unit->short_name,
         is_active: false,
     );
 
@@ -92,9 +91,9 @@ it('activates inactive unit', function (): void {
 
     $action = resolve(UpdateUnit::class);
 
-    $data = new UpdateUnitData(
-        name: Optional::create(),
-        short_name: Optional::create(),
+    $data = new UnitData(
+        name: $unit->name,
+        short_name: $unit->short_name,
         is_active: true,
     );
 

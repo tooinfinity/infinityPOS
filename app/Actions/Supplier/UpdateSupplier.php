@@ -19,9 +19,9 @@ final readonly class UpdateSupplier
         return DB::transaction(static function () use ($supplier, $data): Supplier {
             $updateData = [
                 'name' => $data->name ?? $supplier->name,
-                'company_name' => $data->company_name ?? $supplier->company_name,
-                'email' => $data->email ?? $supplier->email,
-                'phone' => $data->phone ?? $supplier->phone,
+                'company_name' => $data->company_name,
+                'email' => $data->email,
+                'phone' => $data->phone,
                 'address' => $data->address ?? $supplier->address,
                 'city' => $data->city ?? $supplier->city,
                 'country' => $data->country ?? $supplier->country,

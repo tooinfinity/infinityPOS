@@ -3,13 +3,12 @@
 declare(strict_types=1);
 
 use App\Actions\Product\UpdateProduct;
-use App\Data\Product\UpdateProductData;
+use App\Data\Product\ProductData;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Unit;
 use Illuminate\Support\Facades\Storage;
-use Spatie\LaravelData\Optional;
 
 beforeEach(function (): void {
     Storage::fake('public');
@@ -20,19 +19,19 @@ it('may update a product name', function (): void {
 
     $action = resolve(UpdateProduct::class);
 
-    $data = new UpdateProductData(
+    $data = new ProductData(
         name: 'New Product Name',
-        sku: Optional::create(),
-        barcode: Optional::create(),
-        unit_id: Optional::create(),
-        category_id: Optional::create(),
-        brand_id: Optional::create(),
-        description: Optional::create(),
-        cost_price: Optional::create(),
-        selling_price: Optional::create(),
-        alert_quantity: Optional::create(),
-        track_inventory: Optional::create(),
-        is_active: Optional::create(),
+        sku: $product->sku,
+        barcode: $product->barcode,
+        unit_id: $product->unit_id,
+        category_id: $product->category_id,
+        brand_id: $product->brand_id,
+        description: $product->description,
+        cost_price: $product->cost_price,
+        selling_price: $product->selling_price,
+        alert_quantity: $product->alert_quantity,
+        track_inventory: $product->track_inventory,
+        is_active: $product->is_active,
     );
 
     $updatedProduct = $action->handle($product, $data);
@@ -48,19 +47,19 @@ it('updates product pricing', function (): void {
 
     $action = resolve(UpdateProduct::class);
 
-    $data = new UpdateProductData(
-        name: Optional::create(),
-        sku: Optional::create(),
-        barcode: Optional::create(),
-        unit_id: Optional::create(),
-        category_id: Optional::create(),
-        brand_id: Optional::create(),
-        description: Optional::create(),
+    $data = new ProductData(
+        name: $product->name,
+        sku: $product->sku,
+        barcode: $product->barcode,
+        unit_id: $product->unit_id,
+        category_id: $product->category_id,
+        brand_id: $product->brand_id,
+        description: $product->description,
         cost_price: 6000,
         selling_price: 9000,
-        alert_quantity: Optional::create(),
-        track_inventory: Optional::create(),
-        is_active: Optional::create(),
+        alert_quantity: $product->alert_quantity,
+        track_inventory: $product->track_inventory,
+        is_active: $product->is_active,
     );
 
     $updatedProduct = $action->handle($product, $data);
@@ -75,19 +74,19 @@ it('updates product unit', function (): void {
 
     $action = resolve(UpdateProduct::class);
 
-    $data = new UpdateProductData(
-        name: Optional::create(),
-        sku: Optional::create(),
-        barcode: Optional::create(),
+    $data = new ProductData(
+        name: $product->name,
+        sku: $product->sku,
+        barcode: $product->barcode,
         unit_id: $newUnit->id,
-        category_id: Optional::create(),
-        brand_id: Optional::create(),
-        description: Optional::create(),
-        cost_price: Optional::create(),
-        selling_price: Optional::create(),
-        alert_quantity: Optional::create(),
-        track_inventory: Optional::create(),
-        is_active: Optional::create(),
+        category_id: $product->category_id,
+        brand_id: $product->brand_id,
+        description: $product->description,
+        cost_price: $product->cost_price,
+        selling_price: $product->selling_price,
+        alert_quantity: $product->alert_quantity,
+        track_inventory: $product->track_inventory,
+        is_active: $product->is_active,
     );
 
     $updatedProduct = $action->handle($product, $data);
@@ -101,19 +100,19 @@ it('updates product category', function (): void {
 
     $action = resolve(UpdateProduct::class);
 
-    $data = new UpdateProductData(
-        name: Optional::create(),
-        sku: Optional::create(),
-        barcode: Optional::create(),
-        unit_id: Optional::create(),
+    $data = new ProductData(
+        name: $product->name,
+        sku: $product->sku,
+        barcode: $product->barcode,
+        unit_id: $product->unit_id,
         category_id: $newCategory->id,
-        brand_id: Optional::create(),
-        description: Optional::create(),
-        cost_price: Optional::create(),
-        selling_price: Optional::create(),
-        alert_quantity: Optional::create(),
-        track_inventory: Optional::create(),
-        is_active: Optional::create(),
+        brand_id: $product->brand_id,
+        description: $product->description,
+        cost_price: $product->cost_price,
+        selling_price: $product->selling_price,
+        alert_quantity: $product->alert_quantity,
+        track_inventory: $product->track_inventory,
+        is_active: $product->is_active,
     );
 
     $updatedProduct = $action->handle($product, $data);
@@ -127,19 +126,19 @@ it('updates product brand', function (): void {
 
     $action = resolve(UpdateProduct::class);
 
-    $data = new UpdateProductData(
-        name: Optional::create(),
-        sku: Optional::create(),
-        barcode: Optional::create(),
-        unit_id: Optional::create(),
-        category_id: Optional::create(),
+    $data = new ProductData(
+        name: $product->name,
+        sku: $product->sku,
+        barcode: $product->barcode,
+        unit_id: $product->unit_id,
+        category_id: $product->category_id,
         brand_id: $newBrand->id,
-        description: Optional::create(),
-        cost_price: Optional::create(),
-        selling_price: Optional::create(),
-        alert_quantity: Optional::create(),
-        track_inventory: Optional::create(),
-        is_active: Optional::create(),
+        description: $product->description,
+        cost_price: $product->cost_price,
+        selling_price: $product->selling_price,
+        alert_quantity: $product->alert_quantity,
+        track_inventory: $product->track_inventory,
+        is_active: $product->is_active,
     );
 
     $updatedProduct = $action->handle($product, $data);
@@ -152,19 +151,19 @@ it('removes category by setting to null', function (): void {
 
     $action = resolve(UpdateProduct::class);
 
-    $data = new UpdateProductData(
-        name: Optional::create(),
-        sku: Optional::create(),
-        barcode: Optional::create(),
-        unit_id: Optional::create(),
+    $data = new ProductData(
+        name: $product->name,
+        sku: $product->sku,
+        barcode: $product->barcode,
+        unit_id: $product->unit_id,
         category_id: null,
-        brand_id: Optional::create(),
-        description: Optional::create(),
-        cost_price: Optional::create(),
-        selling_price: Optional::create(),
-        alert_quantity: Optional::create(),
-        track_inventory: Optional::create(),
-        is_active: Optional::create(),
+        brand_id: $product->brand_id,
+        description: $product->description,
+        cost_price: $product->cost_price,
+        selling_price: $product->selling_price,
+        alert_quantity: $product->alert_quantity,
+        track_inventory: $product->track_inventory,
+        is_active: $product->is_active,
     );
 
     $updatedProduct = $action->handle($product, $data);
@@ -177,19 +176,19 @@ it('removes brand by setting to null', function (): void {
 
     $action = resolve(UpdateProduct::class);
 
-    $data = new UpdateProductData(
-        name: Optional::create(),
-        sku: Optional::create(),
-        barcode: Optional::create(),
-        unit_id: Optional::create(),
-        category_id: Optional::create(),
+    $data = new ProductData(
+        name: $product->name,
+        sku: $product->sku,
+        barcode: $product->barcode,
+        unit_id: $product->unit_id,
+        category_id: $product->category_id,
         brand_id: null,
-        description: Optional::create(),
-        cost_price: Optional::create(),
-        selling_price: Optional::create(),
-        alert_quantity: Optional::create(),
-        track_inventory: Optional::create(),
-        is_active: Optional::create(),
+        description: $product->description,
+        cost_price: $product->cost_price,
+        selling_price: $product->selling_price,
+        alert_quantity: $product->alert_quantity,
+        track_inventory: $product->track_inventory,
+        is_active: $product->is_active,
     );
 
     $updatedProduct = $action->handle($product, $data);
@@ -202,19 +201,19 @@ it('updates product description', function (): void {
 
     $action = resolve(UpdateProduct::class);
 
-    $data = new UpdateProductData(
-        name: Optional::create(),
-        sku: Optional::create(),
-        barcode: Optional::create(),
-        unit_id: Optional::create(),
-        category_id: Optional::create(),
-        brand_id: Optional::create(),
+    $data = new ProductData(
+        name: $product->name,
+        sku: $product->sku,
+        barcode: $product->barcode,
+        unit_id: $product->unit_id,
+        category_id: $product->category_id,
+        brand_id: $product->brand_id,
         description: 'New description',
-        cost_price: Optional::create(),
-        selling_price: Optional::create(),
-        alert_quantity: Optional::create(),
-        track_inventory: Optional::create(),
-        is_active: Optional::create(),
+        cost_price: $product->cost_price,
+        selling_price: $product->selling_price,
+        alert_quantity: $product->alert_quantity,
+        track_inventory: $product->track_inventory,
+        is_active: $product->is_active,
     );
 
     $updatedProduct = $action->handle($product, $data);
@@ -227,19 +226,19 @@ it('updates track_inventory status', function (): void {
 
     $action = resolve(UpdateProduct::class);
 
-    $data = new UpdateProductData(
-        name: Optional::create(),
-        sku: Optional::create(),
-        barcode: Optional::create(),
-        unit_id: Optional::create(),
-        category_id: Optional::create(),
-        brand_id: Optional::create(),
-        description: Optional::create(),
-        cost_price: Optional::create(),
-        selling_price: Optional::create(),
-        alert_quantity: Optional::create(),
+    $data = new ProductData(
+        name: $product->name,
+        sku: $product->sku,
+        barcode: $product->barcode,
+        unit_id: $product->unit_id,
+        category_id: $product->category_id,
+        brand_id: $product->brand_id,
+        description: $product->description,
+        cost_price: $product->cost_price,
+        selling_price: $product->selling_price,
+        alert_quantity: $product->alert_quantity,
         track_inventory: false,
-        is_active: Optional::create(),
+        is_active: $product->is_active,
     );
 
     $updatedProduct = $action->handle($product, $data);
@@ -252,18 +251,18 @@ it('updates is_active status', function (): void {
 
     $action = resolve(UpdateProduct::class);
 
-    $data = new UpdateProductData(
-        name: Optional::create(),
-        sku: Optional::create(),
-        barcode: Optional::create(),
-        unit_id: Optional::create(),
-        category_id: Optional::create(),
-        brand_id: Optional::create(),
-        description: Optional::create(),
-        cost_price: Optional::create(),
-        selling_price: Optional::create(),
-        alert_quantity: Optional::create(),
-        track_inventory: Optional::create(),
+    $data = new ProductData(
+        name: $product->name,
+        sku: $product->sku,
+        barcode: $product->barcode,
+        unit_id: $product->unit_id,
+        category_id: $product->category_id,
+        brand_id: $product->brand_id,
+        description: $product->description,
+        cost_price: $product->cost_price,
+        selling_price: $product->selling_price,
+        alert_quantity: $product->alert_quantity,
+        track_inventory: $product->track_inventory,
         is_active: false,
     );
 
@@ -282,19 +281,19 @@ it('updates multiple fields at once', function (): void {
 
     $action = resolve(UpdateProduct::class);
 
-    $data = new UpdateProductData(
+    $data = new ProductData(
         name: 'New Name',
-        sku: Optional::create(),
-        barcode: Optional::create(),
+        sku: $product->sku,
+        barcode: $product->barcode,
         unit_id: $newUnit->id,
-        category_id: Optional::create(),
-        brand_id: Optional::create(),
-        description: Optional::create(),
+        category_id: $product->category_id,
+        brand_id: $product->brand_id,
+        description: $product->description,
         cost_price: 6000,
         selling_price: 9000,
-        alert_quantity: Optional::create(),
-        track_inventory: Optional::create(),
-        is_active: Optional::create(),
+        alert_quantity: $product->alert_quantity,
+        track_inventory: $product->track_inventory,
+        is_active: $product->is_active,
     );
 
     $updatedProduct = $action->handle($product, $data);
@@ -315,19 +314,19 @@ it('keeps unchanged fields intact', function (): void {
 
     $action = resolve(UpdateProduct::class);
 
-    $data = new UpdateProductData(
-        name: Optional::create(),
-        sku: Optional::create(),
-        barcode: Optional::create(),
-        unit_id: Optional::create(),
-        category_id: Optional::create(),
-        brand_id: Optional::create(),
-        description: Optional::create(),
+    $data = new ProductData(
+        name: $product->name,
+        sku: $product->sku,
+        barcode: $product->barcode,
+        unit_id: $product->unit_id,
+        category_id: $product->category_id,
+        brand_id: $product->brand_id,
+        description: $product->description,
         cost_price: 6000,
-        selling_price: Optional::create(),
-        alert_quantity: Optional::create(),
-        track_inventory: Optional::create(),
-        is_active: Optional::create(),
+        selling_price: $product->selling_price,
+        alert_quantity: $product->alert_quantity,
+        track_inventory: $product->track_inventory,
+        is_active: $product->is_active,
     );
 
     $updatedProduct = $action->handle($product, $data);
@@ -349,19 +348,19 @@ it('rolls back transaction on failure', function (): void {
 
     $action = resolve(UpdateProduct::class);
 
-    $data = new UpdateProductData(
-        name: Optional::create(),
+    $data = new ProductData(
+        name: $product->name,
         sku: 'PRD-DUPLICATE',
-        barcode: Optional::create(),
-        unit_id: Optional::create(),
-        category_id: Optional::create(),
-        brand_id: Optional::create(),
-        description: Optional::create(),
-        cost_price: Optional::create(),
-        selling_price: Optional::create(),
-        alert_quantity: Optional::create(),
-        track_inventory: Optional::create(),
-        is_active: Optional::create(),
+        barcode: $product->barcode,
+        unit_id: $product->unit_id,
+        category_id: $product->category_id,
+        brand_id: $product->brand_id,
+        description: $product->description,
+        cost_price: $product->cost_price,
+        selling_price: $product->selling_price,
+        alert_quantity: $product->alert_quantity,
+        track_inventory: $product->track_inventory,
+        is_active: $product->is_active,
     );
 
     try {
@@ -381,19 +380,19 @@ it('updates sku and barcode', function (): void {
 
     $action = resolve(UpdateProduct::class);
 
-    $data = new UpdateProductData(
-        name: Optional::create(),
+    $data = new ProductData(
+        name: $product->name,
         sku: 'NEW-SKU-002',
         barcode: '9780000000002',
-        unit_id: Optional::create(),
-        category_id: Optional::create(),
-        brand_id: Optional::create(),
-        description: Optional::create(),
-        cost_price: Optional::create(),
-        selling_price: Optional::create(),
-        alert_quantity: Optional::create(),
-        track_inventory: Optional::create(),
-        is_active: Optional::create(),
+        unit_id: $product->unit_id,
+        category_id: $product->category_id,
+        brand_id: $product->brand_id,
+        description: $product->description,
+        cost_price: $product->cost_price,
+        selling_price: $product->selling_price,
+        alert_quantity: $product->alert_quantity,
+        track_inventory: $product->track_inventory,
+        is_active: $product->is_active,
     );
 
     $updatedProduct = $action->handle($product, $data);
@@ -407,19 +406,19 @@ it('updates alert quantity', function (): void {
 
     $action = resolve(UpdateProduct::class);
 
-    $data = new UpdateProductData(
-        name: Optional::create(),
-        sku: Optional::create(),
-        barcode: Optional::create(),
-        unit_id: Optional::create(),
-        category_id: Optional::create(),
-        brand_id: Optional::create(),
-        description: Optional::create(),
-        cost_price: Optional::create(),
-        selling_price: Optional::create(),
+    $data = new ProductData(
+        name: $product->name,
+        sku: $product->sku,
+        barcode: $product->barcode,
+        unit_id: $product->unit_id,
+        category_id: $product->category_id,
+        brand_id: $product->brand_id,
+        description: $product->description,
+        cost_price: $product->cost_price,
+        selling_price: $product->selling_price,
         alert_quantity: 20,
-        track_inventory: Optional::create(),
-        is_active: Optional::create(),
+        track_inventory: $product->track_inventory,
+        is_active: $product->is_active,
     );
 
     $updatedProduct = $action->handle($product, $data);

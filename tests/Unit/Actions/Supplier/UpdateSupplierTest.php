@@ -3,9 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Supplier\UpdateSupplier;
-use App\Data\Supplier\UpdateSupplierData;
+use App\Data\Supplier\SupplierData;
 use App\Models\Supplier;
-use Spatie\LaravelData\Optional;
 
 it('may update a supplier name', function (): void {
     $supplier = Supplier::factory()->create([
@@ -14,15 +13,15 @@ it('may update a supplier name', function (): void {
 
     $action = resolve(UpdateSupplier::class);
 
-    $data = new UpdateSupplierData(
+    $data = new SupplierData(
         name: 'New Name',
-        company_name: Optional::create(),
-        email: Optional::create(),
-        phone: Optional::create(),
-        address: Optional::create(),
-        city: Optional::create(),
-        country: Optional::create(),
-        is_active: Optional::create(),
+        company_name: $supplier->company_name,
+        email: $supplier->email,
+        phone: $supplier->phone,
+        address: $supplier->address,
+        city: $supplier->city,
+        country: $supplier->country,
+        is_active: $supplier->is_active,
     );
 
     $updatedSupplier = $action->handle($supplier, $data);
@@ -44,7 +43,7 @@ it('may update all supplier fields', function (): void {
 
     $action = resolve(UpdateSupplier::class);
 
-    $data = new UpdateSupplierData(
+    $data = new SupplierData(
         name: 'New Name',
         company_name: 'New Company',
         email: 'new@example.com',
@@ -78,14 +77,14 @@ it('partially updates supplier with Optional fields', function (): void {
 
     $action = resolve(UpdateSupplier::class);
 
-    $data = new UpdateSupplierData(
-        name: Optional::create(),
-        company_name: Optional::create(),
+    $data = new SupplierData(
+        name: $supplier->name,
+        company_name: $supplier->company_name,
         email: 'updated@example.com',
-        phone: Optional::create(),
-        address: Optional::create(),
-        city: Optional::create(),
-        country: Optional::create(),
+        phone: $supplier->phone,
+        address: $supplier->address,
+        city: $supplier->city,
+        country: $supplier->country,
         is_active: false,
     );
 
@@ -107,15 +106,15 @@ it('updates nullable fields to null', function (): void {
 
     $action = resolve(UpdateSupplier::class);
 
-    $data = new UpdateSupplierData(
-        name: Optional::create(),
+    $data = new SupplierData(
+        name: $supplier->name,
         company_name: null,
         email: null,
         phone: null,
-        address: Optional::create(),
-        city: Optional::create(),
-        country: Optional::create(),
-        is_active: Optional::create(),
+        address: $supplier->address,
+        city: $supplier->city,
+        country: $supplier->country,
+        is_active: $supplier->is_active,
     );
 
     $updatedSupplier = $action->handle($supplier, $data);
@@ -132,15 +131,15 @@ it('persists updates to database', function (): void {
 
     $action = resolve(UpdateSupplier::class);
 
-    $data = new UpdateSupplierData(
+    $data = new SupplierData(
         name: 'Persisted Name',
-        company_name: Optional::create(),
-        email: Optional::create(),
-        phone: Optional::create(),
-        address: Optional::create(),
-        city: Optional::create(),
-        country: Optional::create(),
-        is_active: Optional::create(),
+        company_name: $supplier->company_name,
+        email: $supplier->email,
+        phone: $supplier->phone,
+        address: $supplier->address,
+        city: $supplier->city,
+        country: $supplier->country,
+        is_active: $supplier->is_active,
     );
 
     $action->handle($supplier, $data);

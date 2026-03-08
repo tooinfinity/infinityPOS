@@ -20,8 +20,8 @@ final readonly class UpdateWarehouse
             $updateData = [
                 'name' => $data->name ?? $warehouse->name,
                 'code' => $data->code ?? $warehouse->code,
-                'email' => $data->email ?? $warehouse->email,
-                'phone' => $data->phone ?? $warehouse->phone,
+                'email' => $data->email,
+                'phone' => $data->phone,
                 'address' => $data->address ?? $warehouse->address,
                 'city' => $data->city ?? $warehouse->city,
                 'country' => $data->country ?? $warehouse->country,

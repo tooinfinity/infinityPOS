@@ -3,9 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Warehouse\UpdateWarehouse;
-use App\Data\Warehouse\UpdateWarehouseData;
+use App\Data\Warehouse\WarehouseData;
 use App\Models\Warehouse;
-use Spatie\LaravelData\Optional;
 
 it('may update a warehouse name', function (): void {
     $warehouse = Warehouse::factory()->create([
@@ -15,15 +14,15 @@ it('may update a warehouse name', function (): void {
 
     $action = resolve(UpdateWarehouse::class);
 
-    $data = new UpdateWarehouseData(
+    $data = new WarehouseData(
         name: 'New Name',
-        code: Optional::create(),
-        email: Optional::create(),
-        phone: Optional::create(),
-        address: Optional::create(),
-        city: Optional::create(),
-        country: Optional::create(),
-        is_active: Optional::create(),
+        code: $warehouse->code,
+        email: $warehouse->email,
+        phone: $warehouse->phone,
+        address: $warehouse->address,
+        city: $warehouse->city,
+        country: $warehouse->country,
+        is_active: $warehouse->is_active,
     );
 
     $action->handle($warehouse, $data);
@@ -40,15 +39,15 @@ it('may update a warehouse code', function (): void {
 
     $action = resolve(UpdateWarehouse::class);
 
-    $data = new UpdateWarehouseData(
-        name: Optional::create(),
+    $data = new WarehouseData(
+        name: $warehouse->name,
         code: 'WH-NEW',
-        email: Optional::create(),
-        phone: Optional::create(),
-        address: Optional::create(),
-        city: Optional::create(),
-        country: Optional::create(),
-        is_active: Optional::create(),
+        email: $warehouse->email,
+        phone: $warehouse->phone,
+        address: $warehouse->address,
+        city: $warehouse->city,
+        country: $warehouse->country,
+        is_active: $warehouse->is_active,
     );
 
     $action->handle($warehouse, $data);
@@ -67,15 +66,15 @@ it('updates multiple fields at once', function (): void {
 
     $action = resolve(UpdateWarehouse::class);
 
-    $data = new UpdateWarehouseData(
+    $data = new WarehouseData(
         name: 'New Name',
         code: 'WH-NEW',
         email: 'new@example.com',
         phone: '9876543210',
-        address: Optional::create(),
-        city: Optional::create(),
-        country: Optional::create(),
-        is_active: Optional::create(),
+        address: $warehouse->address,
+        city: $warehouse->city,
+        country: $warehouse->country,
+        is_active: $warehouse->is_active,
     );
 
     $action->handle($warehouse, $data);
@@ -96,15 +95,15 @@ it('updates location fields', function (): void {
 
     $action = resolve(UpdateWarehouse::class);
 
-    $data = new UpdateWarehouseData(
-        name: Optional::create(),
-        code: Optional::create(),
-        email: Optional::create(),
-        phone: Optional::create(),
+    $data = new WarehouseData(
+        name: $warehouse->name,
+        code: $warehouse->code,
+        email: $warehouse->email,
+        phone: $warehouse->phone,
         address: 'New Address',
         city: 'New City',
         country: 'New Country',
-        is_active: Optional::create(),
+        is_active: $warehouse->is_active,
     );
 
     $action->handle($warehouse, $data);
@@ -122,14 +121,14 @@ it('updates is_active status', function (): void {
 
     $action = resolve(UpdateWarehouse::class);
 
-    $data = new UpdateWarehouseData(
-        name: Optional::create(),
-        code: Optional::create(),
-        email: Optional::create(),
-        phone: Optional::create(),
-        address: Optional::create(),
-        city: Optional::create(),
-        country: Optional::create(),
+    $data = new WarehouseData(
+        name: $warehouse->name,
+        code: $warehouse->code,
+        email: $warehouse->email,
+        phone: $warehouse->phone,
+        address: $warehouse->address,
+        city: $warehouse->city,
+        country: $warehouse->country,
         is_active: false,
     );
 
@@ -145,14 +144,14 @@ it('activates inactive warehouse', function (): void {
 
     $action = resolve(UpdateWarehouse::class);
 
-    $data = new UpdateWarehouseData(
-        name: Optional::create(),
-        code: Optional::create(),
-        email: Optional::create(),
-        phone: Optional::create(),
-        address: Optional::create(),
-        city: Optional::create(),
-        country: Optional::create(),
+    $data = new WarehouseData(
+        name: $warehouse->name,
+        code: $warehouse->code,
+        email: $warehouse->email,
+        phone: $warehouse->phone,
+        address: $warehouse->address,
+        city: $warehouse->city,
+        country: $warehouse->country,
         is_active: true,
     );
 
@@ -169,15 +168,15 @@ it('sets nullable fields to null', function (): void {
 
     $action = resolve(UpdateWarehouse::class);
 
-    $data = new UpdateWarehouseData(
-        name: Optional::create(),
-        code: Optional::create(),
+    $data = new WarehouseData(
+        name: $warehouse->name,
+        code: $warehouse->code,
         email: null,
         phone: null,
-        address: Optional::create(),
-        city: Optional::create(),
-        country: Optional::create(),
-        is_active: Optional::create(),
+        address: $warehouse->address,
+        city: $warehouse->city,
+        country: $warehouse->country,
+        is_active: $warehouse->is_active,
     );
 
     $action->handle($warehouse, $data);
@@ -196,15 +195,15 @@ it('keeps unchanged fields intact', function (): void {
 
     $action = resolve(UpdateWarehouse::class);
 
-    $data = new UpdateWarehouseData(
-        name: Optional::create(),
-        code: Optional::create(),
-        email: Optional::create(),
-        phone: Optional::create(),
-        address: Optional::create(),
+    $data = new WarehouseData(
+        name: $warehouse->name,
+        code: $warehouse->code,
+        email: $warehouse->email,
+        phone: $warehouse->phone,
+        address: $warehouse->address,
         city: 'New City',
-        country: Optional::create(),
-        is_active: Optional::create(),
+        country: $warehouse->country,
+        is_active: $warehouse->is_active,
     );
 
     $action->handle($warehouse, $data);
