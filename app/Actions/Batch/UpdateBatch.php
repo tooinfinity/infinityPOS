@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Batch;
 
-use App\Data\Batch\UpdateBatchData;
+use App\Data\Batch\BatchData;
 use App\Models\Batch;
 use Illuminate\Support\Facades\DB;
-use Spatie\LaravelData\Optional;
 use Throwable;
 
 final readonly class UpdateBatch
@@ -19,27 +18,18 @@ final readonly class UpdateBatch
     /**
      * @throws Throwable
      */
-    public function handle(Batch $batch, UpdateBatchData $data): Batch
+    public function handle(Batch $batch, BatchData $data): Batch
     {
-        $generator = $this->generator;
 
-        return DB::transaction(static function () use ($batch, $data, $generator): Batch {
-            $updateData = [];
-
-            if (! $data->batch_number instanceof Optional) {
-                $updateData['batch_number'] = $data->batch_number ?? $generator->handle($batch->product_id);
-            }
-            if (! $data->cost_amount instanceof Optional) {
-                $updateData['cost_amount'] = $data->cost_amount;
-            }
-            if (! $data->quantity instanceof Optional) {
-                $updateData['quantity'] = $data->quantity;
-            }
-            if (! $data->expires_at instanceof Optional) {
-                $updateData['expires_at'] = $data->expires_at;
-            }
-
-            $batch->update($updateData);
+        return DB::transaction(function () use ($batch, $data): Batch {
+            $batch->update([
+                'product_id' => $data->product_id ?? $batch->product_id,
+                'warehouse_id' => $data->warehouse_id ?? $batch->warehouse_id,
+                'batch_number' => $data->batch_number ?? $this->generator->handle($data->product_id ?? $batch->product_id),
+                'cost_amount' => $data->cost_amount ?? $batch->cost_amount,
+                'quantity' => $data->quantity ?? $batch->quantity,
+                'expires_at' => $data->expires_at ?? $batch->expires_at,
+            ]);
 
             // Record stock movement if quantity has changed
             return $batch->refresh();

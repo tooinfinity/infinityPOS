@@ -3,8 +3,9 @@
 declare(strict_types=1);
 
 use App\Actions\Batch\UpdateBatch;
-use App\Data\Batch\UpdateBatchData;
+use App\Data\Batch\BatchData;
 use App\Models\Batch;
+use App\Models\Product;
 use Spatie\LaravelData\Optional;
 
 it('may update a batch batch_number', function (): void {
@@ -14,7 +15,9 @@ it('may update a batch batch_number', function (): void {
 
     $action = resolve(UpdateBatch::class);
 
-    $data = new UpdateBatchData(
+    $data = new BatchData(
+        product_id: $batch->product_id,
+        warehouse_id: $batch->warehouse_id,
         batch_number: 'NEW-BATCH',
         cost_amount: 5000,
         quantity: 100,
@@ -33,8 +36,10 @@ it('may update a batch cost_amount', function (): void {
 
     $action = resolve(UpdateBatch::class);
 
-    $data = new UpdateBatchData(
-        batch_number: null,
+    $data = new BatchData(
+        product_id: $batch->product_id,
+        warehouse_id: $batch->warehouse_id,
+        batch_number: $batch->batch_number ?? '',
         cost_amount: 7500,
         quantity: 100,
         expires_at: null,
@@ -52,8 +57,10 @@ it('may update a batch quantity', function (): void {
 
     $action = resolve(UpdateBatch::class);
 
-    $data = new UpdateBatchData(
-        batch_number: null,
+    $data = new BatchData(
+        product_id: $batch->product_id,
+        warehouse_id: $batch->warehouse_id,
+        batch_number: $batch->batch_number ?? '',
         cost_amount: 5000,
         quantity: 200,
         expires_at: null,
@@ -71,8 +78,10 @@ it('updates batch expires_at', function (): void {
 
     $action = resolve(UpdateBatch::class);
 
-    $data = new UpdateBatchData(
-        batch_number: null,
+    $data = new BatchData(
+        product_id: $batch->product_id,
+        warehouse_id: $batch->warehouse_id,
+        batch_number: '',
         cost_amount: 5000,
         quantity: 100,
         expires_at: now()->addYear(),
@@ -92,7 +101,9 @@ it('updates multiple fields at once', function (): void {
 
     $action = resolve(UpdateBatch::class);
 
-    $data = new UpdateBatchData(
+    $data = new BatchData(
+        product_id: $batch->product_id,
+        warehouse_id: $batch->warehouse_id,
         batch_number: 'NEW-BATCH',
         cost_amount: 10000,
         quantity: 500,
@@ -107,28 +118,6 @@ it('updates multiple fields at once', function (): void {
         ->and($fresh->quantity)->toBe(500);
 });
 
-it('sets nullable fields to null', function (): void {
-    $batch = Batch::factory()->create([
-        'batch_number' => 'BATCH-001',
-        'expires_at' => now()->addYear(),
-    ]);
-
-    $action = resolve(UpdateBatch::class);
-
-    $data = new UpdateBatchData(
-        batch_number: null,
-        cost_amount: 5000,
-        quantity: 100,
-        expires_at: null,
-    );
-
-    $action->handle($batch, $data);
-
-    $fresh = $batch->fresh();
-    expect($fresh->batch_number)->toStartWith('BAT-')
-        ->and($fresh->expires_at)->toBeNull();
-});
-
 it('keeps unchanged fields intact', function (): void {
     $batch = Batch::factory()->create([
         'batch_number' => 'BATCH-001',
@@ -138,11 +127,13 @@ it('keeps unchanged fields intact', function (): void {
 
     $action = resolve(UpdateBatch::class);
 
-    $data = new UpdateBatchData(
-        batch_number: Optional::create(),
-        cost_amount: Optional::create(),
+    $data = new BatchData(
+        product_id: $batch->product_id,
+        warehouse_id: $batch->warehouse_id,
+        batch_number: $batch->batch_number,
+        cost_amount: $batch->cost_amount,
         quantity: 200,
-        expires_at: Optional::create(),
+        expires_at: $batch->expires_at,
     );
 
     $action->handle($batch, $data);

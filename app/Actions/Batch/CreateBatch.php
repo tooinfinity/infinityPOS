@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Batch;
 
-use App\Data\Batch\CreateBatchData;
+use App\Data\Batch\BatchData;
 use App\Models\Batch;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -18,7 +18,7 @@ final readonly class CreateBatch
     /**
      * @throws Throwable
      */
-    public function handle(CreateBatchData $data): Batch
+    public function handle(BatchData $data): Batch
     {
         return DB::transaction(function () use ($data): Batch {
             return Batch::query()->forceCreate([
