@@ -105,3 +105,5 @@ Route::middleware('auth')->group(function (): void {
     Route::post('logout', [SessionController::class, 'destroy'])
         ->name('logout');
 });
+
+require __DIR__.'/sale.php';
