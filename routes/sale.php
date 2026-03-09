@@ -5,10 +5,11 @@ declare(strict_types=1);
 use App\Http\Controllers\Sales\CancelSaleController;
 use App\Http\Controllers\Sales\CompleteSaleController;
 use App\Http\Controllers\Sales\SaleController;
+use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function (): void {
 
-    Route::prefix('sales')->name('sales.')->group(function () {
+    Route::prefix('sales')->name('sales.')->group(function (): void {
         Route::get('/', [SaleController::class, 'index'])->name('index');
         Route::get('/create', [SaleController::class, 'create'])->name('create');
         Route::post('/', [SaleController::class, 'store'])->name('store');
