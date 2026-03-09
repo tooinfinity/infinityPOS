@@ -6,6 +6,7 @@ namespace App\Data\Category;
 
 use App\Models\Category;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Support\Validation\ValidationContext;
 
 final class CategoryData extends Data
 {
@@ -32,7 +33,7 @@ final class CategoryData extends Data
     /**
      * @return array<string, array<int, string>>
      */
-    public static function rules(): array
+    public static function rules(ValidationContext $context): array
     {
         return [
             'name' => ['required', 'string', 'min:3', 'max:80', 'unique:categories,name'],

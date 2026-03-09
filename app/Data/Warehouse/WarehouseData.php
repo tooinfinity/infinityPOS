@@ -6,6 +6,7 @@ namespace App\Data\Warehouse;
 
 use App\Models\Warehouse;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Support\Validation\ValidationContext;
 
 final class WarehouseData extends Data
 {
@@ -42,7 +43,7 @@ final class WarehouseData extends Data
     /**
      * @return array<string, array<int, string>>
      */
-    public static function rules(): array
+    public static function rules(ValidationContext $context): array
     {
         return [
             'name' => ['required', 'string', 'min:3', 'max:80', 'unique:warehouses,name'],

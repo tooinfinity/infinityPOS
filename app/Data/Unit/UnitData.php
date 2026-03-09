@@ -36,7 +36,7 @@ final class UnitData extends Data
     public static function rules(ValidationContext $context): array
     {
         return [
-            'name' => ['required', 'string', 'min:3', 'max:80', 'unique:brands,name'],
+            'name' => ['required', 'string', 'min:3', 'max:80', 'unique:units,name'],
             'short_name' => ['required', 'string', 'min:1', 'max:20'],
             'is_active' => ['nullable', 'boolean'],
         ];

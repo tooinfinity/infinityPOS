@@ -46,7 +46,7 @@ final class SupplierData extends Data
     public static function rules(ValidationContext $context): array
     {
         return [
-            'name' => ['required', 'string', 'min:3', 'max:80', 'unique:customers,name'],
+            'name' => ['required', 'string', 'min:3', 'max:80', 'unique:suppliers,name'],
             'company_name' => ['nullable', 'string', 'max:80'],
             'email' => ['nullable', 'string', 'email', 'max:120'],
             'phone' => ['nullable', 'string', 'max:20'],
