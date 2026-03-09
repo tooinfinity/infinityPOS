@@ -22,9 +22,19 @@ final readonly class UpdatePaymentStatus
             default => PaymentStatusEnum::Paid,
         };
 
-        $payable->forceFill([
-            'paid_amount' => $paidAmount,
+        $updates = [
+            'paid_amount' => min($paidAmount, $payable->total_amount),
             'payment_status' => $status,
-        ])->save();
+        ];
+
+        if ($payable instanceof Sale && $payable->customer_id === null) {
+            $updates['change_amount'] = max(0, $paidAmount - $payable->total_amount);
+            $updates['paid_amount'] = $payable->total_amount; // never exceed total
+            $updates['payment_status'] = $paidAmount >= $payable->total_amount
+                ? PaymentStatusEnum::Paid
+                : PaymentStatusEnum::Partial;
+        }
+
+        $payable->forceFill($updates)->save();
     }
 }
