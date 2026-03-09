@@ -28,8 +28,7 @@ final class ProductMediaController
     ): RedirectResponse {
         $action->handle($product, UploadMediaData::forProductThumbnail($request));
 
-        return redirect()
-            ->back()
+        return back()
             ->with('success', 'Product thumbnail uploaded successfully.');
     }
 
@@ -43,8 +42,7 @@ final class ProductMediaController
 
         $action->handle($media);
 
-        return redirect()
-            ->back()
+        return back()
             ->with('success', 'Brand logo removed.');
     }
 }

@@ -28,8 +28,7 @@ final class BrandMediaController
     ): RedirectResponse {
         $action->handle($brand, UploadMediaData::forBrandLogo($request));
 
-        return redirect()
-            ->back()
+        return back()
             ->with('success', 'Brand logo uploaded successfully.');
     }
 
@@ -43,8 +42,7 @@ final class BrandMediaController
 
         $action->handle($media);
 
-        return redirect()
-            ->back()
+        return back()
             ->with('success', 'Brand logo removed.');
     }
 }

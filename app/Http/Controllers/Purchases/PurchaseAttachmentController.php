@@ -28,8 +28,7 @@ final class PurchaseAttachmentController
     ): RedirectResponse {
         $action->handle($purchase, UploadMediaData::forPurchaseAttachment($request));
 
-        return redirect()
-            ->back()
+        return back()
             ->with('success', 'Attachment uploaded successfully.');
     }
 
@@ -43,8 +42,7 @@ final class PurchaseAttachmentController
 
         $action->handle($media);
 
-        return redirect()
-            ->back()
+        return back()
             ->with('success', 'Attachment removed.');
     }
 }
