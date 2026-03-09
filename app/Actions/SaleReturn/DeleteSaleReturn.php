@@ -27,13 +27,7 @@ final readonly class DeleteSaleReturn
                 );
             }
 
-            if ($return->payments()->active()->exists()) {
-                throw new InvalidOperationException(
-                    'delete',
-                    'SaleReturn',
-                    'Cannot delete a return with active payments.'
-                );
-            }
+            throw_if($return->payments()->active()->exists(), InvalidOperationException::class, 'delete', 'SaleReturn', 'Cannot delete a return with active payments.');
 
             $return->items()->delete();
 

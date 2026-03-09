@@ -40,13 +40,13 @@ final class SaleData extends Data
             'total_amount' => $model->total_amount,
             'paid_amount' => $model->paid_amount,
             'note' => $model->note,
-            'items' => $model->items->map(fn ($item) => [
+            'items' => $model->items->map(fn ($item): array => [
                 'product_id' => $item->product_id,
                 'batch_id' => $item->batch_id,
                 'quantity' => $item->quantity,
                 'unit_price' => $item->unit_price,
                 'unit_cost' => $item->unit_cost,
-            ])->toArray(),
+            ])->all(),
         ]);
     }
 
@@ -57,7 +57,6 @@ final class SaleData extends Data
 
     /**
      * @return array<string, array<int, Enum|string>>
-     *
      */
     public static function rules(ValidationContext $context): array
     {

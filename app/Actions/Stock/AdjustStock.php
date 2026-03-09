@@ -26,13 +26,7 @@ final readonly class AdjustStock
         Model $reference,
         ?string $note = null,
     ): Batch {
-        if ($newQuantity < 0) {
-            throw new InvalidOperationException(
-                'adjust',
-                'Stock',
-                'Adjusted quantity cannot be negative.'
-            );
-        }
+        throw_if($newQuantity < 0, InvalidOperationException::class, 'adjust', 'Stock', 'Adjusted quantity cannot be negative.');
 
         return DB::transaction(function () use ($batch, $newQuantity, $reference, $note): Batch {
             $batch = Batch::query()

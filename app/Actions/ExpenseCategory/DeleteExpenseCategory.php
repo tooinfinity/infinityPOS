@@ -18,13 +18,7 @@ final readonly class DeleteExpenseCategory
     {
         /** @var bool $result */
         $result = DB::transaction(static function () use ($category): bool {
-            if ($category->expenses()->exists()) {
-                throw new InvalidOperationException(
-                    'delete',
-                    'ExpenseCategory',
-                    'Cannot delete a category that has associated expenses.'
-                );
-            }
+            throw_if($category->expenses()->exists(), InvalidOperationException::class, 'delete', 'ExpenseCategory', 'Cannot delete a category that has associated expenses.');
 
             return (bool) $category->delete();
         });

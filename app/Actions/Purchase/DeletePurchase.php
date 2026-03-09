@@ -30,13 +30,7 @@ final readonly class DeletePurchase
                 );
             }
 
-            if ($purchase->payments()->active()->exists()) {
-                throw new InvalidOperationException(
-                    'delete',
-                    'Purchase',
-                    'Cannot delete a purchase with active payments.'
-                );
-            }
+            throw_if($purchase->payments()->active()->exists(), InvalidOperationException::class, 'delete', 'Purchase', 'Cannot delete a purchase with active payments.');
 
             $purchase->items()->delete();
 

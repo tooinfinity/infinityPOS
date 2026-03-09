@@ -29,9 +29,7 @@ final readonly class TransferStock
         int $quantity,
         StockTransfer $transfer,
     ): TransferResult {
-        if ($sourceBatch->warehouse_id === $destinationWarehouseId) {
-            throw new WarehouseSameException;
-        }
+        throw_if($sourceBatch->warehouse_id === $destinationWarehouseId, WarehouseSameException::class);
 
         /** @var TransferResult $result */
         $result = DB::transaction(function () use (

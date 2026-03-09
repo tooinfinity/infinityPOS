@@ -18,21 +18,9 @@ final readonly class DeleteSale
     public function handle(Sale $sale): bool
     {
         return DB::transaction(static function () use ($sale): bool {
-            if ($sale->status === SaleStatusEnum::Completed) {
-                throw new InvalidOperationException(
-                    'delete',
-                    'Sale',
-                    'Completed sales cannot be deleted. Cancel it first.'
-                );
-            }
+            throw_if($sale->status === SaleStatusEnum::Completed, InvalidOperationException::class, 'delete', 'Sale', 'Completed sales cannot be deleted. Cancel it first.');
 
-            if ($sale->payments()->active()->exists()) {
-                throw new InvalidOperationException(
-                    'delete',
-                    'Sale',
-                    'Cannot delete a sale with active payments.'
-                );
-            }
+            throw_if($sale->payments()->active()->exists(), InvalidOperationException::class, 'delete', 'Sale', 'Cannot delete a sale with active payments.');
 
             $sale->items()->delete();
 

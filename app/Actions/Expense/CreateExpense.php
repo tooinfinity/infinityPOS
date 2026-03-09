@@ -22,16 +22,14 @@ final readonly class CreateExpense
     public function handle(ExpenseData $data): Expense
     {
         /** @var Expense $expense */
-        $expense = DB::transaction(function () use ($data): Expense {
-            return Expense::query()->forceCreate([
-                'expense_category_id' => $data->expense_category_id,
-                'user_id' => auth()->id(),
-                'reference_no' => $this->referenceGenerator->handle('EXP', Expense::class),
-                'amount' => $data->amount,
-                'expense_date' => $data->expense_date,
-                'description' => $data->description,
-            ])->refresh();
-        });
+        $expense = DB::transaction(fn (): Expense => Expense::query()->forceCreate([
+            'expense_category_id' => $data->expense_category_id,
+            'user_id' => auth()->id(),
+            'reference_no' => $this->referenceGenerator->handle('EXP', Expense::class),
+            'amount' => $data->amount,
+            'expense_date' => $data->expense_date,
+            'description' => $data->description,
+        ])->refresh());
 
         return $expense;
     }

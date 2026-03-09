@@ -30,19 +30,13 @@ final readonly class CancelPurchase
                 throw new StateTransitionException($purchase->status->value, PurchaseStatusEnum::Cancelled->value);
             }
 
-            if ($purchase->payments()->active()->exists()) {
-                throw new InvalidOperationException(
-                    'cancel',
-                    'Purchase',
-                    'Cannot cancel a purchase with active payments. Void payments first.'
-                );
-            }
+            throw_if($purchase->payments()->active()->exists(), InvalidOperationException::class, 'cancel', 'Purchase', 'Cannot cancel a purchase with active payments. Void payments first.');
 
             if ($purchase->status === PurchaseStatusEnum::Received) {
                 $purchase->load('items.batch');
 
                 $purchase->items
-                    ->filter(fn ($item) => $item->received_quantity > 0)
+                    ->filter(fn ($item): bool => $item->received_quantity > 0)
                     ->each(function ($item) use ($purchase, $reason): void {
                         if ($item->batch instanceof Batch) {
                             $this->deductStock->handle(

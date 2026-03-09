@@ -31,12 +31,12 @@ final class SaleReturnData extends Data
             'warehouse_id' => $model->warehouse_id,
             'return_date' => $model->return_date,
             'note' => $model->note,
-            'items' => $model->items->map(fn ($item) => [
+            'items' => $model->items->map(fn ($item): array => [
                 'product_id' => $item->product_id,
                 'batch_id' => $item->batch_id,
                 'quantity' => $item->quantity,
                 'unit_price' => $item->unit_price,
-            ])->toArray(),
+            ])->all(),
         ]);
     }
 

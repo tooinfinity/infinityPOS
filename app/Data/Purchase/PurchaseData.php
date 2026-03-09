@@ -40,12 +40,12 @@ final class PurchaseData extends Data
             'total_amount' => $model->total_amount,
             'paid_amount' => $model->paid_amount,
             'note' => $model->note,
-            'items' => $model->items->map(fn ($item) => [
+            'items' => $model->items->map(fn ($item): array => [
                 'product_id' => $item->product_id,
                 'quantity' => $item->quantity,
                 'unit_cost' => $item->unit_cost,
                 'expires_at' => $item->expires_at,
-            ])->toArray(),
+            ])->all(),
         ]);
     }
 
@@ -56,7 +56,6 @@ final class PurchaseData extends Data
 
     /**
      * @return array<string, array<int, Enum|string>>
-     *
      */
     public static function rules(ValidationContext $context): array
     {

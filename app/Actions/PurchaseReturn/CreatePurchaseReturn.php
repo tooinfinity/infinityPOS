@@ -49,7 +49,7 @@ final readonly class CreatePurchaseReturn
 
             $totalAmount = $data->items
                 ->toCollection()
-                ->sum(fn (PurchaseReturnItemData $item) => $item->unit_cost * $item->quantity);
+                ->sum(fn (PurchaseReturnItemData $item): int => $item->unit_cost * $item->quantity);
 
             $return = PurchaseReturn::query()->forceCreate([
                 'purchase_id' => $data->purchase_id,

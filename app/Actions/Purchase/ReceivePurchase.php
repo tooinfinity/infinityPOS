@@ -13,7 +13,6 @@ use App\Exceptions\ItemNotFoundException;
 use App\Exceptions\StateTransitionException;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -55,9 +54,9 @@ final readonly class ReceivePurchase
                         return; // skip — nothing received for this item
                     }
 
-                    $expiresAt = $receivedItem->expires_at
-                        ? Carbon::parse($receivedItem->expires_at)
-                        : ($purchaseItem->expires_at ? Carbon::parse($purchaseItem->expires_at) : null);
+                    $expiresAt = $receivedItem->expires_at instanceof \Carbon\CarbonInterface
+                        ? \Illuminate\Support\Facades\Date::parse($receivedItem->expires_at)
+                        : ($purchaseItem->expires_at ? \Illuminate\Support\Facades\Date::parse($purchaseItem->expires_at) : null);
 
                     $batch = $this->findOrCreateBatch->handle(
                         productId: $purchaseItem->product_id,

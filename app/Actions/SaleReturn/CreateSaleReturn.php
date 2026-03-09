@@ -49,7 +49,7 @@ final readonly class CreateSaleReturn
 
             $totalAmount = $data->items
                 ->toCollection()
-                ->sum(fn (SaleReturnItemData $item) => $item->unit_price * $item->quantity);
+                ->sum(fn (SaleReturnItemData $item): int => $item->unit_price * $item->quantity);
 
             $return = SaleReturn::query()->forceCreate([
                 'sale_id' => $data->sale_id,

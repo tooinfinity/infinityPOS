@@ -18,13 +18,7 @@ final readonly class DeletePaymentMethod
     {
         /** @var bool $result */
         $result = DB::transaction(static function () use ($method): bool {
-            if ($method->payments()->exists()) {
-                throw new InvalidOperationException(
-                    'delete',
-                    'PaymentMethod',
-                    'Cannot delete a payment method with associated payments.'
-                );
-            }
+            throw_if($method->payments()->exists(), InvalidOperationException::class, 'delete', 'PaymentMethod', 'Cannot delete a payment method with associated payments.');
 
             return (bool) $method->delete();
         });

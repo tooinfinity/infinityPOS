@@ -29,13 +29,7 @@ final readonly class CancelSale
                 throw new StateTransitionException($sale->status->value, SaleStatusEnum::Cancelled->value);
             }
 
-            if ($sale->payments()->active()->exists()) {
-                throw new InvalidOperationException(
-                    'cancel',
-                    'Sale',
-                    'Cannot cancel a sale with active payments. Void payments first.'
-                );
-            }
+            throw_if($sale->payments()->active()->exists(), InvalidOperationException::class, 'cancel', 'Sale', 'Cannot cancel a sale with active payments. Void payments first.');
 
             if ($sale->status === SaleStatusEnum::Completed) {
                 $sale->load('items.batch');
