@@ -12,6 +12,9 @@ use Illuminate\Http\UploadedFile;
 
 final readonly class UploadMediaData
 {
+    /**
+     * @param  array<string, mixed>  $customProperties
+     */
     public function __construct(
         public UploadedFile $file,
         public MediaCollection $collection,

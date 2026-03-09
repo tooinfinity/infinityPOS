@@ -20,16 +20,7 @@ final readonly class DeleteProduct
         return DB::transaction(function () use ($product): bool {
             $this->ensureNoRelatedRecords($product);
 
-            $imagePath = $product->image;
-            $deleted = (bool) $product->delete();
-
-            if ($deleted && $imagePath) {
-                DB::afterCommit(static function () use ($imagePath): void {
-                    Storage::disk('public')->delete($imagePath);
-                });
-            }
-
-            return $deleted;
+            return (bool) $product->delete();
         });
     }
 
