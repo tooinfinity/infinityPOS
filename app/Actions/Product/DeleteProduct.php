@@ -7,7 +7,6 @@ namespace App\Actions\Product;
 use App\Exceptions\InvalidOperationException;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 final readonly class DeleteProduct

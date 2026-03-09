@@ -39,7 +39,7 @@ it('creates exception with Stringable objects', function (): void {
         }
     };
 
-    $exception = new StateTransitionException($fromStatus, $toStatus);
+    $exception = new StateTransitionException((string) $fromStatus, (string) $toStatus);
 
     expect($exception->getMessage())
         ->toBe('Invalid state transition from "Current Status" to "Target Status"');
