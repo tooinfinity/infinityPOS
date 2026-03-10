@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Inventory\CancelStockTransferController;
 use App\Http\Controllers\Inventory\CompleteStockTransferController;
+use App\Http\Controllers\Inventory\StockMovementController;
 use App\Http\Controllers\Inventory\StockTransferController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +20,11 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::patch('/{stockTransfer}/complete', [CompleteStockTransferController::class])->name('complete');
         Route::patch('/{stockTransfer}/cancel', [CancelStockTransferController::class])->name('cancel');
         Route::delete('/{stockTransfer}', [StockTransferController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('stock-movements')->name('stock-movements.')->group(function (): void {
+        Route::get('/', [StockMovementController::class, 'index'])->name('index');
+        Route::get('/{stockMovement}', [StockMovementController::class, 'show'])->name('show');
     });
 
 });
