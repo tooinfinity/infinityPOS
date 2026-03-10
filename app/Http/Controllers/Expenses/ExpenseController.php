@@ -1,0 +1,100 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Expenses;
+
+use App\Actions\Expense\CreateExpense;
+use App\Actions\Expense\DeleteExpense;
+use App\Actions\Expense\UpdateExpense;
+use App\Data\Expense\ExpenseData;
+use App\Models\Expense;
+use App\Models\ExpenseCategory;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+use Inertia\Response;
+use Throwable;
+
+final readonly class ExpenseController
+{
+    public function index(): Response
+    {
+        $expenses = Expense::query()
+            ->with(['expenseCategory', 'user'])
+            ->latest('expense_date')
+            ->paginate(25);
+
+        return Inertia::render('expenses/index', [
+            'expenses' => $expenses,
+        ]);
+    }
+
+    public function create(): Response
+    {
+        return Inertia::render('expenses/create', [
+            'categories' => ExpenseCategory::query()
+                ->select('id', 'name')
+                ->get(),
+        ]);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function store(ExpenseData $data, CreateExpense $action): RedirectResponse
+    {
+        $expense = $action->handle($data);
+
+        return redirect()
+            ->route('expenses.show', $expense)
+            ->with('success', "Expense {$expense->reference_no} created successfully.");
+    }
+
+    public function show(Expense $expense): Response
+    {
+        $expense->load(['expenseCategory', 'user']);
+
+        return Inertia::render('expenses/show', [
+            'expense' => $expense,
+        ]);
+    }
+
+    public function edit(Expense $expense): Response
+    {
+        $expense->load('expenseCategory');
+
+        return Inertia::render('expenses/edit', [
+            'expense' => $expense,
+            'categories' => ExpenseCategory::query()
+                ->select('id', 'name')
+                ->get(),
+        ]);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function update(
+        Expense $expense,
+        ExpenseData $data,
+        UpdateExpense $action,
+    ): RedirectResponse {
+        $action->handle($expense, $data);
+
+        return redirect()
+            ->route('expenses.show', $expense)
+            ->with('success', 'Expense updated successfully.');
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function destroy(Expense $expense, DeleteExpense $action): RedirectResponse
+    {
+        $action->handle($expense);
+
+        return redirect()
+            ->route('expenses.index')
+            ->with('success', 'Expense deleted.');
+    }
+}
