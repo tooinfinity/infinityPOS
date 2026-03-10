@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Products\BrandMediaController;
 use App\Http\Controllers\Products\ProductMediaController;
 use App\Http\Controllers\SessionController;
@@ -15,6 +16,7 @@ Route::get('/', static fn () => Inertia::render('welcome'))->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', static fn () => Inertia::render('dashboard'))->name('dashboard');
+    // Route::get('/dashboard', DashboardController::class)->name('dashboard'); // commented for now, as it is not yet implemented
 
     // Brand Logo
     Route::post('brands/{brand}/logo', [BrandMediaController::class, 'store'])
