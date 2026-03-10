@@ -58,6 +58,7 @@ Route::middleware('guest')->group(function (): void {
 });
 
 require __DIR__.'/auth.php';
+require __DIR__.'/product.php';
 require __DIR__.'/sale.php';
 require __DIR__.'/purchase.php';
 require __DIR__.'/inventory.php';
