@@ -16,6 +16,7 @@
         "pest-testing",
         "inertia-react-development",
         "tailwindcss-development",
-        "developing-with-fortify"
+        "developing-with-fortify",
+        "spatie-laravel-php-standards"
     ]
 }
