@@ -114,3 +114,4 @@ require __DIR__.'/purchase-return.php';
 require __DIR__.'/payment.php';
 require __DIR__.'/payment-method.php';
 require __DIR__.'/expense.php';
+require __DIR__.'/pos.php';
