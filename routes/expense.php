@@ -6,9 +6,9 @@ use App\Http\Controllers\Expenses\ExpenseCategoryController;
 use App\Http\Controllers\Expenses\ExpenseController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function (): void {
 
-    Route::prefix('expense-categories')->name('expense-categories.')->group(function () {
+    Route::prefix('expense-categories')->name('expense-categories.')->group(function (): void {
         Route::get('/', [ExpenseCategoryController::class, 'index'])->name('index');
         Route::get('/create', [ExpenseCategoryController::class, 'create'])->name('create');
         Route::post('/', [ExpenseCategoryController::class, 'store'])->name('store');
@@ -17,7 +17,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/{expenseCategory}', [ExpenseCategoryController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('expenses')->name('expenses.')->group(function () {
+    Route::prefix('expenses')->name('expenses.')->group(function (): void {
         Route::get('/', [ExpenseController::class, 'index'])->name('index');
         Route::get('/create', [ExpenseController::class, 'create'])->name('create');
         Route::post('/', [ExpenseController::class, 'store'])->name('store');

@@ -45,8 +45,7 @@ final readonly class ExpenseController
     {
         $expense = $action->handle($data);
 
-        return redirect()
-            ->route('expenses.show', $expense)
+        return to_route('expenses.show', $expense)
             ->with('success', "Expense {$expense->reference_no} created successfully.");
     }
 
@@ -81,8 +80,7 @@ final readonly class ExpenseController
     ): RedirectResponse {
         $action->handle($expense, $data);
 
-        return redirect()
-            ->route('expenses.show', $expense)
+        return to_route('expenses.show', $expense)
             ->with('success', 'Expense updated successfully.');
     }
 
@@ -93,8 +91,7 @@ final readonly class ExpenseController
     {
         $action->handle($expense);
 
-        return redirect()
-            ->route('expenses.index')
+        return to_route('expenses.index')
             ->with('success', 'Expense deleted.');
     }
 }

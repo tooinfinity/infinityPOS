@@ -40,8 +40,7 @@ final readonly class ExpenseCategoryController
     ): RedirectResponse {
         $category = $action->handle($data);
 
-        return redirect()
-            ->route('expense-categories.index')
+        return to_route('expense-categories.index')
             ->with('success', "Category '{$category->name}' created.");
     }
 
@@ -62,8 +61,7 @@ final readonly class ExpenseCategoryController
     ): RedirectResponse {
         $action->handle($expenseCategory, $data);
 
-        return redirect()
-            ->route('expense-categories.index')
+        return to_route('expense-categories.index')
             ->with('success', "Category '{$expenseCategory->name}' updated.");
     }
 
@@ -76,8 +74,7 @@ final readonly class ExpenseCategoryController
     ): RedirectResponse {
         $action->handle($expenseCategory);
 
-        return redirect()
-            ->route('expense-categories.index')
+        return to_route('expense-categories.index')
             ->with('success', 'Category deleted.');
     }
 }
