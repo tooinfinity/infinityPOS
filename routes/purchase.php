@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Purchases\CancelPurchaseController;
 use App\Http\Controllers\Purchases\OrderPurchaseController;
+use App\Http\Controllers\Purchases\PurchaseAttachmentController;
 use App\Http\Controllers\Purchases\PurchaseController;
 use App\Http\Controllers\Purchases\ReceivePurchaseController;
 use Illuminate\Support\Facades\Route;
@@ -21,6 +22,12 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::patch('/{purchase}/receive', [ReceivePurchaseController::class])->name('receive');
         Route::patch('/{purchase}/cancel', [CancelPurchaseController::class])->name('cancel');
         Route::delete('/{purchase}', [PurchaseController::class, 'destroy'])->name('destroy');
+        // Purchase Attachment
+        Route::post('/{purchase}/attachment', [PurchaseAttachmentController::class, 'store'])
+            ->name('attachment.store');
+
+        Route::delete('/{purchase}/attachment', [PurchaseAttachmentController::class, 'destroy'])
+            ->name('attachment.destroy');
     });
 
 });
