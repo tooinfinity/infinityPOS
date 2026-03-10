@@ -11,6 +11,7 @@ use App\Data\Batch\BatchData;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\Warehouse;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -54,7 +55,7 @@ final readonly class BatchController
         $batch->load([
             'product.unit',
             'warehouse',
-            'stockMovements' => fn ($q) => $q->latest()->limit(20),
+            'stockMovements' => fn (Relation $q) => $q->latest()->limit(20),
         ]);
 
         return Inertia::render('products/batches/show', [

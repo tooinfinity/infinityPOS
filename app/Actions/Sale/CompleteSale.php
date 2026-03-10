@@ -9,6 +9,7 @@ use App\Enums\SaleStatusEnum;
 use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Sale;
+use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -30,7 +31,7 @@ final readonly class CompleteSale
 
             $sale->load('items.batch');
 
-            $sale->items->each(function ($item) use ($sale): void {
+            $sale->items->each(function (SaleItem $item) use ($sale): void {
                 if ($item->batch instanceof Batch) {
                     $this->deductStock->handle(
                         batch: $item->batch,

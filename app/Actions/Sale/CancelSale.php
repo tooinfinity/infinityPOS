@@ -10,6 +10,7 @@ use App\Exceptions\InvalidOperationException;
 use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
 use App\Models\Sale;
+use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -34,7 +35,7 @@ final readonly class CancelSale
             if ($sale->status === SaleStatusEnum::Completed) {
                 $sale->load('items.batch');
 
-                $sale->items->each(function ($item) use ($sale, $reason): void {
+                $sale->items->each(function (SaleItem $item) use ($sale, $reason): void {
                     if ($item->batch instanceof Batch) {
                         $this->addStock->handle(
                             batch: $item->batch,

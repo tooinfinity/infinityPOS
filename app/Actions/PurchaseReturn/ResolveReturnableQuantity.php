@@ -7,6 +7,9 @@ namespace App\Actions\PurchaseReturn;
 use App\Data\PurchaseReturn\PurchaseReturnItemData;
 use App\Exceptions\InvalidOperationException;
 use App\Models\Purchase;
+use App\Models\PurchaseItem;
+use App\Models\PurchaseReturn;
+use App\Models\PurchaseReturnItem;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\DataCollection;
 
@@ -19,24 +22,41 @@ final readonly class ResolveReturnableQuantity
     {
         $purchase->loadMissing('items');
 
+        /** @var Collection<int, int> $alreadyReturned */
         $alreadyReturned = $purchase->returns()
             ->with('items')
             ->get()
-            ->flatMap(fn ($return) => $return->items)
+            ->flatMap(
+                /** @return Collection<int, PurchaseReturnItem> */
+                fn (PurchaseReturn $return): Collection => $return->items
+            )
             ->groupBy('product_id')
-            ->map(fn ($items) => $items->sum('quantity'));
+            ->map(
+                /** @param Collection<int, PurchaseReturnItem> $items */
+                function (Collection $items): int {
+                    /** @var int|float $sum */
+                    $sum = $items->sum('quantity');
+
+                    return (int) $sum;
+                }
+            );
 
         /** @var Collection<int, int> $purchaseItems */
         $purchaseItems = $purchase->items
             ->groupBy('product_id')
-            ->map(function ($items, int $productId) use ($alreadyReturned): int {
-                /** @var int $receivedQty */
-                $receivedQty = $items->sum('received_quantity');
-                /** @var int $returnedQty */
-                $returnedQty = $alreadyReturned->get($productId, 0);
+            ->map(
+                /**
+                 * @param  Collection<int, PurchaseItem>  $items
+                 */
+                function (Collection $items, int $productId) use ($alreadyReturned): int {
+                    /** @var int $receivedQty */
+                    $receivedQty = $items->sum('received_quantity');
 
-                return max(0, $receivedQty - $returnedQty);
-            });
+                    $returnedQty = $alreadyReturned->get($productId, 0);
+
+                    return max(0, $receivedQty - $returnedQty);
+                }
+            );
 
         return $purchaseItems;
     }
@@ -50,6 +70,7 @@ final readonly class ResolveReturnableQuantity
     public function validate(Collection $returnableMap, DataCollection $items): void
     {
         foreach ($items as $item) {
+            /** @var PurchaseReturnItemData $item */
             $maxReturnable = $returnableMap->get($item->product_id, 0);
 
             if ($item->quantity > $maxReturnable) {

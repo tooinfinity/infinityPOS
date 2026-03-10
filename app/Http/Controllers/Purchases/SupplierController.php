@@ -9,6 +9,7 @@ use App\Actions\Supplier\DeleteSupplier;
 use App\Actions\Supplier\UpdateSupplier;
 use App\Data\Supplier\SupplierData;
 use App\Models\Supplier;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -47,7 +48,7 @@ final readonly class SupplierController
         $supplier->loadCount('purchases');
 
         $supplier->load([
-            'purchases' => fn ($q) => $q
+            'purchases' => fn (Relation $q) => $q
                 ->latest()
                 ->limit(10),
         ]);

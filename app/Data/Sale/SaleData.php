@@ -6,6 +6,7 @@ namespace App\Data\Sale;
 
 use App\Enums\SaleStatusEnum;
 use App\Models\Sale;
+use App\Models\SaleItem;
 use Carbon\CarbonInterface;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
@@ -40,13 +41,14 @@ final class SaleData extends Data
             'total_amount' => $model->total_amount,
             'paid_amount' => $model->paid_amount,
             'note' => $model->note,
-            'items' => $model->items->map(fn ($item): array => [
-                'product_id' => $item->product_id,
-                'batch_id' => $item->batch_id,
-                'quantity' => $item->quantity,
-                'unit_price' => $item->unit_price,
-                'unit_cost' => $item->unit_cost,
-            ])->all(),
+            'items' => $model->items->map(
+                fn (SaleItem $item): array => [
+                    'product_id' => $item->product_id,
+                    'batch_id' => $item->batch_id,
+                    'quantity' => $item->quantity,
+                    'unit_price' => $item->unit_price,
+                    'unit_cost' => $item->unit_cost,
+                ])->all(),
         ]);
     }
 

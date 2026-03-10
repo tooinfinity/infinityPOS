@@ -13,6 +13,7 @@ use App\Enums\SaleStatusEnum;
 use App\Exceptions\InsufficientStockException;
 use App\Models\Batch;
 use App\Models\Sale;
+use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
@@ -83,7 +84,7 @@ final readonly class CreateSale
     {
         $sale->load('items.batch');
 
-        $sale->items->each(function ($item) use ($sale): void {
+        $sale->items->each(function (SaleItem $item) use ($sale): void {
             if ($item->batch instanceof Batch) {
                 $this->deductStock->handle(
                     batch: $item->batch,

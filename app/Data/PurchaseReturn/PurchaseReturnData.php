@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Data\PurchaseReturn;
 
 use App\Models\PurchaseReturn;
+use App\Models\PurchaseReturnItem;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
@@ -30,12 +31,14 @@ final class PurchaseReturnData extends Data
             'warehouse_id' => $model->warehouse_id,
             'return_date' => $model->return_date,
             'note' => $model->note,
-            'items' => $model->items->map(fn ($item): array => [
-                'product_id' => $item->product_id,
-                'batch_id' => $item->batch_id,
-                'quantity' => $item->quantity,
-                'unit_cost' => $item->unit_cost,
-            ])->all(),
+            'items' => $model->items->map(
+                fn (PurchaseReturnItem $item): array => [
+                    'product_id' => $item->product_id,
+                    'batch_id' => $item->batch_id,
+                    'quantity' => $item->quantity,
+                    'unit_cost' => $item->unit_cost,
+                ]
+            )->all(),
         ]);
     }
 

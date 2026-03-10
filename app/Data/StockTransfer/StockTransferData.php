@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Data\StockTransfer;
 
 use App\Models\StockTransfer;
+use App\Models\StockTransferItem;
 use Carbon\CarbonInterface;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Data;
@@ -31,11 +32,12 @@ final class StockTransferData extends Data
             'to_warehouse_id' => $model->to_warehouse_id,
             'transfer_date' => $model->transfer_date,
             'note' => $model->note,
-            'items' => $model->items->map(fn ($item): array => [
-                'product_id' => $item->product_id,
-                'batch_id' => $item->batch_id,
-                'quantity' => $item->quantity,
-            ])->all(),
+            'items' => $model->items->map(
+                fn (StockTransferItem $item): array => [
+                    'product_id' => $item->product_id,
+                    'batch_id' => $item->batch_id,
+                    'quantity' => $item->quantity,
+                ])->all(),
         ]);
     }
 

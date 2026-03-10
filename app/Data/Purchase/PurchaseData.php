@@ -6,6 +6,7 @@ namespace App\Data\Purchase;
 
 use App\Enums\PurchaseStatusEnum;
 use App\Models\Purchase;
+use App\Models\PurchaseItem;
 use Carbon\CarbonInterface;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
@@ -40,12 +41,13 @@ final class PurchaseData extends Data
             'total_amount' => $model->total_amount,
             'paid_amount' => $model->paid_amount,
             'note' => $model->note,
-            'items' => $model->items->map(fn ($item): array => [
-                'product_id' => $item->product_id,
-                'quantity' => $item->quantity,
-                'unit_cost' => $item->unit_cost,
-                'expires_at' => $item->expires_at,
-            ])->all(),
+            'items' => $model->items->map(
+                fn (PurchaseItem $item): array => [
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'unit_cost' => $item->unit_cost,
+                    'expires_at' => $item->expires_at,
+                ])->all(),
         ]);
     }
 

@@ -9,6 +9,7 @@ use App\Actions\Customer\DeleteCustomer;
 use App\Actions\Customer\UpdateCustomer;
 use App\Data\Customer\CustomerData;
 use App\Models\Customer;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -47,7 +48,7 @@ final readonly class CustomerController
         $customer->loadCount('sales');
 
         $customer->load([
-            'sales' => fn ($q) => $q
+            'sales' => fn (Relation $q) => $q
                 ->latest()
                 ->limit(10),
         ]);
