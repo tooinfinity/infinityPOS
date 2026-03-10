@@ -38,8 +38,17 @@ final readonly class CategoryController
     {
         $category = $action->handle($data);
 
-        return to_route('categories.index')
+        return to_route('categories.show', $category)
             ->with('success', "Category '{$category->name}' created.");
+    }
+
+    public function show(Category $category): Response
+    {
+        $category->loadCount('products');
+
+        return Inertia::render('products/categories/show', [
+            'category' => $category,
+        ]);
     }
 
     public function edit(Category $category): Response

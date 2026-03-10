@@ -43,6 +43,6 @@ final class ProductMediaController
         $action->handle($media);
 
         return back()
-            ->with('success', 'Brand logo removed.');
+            ->with('success', 'Product thumbnail removed.');
     }
 }

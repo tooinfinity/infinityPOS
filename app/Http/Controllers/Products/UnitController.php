@@ -38,8 +38,17 @@ final readonly class UnitController
     {
         $unit = $action->handle($data);
 
-        return to_route('units.index')
+        return to_route('units.show', $unit)
             ->with('success', "Unit '{$unit->name}' created.");
+    }
+
+    public function show(Unit $unit): Response
+    {
+        $unit->loadCount('products');
+
+        return Inertia::render('products/units/show', [
+            'unit' => $unit,
+        ]);
     }
 
     public function edit(Unit $unit): Response

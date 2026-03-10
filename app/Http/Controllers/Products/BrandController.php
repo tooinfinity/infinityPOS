@@ -38,8 +38,17 @@ final readonly class BrandController
     {
         $brand = $action->handle($data);
 
-        return to_route('brands.index')
+        return to_route('brands.show', $brand)
             ->with('success', "Brand '{$brand->name}' created.");
+    }
+
+    public function show(Brand $brand): Response
+    {
+        $brand->loadCount('products');
+
+        return Inertia::render('products/brands/show', [
+            'brand' => $brand,
+        ]);
     }
 
     public function edit(Brand $brand): Response

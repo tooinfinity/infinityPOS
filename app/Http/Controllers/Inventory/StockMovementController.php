@@ -25,7 +25,7 @@ final readonly class StockMovementController
                 'user:id,name',
             ])
             ->latest()
-            ->paginate(50);
+            ->paginate(25);
 
         return Inertia::render('inventory/stock-movements/index', [
             'movements' => $movements,
