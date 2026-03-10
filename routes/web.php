@@ -109,3 +109,4 @@ Route::middleware('auth')->group(function (): void {
 require __DIR__.'/sale.php';
 require __DIR__.'/purchase.php';
 require __DIR__.'/inventory.php';
+require __DIR__.'/sale-return.php';
