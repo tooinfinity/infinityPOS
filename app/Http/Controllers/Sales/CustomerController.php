@@ -1,0 +1,91 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Sales;
+
+use App\Actions\Customer\CreateCustomer;
+use App\Actions\Customer\DeleteCustomer;
+use App\Actions\Customer\UpdateCustomer;
+use App\Data\Customer\CustomerData;
+use App\Models\Customer;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+use Inertia\Response;
+use Throwable;
+
+final readonly class CustomerController
+{
+    public function index(): Response
+    {
+        return Inertia::render('sales/customers/index', [
+            'customers' => Customer::withInactive()
+                ->withCount('sales')
+                ->latest()
+                ->paginate(25),
+        ]);
+    }
+
+    public function create(): Response
+    {
+        return Inertia::render('sales/customers/create');
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function store(CustomerData $data, CreateCustomer $action): RedirectResponse
+    {
+        $customer = $action->handle($data);
+
+        return to_route('customers.show', $customer)
+            ->with('success', "Customer '{$customer->name}' created.");
+    }
+
+    public function show(Customer $customer): Response
+    {
+        $customer->loadCount('sales');
+
+        $customer->load([
+            'sales' => fn ($q) => $q
+                ->latest()
+                ->limit(10),
+        ]);
+
+        return Inertia::render('sales/customers/show', [
+            'customer' => $customer,
+        ]);
+    }
+
+    public function edit(Customer $customer): Response
+    {
+        return Inertia::render('sales/customers/edit', [
+            'customer' => $customer,
+        ]);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function update(
+        Customer $customer,
+        CustomerData $data,
+        UpdateCustomer $action,
+    ): RedirectResponse {
+        $action->handle($customer, $data);
+
+        return to_route('customers.show', $customer)
+            ->with('success', "Customer '{$customer->name}' updated.");
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function destroy(Customer $customer, DeleteCustomer $action): RedirectResponse
+    {
+        $action->handle($customer);
+
+        return to_route('customers.index')
+            ->with('success', 'Customer deleted.');
+    }
+}

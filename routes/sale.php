@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Sales\CancelSaleController;
 use App\Http\Controllers\Sales\CompleteSaleController;
+use App\Http\Controllers\Sales\CustomerController;
 use App\Http\Controllers\Sales\SaleController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +20,16 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::patch('/{sale}/complete', [CompleteSaleController::class])->name('complete');
         Route::patch('/{sale}/cancel', [CancelSaleController::class])->name('cancel');
         Route::delete('/{sale}', [SaleController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('customers')->name('customers.')->group(function (): void {
+        Route::get('/', [CustomerController::class, 'index'])->name('index');
+        Route::get('/create', [CustomerController::class, 'create'])->name('create');
+        Route::post('/', [CustomerController::class, 'store'])->name('store');
+        Route::get('/{customer}', [CustomerController::class, 'show'])->name('show');
+        Route::get('/{customer}/edit', [CustomerController::class, 'edit'])->name('edit');
+        Route::put('/{customer}', [CustomerController::class, 'update'])->name('update');
+        Route::delete('/{customer}', [CustomerController::class, 'destroy'])->name('destroy');
     });
 
 });
