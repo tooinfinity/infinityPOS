@@ -14,7 +14,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::get('/create/{sale}', [SaleReturnController::class, 'create'])->name('create.from-sale');
         Route::post('/', [SaleReturnController::class, 'store'])->name('store');
         Route::get('/{saleReturn}', [SaleReturnController::class, 'show'])->name('show');
-        Route::patch('/{saleReturn}/complete', [CompleteSaleReturnController::class])->name('complete');
+        Route::patch('/{saleReturn}/complete', CompleteSaleReturnController::class)->name('complete');
         Route::delete('/{saleReturn}', [SaleReturnController::class, 'destroy'])->name('destroy');
     });
 

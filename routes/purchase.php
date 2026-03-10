@@ -19,9 +19,9 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::get('/{purchase}', [PurchaseController::class, 'show'])->name('show');
         Route::get('/{purchase}/edit', [PurchaseController::class, 'edit'])->name('edit');
         Route::put('/{purchase}', [PurchaseController::class, 'update'])->name('update');
-        Route::patch('/{purchase}/order', [OrderPurchaseController::class])->name('order');
-        Route::patch('/{purchase}/receive', [ReceivePurchaseController::class])->name('receive');
-        Route::patch('/{purchase}/cancel', [CancelPurchaseController::class])->name('cancel');
+        Route::patch('/{purchase}/order', OrderPurchaseController::class)->name('order');
+        Route::patch('/{purchase}/receive', ReceivePurchaseController::class)->name('receive');
+        Route::patch('/{purchase}/cancel', CancelPurchaseController::class)->name('cancel');
         Route::delete('/{purchase}', [PurchaseController::class, 'destroy'])->name('destroy');
         // Purchase Attachment
         Route::post('/{purchase}/attachment', [PurchaseAttachmentController::class, 'store'])

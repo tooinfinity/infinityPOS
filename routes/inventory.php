@@ -17,8 +17,8 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::get('/{stockTransfer}', [StockTransferController::class, 'show'])->name('show');
         Route::get('/{stockTransfer}/edit', [StockTransferController::class, 'edit'])->name('edit');
         Route::put('/{stockTransfer}', [StockTransferController::class, 'update'])->name('update');
-        Route::patch('/{stockTransfer}/complete', [CompleteStockTransferController::class])->name('complete');
-        Route::patch('/{stockTransfer}/cancel', [CancelStockTransferController::class])->name('cancel');
+        Route::patch('/{stockTransfer}/complete', CompleteStockTransferController::class)->name('complete');
+        Route::patch('/{stockTransfer}/cancel', CancelStockTransferController::class)->name('cancel');
         Route::delete('/{stockTransfer}', [StockTransferController::class, 'destroy'])->name('destroy');
     });
 

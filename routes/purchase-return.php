@@ -13,7 +13,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::get('/create/{purchase}', [PurchaseReturnController::class, 'create'])->name('create.from-purchase');
         Route::post('/', [PurchaseReturnController::class, 'store'])->name('store');
         Route::get('/{purchaseReturn}', [PurchaseReturnController::class, 'show'])->name('show');
-        Route::patch('/{purchaseReturn}/complete', [CompletePurchaseReturnController::class])->name('complete');
+        Route::patch('/{purchaseReturn}/complete', CompletePurchaseReturnController::class)->name('complete');
         Route::delete('/{purchaseReturn}', [PurchaseReturnController::class, 'destroy'])->name('destroy');
     });
 

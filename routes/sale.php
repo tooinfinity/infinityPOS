@@ -17,8 +17,8 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::get('/{sale}', [SaleController::class, 'show'])->name('show');
         Route::get('/{sale}/edit', [SaleController::class, 'edit'])->name('edit');
         Route::put('/{sale}', [SaleController::class, 'update'])->name('update');
-        Route::patch('/{sale}/complete', [CompleteSaleController::class])->name('complete');
-        Route::patch('/{sale}/cancel', [CancelSaleController::class])->name('cancel');
+        Route::patch('/{sale}/complete', CompleteSaleController::class)->name('complete');
+        Route::patch('/{sale}/cancel', CancelSaleController::class)->name('cancel');
         Route::delete('/{sale}', [SaleController::class, 'destroy'])->name('destroy');
     });
 

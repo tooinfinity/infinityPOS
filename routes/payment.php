@@ -13,27 +13,27 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 
     Route::post(
         'sales/{sale}/payments',
-        [SalePaymentController::class]
+        SalePaymentController::class
     )->name('sales.payments.store');
 
     Route::post(
         'purchases/{purchase}/payments',
-        [PurchasePaymentController::class]
+        PurchasePaymentController::class
     )->name('purchases.payments.store');
 
     Route::post(
         'sale-returns/{saleReturn}/payments',
-        [SaleReturnPaymentController::class]
+        SaleReturnPaymentController::class
     )->name('sale-returns.payments.store');
 
     Route::post(
         'purchase-returns/{purchaseReturn}/payments',
-        [PurchaseReturnPaymentController::class]
+        PurchaseReturnPaymentController::class
     )->name('purchase-returns.payments.store');
 
     Route::patch(
         'payments/{payment}/void',
-        [VoidPaymentController::class]
+        VoidPaymentController::class
     )->name('payments.void');
 
 });
