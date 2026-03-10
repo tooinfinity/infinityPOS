@@ -7,6 +7,7 @@ use App\Http\Controllers\Purchases\OrderPurchaseController;
 use App\Http\Controllers\Purchases\PurchaseAttachmentController;
 use App\Http\Controllers\Purchases\PurchaseController;
 use App\Http\Controllers\Purchases\ReceivePurchaseController;
+use App\Http\Controllers\Purchases\SupplierController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
@@ -28,6 +29,16 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 
         Route::delete('/{purchase}/attachment', [PurchaseAttachmentController::class, 'destroy'])
             ->name('attachment.destroy');
+    });
+
+    Route::prefix('suppliers')->name('suppliers.')->group(function (): void {
+        Route::get('/', [SupplierController::class, 'index'])->name('index');
+        Route::get('/create', [SupplierController::class, 'create'])->name('create');
+        Route::post('/', [SupplierController::class, 'store'])->name('store');
+        Route::get('/{supplier}', [SupplierController::class, 'show'])->name('show');
+        Route::get('/{supplier}/edit', [SupplierController::class, 'edit'])->name('edit');
+        Route::put('/{supplier}', [SupplierController::class, 'update'])->name('update');
+        Route::delete('/{supplier}', [SupplierController::class, 'destroy'])->name('destroy');
     });
 
 });
