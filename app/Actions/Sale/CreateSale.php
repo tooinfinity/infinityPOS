@@ -9,6 +9,7 @@ use App\Actions\Payment\UpdatePaymentStatus;
 use App\Actions\Stock\DeductStock;
 use App\Data\Sale\SaleData;
 use App\Data\Sale\SaleItemData;
+use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
 use App\Exceptions\InsufficientStockException;
 use App\Models\Batch;
@@ -41,7 +42,8 @@ final readonly class CreateSale
                 'sale_date' => $data->sale_date,
                 'total_amount' => $data->total_amount,
                 'paid_amount' => 0,
-                'payment_status' => \App\Enums\PaymentStatusEnum::Unpaid,
+                'change_amount' => $data->change_amount ?? 0,
+                'payment_status' => PaymentStatusEnum::Unpaid,
                 'note' => $data->note,
             ]);
 
