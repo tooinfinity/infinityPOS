@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Sale;
 
 use App\Actions\GenerateReferenceNo;
-use App\Actions\Payment\UpdatePaymentStatus;
 use App\Actions\Stock\DeductStock;
 use App\Data\Sale\SaleData;
 use App\Data\Sale\SaleItemData;
@@ -24,7 +23,6 @@ final readonly class CreateSale
     public function __construct(
         private GenerateReferenceNo $referenceGenerator,
         private DeductStock $deductStock,
-        private UpdatePaymentStatus $updatePaymentStatus,
     ) {}
 
     /**
@@ -54,8 +52,13 @@ final readonly class CreateSale
             }
 
             if ($data->paid_amount > 0) {
-                $sale->forceFill(['paid_amount' => $data->paid_amount])->save();
-                $this->updatePaymentStatus->handle($sale);
+                $paymentStatus = $data->paid_amount >= $data->total_amount
+                    ? PaymentStatusEnum::Paid
+                    : PaymentStatusEnum::Partial;
+                $sale->forceFill([
+                    'paid_amount' => $data->paid_amount,
+                    'payment_status' => $paymentStatus,
+                ])->save();
             }
 
             return $sale->load(['items.product', 'items.batch', 'customer', 'warehouse']);
