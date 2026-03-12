@@ -18,6 +18,7 @@
         "tailwindcss-development",
         "developing-with-fortify",
         "spatie-laravel-php-standards",
+        "laravel-architecture",
         "laravel-inertia-react",
         "laravel-security-audit"
     ]
