@@ -24,6 +24,7 @@
         "laravel-inertia-react",
         "laravel-models",
         "laravel-permission-development",
-        "laravel-security-audit"
+        "laravel-security-audit",
+        "laravel-value-objects"
     ]
 }

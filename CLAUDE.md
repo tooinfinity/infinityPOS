@@ -89,6 +89,7 @@ This project has domain-specific skills available. You MUST activate the relevan
 - `laravel-models` — Eloquent model patterns and database layer. Use when working with models, database entities, Eloquent ORM, or when user mentions models, eloquent, relationships, casts, observers, database entities.
 - `laravel-permission-development` — Build and work with Spatie Laravel Permission features, including roles, permissions, middleware, policies, teams, and Blade directives.
 - `laravel-security-audit` — Security auditor for Laravel applications. Analyzes code for vulnerabilities, misconfigurations, and insecure practices using OWASP standards and Laravel security best practices.
+- `laravel-value-objects` — Immutable value objects for domain values. Use when working with domain values, immutable objects, or when user mentions value objects, immutable values, domain values, money objects, coordinate objects.
 
 ## Conventions
 
