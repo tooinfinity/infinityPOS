@@ -13,10 +13,10 @@ final class VoidPaymentData extends Data
         public string $void_reason,
     ) {}
 
-    public static function authorize(): bool
-    {
-        return true;
-    }
+    //    public static function authorize(): bool
+    //    {
+    //        return true;
+    //    }
 
     /**
      * @return array<string, array<int, string>>

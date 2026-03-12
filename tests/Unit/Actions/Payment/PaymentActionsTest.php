@@ -253,7 +253,11 @@ describe(RecordPayment::class, function (): void {
         $sale = Sale::factory()
             ->for($this->warehouse)
             ->for($this->customer)
-            ->create();
+            ->create([
+                'total_amount' => 10000,
+                'paid_amount' => 0,
+                'payment_status' => PaymentStatusEnum::Unpaid,
+            ]);
 
         $data = new PaymentData(
             payment_method_id: $this->paymentMethod->id,

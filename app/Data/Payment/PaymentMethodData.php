@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Data\Payment;
 
 use App\Models\PaymentMethod;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Unique;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
 
@@ -27,28 +25,22 @@ final class PaymentMethodData extends Data
         ]);
     }
 
-    public static function authorize(): bool
-    {
-        return true;
-    }
+    //    public static function authorize(): bool
+    //    {
+    //        return true;
+    //    }
 
     /**
-     * @return array<string, array<int, Unique|string>>
+     * @return array<string, array<int, string>>
      */
     public static function rules(ValidationContext $context): array
     {
-        $routeParam = request()->route('paymentMethod');
-
-        $methodId = $routeParam instanceof PaymentMethod
-            ? $routeParam->id
-            : null;
-
         return [
             'name' => ['required', 'string', 'max:80',
-                Rule::unique('payment_methods', 'name')->ignore($methodId),
+                'unique:payment_methods,name',
             ],
             'code' => ['required', 'string', 'max:20',
-                Rule::unique('payment_methods', 'code')->ignore($methodId),
+                'unique:payment_methods,code',
             ],
             'is_active' => ['nullable', 'boolean'],
         ];

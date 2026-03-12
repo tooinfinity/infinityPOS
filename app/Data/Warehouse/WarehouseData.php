@@ -35,10 +35,10 @@ final class WarehouseData extends Data
         ]);
     }
 
-    public static function authorize(): bool
-    {
-        return true;
-    }
+    //    public static function authorize(): bool
+    //    {
+    //        return true;
+    //    }
 
     /**
      * @return array<string, array<int, string>>
