@@ -9,27 +9,44 @@ use App\Actions\Sale\DeleteSale;
 use App\Actions\Sale\UpdateSale;
 use App\Data\Sale\SaleData;
 use App\Models\Customer;
+use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Throwable;
 
 final readonly class SaleController
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        /** @var string|null $search */
+        $search = $request->string('search')->value();
         $sales = Sale::query()
             ->with(['customer', 'warehouse', 'user'])
+            ->search($search)
             ->withDueAmount()
             ->latest()
             ->paginate(25);
 
         return Inertia::render('sales/index', [
             'sales' => $sales,
+            'customers' => Customer::query()->select('id', 'name')->get(),
+            'warehouses' => Warehouse::query()->select('id', 'name')->get(),
+            'products' => Product::query()
+                ->with(['unit', 'batches' => fn (Relation $q) => $q->where('quantity', '>', 0)])
+                ->withStockQuantity()
+                ->select('id', 'name', 'sku', 'selling_price', 'cost_price', 'unit_id', 'alert_quantity')
+                ->get(),
+            'filters' => [
+                'search' => $request->string('search')->value(),
+                'status' => $request->string('status')->value(),
+                'payment_status' => $request->string('payment_status')->value(),
+            ],
         ]);
     }
 
@@ -70,6 +87,14 @@ final readonly class SaleController
 
         return Inertia::render('sales/show', [
             'sale' => $sale,
+            'customers' => Customer::query()->select('id', 'name')->get(),
+            'warehouses' => Warehouse::query()->select('id', 'name')->get(),
+            'products' => Product::query()
+                ->with(['unit', 'batches' => fn (Relation $q) => $q->where('quantity', '>', 0)])
+                ->withStockQuantity()
+                ->select('id', 'name', 'sku', 'selling_price', 'cost_price', 'unit_id', 'alert_quantity')
+                ->get(),
+            'payment_methods' => PaymentMethod::query()->select('id', 'name', 'code')->get(),
         ]);
     }
 

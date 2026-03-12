@@ -19,17 +19,13 @@ final readonly class CustomerController
 {
     public function index(): Response
     {
-        return Inertia::render('sales/customers/index', [
+        return Inertia::render('customers/index', [
             'customers' => Customer::withInactive()
                 ->withCount('sales')
                 ->latest()
                 ->paginate(25),
+            'filters' => request()->query(),
         ]);
-    }
-
-    public function create(): Response
-    {
-        return Inertia::render('sales/customers/create');
     }
 
     /**
@@ -53,14 +49,7 @@ final readonly class CustomerController
                 ->limit(10),
         ]);
 
-        return Inertia::render('sales/customers/show', [
-            'customer' => $customer,
-        ]);
-    }
-
-    public function edit(Customer $customer): Response
-    {
-        return Inertia::render('sales/customers/edit', [
+        return Inertia::render('customers/show', [
             'customer' => $customer,
         ]);
     }

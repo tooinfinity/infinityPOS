@@ -137,6 +137,20 @@ final class Sale extends Model
 
     /**
      * @param  Builder<Sale>  $query
+     */
+    #[Scope]
+    protected function search(Builder $query, ?string $search): void
+    {
+        $query->when($search, fn (Builder $query, string $search) => $query->whereAny(
+            ['customer.name', 'reference_no'],
+            'like',
+            "%{$search}%",
+        ));
+
+    }
+
+    /**
+     * @param  Builder<Sale>  $query
      * @return Builder<Sale>
      */
     #[Scope]

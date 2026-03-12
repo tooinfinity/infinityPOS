@@ -26,8 +26,9 @@ final readonly class PurchaseReturnController
             ->latest()
             ->paginate(25);
 
-        return Inertia::render('purchases/returns/index', [
+        return Inertia::render('purchase-returns/index', [
             'returns' => $returns,
+            'filters' => request()->query(),
         ]);
     }
 
@@ -45,7 +46,7 @@ final readonly class PurchaseReturnController
             $returnableMap = $resolveReturnableQuantity->handle($purchase);
         }
 
-        return Inertia::render('purchases/returns/create', [
+        return Inertia::render('purchase-returns/create', [
             'purchase' => $purchase?->load('items.product'),
             'returnableMap' => $returnableMap,
             'warehouses' => Warehouse::query()->select('id', 'name', 'code')->get(),
@@ -74,7 +75,7 @@ final readonly class PurchaseReturnController
             'payments.paymentMethod',
         ]);
 
-        return Inertia::render('purchases/returns/show', [
+        return Inertia::render('purchase-returns/show', [
             'return' => $purchaseReturn,
         ]);
     }

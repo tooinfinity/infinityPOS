@@ -8,6 +8,7 @@ use App\Actions\SaleReturn\CreateSaleReturn;
 use App\Actions\SaleReturn\DeleteSaleReturn;
 use App\Actions\SaleReturn\ResolveReturnableQuantity;
 use App\Data\SaleReturn\SaleReturnData;
+use App\Models\PaymentMethod;
 use App\Models\Sale;
 use App\Models\SaleReturn;
 use App\Models\Warehouse;
@@ -26,8 +27,9 @@ final readonly class SaleReturnController
             ->latest()
             ->paginate(25);
 
-        return Inertia::render('sales/returns/index', [
-            'returns' => $returns,
+        return Inertia::render('sale-returns/index', [
+            'saleReturns' => $returns,
+            'filters' => request()->query(),
         ]);
     }
 
@@ -45,7 +47,7 @@ final readonly class SaleReturnController
             $returnableMap = $resolveReturnableQuantity->handle($sale);
         }
 
-        return Inertia::render('sales/returns/create', [
+        return Inertia::render('sale-returns/create', [
             'sale' => $sale?->load('items.product'),
             'returnableMap' => $returnableMap,
             'warehouses' => Warehouse::query()->select('id', 'name', 'code')->get(),
@@ -74,8 +76,9 @@ final readonly class SaleReturnController
             'payments.paymentMethod',
         ]);
 
-        return Inertia::render('sales/returns/show', [
-            'return' => $saleReturn,
+        return Inertia::render('sale-returns/show', [
+            'saleReturn' => $saleReturn,
+            'payment_methods' => PaymentMethod::query()->select('id', 'name', 'code')->get(),
         ]);
     }
 

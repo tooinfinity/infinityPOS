@@ -8,6 +8,7 @@ use App\Actions\Purchase\CreatePurchase;
 use App\Actions\Purchase\DeletePurchase;
 use App\Actions\Purchase\UpdatePurchase;
 use App\Data\Purchase\PurchaseData;
+use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\Supplier;
@@ -29,6 +30,7 @@ final readonly class PurchaseController
 
         return Inertia::render('purchases/index', [
             'purchases' => $purchases,
+            'filters' => request()->query(),
         ]);
     }
 
@@ -68,6 +70,7 @@ final readonly class PurchaseController
 
         return Inertia::render('purchases/show', [
             'purchase' => $purchase,
+            'payment_methods' => PaymentMethod::query()->select('id', 'name', 'code')->get(),
         ]);
     }
 

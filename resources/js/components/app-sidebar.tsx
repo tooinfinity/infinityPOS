@@ -12,8 +12,22 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { dashboard } from '@/wayfinder/routes';
+import customers from '@/wayfinder/routes/customers';
+import purchaseReturns from '@/wayfinder/routes/purchase-returns';
+import purchases from '@/wayfinder/routes/purchases';
+import saleReturns from '@/wayfinder/routes/sale-returns';
+import sales from '@/wayfinder/routes/sales';
+import suppliers from '@/wayfinder/routes/suppliers';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import {
+    BookOpen,
+    Folder,
+    LayoutGrid,
+    ShoppingCart,
+    UserRoundMinus,
+    UserRoundPlus,
+    Van,
+} from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -21,6 +35,36 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Customers',
+        href: customers.index(),
+        icon: UserRoundPlus,
+    },
+    {
+        title: 'Sales',
+        href: sales.index(),
+        icon: ShoppingCart,
+    },
+    {
+        title: 'Sales Returns',
+        href: saleReturns.index(),
+        icon: ShoppingCart,
+    },
+    {
+        title: 'Suppliers',
+        href: suppliers.index(),
+        icon: UserRoundMinus,
+    },
+    {
+        title: 'Purchases',
+        href: purchases.index(),
+        icon: Van,
+    },
+    {
+        title: 'Purchases Returns',
+        href: purchaseReturns.index(),
+        icon: Van,
     },
 ];
 

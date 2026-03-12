@@ -19,17 +19,13 @@ final readonly class SupplierController
 {
     public function index(): Response
     {
-        return Inertia::render('purchases/suppliers/index', [
+        return Inertia::render('suppliers/index', [
             'suppliers' => Supplier::withInactive()
                 ->withCount('purchases')
                 ->latest()
                 ->paginate(25),
+            'filters' => request()->query(),
         ]);
-    }
-
-    public function create(): Response
-    {
-        return Inertia::render('purchases/suppliers/create');
     }
 
     /**
@@ -53,14 +49,7 @@ final readonly class SupplierController
                 ->limit(10),
         ]);
 
-        return Inertia::render('purchases/suppliers/show', [
-            'supplier' => $supplier,
-        ]);
-    }
-
-    public function edit(Supplier $supplier): Response
-    {
-        return Inertia::render('purchases/suppliers/edit', [
+        return Inertia::render('suppliers/show', [
             'supplier' => $supplier,
         ]);
     }
