@@ -19,6 +19,7 @@
         "developing-with-fortify",
         "spatie-laravel-php-standards",
         "laravel-architecture",
+        "laravel-controllers",
         "laravel-inertia-react",
         "laravel-models",
         "laravel-permission-development",
