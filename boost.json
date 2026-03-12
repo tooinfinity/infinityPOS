@@ -25,6 +25,7 @@
         "laravel-exceptions",
         "laravel-inertia-react",
         "laravel-models",
+        "laravel-performance-caching",
         "laravel-permission-development",
         "laravel-security-audit",
         "laravel-value-objects"
