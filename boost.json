@@ -17,6 +17,7 @@
         "inertia-react-development",
         "tailwindcss-development",
         "developing-with-fortify",
-        "spatie-laravel-php-standards"
+        "spatie-laravel-php-standards",
+        "laravel-inertia-react"
     ]
 }
