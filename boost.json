@@ -21,6 +21,7 @@
         "laravel-actions",
         "laravel-architecture",
         "laravel-controllers",
+        "laravel-exceptions",
         "laravel-inertia-react",
         "laravel-models",
         "laravel-permission-development",
