@@ -15,6 +15,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
+import AppLayout from '@/layouts/app-layout';
 import { formatAmount } from '@/lib/formatters';
 import SaleController from '@/wayfinder/App/Http/Controllers/Sales/SaleController';
 import SaleReturnController from '@/wayfinder/App/Http/Controllers/Sales/SaleReturnController';
@@ -88,206 +89,212 @@ export default function SaleReturnCreate({ sale, returnableItems }: Props) {
     }
 
     return (
-        <>
+        <AppLayout>
             <Head title={`Return — ${sale.reference_no}`} />
-
-            <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 shrink-0"
-                        onClick={() =>
-                            router.visit(
-                                SaleController.show.url({ sale: sale.id }),
-                            )
-                        }
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                    <div>
-                        <h1 className="text-xl font-semibold tracking-tight">
-                            New Customer Return
-                        </h1>
-                        <p className="text-sm text-muted-foreground">
-                            Against sale{' '}
-                            <span className="font-mono font-medium text-foreground">
-                                {sale.reference_no}
-                            </span>
-                            {sale.customer && <> · {sale.customer.name}</>}
-                        </p>
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+                <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 shrink-0"
+                            onClick={() =>
+                                router.visit(
+                                    SaleController.show.url({ sale: sale.id }),
+                                )
+                            }
+                        >
+                            <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                        <div>
+                            <h1 className="text-xl font-semibold tracking-tight">
+                                New Customer Return
+                            </h1>
+                            <p className="text-sm text-muted-foreground">
+                                Against sale{' '}
+                                <span className="font-mono font-medium text-foreground">
+                                    {sale.reference_no}
+                                </span>
+                                {sale.customer && <> · {sale.customer.name}</>}
+                            </p>
+                        </div>
                     </div>
-                </div>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-3 gap-6">
-                        {/* Items */}
-                        <div className="col-span-2">
-                            <Card>
-                                <CardHeader className="pb-3">
-                                    <CardTitle className="text-base">
-                                        Select items to return
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="p-0">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Product</TableHead>
-                                                <TableHead>Batch</TableHead>
-                                                <TableHead className="text-right">
-                                                    Max
-                                                </TableHead>
-                                                <TableHead className="w-28 text-right">
-                                                    Qty to return
-                                                </TableHead>
-                                                <TableHead className="text-right">
-                                                    Subtotal
-                                                </TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {returnableItems.map(
-                                                (item, idx) => {
-                                                    const formItem =
-                                                        data.items[idx];
-                                                    return (
-                                                        <TableRow
-                                                            key={
-                                                                item.sale_item_id
-                                                            }
-                                                        >
-                                                            <TableCell>
-                                                                <p className="text-sm font-medium">
+                    <form onSubmit={handleSubmit}>
+                        <div className="grid grid-cols-3 gap-6">
+                            {/* Items */}
+                            <div className="col-span-2">
+                                <Card>
+                                    <CardHeader className="pb-3">
+                                        <CardTitle className="text-base">
+                                            Select items to return
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="p-0">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>
+                                                        Product
+                                                    </TableHead>
+                                                    <TableHead>Batch</TableHead>
+                                                    <TableHead className="text-right">
+                                                        Max
+                                                    </TableHead>
+                                                    <TableHead className="w-28 text-right">
+                                                        Qty to return
+                                                    </TableHead>
+                                                    <TableHead className="text-right">
+                                                        Subtotal
+                                                    </TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {returnableItems.map(
+                                                    (item, idx) => {
+                                                        const formItem =
+                                                            data.items[idx];
+                                                        return (
+                                                            <TableRow
+                                                                key={
+                                                                    item.sale_item_id
+                                                                }
+                                                            >
+                                                                <TableCell>
+                                                                    <p className="text-sm font-medium">
+                                                                        {
+                                                                            item.product_name
+                                                                        }
+                                                                    </p>
+                                                                    <p className="font-mono text-xs text-muted-foreground">
+                                                                        {
+                                                                            item.product_sku
+                                                                        }
+                                                                    </p>
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <span className="font-mono text-sm text-muted-foreground">
+                                                                        {
+                                                                            item.batch_number
+                                                                        }
+                                                                    </span>
+                                                                </TableCell>
+                                                                <TableCell className="text-right text-sm text-muted-foreground tabular-nums">
                                                                     {
-                                                                        item.product_name
-                                                                    }
-                                                                </p>
-                                                                <p className="font-mono text-xs text-muted-foreground">
-                                                                    {
-                                                                        item.product_sku
-                                                                    }
-                                                                </p>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <span className="font-mono text-sm text-muted-foreground">
-                                                                    {
-                                                                        item.batch_number
-                                                                    }
-                                                                </span>
-                                                            </TableCell>
-                                                            <TableCell className="text-right text-sm text-muted-foreground tabular-nums">
-                                                                {
-                                                                    item.max_quantity
-                                                                }{' '}
-                                                                <span className="text-xs">
-                                                                    {
-                                                                        item.unit_short_name
-                                                                    }
-                                                                </span>
-                                                            </TableCell>
-                                                            <TableCell className="text-right">
-                                                                <Input
-                                                                    type="number"
-                                                                    min={0}
-                                                                    max={
                                                                         item.max_quantity
-                                                                    }
-                                                                    className="ml-auto h-8 w-20 text-right font-mono"
-                                                                    value={
-                                                                        formItem.quantity ||
-                                                                        ''
-                                                                    }
-                                                                    placeholder="0"
-                                                                    onChange={(
-                                                                        e,
-                                                                    ) =>
-                                                                        updateItemQty(
-                                                                            idx,
-                                                                            Number(
-                                                                                e
-                                                                                    .target
-                                                                                    .value,
-                                                                            ),
-                                                                        )
-                                                                    }
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell className="text-right font-mono text-sm">
-                                                                {formItem.quantity >
-                                                                0
-                                                                    ? formatAmount(
-                                                                          formItem.quantity *
-                                                                              item.unit_price,
-                                                                      )
-                                                                    : '—'}
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    );
-                                                },
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                </CardContent>
-                            </Card>
-                        </div>
+                                                                    }{' '}
+                                                                    <span className="text-xs">
+                                                                        {
+                                                                            item.unit_short_name
+                                                                        }
+                                                                    </span>
+                                                                </TableCell>
+                                                                <TableCell className="text-right">
+                                                                    <Input
+                                                                        type="number"
+                                                                        min={0}
+                                                                        max={
+                                                                            item.max_quantity
+                                                                        }
+                                                                        className="ml-auto h-8 w-20 text-right font-mono"
+                                                                        value={
+                                                                            formItem.quantity ||
+                                                                            ''
+                                                                        }
+                                                                        placeholder="0"
+                                                                        onChange={(
+                                                                            e,
+                                                                        ) =>
+                                                                            updateItemQty(
+                                                                                idx,
+                                                                                Number(
+                                                                                    e
+                                                                                        .target
+                                                                                        .value,
+                                                                                ),
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell className="text-right font-mono text-sm">
+                                                                    {formItem.quantity >
+                                                                    0
+                                                                        ? formatAmount(
+                                                                              formItem.quantity *
+                                                                                  item.unit_price,
+                                                                          )
+                                                                        : '—'}
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        );
+                                                    },
+                                                )}
+                                            </TableBody>
+                                        </Table>
+                                    </CardContent>
+                                </Card>
+                            </div>
 
-                        {/* Sidebar */}
-                        <div className="space-y-4">
-                            <Card>
-                                <CardHeader className="pb-3">
-                                    <CardTitle className="text-base">
-                                        Details
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="space-y-1.5">
-                                        <Label>Note</Label>
-                                        <Textarea
-                                            rows={3}
-                                            className="resize-none"
-                                            placeholder="Reason for return…"
-                                            value={data.note}
-                                            onChange={(e) =>
-                                                setData('note', e.target.value)
-                                            }
-                                        />
-                                    </div>
+                            {/* Sidebar */}
+                            <div className="space-y-4">
+                                <Card>
+                                    <CardHeader className="pb-3">
+                                        <CardTitle className="text-base">
+                                            Details
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="space-y-1.5">
+                                            <Label>Note</Label>
+                                            <Textarea
+                                                rows={3}
+                                                className="resize-none"
+                                                placeholder="Reason for return…"
+                                                value={data.note}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        'note',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </div>
 
-                                    <Separator />
+                                        <Separator />
 
-                                    <div className="flex justify-between font-semibold">
-                                        <span>Return total</span>
-                                        <span className="font-mono">
-                                            {formatAmount(total)}
-                                        </span>
-                                    </div>
+                                        <div className="flex justify-between font-semibold">
+                                            <span>Return total</span>
+                                            <span className="font-mono">
+                                                {formatAmount(total)}
+                                            </span>
+                                        </div>
 
-                                    {errors.items && (
-                                        <p className="text-xs text-destructive">
-                                            {errors.items as string}
-                                        </p>
-                                    )}
-
-                                    <Button
-                                        type="submit"
-                                        className="w-full"
-                                        disabled={
-                                            processing ||
-                                            activeItems.length === 0
-                                        }
-                                    >
-                                        {processing && (
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        {errors.items && (
+                                            <p className="text-xs text-destructive">
+                                                {errors.items as string}
+                                            </p>
                                         )}
-                                        Create return
-                                    </Button>
-                                </CardContent>
-                            </Card>
+
+                                        <Button
+                                            type="submit"
+                                            className="w-full"
+                                            disabled={
+                                                processing ||
+                                                activeItems.length === 0
+                                            }
+                                        >
+                                            {processing && (
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            )}
+                                            Create return
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
-        </>
+        </AppLayout>
     );
 }

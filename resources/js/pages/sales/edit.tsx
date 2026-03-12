@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 
+import AppLayout from '@/layouts/app-layout';
 import SaleController from '@/wayfinder/App/Http/Controllers/Sales/SaleController';
 import type { App, Inertia } from '@/wayfinder/types';
 import SaleFormModal from './partials/sale-form-modal';
@@ -18,23 +19,24 @@ export default function SaleEdit({
     products,
 }: Props) {
     return (
-        <>
+        <AppLayout>
             <Head title={`Edit Sale ${sale.reference_no}`} />
-
-            <SaleFormModal
-                open={true}
-                onOpenChange={(open) => {
-                    if (!open) {
-                        router.visit(
-                            SaleController.show.url({ sale: sale.id }),
-                        );
-                    }
-                }}
-                customers={customers}
-                warehouses={warehouses}
-                products={products}
-                sale={sale}
-            />
-        </>
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+                <SaleFormModal
+                    open={true}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            router.visit(
+                                SaleController.show.url({ sale: sale.id }),
+                            );
+                        }
+                    }}
+                    customers={customers}
+                    warehouses={warehouses}
+                    products={products}
+                    sale={sale}
+                />
+            </div>
+        </AppLayout>
     );
 }
