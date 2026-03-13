@@ -8,10 +8,7 @@ use App\Actions\Product\CreateProduct;
 use App\Actions\Product\DeleteProduct;
 use App\Actions\Product\UpdateProduct;
 use App\Data\Product\ProductData;
-use App\Models\Brand;
-use App\Models\Category;
 use App\Models\Product;
-use App\Models\Unit;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -21,23 +18,29 @@ final readonly class ProductController
 {
     public function index(): Response
     {
-        $products = Product::withInactive()
-            ->with(['category', 'brand', 'unit'])
-            ->withStockQuantity()
-            ->latest()
-            ->paginate(25);
+        /** @var array{
+         *     search?: string|null,
+         *     category_id?: int|null,
+         *     brand_id?: int|null,
+         *     is_tracked?: bool|string|null,
+         *     sort?: string|null,
+         *     direction?: string|null
+         * } $filters
+         */
+        $filters = request()->only([
+            'search',
+            'category_id',
+            'brand_id',
+            'tracked',
+            'low_stock',
+            'out_of_stock',
+        ]);
+        $perPage = request()->integer('per_page');
+
+        $product = Product::query()->paginateWithFilters($filters, $perPage);
 
         return Inertia::render('products/index', [
-            'products' => $products,
-        ]);
-    }
-
-    public function create(): Response
-    {
-        return Inertia::render('products/create', [
-            'categories' => Category::query()->select('id', 'name')->get(),
-            'brands' => Brand::query()->select('id', 'name')->get(),
-            'units' => Unit::query()->select('id', 'name', 'short_name')->get(),
+            'products' => $product,
         ]);
     }
 
@@ -49,7 +52,7 @@ final readonly class ProductController
         $product = $action->handle($data);
 
         return to_route('products.show', $product)
-            ->with('success', "Product '{$product->name}' created.");
+            ->with('success', "Product '$product->name' created.");
     }
 
     public function show(Product $product): Response
@@ -72,18 +75,6 @@ final readonly class ProductController
         ]);
     }
 
-    public function edit(Product $product): Response
-    {
-        $product->load(['category', 'brand', 'unit']);
-
-        return Inertia::render('products/edit', [
-            'product' => $product,
-            'categories' => Category::query()->select('id', 'name')->get(),
-            'brands' => Brand::query()->select('id', 'name')->get(),
-            'units' => Unit::query()->select('id', 'name', 'short_name')->get(),
-        ]);
-    }
-
     /**
      * @throws Throwable
      */
@@ -95,7 +86,7 @@ final readonly class ProductController
         $action->handle($product, $data);
 
         return to_route('products.show', $product)
-            ->with('success', "Product '{$product->name}' updated.");
+            ->with('success', "Product '$product->name' updated.");
     }
 
     /**
