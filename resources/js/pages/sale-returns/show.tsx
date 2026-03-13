@@ -1,14 +1,9 @@
 import { Head, Link, router } from '@inertiajs/react';
-import {
-    ArrowLeft,
-    CheckCircle2,
-    CreditCard,
-    Package,
-    User,
-} from 'lucide-react';
+import { CheckCircle2, CreditCard, Package, User } from 'lucide-react';
 import { useState } from 'react';
 
 import ConfirmDialog, { ActionDialog } from '@/components/confirm-dialog';
+import PageHeader from '@/components/page-header';
 import {
     PaymentStatusBadge,
     ReturnStatusBadge,
@@ -54,84 +49,71 @@ export default function SaleReturnShow({ saleReturn, payment_methods }: Props) {
             <Head title={`Return ${saleReturn.reference_no}`} />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="space-y-6">
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 shrink-0"
-                                onClick={() =>
-                                    router.visit(
-                                        SaleReturnController.index.url(),
-                                    )
-                                }
-                            >
-                                <ArrowLeft className="h-4 w-4" />
-                            </Button>
-                            <div>
-                                <div className="flex items-center gap-2.5">
-                                    <h1 className="font-mono text-xl font-semibold tracking-tight">
-                                        {saleReturn.reference_no}
-                                    </h1>
-                                    <ReturnStatusBadge
-                                        status={saleReturn.status}
-                                    />
-                                    <PaymentStatusBadge
-                                        status={saleReturn.payment_status}
-                                    />
-                                </div>
-                                <p className="mt-0.5 text-sm text-muted-foreground">
-                                    Created{' '}
-                                    {formatDateTime(saleReturn.created_at)}
-                                    {saleReturn.sale && (
-                                        <>
-                                            {' · '}
-                                            <Link
-                                                href={SaleController.show.url({
-                                                    sale: saleReturn.sale.id,
-                                                })}
-                                                className="text-primary hover:underline"
-                                            >
-                                                {saleReturn.sale.reference_no}
-                                            </Link>
-                                        </>
-                                    )}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex shrink-0 items-center gap-2">
-                            {saleReturn.status === 'completed' &&
-                                saleReturn.payment_status !== 'paid' && (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setPayOpen(true)}
-                                    >
-                                        <CreditCard className="mr-1.5 h-3.5 w-3.5" />
-                                        Add refund
-                                    </Button>
+                    <PageHeader
+                        backUrl={SaleReturnController.index.url()}
+                        title={saleReturn.reference_no}
+                        badges={
+                            <>
+                                <ReturnStatusBadge status={saleReturn.status} />
+                                <PaymentStatusBadge
+                                    status={saleReturn.payment_status}
+                                />
+                            </>
+                        }
+                        subtitle={
+                            <>
+                                Created {formatDateTime(saleReturn.created_at)}
+                                {saleReturn.sale && (
+                                    <>
+                                        {' · '}
+                                        <Link
+                                            href={SaleController.show.url({
+                                                sale: saleReturn.sale.id,
+                                            })}
+                                            className="text-primary hover:underline"
+                                        >
+                                            {saleReturn.sale.reference_no}
+                                        </Link>
+                                    </>
                                 )}
-                            {saleReturn.status === 'pending' && (
-                                <>
-                                    <Button
-                                        size="sm"
-                                        onClick={() => setCompleteOpen(true)}
-                                    >
-                                        <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
-                                        Complete
-                                    </Button>
-                                    <Button
-                                        variant="destructive"
-                                        size="sm"
-                                        onClick={() => setDeleteOpen(true)}
-                                    >
-                                        Delete
-                                    </Button>
-                                </>
-                            )}
-                        </div>
-                    </div>
+                            </>
+                        }
+                        actions={
+                            <>
+                                {saleReturn.status === 'completed' &&
+                                    saleReturn.payment_status !== 'paid' && (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setPayOpen(true)}
+                                        >
+                                            <CreditCard className="mr-1.5 h-3.5 w-3.5" />
+                                            Add refund
+                                        </Button>
+                                    )}
+                                {saleReturn.status === 'pending' && (
+                                    <>
+                                        <Button
+                                            size="sm"
+                                            onClick={() =>
+                                                setCompleteOpen(true)
+                                            }
+                                        >
+                                            <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
+                                            Complete
+                                        </Button>
+                                        <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            onClick={() => setDeleteOpen(true)}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </>
+                                )}
+                            </>
+                        }
+                    />
 
                     <div className="grid grid-cols-3 gap-6">
                         <div className="col-span-2 space-y-4">

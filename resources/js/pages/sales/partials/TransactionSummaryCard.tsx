@@ -8,7 +8,7 @@ interface Props {
     dueAmount: number;
 }
 
-export default function PurchaseSummaryCard({
+export default function TransactionSummaryCard({
     totalAmount,
     paidAmount,
     dueAmount,

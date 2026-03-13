@@ -13,6 +13,7 @@ import { useState } from 'react';
 import ConfirmDialog, { ActionDialog } from '@/components/confirm-dialog';
 import DataTable from '@/components/data-table/data-table';
 import DataTableColumnHeader from '@/components/data-table/data-table-column-header';
+import FilterBar from '@/components/filter-bar';
 import {
     PaymentStatusBadge,
     PurchaseStatusBadge,
@@ -26,7 +27,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
 import {
     Select,
     SelectContent,
@@ -236,9 +236,7 @@ export default function PurchasesIndex({ purchases, filters = {} }: Props) {
             header: 'Due',
             cell: ({ row }) => {
                 const due =
-                    typeof row.original.due_amount === 'number'
-                        ? row.original.due_amount
-                        : 0;
+                    row.original.due_amount;
                 return (
                     <span
                         className={
@@ -301,17 +299,12 @@ export default function PurchasesIndex({ purchases, filters = {} }: Props) {
                         </Button>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3">
-                        <Input
-                            placeholder="Search reference, supplier…"
-                            className="h-9 w-64"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={(e) =>
-                                e.key === 'Enter' && applyFilters({ search })
-                            }
-                            onBlur={() => applyFilters({ search })}
-                        />
+                    <FilterBar
+                        search={search}
+                        onSearchChange={setSearch}
+                        onSearch={() => applyFilters({ search })}
+                        placeholder="Search reference, supplier…"
+                    >
                         <Select
                             value={filters.status ?? ''}
                             onValueChange={(v) =>
@@ -357,7 +350,7 @@ export default function PurchasesIndex({ purchases, filters = {} }: Props) {
                                 <SelectItem value="paid">Paid</SelectItem>
                             </SelectContent>
                         </Select>
-                    </div>
+                    </FilterBar>
 
                     <DataTable
                         columns={columns}

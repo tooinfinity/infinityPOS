@@ -6,6 +6,7 @@ import { useState } from 'react';
 import ConfirmDialog, { ActionDialog } from '@/components/confirm-dialog';
 import DataTable from '@/components/data-table/data-table';
 import DataTableColumnHeader from '@/components/data-table/data-table-column-header';
+import FilterBar from '@/components/filter-bar';
 import {
     PaymentStatusBadge,
     ReturnStatusBadge,
@@ -19,7 +20,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
 import {
     Select,
     SelectContent,
@@ -68,7 +68,7 @@ export default function SaleReturnsIndex({ saleReturns, filters = {} }: Props) {
         );
     }
 
-    const columns: ColumnDef<SaleReturnRow, unknown>[] = [
+    const columns: ColumnDef<SaleReturnRow>[] = [
         {
             accessorKey: 'reference_no',
             size: 140,
@@ -237,17 +237,12 @@ export default function SaleReturnsIndex({ saleReturns, filters = {} }: Props) {
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3">
-                        <Input
-                            placeholder="Search reference…"
-                            className="h-9 w-64"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={(e) =>
-                                e.key === 'Enter' && applyFilters({ search })
-                            }
-                            onBlur={() => applyFilters({ search })}
-                        />
+                    <FilterBar
+                        search={search}
+                        onSearchChange={setSearch}
+                        onSearch={() => applyFilters({ search })}
+                        placeholder="Search reference…"
+                    >
                         <Select
                             value={filters.status ?? ''}
                             onValueChange={(v) =>
@@ -269,7 +264,7 @@ export default function SaleReturnsIndex({ saleReturns, filters = {} }: Props) {
                                 </SelectItem>
                             </SelectContent>
                         </Select>
-                    </div>
+                    </FilterBar>
 
                     <DataTable
                         columns={columns}

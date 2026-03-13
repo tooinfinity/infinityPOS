@@ -1,11 +1,13 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Loader2, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
+import ActionMenu from '@/components/action-menu';
 import ConfirmDialog from '@/components/confirm-dialog';
 import DataTable from '@/components/data-table/data-table';
 import DataTableColumnHeader from '@/components/data-table/data-table-column-header';
+import FilterBar from '@/components/filter-bar';
 import { ActiveBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,14 +17,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -320,40 +314,29 @@ export default function CustomersIndex({ customers, filters = {} }: Props) {
             id: 'actions',
             size: 50,
             cell: ({ row }) => (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                            onClick={() =>
+                <ActionMenu
+                    items={[
+                        {
+                            label: 'View',
+                            onClick: () =>
                                 router.visit(
                                     CustomerController.show.url({
                                         customer: row.original.id,
                                     }),
-                                )
-                            }
-                        >
-                            View
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                            onClick={() => setEditCustomer(row.original)}
-                        >
-                            Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                            className="text-destructive focus:text-destructive"
-                            onClick={() => setDeleteCustomer(row.original)}
-                        >
-                            <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                                ),
+                        },
+                        {
+                            label: 'Edit',
+                            onClick: () => setEditCustomer(row.original),
+                        },
+                        {
+                            label: 'Delete',
+                            onClick: () => setDeleteCustomer(row.original),
+                            icon: <Trash2 className="h-3.5 w-3.5" />,
+                            variant: 'destructive',
+                        },
+                    ]}
+                />
             ),
         },
     ];
@@ -377,15 +360,11 @@ export default function CustomersIndex({ customers, filters = {} }: Props) {
                         </Button>
                     </div>
 
-                    <Input
+                    <FilterBar
+                        search={search}
+                        onSearchChange={setSearch}
+                        onSearch={() => applyFilters({ search })}
                         placeholder="Search by name, email, phone…"
-                        className="h-9 w-64"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        onKeyDown={(e) =>
-                            e.key === 'Enter' && applyFilters({ search })
-                        }
-                        onBlur={() => applyFilters({ search })}
                     />
 
                     <DataTable

@@ -1,8 +1,9 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeft, Mail, MapPin, Phone, ShoppingBag } from 'lucide-react';
+import { Mail, MapPin, Phone, ShoppingBag } from 'lucide-react';
 import { useState } from 'react';
 
 import ConfirmDialog from '@/components/confirm-dialog';
+import PageHeader from '@/components/page-header';
 import {
     ActiveBadge,
     PaymentStatusBadge,
@@ -41,54 +42,36 @@ export default function CustomerShow({ customer }: Props) {
             <Head title={customer.name} />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="space-y-6">
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 shrink-0"
-                                onClick={() =>
-                                    router.visit(CustomerController.index.url())
-                                }
-                            >
-                                <ArrowLeft className="h-4 w-4" />
-                            </Button>
-                            <div>
-                                <div className="flex items-center gap-2.5">
-                                    <h1 className="text-xl font-semibold tracking-tight">
-                                        {customer.name}
-                                    </h1>
-                                    <ActiveBadge active={customer.is_active} />
-                                </div>
-                                <p className="mt-0.5 text-sm text-muted-foreground">
-                                    Customer since{' '}
-                                    {formatDate(customer.created_at)}
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex shrink-0 items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                    router.visit(
-                                        CustomerController.edit.url({
-                                            customer: customer.id,
-                                        }),
-                                    )
-                                }
-                            >
-                                Edit
-                            </Button>
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => setDeleteOpen(true)}
-                            >
-                                Delete
-                            </Button>
-                        </div>
-                    </div>
+                    <PageHeader
+                        backUrl={CustomerController.index.url()}
+                        title={customer.name}
+                        badges={<ActiveBadge active={customer.is_active} />}
+                        subtitle={`Customer since ${formatDate(customer.created_at)}`}
+                        actions={
+                            <>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() =>
+                                        router.visit(
+                                            CustomerController.edit.url({
+                                                customer: customer.id,
+                                            }),
+                                        )
+                                    }
+                                >
+                                    Edit
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => setDeleteOpen(true)}
+                                >
+                                    Delete
+                                </Button>
+                            </>
+                        }
+                    />
 
                     <div className="grid grid-cols-3 gap-6">
                         <div className="col-span-2">

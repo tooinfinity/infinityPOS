@@ -1,14 +1,9 @@
 import { Head, Link, router } from '@inertiajs/react';
-import {
-    ArrowLeft,
-    CheckCircle2,
-    CreditCard,
-    Package,
-    Truck,
-} from 'lucide-react';
+import { CheckCircle2, CreditCard, Package, Truck } from 'lucide-react';
 import { useState } from 'react';
 
 import ConfirmDialog, { ActionDialog } from '@/components/confirm-dialog';
+import PageHeader from '@/components/page-header';
 import {
     PaymentStatusBadge,
     ReturnStatusBadge,
@@ -55,92 +50,80 @@ export default function PurchaseReturnShow({
             <Head title={`Return ${purchaseReturn.reference_no}`} />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="space-y-6">
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 shrink-0"
-                                onClick={() =>
-                                    router.visit(
-                                        PurchaseReturnController.index.url(),
-                                    )
-                                }
-                            >
-                                <ArrowLeft className="h-4 w-4" />
-                            </Button>
-                            <div>
-                                <div className="flex items-center gap-2.5">
-                                    <h1 className="font-mono text-xl font-semibold tracking-tight">
-                                        {purchaseReturn.reference_no}
-                                    </h1>
-                                    <ReturnStatusBadge
-                                        status={purchaseReturn.status}
-                                    />
-                                    <PaymentStatusBadge
-                                        status={purchaseReturn.payment_status}
-                                    />
-                                </div>
-                                <p className="mt-0.5 text-sm text-muted-foreground">
-                                    Created{' '}
-                                    {formatDateTime(purchaseReturn.created_at)}
-                                    {purchaseReturn.purchase && (
-                                        <>
-                                            {' '}
-                                            ·{' '}
-                                            <Link
-                                                href={PurchaseController.show.url(
-                                                    {
-                                                        purchase:
-                                                            purchaseReturn
-                                                                .purchase.id,
-                                                    },
-                                                )}
-                                                className="text-primary hover:underline"
-                                            >
-                                                {
-                                                    purchaseReturn.purchase
-                                                        .reference_no
-                                                }
-                                            </Link>
-                                        </>
-                                    )}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex shrink-0 items-center gap-2">
-                            {purchaseReturn.status === 'completed' &&
-                                purchaseReturn.payment_status !== 'paid' && (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setPayOpen(true)}
-                                    >
-                                        <CreditCard className="mr-1.5 h-3.5 w-3.5" />{' '}
-                                        Add refund
-                                    </Button>
+                    <PageHeader
+                        backUrl={PurchaseReturnController.index.url()}
+                        title={purchaseReturn.reference_no}
+                        badges={
+                            <>
+                                <ReturnStatusBadge
+                                    status={purchaseReturn.status}
+                                />
+                                <PaymentStatusBadge
+                                    status={purchaseReturn.payment_status}
+                                />
+                            </>
+                        }
+                        subtitle={
+                            <>
+                                Created{' '}
+                                {formatDateTime(purchaseReturn.created_at)}
+                                {purchaseReturn.purchase && (
+                                    <>
+                                        {' '}
+                                        ·{' '}
+                                        <Link
+                                            href={PurchaseController.show.url({
+                                                purchase:
+                                                    purchaseReturn.purchase.id,
+                                            })}
+                                            className="text-primary hover:underline"
+                                        >
+                                            {
+                                                purchaseReturn.purchase
+                                                    .reference_no
+                                            }
+                                        </Link>
+                                    </>
                                 )}
-                            {purchaseReturn.status === 'pending' && (
-                                <>
-                                    <Button
-                                        size="sm"
-                                        onClick={() => setCompleteOpen(true)}
-                                    >
-                                        <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />{' '}
-                                        Complete
-                                    </Button>
-                                    <Button
-                                        variant="destructive"
-                                        size="sm"
-                                        onClick={() => setDeleteOpen(true)}
-                                    >
-                                        Delete
-                                    </Button>
-                                </>
-                            )}
-                        </div>
-                    </div>
+                            </>
+                        }
+                        actions={
+                            <>
+                                {purchaseReturn.status === 'completed' &&
+                                    purchaseReturn.payment_status !==
+                                        'paid' && (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setPayOpen(true)}
+                                        >
+                                            <CreditCard className="mr-1.5 h-3.5 w-3.5" />
+                                            Add refund
+                                        </Button>
+                                    )}
+                                {purchaseReturn.status === 'pending' && (
+                                    <>
+                                        <Button
+                                            size="sm"
+                                            onClick={() =>
+                                                setCompleteOpen(true)
+                                            }
+                                        >
+                                            <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
+                                            Complete
+                                        </Button>
+                                        <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            onClick={() => setDeleteOpen(true)}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </>
+                                )}
+                            </>
+                        }
+                    />
 
                     <div className="grid grid-cols-3 gap-6">
                         <div className="col-span-2 space-y-4">

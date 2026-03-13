@@ -1,6 +1,5 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import {
-    ArrowLeft,
     Building2,
     CheckCircle2,
     CreditCard,
@@ -11,11 +10,13 @@ import {
 import { useState } from 'react';
 
 import { ActionDialog } from '@/components/confirm-dialog';
+import PageHeader from '@/components/page-header';
 import { PaymentStatusBadge, SaleStatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { formatDateTime } from '@/lib/formatters';
+import TransactionSummaryCard from '@/pages/sales/partials/TransactionSummaryCard';
 import SalePaymentController from '@/wayfinder/App/Http/Controllers/Payments/SalePaymentController';
 import WarehouseController from '@/wayfinder/App/Http/Controllers/Products/WarehouseController';
 import CancelSaleController from '@/wayfinder/App/Http/Controllers/Sales/CancelSaleController';
@@ -28,7 +29,6 @@ import PaymentFormModal from './partials/payment-form-modal';
 import SaleFormModal from './partials/sale-form-modal';
 import SaleItemsTable from './partials/sale-items-table';
 import SalePaymentsTable from './partials/sale-payments-table';
-import SaleSummaryCard from './partials/sale-summary-card';
 
 interface Props extends Inertia.SharedData {
     sale: App.Models.Sale;
@@ -58,91 +58,77 @@ export default function SaleShow({
             <Head title={`Sale ${sale.reference_no}`} />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="space-y-6">
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 shrink-0"
-                                onClick={() =>
-                                    router.visit(SaleController.index.url())
-                                }
-                            >
-                                <ArrowLeft className="h-4 w-4" />
-                            </Button>
-                            <div>
-                                <div className="flex items-center gap-2.5">
-                                    <h1 className="font-mono text-xl font-semibold tracking-tight">
-                                        {sale.reference_no}
-                                    </h1>
-                                    <SaleStatusBadge status={sale.status} />
-                                    <PaymentStatusBadge
-                                        status={sale.payment_status}
-                                    />
-                                </div>
-                                <p className="mt-0.5 text-sm text-muted-foreground">
-                                    Created {formatDateTime(sale.created_at)}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex shrink-0 items-center gap-2">
-                            {sale.status === 'pending' && (
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setEditOpen(true)}
-                                >
-                                    Edit
-                                </Button>
-                            )}
-                            {sale.status === 'completed' &&
-                                sale.payment_status !== 'paid' && (
+                    <PageHeader
+                        backUrl={SaleController.index.url()}
+                        title={sale.reference_no}
+                        badges={
+                            <>
+                                <SaleStatusBadge status={sale.status} />
+                                <PaymentStatusBadge
+                                    status={sale.payment_status}
+                                />
+                            </>
+                        }
+                        subtitle={`Created ${formatDateTime(sale.created_at)}`}
+                        actions={
+                            <>
+                                {sale.status === 'pending' && (
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => setPayOpen(true)}
+                                        onClick={() => setEditOpen(true)}
                                     >
-                                        <CreditCard className="mr-1.5 h-3.5 w-3.5" />{' '}
-                                        Add payment
+                                        Edit
                                     </Button>
                                 )}
-                            {sale.status === 'pending' && (
-                                <Button
-                                    size="sm"
-                                    onClick={() => setCompleteOpen(true)}
-                                >
-                                    <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />{' '}
-                                    Complete
-                                </Button>
-                            )}
-                            {sale.status === 'completed' && (
-                                <Button variant="outline" size="sm" asChild>
-                                    <Link
-                                        href={SaleReturnController.create[
-                                            '/sale-returns/create/{sale}'
-                                        ].url({
-                                            sale: sale.id,
-                                        })}
+                                {sale.status === 'completed' &&
+                                    sale.payment_status !== 'paid' && (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setPayOpen(true)}
+                                        >
+                                            <CreditCard className="mr-1.5 h-3.5 w-3.5" />
+                                            Add payment
+                                        </Button>
+                                    )}
+                                {sale.status === 'pending' && (
+                                    <Button
+                                        size="sm"
+                                        onClick={() => setCompleteOpen(true)}
                                     >
-                                        <RotateCcw className="mr-1.5 h-3.5 w-3.5" />{' '}
-                                        Create return
-                                    </Link>
-                                </Button>
-                            )}
-                            {(sale.status === 'pending' ||
-                                sale.status === 'completed') && (
-                                <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={() => setCancelOpen(true)}
-                                >
-                                    <XCircle className="mr-1.5 h-3.5 w-3.5" />{' '}
-                                    Cancel
-                                </Button>
-                            )}
-                        </div>
-                    </div>
+                                        <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
+                                        Complete
+                                    </Button>
+                                )}
+                                {sale.status === 'completed' && (
+                                    <Button variant="outline" size="sm" asChild>
+                                        <Link
+                                            href={SaleReturnController.create[
+                                                '/sale-returns/create/{sale}'
+                                            ].url({
+                                                sale: sale.id,
+                                            })}
+                                        >
+                                            <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+                                            Create return
+                                        </Link>
+                                    </Button>
+                                )}
+                                {(sale.status === 'pending' ||
+                                    sale.status === 'completed') && (
+                                    <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        onClick={() => setCancelOpen(true)}
+                                    >
+                                        <XCircle className="mr-1.5 h-3.5 w-3.5" />
+                                        Cancel
+                                    </Button>
+                                )}
+                            </>
+                        }
+                    />
 
                     <div className="grid grid-cols-3 gap-6">
                         <div className="col-span-2 space-y-4">
@@ -151,14 +137,10 @@ export default function SaleShow({
                         </div>
 
                         <div className="space-y-4">
-                            <SaleSummaryCard
+                            <TransactionSummaryCard
                                 totalAmount={sale.total_amount}
                                 paidAmount={sale.paid_amount}
-                                dueAmount={
-                                    typeof sale.due_amount === 'number'
-                                        ? sale.due_amount
-                                        : 0
-                                }
+                                dueAmount={sale.due_amount}
                             />
 
                             <Card>
@@ -264,11 +246,7 @@ export default function SaleShow({
                     open={payOpen}
                     onOpenChange={setPayOpen}
                     storeUrl={SalePaymentController.url({ sale: sale.id })}
-                    dueAmount={
-                        typeof sale.due_amount === 'number'
-                            ? sale.due_amount
-                            : 0
-                    }
+                    dueAmount={sale.due_amount}
                     paymentMethods={payment_methods}
                 />
 
