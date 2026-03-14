@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Builders\StockMovementBuilder;
 use App\Enums\StockMovementTypeEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\StockMovementFactory;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -39,6 +38,11 @@ final class StockMovement extends Model
 {
     /** @use HasFactory<StockMovementFactory> */
     use HasFactory;
+
+    public function newEloquentBuilder(mixed $query): StockMovementBuilder
+    {
+        return new StockMovementBuilder($query);
+    }
 
     /**
      * @return BelongsTo<Warehouse, $this>
@@ -101,55 +105,5 @@ final class StockMovement extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @param  Builder<StockMovement>  $query
-     * @return Builder<StockMovement>
-     */
-    #[Scope]
-    protected function in(Builder $query): Builder
-    {
-        return $query->where('type', StockMovementTypeEnum::In);
-    }
-
-    /**
-     * @param  Builder<StockMovement>  $query
-     * @return Builder<StockMovement>
-     */
-    #[Scope]
-    protected function out(Builder $query): Builder
-    {
-        return $query->where('type', StockMovementTypeEnum::Out);
-    }
-
-    /**
-     * @param  Builder<StockMovement>  $query
-     * @return Builder<StockMovement>
-     */
-    #[Scope]
-    protected function transfer(Builder $query): Builder
-    {
-        return $query->where('type', StockMovementTypeEnum::Transfer);
-    }
-
-    /**
-     * @param  Builder<StockMovement>  $query
-     * @return Builder<StockMovement>
-     */
-    #[Scope]
-    protected function adjustment(Builder $query): Builder
-    {
-        return $query->where('type', StockMovementTypeEnum::Adjustment);
-    }
-
-    /**
-     * @param  Builder<StockMovement>  $query
-     * @return Builder<StockMovement>
-     */
-    #[Scope]
-    protected function recent(Builder $query, int $days = 30): Builder
-    {
-        return $query->where('created_at', '>=', now()->subDays($days));
     }
 }

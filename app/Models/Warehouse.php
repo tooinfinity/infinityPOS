@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Builders\WarehouseBuilder;
 use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\WarehouseFactory;
@@ -47,6 +48,11 @@ final class Warehouse extends Model
     public static function withInactive(): Builder
     {
         return self::query()->withoutGlobalScope(ActiveScope::class);
+    }
+
+    public function newEloquentBuilder(mixed $query): WarehouseBuilder
+    {
+        return new WarehouseBuilder($query);
     }
 
     /**

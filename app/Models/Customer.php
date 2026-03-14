@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Builders\CustomerBuilder;
 use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\CustomerFactory;
-use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -42,6 +42,11 @@ final class Customer extends Model
         return self::query()->withoutGlobalScope(ActiveScope::class);
     }
 
+    public function newEloquentBuilder(mixed $query): CustomerBuilder
+    {
+        return new CustomerBuilder($query);
+    }
+
     /**
      * @return HasMany<Sale, $this>
      */
@@ -67,19 +72,5 @@ final class Customer extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @param  Builder<Customer>  $query
-     * @return Builder<Customer>
-     */
-    #[Scope]
-    protected function search(Builder $query, string $search): Builder
-    {
-        return $query->where(function (Builder $q) use ($search): void {
-            $q->where('name', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%")
-                ->orWhere('phone', 'like', "%{$search}%");
-        });
     }
 }

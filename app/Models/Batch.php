@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Builders\BatchBuilder;
 use Carbon\CarbonInterface;
 use Database\Factories\BatchFactory;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -38,6 +37,11 @@ final class Batch extends Model
 {
     /** @use HasFactory<BatchFactory> */
     use HasFactory;
+
+    public function newEloquentBuilder(mixed $query): BatchBuilder
+    {
+        return new BatchBuilder($query);
+    }
 
     /**
      * @return BelongsTo<Product, $this>
@@ -119,81 +123,6 @@ final class Batch extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @param  Builder<Batch>  $query
-     * @return Builder<Batch>
-     */
-    #[Scope]
-    protected function inStock(Builder $query): Builder
-    {
-        return $query->where('quantity', '>', 0);
-    }
-
-    /**
-     * @param  Builder<Batch>  $query
-     * @return Builder<Batch>
-     */
-    #[Scope]
-    protected function expired(Builder $query): Builder
-    {
-        return $query->whereNotNull('expires_at')
-            ->where('expires_at', '<', now());
-    }
-
-    /**
-     * @param  Builder<Batch>  $query
-     * @return Builder<Batch>
-     */
-    #[Scope]
-    protected function expiringSoon(Builder $query, int $days = 30): Builder
-    {
-        return $query->whereNotNull('expires_at')
-            ->where('expires_at', '>=', now())
-            ->where('expires_at', '<=', now()->addDays($days));
-    }
-
-    /**
-     * @param  Builder<Batch>  $query
-     * @return Builder<Batch>
-     */
-    #[Scope]
-    protected function fifo(Builder $query): Builder
-    {
-        return $query->oldest();
-    }
-
-    /**
-     * @param  Builder<Batch>  $query
-     * @return Builder<Batch>
-     */
-    #[Scope]
-    protected function fefo(Builder $query): Builder
-    {
-        return $query->orderByRaw('expires_at IS NULL, expires_at ASC');
-    }
-
-    /**
-     * @param  Builder<Batch>  $query
-     * @return Builder<Batch>
-     */
-    #[Scope]
-    protected function matching(
-        Builder $query,
-        int $productId,
-        int $warehouseId,
-        int $costAmount,
-        ?CarbonInterface $expiresAt = null,
-    ): Builder {
-        return $query->where('product_id', $productId)
-            ->where('warehouse_id', $warehouseId)
-            ->where('cost_amount', $costAmount)
-            ->when(
-                $expiresAt instanceof CarbonInterface,
-                fn (Builder $q) => $q->where('expires_at', $expiresAt),
-                fn (Builder $q) => $q->whereNull('expires_at'),
-            );
     }
 
     /**

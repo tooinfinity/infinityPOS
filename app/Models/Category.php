@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Builders\CategoryBuilder;
 use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\CategoryFactory;
@@ -35,6 +36,11 @@ final class Category extends Model
     public static function withInactive(): Builder
     {
         return self::query()->withoutGlobalScope(ActiveScope::class);
+    }
+
+    public function newEloquentBuilder(mixed $query): CategoryBuilder
+    {
+        return new CategoryBuilder($query);
     }
 
     /**

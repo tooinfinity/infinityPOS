@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Builders\PurchaseReturnBuilder;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\ReturnStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\PurchaseReturnFactory;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +16,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Support\Facades\DB;
 
 /**
  * @property-read int $id
@@ -45,6 +43,11 @@ final class PurchaseReturn extends Model
 {
     /** @use HasFactory<PurchaseReturnFactory> */
     use HasFactory;
+
+    public function newEloquentBuilder(mixed $query): PurchaseReturnBuilder
+    {
+        return new PurchaseReturnBuilder($query);
+    }
 
     /**
      * @return BelongsTo<Purchase, $this>
@@ -125,56 +128,6 @@ final class PurchaseReturn extends Model
     }
 
     /**
-     * @param  Builder<PurchaseReturn>  $query
-     * @return Builder<PurchaseReturn>
-     */
-    #[Scope]
-    protected function pending(Builder $query): Builder
-    {
-        return $query->where('status', ReturnStatusEnum::Pending);
-    }
-
-    /**
-     * @param  Builder<PurchaseReturn>  $query
-     * @return Builder<PurchaseReturn>
-     */
-    #[Scope]
-    protected function completed(Builder $query): Builder
-    {
-        return $query->where('status', ReturnStatusEnum::Completed);
-    }
-
-    /**
-     * @param  Builder<PurchaseReturn>  $query
-     * @return Builder<PurchaseReturn>
-     */
-    #[Scope]
-    protected function unpaid(Builder $query): Builder
-    {
-        return $query->where('payment_status', PaymentStatusEnum::Unpaid);
-    }
-
-    /**
-     * @param  Builder<PurchaseReturn>  $query
-     * @return Builder<PurchaseReturn>
-     */
-    #[Scope]
-    protected function partiallyPaid(Builder $query): Builder
-    {
-        return $query->where('payment_status', PaymentStatusEnum::Partial);
-    }
-
-    /**
-     * @param  Builder<PurchaseReturn>  $query
-     * @return Builder<PurchaseReturn>
-     */
-    #[Scope]
-    protected function paid(Builder $query): Builder
-    {
-        return $query->where('payment_status', PaymentStatusEnum::Paid);
-    }
-
-    /**
      * @return Attribute<int, null>
      */
     protected function dueAmount(): Attribute
@@ -182,17 +135,5 @@ final class PurchaseReturn extends Model
         return Attribute::make(
             get: fn (): int => max(0, $this->total_amount - $this->paid_amount),
         );
-    }
-
-    /**
-     * @param  Builder<PurchaseReturn>  $query
-     * @return Builder<PurchaseReturn>
-     */
-    #[Scope]
-    protected function withDueAmount(Builder $query): Builder
-    {
-        return $query->select('*')->addSelect([
-            'due_amount' => DB::raw('CASE WHEN total_amount > paid_amount THEN total_amount - paid_amount ELSE 0 END'),
-        ]);
     }
 }

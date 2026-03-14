@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Builders\StockTransferBuilder;
 use App\Enums\StockTransferStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\StockTransferFactory;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -37,6 +36,11 @@ final class StockTransfer extends Model
 {
     /** @use HasFactory<StockTransferFactory> */
     use HasFactory;
+
+    public function newEloquentBuilder(mixed $query): StockTransferBuilder
+    {
+        return new StockTransferBuilder($query);
+    }
 
     /**
      * @return BelongsTo<Warehouse, $this>
@@ -95,35 +99,5 @@ final class StockTransfer extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @param  Builder<StockTransfer>  $query
-     * @return Builder<StockTransfer>
-     */
-    #[Scope]
-    protected function pending(Builder $query): Builder
-    {
-        return $query->where('status', StockTransferStatusEnum::Pending);
-    }
-
-    /**
-     * @param  Builder<StockTransfer>  $query
-     * @return Builder<StockTransfer>
-     */
-    #[Scope]
-    protected function completed(Builder $query): Builder
-    {
-        return $query->where('status', StockTransferStatusEnum::Completed);
-    }
-
-    /**
-     * @param  Builder<StockTransfer>  $query
-     * @return Builder<StockTransfer>
-     */
-    #[Scope]
-    protected function cancelled(Builder $query): Builder
-    {
-        return $query->where('status', StockTransferStatusEnum::Cancelled);
     }
 }

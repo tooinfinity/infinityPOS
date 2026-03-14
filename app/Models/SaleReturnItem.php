@@ -6,8 +6,6 @@ namespace App\Models;
 
 use Carbon\CarbonInterface;
 use Database\Factories\SaleReturnItemFactory;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -71,37 +69,5 @@ final class SaleReturnItem extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @param  Builder<SaleReturnItem>  $query
-     * @return Builder<SaleReturnItem>
-     */
-    #[Scope]
-    protected function forProduct(Builder $query, int $productId): Builder
-    {
-        return $query->where('product_id', $productId);
-    }
-
-    /**
-     * @param  Builder<SaleReturnItem>  $query
-     * @return Builder<SaleReturnItem>
-     */
-    #[Scope]
-    protected function forBatch(Builder $query, ?int $batchId): Builder
-    {
-        return $batchId !== null
-            ? $query->where('batch_id', $batchId)
-            : $query->whereNull('batch_id');
-    }
-
-    /**
-     * @param  Builder<SaleReturnItem>  $query
-     * @return Builder<SaleReturnItem>
-     */
-    #[Scope]
-    protected function forOriginalSale(Builder $query, int $saleId): Builder
-    {
-        return $query->whereHas('saleReturn', fn (Builder $q) => $q->where('sale_id', $saleId));
     }
 }

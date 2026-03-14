@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Builders\SaleBuilder;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\SaleFactory;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +16,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Support\Facades\DB;
 
 /**
  * @property-read int $id
@@ -47,6 +45,11 @@ final class Sale extends Model
 {
     /** @use HasFactory<SaleFactory> */
     use HasFactory;
+
+    public function newEloquentBuilder(mixed $query): SaleBuilder
+    {
+        return new SaleBuilder($query);
+    }
 
     /**
      * @return BelongsTo<Customer, $this>
@@ -136,90 +139,6 @@ final class Sale extends Model
     }
 
     /**
-     * @param  Builder<Sale>  $query
-     */
-    #[Scope]
-    protected function search(Builder $query, ?string $search): void
-    {
-        $query->when($search, fn (Builder $query, string $search) => $query->whereAny(
-            ['customer.name', 'reference_no'],
-            'like',
-            "%{$search}%",
-        ));
-
-    }
-
-    /**
-     * @param  Builder<Sale>  $query
-     * @return Builder<Sale>
-     */
-    #[Scope]
-    protected function pending(Builder $query): Builder
-    {
-        return $query->where('status', SaleStatusEnum::Pending);
-    }
-
-    /**
-     * @param  Builder<Sale>  $query
-     * @return Builder<Sale>
-     */
-    #[Scope]
-    protected function completed(Builder $query): Builder
-    {
-        return $query->where('status', SaleStatusEnum::Completed);
-    }
-
-    /**
-     * @param  Builder<Sale>  $query
-     * @return Builder<Sale>
-     */
-    #[Scope]
-    protected function cancelled(Builder $query): Builder
-    {
-        return $query->where('status', SaleStatusEnum::Cancelled);
-    }
-
-    /**
-     * @param  Builder<Sale>  $query
-     * @return Builder<Sale>
-     */
-    #[Scope]
-    protected function unpaid(Builder $query): Builder
-    {
-        return $query->where('payment_status', PaymentStatusEnum::Unpaid);
-    }
-
-    /**
-     * @param  Builder<Sale>  $query
-     * @return Builder<Sale>
-     */
-    #[Scope]
-    protected function partiallyPaid(Builder $query): Builder
-    {
-        return $query->where('payment_status', PaymentStatusEnum::Partial);
-    }
-
-    /**
-     * @param  Builder<Sale>  $query
-     * @return Builder<Sale>
-     */
-    #[Scope]
-    protected function paid(Builder $query): Builder
-    {
-        return $query->where('payment_status', PaymentStatusEnum::Paid);
-    }
-
-    /**
-     * @param  Builder<Sale>  $query
-     * @return Builder<Sale>
-     */
-    #[Scope]
-    protected function today(Builder $query): Builder
-    {
-        return $query->whereDate('sale_date', today());
-    }
-
-    /**
      * @return Attribute<int, null>
      */
     protected function dueAmount(): Attribute
@@ -227,18 +146,6 @@ final class Sale extends Model
         return Attribute::make(
             get: fn (): int => max(0, $this->total_amount - $this->paid_amount),
         );
-    }
-
-    /**
-     * @param  Builder<Sale>  $query
-     * @return Builder<Sale>
-     */
-    #[Scope]
-    protected function withDueAmount(Builder $query): Builder
-    {
-        return $query->select('*')->addSelect([
-            'due_amount' => DB::raw('CASE WHEN total_amount > paid_amount THEN total_amount - paid_amount ELSE 0 END'),
-        ]);
     }
 
     /**

@@ -6,8 +6,10 @@ namespace App\Builders;
 
 use App\Models\Batch;
 use App\Models\Product;
+use App\Models\StockMovement;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 /**
  * @extends Builder<Product>
@@ -24,7 +26,7 @@ final class ProductBuilder extends Builder
 
     public function search(?string $search): self
     {
-        return $this->when($search, fn ($q) => $q->where(fn ($q) => $q
+        return $this->when($search, fn (self $q): self => $q->where(fn (self $q): self => $q
             ->where('name', 'like', "%$search%")
             ->orWhere('sku', 'like', "%$search%")
             ->orWhere('barcode', 'like', "%$search%")
@@ -33,17 +35,17 @@ final class ProductBuilder extends Builder
 
     public function category(?int $categoryId): self
     {
-        return $this->when($categoryId, fn ($q) => $q->where('category_id', $categoryId));
+        return $this->when($categoryId, fn (self $q): self => $q->where('category_id', $categoryId));
     }
 
     public function brand(?int $brandId): self
     {
-        return $this->when($brandId, fn ($q) => $q->where('brand_id', $brandId));
+        return $this->when($brandId, fn (self $q): self => $q->where('brand_id', $brandId));
     }
 
     public function tracked(?bool $isTracked = true): self
     {
-        return $this->when($isTracked !== null, fn ($q) => $q->where('track_inventory', $isTracked));
+        return $this->when($isTracked !== null, fn (self $q): self => $q->where('track_inventory', $isTracked));
     }
 
     public function lowStock(): self
@@ -73,7 +75,7 @@ final class ProductBuilder extends Builder
      *     search?: string|null,
      *     category_id?: int|null,
      *     brand_id?: int|null,
-     *     is_tracked?: bool|string|null,
+     *     track_inventory?: bool|string|null,
      *     sort?: string|null,
      *     direction?: 'asc'|'desc'|string|null
      * } $filters
@@ -82,16 +84,12 @@ final class ProductBuilder extends Builder
     {
         $search = $filters['search'] ?? null;
 
-        $categoryId = isset($filters['category_id'])
-            ? (int) $filters['category_id']
-            : null;
+        $categoryId = $filters['category_id'] ?? null;
 
-        $brandId = isset($filters['brand_id'])
-            ? (int) $filters['brand_id']
-            : null;
+        $brandId = $filters['brand_id'] ?? null;
 
-        $isTracked = isset($filters['is_tracked'])
-            ? filter_var($filters['is_tracked'], FILTER_VALIDATE_BOOLEAN)
+        $track_inventory = isset($filters['track_inventory'])
+            ? filter_var($filters['track_inventory'], FILTER_VALIDATE_BOOLEAN)
             : null;
 
         $sort = in_array($filters['sort'] ?? null, self::SORTABLE, true)
@@ -106,7 +104,7 @@ final class ProductBuilder extends Builder
             ->search($search)
             ->category($categoryId)
             ->brand($brandId)
-            ->tracked($isTracked)
+            ->tracked($track_inventory)
             ->when(
                 $sort,
                 fn (self $q, string $col): self => $q->orderBy($col, $direction),
@@ -119,7 +117,7 @@ final class ProductBuilder extends Builder
      *      search?: string|null,
      *      category_id?: int|null,
      *      brand_id?: int|null,
-     *      is_tracked?: bool|string|null,
+     *      track_inventory?: bool|string|null,
      *      sort?: string|null,
      *      direction?: 'asc'|'desc'|string|null
      *  } $filters
@@ -132,5 +130,33 @@ final class ProductBuilder extends Builder
             ->with(['unit', 'category', 'brand'])
             ->paginate($perPage ?? 25)
             ->withQueryString();
+    }
+
+    /**
+     * @return Collection<int, Batch>
+     */
+    public function getStockByWarehouse(): Collection
+    {
+        return Batch::query()
+            ->join('warehouses', 'batches.warehouse_id', '=', 'warehouses.id')
+            ->whereColumn('batches.product_id', 'products.id')
+            ->groupBy('batches.warehouse_id', 'warehouses.name')
+            ->select('batches.warehouse_id', 'warehouses.name as warehouse_name')
+            ->selectRaw('COALESCE(SUM(batches.quantity), 0) as total_quantity')
+            ->orderBy('warehouses.name')
+            ->get();
+    }
+
+    /**
+     * @return Collection<int, StockMovement>
+     */
+    public function getRecentMovements(int $limit = 20): Collection
+    {
+        /** @var Collection<int, StockMovement> */
+        return StockMovement::query()
+            ->whereColumn('stock_movements.product_id', 'products.id')
+            ->latest()
+            ->limit($limit)
+            ->get();
     }
 }

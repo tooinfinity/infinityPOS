@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Builders\PaymentBuilder;
 use App\Enums\PaymentStateEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\PaymentFactory;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -55,6 +54,11 @@ final class Payment extends Model
         $amount = $query->sum('amount');
 
         return $amount;
+    }
+
+    public function newEloquentBuilder(mixed $query): PaymentBuilder
+    {
+        return new PaymentBuilder($query);
     }
 
     /**
@@ -131,67 +135,5 @@ final class Payment extends Model
     public function canBeUnvoided(): bool
     {
         return $this->isVoided();
-    }
-
-    /**
-     * @param  Builder<Payment>  $query
-     * @return Builder<Payment>
-     */
-    #[Scope]
-    protected function active(Builder $query): Builder
-    {
-        return $query->where('status', PaymentStateEnum::Active);
-    }
-
-    /**
-     * @param  Builder<Payment>  $query
-     * @return Builder<Payment>
-     */
-    #[Scope]
-    protected function voided(Builder $query): Builder
-    {
-        return $query->where('status', PaymentStateEnum::Voided);
-    }
-
-    /**
-     * @param  Builder<Payment>  $query
-     * @return Builder<Payment>
-     */
-    #[Scope]
-    protected function recent(Builder $query, int $days = 30): Builder
-    {
-        return $query->where('payment_date', '>=', now()->subDays($days));
-    }
-
-    /**
-     * @param  Builder<Payment>  $query
-     * @return Builder<Payment>
-     */
-    #[Scope]
-    protected function today(Builder $query): Builder
-    {
-        return $query->whereDate('payment_date', today());
-    }
-
-    /**
-     * @param  Builder<Payment>  $query
-     * @return Builder<Payment>
-     */
-    #[Scope]
-    protected function refunds(Builder $query): Builder
-    {
-        return $query->where('amount', '<', 0);
-    }
-
-    /**
-     * @param  Builder<Payment>  $query
-     * @return Builder<Payment>
-     */
-    #[Scope]
-    protected function activeForPayable(Builder $query, string $payableType, int $payableId): Builder
-    {
-        return $query->where('payable_type', $payableType)
-            ->where('payable_id', $payableId)
-            ->where('status', PaymentStateEnum::Active);
     }
 }

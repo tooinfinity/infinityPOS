@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Builders\UnitBuilder;
 use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\UnitFactory;
@@ -35,6 +36,11 @@ final class Unit extends Model
     public static function withInactive(): Builder
     {
         return self::query()->withoutGlobalScope(ActiveScope::class);
+    }
+
+    public function newEloquentBuilder(mixed $query): UnitBuilder
+    {
+        return new UnitBuilder($query);
     }
 
     /**

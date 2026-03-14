@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Builders\SupplierBuilder;
 use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\SupplierFactory;
-use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -43,6 +43,11 @@ final class Supplier extends Model
         return self::query()->withoutGlobalScope(ActiveScope::class);
     }
 
+    public function newEloquentBuilder(mixed $query): SupplierBuilder
+    {
+        return new SupplierBuilder($query);
+    }
+
     /**
      * @return HasMany<Purchase, $this>
      */
@@ -69,20 +74,5 @@ final class Supplier extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @param  Builder<Supplier>  $query
-     * @return Builder<Supplier>
-     */
-    #[Scope]
-    protected function search(Builder $query, string $search): Builder
-    {
-        return $query->where(function (Builder $q) use ($search): void {
-            $q->where('name', 'like', "%{$search}%")
-                ->orWhere('company_name', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%")
-                ->orWhere('phone', 'like', "%{$search}%");
-        });
     }
 }

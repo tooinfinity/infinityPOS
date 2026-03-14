@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Builders\BrandBuilder;
 use App\Enums\MediaCollection;
 use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
@@ -40,6 +41,11 @@ final class Brand extends Model implements HasMedia
     public static function withInactive(): Builder
     {
         return self::query()->withoutGlobalScope(ActiveScope::class);
+    }
+
+    public function newEloquentBuilder(mixed $query): BrandBuilder
+    {
+        return new BrandBuilder($query);
     }
 
     /**

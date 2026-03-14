@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Query\Builder as QueryBuilder;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -66,10 +65,7 @@ final class Product extends Model implements HasMedia
         return self::query()->withoutGlobalScope(ActiveScope::class);
     }
 
-    /**
-     * @param  QueryBuilder  $query
-     */
-    public function newEloquentBuilder($query): ProductBuilder
+    public function newEloquentBuilder(mixed $query): ProductBuilder
     {
         return new ProductBuilder($query);
     }
