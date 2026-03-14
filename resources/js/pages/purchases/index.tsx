@@ -235,8 +235,7 @@ export default function PurchasesIndex({ purchases, filters = {} }: Props) {
             size: 120,
             header: 'Due',
             cell: ({ row }) => {
-                const due =
-                    row.original.due_amount;
+                const due = row.original.due_amount;
                 return (
                     <span
                         className={

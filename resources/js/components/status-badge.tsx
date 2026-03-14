@@ -167,3 +167,33 @@ export function ActiveBadge({
         />
     );
 }
+
+// ─── Stock ───────────────────────────────────────────────────────────────────
+
+export type StockStatus = 'in_stock' | 'low_stock' | 'out_of_stock';
+
+const STOCK_STATUS: Record<StockStatus, { label: string; cls: string }> = {
+    in_stock: {
+        label: 'In Stock',
+        cls: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20 dark:bg-emerald-900/20 dark:text-emerald-400',
+    },
+    low_stock: {
+        label: 'Low Stock',
+        cls: 'bg-amber-50 text-amber-700 ring-amber-600/20 dark:bg-amber-900/20 dark:text-amber-400',
+    },
+    out_of_stock: {
+        label: 'Out of Stock',
+        cls: 'bg-red-50 text-red-700 ring-red-600/20 dark:bg-red-900/20 dark:text-red-400',
+    },
+};
+
+export function StockStatusBadge({
+    status,
+    className,
+}: {
+    status: StockStatus;
+    className?: string;
+}) {
+    const { label, cls } = STOCK_STATUS[status];
+    return <StatusPill label={label} className={cn(cls, className)} />;
+}

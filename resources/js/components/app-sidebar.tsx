@@ -13,6 +13,7 @@ import {
 import { type NavItem } from '@/types';
 import { dashboard } from '@/wayfinder/routes';
 import customers from '@/wayfinder/routes/customers';
+import products from '@/wayfinder/routes/products';
 import purchaseReturns from '@/wayfinder/routes/purchase-returns';
 import purchases from '@/wayfinder/routes/purchases';
 import saleReturns from '@/wayfinder/routes/sale-returns';
@@ -23,6 +24,7 @@ import {
     BookOpen,
     Folder,
     LayoutGrid,
+    Package,
     ShoppingCart,
     UserRoundMinus,
     UserRoundPlus,
@@ -35,6 +37,11 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Products',
+        href: products.index(),
+        icon: Package,
     },
     {
         title: 'Customers',

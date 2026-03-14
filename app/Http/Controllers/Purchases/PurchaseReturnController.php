@@ -22,7 +22,6 @@ final readonly class PurchaseReturnController
     {
         $returns = PurchaseReturn::query()
             ->with(['purchase.supplier', 'warehouse', 'user'])
-            ->withDueAmount()
             ->latest()
             ->paginate(25);
 

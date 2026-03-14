@@ -23,7 +23,6 @@ final readonly class SaleReturnController
     {
         $returns = SaleReturn::query()
             ->with(['sale', 'warehouse', 'user'])
-            ->withDueAmount()
             ->latest()
             ->paginate(25);
 
