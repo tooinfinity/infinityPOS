@@ -76,6 +76,8 @@ final class ProductBuilder extends Builder
      *     category_id?: int|null,
      *     brand_id?: int|null,
      *     track_inventory?: bool|string|null,
+     *     low_stock?: bool|string|null,
+     *     out_of_stock?: bool|string|null,
      *     sort?: string|null,
      *     direction?: 'asc'|'desc'|string|null
      * } $filters
@@ -88,9 +90,12 @@ final class ProductBuilder extends Builder
 
         $brandId = $filters['brand_id'] ?? null;
 
-        $track_inventory = isset($filters['track_inventory'])
+        $trackInventory = isset($filters['track_inventory'])
             ? filter_var($filters['track_inventory'], FILTER_VALIDATE_BOOLEAN)
             : null;
+
+        $lowStock = filter_var($filters['low_stock'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $outOfStock = filter_var($filters['out_of_stock'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         $sort = in_array($filters['sort'] ?? null, self::SORTABLE, true)
             ? $filters['sort']
@@ -104,7 +109,9 @@ final class ProductBuilder extends Builder
             ->search($search)
             ->category($categoryId)
             ->brand($brandId)
-            ->tracked($track_inventory)
+            ->tracked($trackInventory)
+            ->when($outOfStock, fn (self $q): self => $q->outOfStock())
+            ->when($lowStock && ! $outOfStock, fn (self $q): self => $q->lowStock())
             ->when(
                 $sort,
                 fn (self $q, string $col): self => $q->orderBy($col, $direction),

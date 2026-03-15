@@ -112,7 +112,6 @@ final class PurchaseBuilder extends Builder
     {
         return $this
             ->applyFilters($filters)
-            ->with(['supplier', 'warehouse'])
             ->paginate($perPage ?? 25)
             ->withQueryString();
     }

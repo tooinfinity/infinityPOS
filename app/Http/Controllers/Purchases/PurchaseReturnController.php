@@ -11,7 +11,6 @@ use App\Data\PurchaseReturn\PurchaseReturnData;
 use App\Models\PaymentMethod;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
-use App\Models\Warehouse;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -23,6 +22,7 @@ final readonly class PurchaseReturnController
     {
         $returns = PurchaseReturn::query()
             ->with(['purchase.supplier', 'warehouse', 'user'])
+            ->withDueAmount()
             ->latest()
             ->paginate(25);
 
@@ -39,17 +39,31 @@ final readonly class PurchaseReturnController
         ResolveReturnableQuantity $resolveReturnableQuantity,
         ?Purchase $purchase = null,
     ): Response {
-        $returnableMap = null;
+        $returnableItems = [];
 
         if ($purchase instanceof Purchase) {
             $purchase->load('items.product.unit', 'items.batch');
             $returnableMap = $resolveReturnableQuantity->handle($purchase);
+
+            $returnableItems = $purchase->items
+                ->filter(fn ($item): bool => $returnableMap->get($item->product_id, 0) > 0)
+                ->map(fn ($item): array => [
+                    'purchase_item_id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'batch_id' => $item->batch_id,
+                    'product_name' => $item->product->name,
+                    'product_sku' => $item->product->sku,
+                    'batch_number' => $item->batch?->batch_number ?? '—',
+                    'unit_cost' => $item->unit_cost,
+                    'unit_short_name' => $item->product->unit->short_name,
+                    'max_quantity' => $returnableMap->get($item->product_id, 0),
+                ])
+                ->values();
         }
 
         return Inertia::render('purchase-returns/create', [
             'purchase' => $purchase?->load('items.product'),
-            'returnableItems' => $returnableMap,
-            'warehouses' => Warehouse::query()->select('id', 'name', 'code')->get(),
+            'returnableItems' => $returnableItems,
         ]);
     }
 

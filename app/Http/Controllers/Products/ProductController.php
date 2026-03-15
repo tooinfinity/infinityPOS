@@ -26,6 +26,8 @@ final readonly class ProductController
          *     category_id?: int|null,
          *     brand_id?: int|null,
          *     track_inventory?: bool|string|null,
+         *     low_stock?: bool|string|null,
+         *     out_of_stock?: bool|string|null,
          *     sort?: string|null,
          *     direction?: string|null
          * } $filters
@@ -35,6 +37,8 @@ final readonly class ProductController
             'category_id',
             'brand_id',
             'track_inventory',
+            'low_stock',
+            'out_of_stock',
             'sort',
             'direction',
         ]);

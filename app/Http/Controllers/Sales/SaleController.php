@@ -24,14 +24,13 @@ final readonly class SaleController
 {
     public function index(Request $request): Response
     {
-        /** @var string|null $search */
-        $search = $request->string('search')->value();
+        $filters = $request->only(['search', 'status', 'payment_status', 'sort', 'direction']);
         $sales = Sale::query()
             ->with(['customer', 'warehouse', 'user'])
-            ->search($search)
+            ->applyFilters($filters)
             ->withDueAmount()
-            ->latest()
-            ->paginate(25);
+            ->paginate($request->integer('per_page', 25))
+            ->withQueryString();
 
         return Inertia::render('sales/index', [
             'sales' => $sales,
@@ -42,11 +41,7 @@ final readonly class SaleController
                 ->withStockQuantity()
                 ->select('id', 'name', 'sku', 'selling_price', 'cost_price', 'unit_id', 'alert_quantity')
                 ->get(),
-            'filters' => [
-                'search' => $request->string('search')->value(),
-                'status' => $request->string('status')->value(),
-                'payment_status' => $request->string('payment_status')->value(),
-            ],
+            'filters' => $filters,
         ]);
     }
 

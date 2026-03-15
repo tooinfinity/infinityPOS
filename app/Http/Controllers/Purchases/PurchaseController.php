@@ -22,15 +22,23 @@ final readonly class PurchaseController
 {
     public function index(): Response
     {
-        $purchases = Purchase::query()
-            ->with(['supplier', 'warehouse', 'user'])
-            ->withDueAmount()
-            ->latest()
-            ->paginate(25);
+        /**
+         * @var array{
+         *     search?: string|null,
+         *     status?: string|null,
+         *     payment_status?: string|null,
+         *     sort?: string|null,
+         *     direction?: 'asc'|'desc'|string|null
+         * } $filters
+         */
+        $filters = request()->only(['search', 'status', 'payment_status', 'sort', 'direction']);
+        $perPage = request()->integer('per_page');
 
         return Inertia::render('purchases/index', [
-            'purchases' => $purchases,
-            'filters' => request()->query(),
+            'purchases' => Purchase::query()->with(['supplier', 'warehouse', 'user'])->withDueAmount()->paginateWithFilters($filters, $perPage),
+            'filters' => $filters,
+            'per_page' => $perPage,
+
         ]);
     }
 

@@ -24,10 +24,8 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 
     Route::prefix('customers')->name('customers.')->group(function (): void {
         Route::get('/', [CustomerController::class, 'index'])->name('index');
-        Route::get('/create', [CustomerController::class, 'create'])->name('create');
         Route::post('/', [CustomerController::class, 'store'])->name('store');
         Route::get('/{customer}', [CustomerController::class, 'show'])->name('show');
-        Route::get('/{customer}/edit', [CustomerController::class, 'edit'])->name('edit');
         Route::put('/{customer}', [CustomerController::class, 'update'])->name('update');
         Route::delete('/{customer}', [CustomerController::class, 'destroy'])->name('destroy');
     });
