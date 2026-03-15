@@ -86,9 +86,13 @@ final class ProductBuilder extends Builder
     {
         $search = $filters['search'] ?? null;
 
-        $categoryId = $filters['category_id'] ?? null;
+        $categoryId = isset($filters['category_id']) && $filters['category_id'] !== 0
+            ? $filters['category_id']
+            : null;
 
-        $brandId = $filters['brand_id'] ?? null;
+        $brandId = isset($filters['brand_id']) && $filters['brand_id'] !== 0
+            ? $filters['brand_id']
+            : null;
 
         $trackInventory = isset($filters['track_inventory'])
             ? filter_var($filters['track_inventory'], FILTER_VALIDATE_BOOLEAN)
@@ -145,6 +149,7 @@ final class ProductBuilder extends Builder
     public function getStockByWarehouse(): Collection
     {
         return Batch::query()
+            ->join('products', 'batches.product_id', '=', 'products.id')
             ->join('warehouses', 'batches.warehouse_id', '=', 'warehouses.id')
             ->whereColumn('batches.product_id', 'products.id')
             ->groupBy('batches.warehouse_id', 'warehouses.name')
@@ -161,6 +166,7 @@ final class ProductBuilder extends Builder
     {
         /** @var Collection<int, StockMovement> */
         return StockMovement::query()
+            ->join('products', 'stock_movements.product_id', '=', 'products.id')
             ->whereColumn('stock_movements.product_id', 'products.id')
             ->latest()
             ->limit($limit)

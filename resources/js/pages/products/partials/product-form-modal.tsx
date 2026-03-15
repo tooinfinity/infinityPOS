@@ -35,6 +35,7 @@ interface FormData {
     cost_price: string;
     track_inventory: boolean;
     alert_quantity: string;
+    is_active: boolean;
 }
 
 interface Props {
@@ -68,6 +69,7 @@ export default function ProductFormModal({
             cost_price: product?.cost_price?.toString() ?? '',
             track_inventory: product?.track_inventory ?? true,
             alert_quantity: product?.alert_quantity?.toString() ?? '10',
+            is_active: product?.is_active ?? true,
         });
 
     function handleSubmit(e: React.FormEvent) {
