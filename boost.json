@@ -23,6 +23,7 @@
         "laravel-controllers",
         "laravel-dtos",
         "laravel-exceptions",
+        "laravel-expert",
         "laravel-inertia-react",
         "laravel-models",
         "laravel-performance-caching",
