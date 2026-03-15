@@ -23,7 +23,6 @@ final class PurchaseData extends Data
         public PurchaseStatusEnum $status,
         public CarbonInterface $purchase_date,
         public int $total_amount,
-        public int $paid_amount,
         public ?string $note,
 
         /** @var DataCollection<int, PurchaseItemData> */
@@ -39,7 +38,6 @@ final class PurchaseData extends Data
             'status' => $model->status,
             'purchase_date' => $model->purchase_date,
             'total_amount' => $model->total_amount,
-            'paid_amount' => $model->paid_amount,
             'note' => $model->note,
             'items' => $model->items->map(
                 fn (PurchaseItem $item): array => [
@@ -67,7 +65,6 @@ final class PurchaseData extends Data
             'status' => ['required', Rule::enum(PurchaseStatusEnum::class)],
             'purchase_date' => ['required', 'date'],
             'total_amount' => ['required', 'integer', 'min:0'],
-            'paid_amount' => ['required', 'integer', 'min:0'],
             'note' => ['nullable', 'string', 'max:500'],
             'items' => ['required', 'array', 'min:1'],
         ];
@@ -88,7 +85,6 @@ final class PurchaseData extends Data
             'items.required' => __('A purchase must have at least one item.'),
             'items.min' => __('A purchase must have at least one item.'),
             'total_amount.required' => __('Total amount is required.'),
-            'paid_amount.required' => __('Paid amount is required.'),
         ];
     }
 }

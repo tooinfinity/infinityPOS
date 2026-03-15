@@ -54,7 +54,7 @@ final readonly class CompleteSaleReturn
                 'status' => ReturnStatusEnum::Completed,
             ])->save();
 
-            return $return->refresh();
+            return $return->refresh()->load('items');
         });
 
         return $result;

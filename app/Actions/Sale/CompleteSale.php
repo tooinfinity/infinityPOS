@@ -44,7 +44,7 @@ final readonly class CompleteSale
 
             $sale->forceFill(['status' => SaleStatusEnum::Completed])->save();
 
-            return $sale->refresh();
+            return $sale->refresh()->load('items');
         });
     }
 }

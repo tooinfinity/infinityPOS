@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Models\Product;
+use Illuminate\Support\Facades\DB;
 use Random\RandomException;
 
 final readonly class GenerateUniqueBarcode
@@ -14,11 +15,13 @@ final readonly class GenerateUniqueBarcode
      */
     public function handle(): string
     {
-        do {
-            $barcode = $this->generateEan13();
-        } while ($this->barcodeExists($barcode));
+        return DB::transaction(function (): string {
+            do {
+                $barcode = $this->generateEan13();
+            } while ($this->barcodeExists($barcode));
 
-        return $barcode;
+            return $barcode;
+        });
     }
 
     /**

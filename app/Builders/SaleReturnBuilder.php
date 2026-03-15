@@ -92,7 +92,7 @@ final class SaleReturnBuilder extends Builder
     {
         return $this
             ->applyFilters($filters)
-            ->with(['sale', 'customer'])
+            ->with(['sale.customer', 'warehouse'])
             ->paginate($perPage ?? 25)
             ->withQueryString();
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Sale;
 
+use App\Actions\Payment\UpdatePaymentStatus;
 use App\Data\Sale\SaleData;
 use App\Data\Sale\SaleItemData;
 use App\Enums\SaleStatusEnum;
@@ -14,12 +15,16 @@ use Throwable;
 
 final readonly class UpdateSale
 {
+    public function __construct(
+        private UpdatePaymentStatus $updatePaymentStatus,
+    ) {}
+
     /**
      * @throws Throwable
      */
     public function handle(Sale $sale, SaleData $data): Sale
     {
-        return DB::transaction(static function () use ($sale, $data): Sale {
+        return DB::transaction(function () use ($sale, $data): Sale {
             if ($sale->status !== SaleStatusEnum::Pending) {
                 throw new InvalidOperationException(
                     'update',
@@ -34,10 +39,16 @@ final readonly class UpdateSale
                 'status' => $data->status ?? $sale->status,
                 'sale_date' => $data->sale_date ?? $sale->sale_date,
                 'total_amount' => $data->total_amount ?? $sale->total_amount,
+                'change_amount' => $data->change_amount ?? $sale->change_amount,
                 'note' => $data->note ?? $sale->note,
             ];
 
             $sale->update($updatedSaleData);
+
+            if ($data->total_amount !== null && $data->total_amount !== $sale->getOriginal('total_amount')) {
+                throw_if($sale->paid_amount > $data->total_amount, InvalidOperationException::class, 'update', 'Sale', 'Cannot reduce total below already paid amount.');
+                $this->updatePaymentStatus->handle($sale);
+            }
 
             $sale->items()->delete();
 

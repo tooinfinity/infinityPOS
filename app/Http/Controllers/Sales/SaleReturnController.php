@@ -37,18 +37,12 @@ final readonly class SaleReturnController
      */
     public function create(
         ResolveReturnableQuantity $resolveReturnableQuantity,
-        ?Sale $sale = null,
+        Sale $sale,
     ): Response {
-        $returnableMap = null;
-
-        if ($sale instanceof Sale) {
-            $sale->load('items.product.unit', 'items.batch');
-            $returnableMap = $resolveReturnableQuantity->handle($sale);
-        }
 
         return Inertia::render('sale-returns/create', [
-            'sale' => $sale?->load('items.product'),
-            'returnableMap' => $returnableMap,
+            'sale' => $sale->load('items.product.unit', 'items.batch'),
+            'returnableItems' => $resolveReturnableQuantity->handle($sale),
             'warehouses' => Warehouse::query()->select('id', 'name', 'code')->get(),
         ]);
     }

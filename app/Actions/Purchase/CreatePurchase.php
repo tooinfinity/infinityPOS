@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Purchase;
 
 use App\Actions\GenerateReferenceNo;
-use App\Actions\Payment\UpdatePaymentStatus;
 use App\Data\Purchase\PurchaseData;
 use App\Data\Purchase\PurchaseItemData;
 use App\Enums\PaymentStatusEnum;
@@ -18,7 +17,6 @@ final readonly class CreatePurchase
 {
     public function __construct(
         private GenerateReferenceNo $referenceGenerator,
-        private UpdatePaymentStatus $updatePaymentStatus,
     ) {}
 
     /**
@@ -52,11 +50,6 @@ final readonly class CreatePurchase
                         'expires_at' => $itemData->expires_at,
                     ]);
                 });
-
-            if ($data->paid_amount > 0) {
-                $purchase->forceFill(['paid_amount' => $data->paid_amount])->save();
-                $this->updatePaymentStatus->handle($purchase);
-            }
 
             return $purchase->load(['items.product', 'supplier', 'warehouse']);
         });

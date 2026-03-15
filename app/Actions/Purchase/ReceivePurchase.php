@@ -13,6 +13,7 @@ use App\Exceptions\ItemNotFoundException;
 use App\Exceptions\StateTransitionException;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -54,9 +55,8 @@ final readonly class ReceivePurchase
                         return; // skip — nothing received for this item
                     }
 
-                    $expiresAt = $receivedItem->expires_at instanceof \Carbon\CarbonInterface
-                        ? \Illuminate\Support\Facades\Date::parse($receivedItem->expires_at)
-                        : ($purchaseItem->expires_at ? \Illuminate\Support\Facades\Date::parse($purchaseItem->expires_at) : null);
+                    $expiresAt = $receivedItem->expires_at
+                        ?? ($purchaseItem->expires_at ? Date::parse($purchaseItem->expires_at) : null);
 
                     $batch = $this->findOrCreateBatch->handle(
                         productId: $purchaseItem->product_id,
@@ -78,8 +78,10 @@ final readonly class ReceivePurchase
                     ])->save();
                 });
 
+            $allFullyReceived = $purchase->items->every(fn ($item): bool => $item->received_quantity === $item->quantity);
+
             $purchase->forceFill([
-                'status' => PurchaseStatusEnum::Received,
+                'status' => $allFullyReceived ? PurchaseStatusEnum::Received : PurchaseStatusEnum::Pending,
             ])->save();
 
             return $purchase->load([

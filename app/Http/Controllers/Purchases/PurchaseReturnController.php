@@ -8,6 +8,7 @@ use App\Actions\PurchaseReturn\CreatePurchaseReturn;
 use App\Actions\PurchaseReturn\DeletePurchaseReturn;
 use App\Actions\PurchaseReturn\ResolveReturnableQuantity;
 use App\Data\PurchaseReturn\PurchaseReturnData;
+use App\Models\PaymentMethod;
 use App\Models\Purchase;
 use App\Models\PurchaseReturn;
 use App\Models\Warehouse;
@@ -26,7 +27,7 @@ final readonly class PurchaseReturnController
             ->paginate(25);
 
         return Inertia::render('purchase-returns/index', [
-            'returns' => $returns,
+            'purchaseReturns' => $returns,
             'filters' => request()->query(),
         ]);
     }
@@ -47,7 +48,7 @@ final readonly class PurchaseReturnController
 
         return Inertia::render('purchase-returns/create', [
             'purchase' => $purchase?->load('items.product'),
-            'returnableMap' => $returnableMap,
+            'returnableItems' => $returnableMap,
             'warehouses' => Warehouse::query()->select('id', 'name', 'code')->get(),
         ]);
     }
@@ -75,7 +76,8 @@ final readonly class PurchaseReturnController
         ]);
 
         return Inertia::render('purchase-returns/show', [
-            'return' => $purchaseReturn,
+            'purchaseReturn' => $purchaseReturn,
+            'payment_methods' => PaymentMethod::query()->select('id', 'name', 'code')->get(),
         ]);
     }
 

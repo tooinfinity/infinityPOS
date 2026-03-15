@@ -23,8 +23,6 @@ final class SaleData extends Data
         public SaleStatusEnum $status,
         public CarbonInterface $sale_date,
         public int $total_amount,
-        public int $paid_amount,
-        public int $change_amount,
         public ?string $note,
 
         /** @var DataCollection<int, SaleItemData> */
@@ -40,8 +38,6 @@ final class SaleData extends Data
             'status' => $model->status,
             'sale_date' => $model->sale_date,
             'total_amount' => $model->total_amount,
-            'paid_amount' => $model->paid_amount,
-            'change_amount' => $model->change_amount,
             'note' => $model->note,
             'items' => $model->items->map(
                 fn (SaleItem $item): array => [
@@ -70,8 +66,6 @@ final class SaleData extends Data
             'status' => ['required', Rule::enum(SaleStatusEnum::class)],
             'sale_date' => ['required', 'date'],
             'total_amount' => ['required', 'integer', 'min:0'],
-            'paid_amount' => ['required', 'integer', 'min:0'],
-            'change_amount' => ['required', 'integer', 'min:0'],
             'note' => ['nullable', 'string', 'max:500'],
             'items' => ['required', 'array', 'min:1'],
         ];
@@ -89,8 +83,6 @@ final class SaleData extends Data
             'items.required' => __('A sale must have at least one item.'),
             'items.min' => __('A sale must have at least one item.'),
             'total_amount.required' => __('Total amount is required.'),
-            'paid_amount.required' => __('Paid amount is required.'),
-            'change_amount.required' => __('Change amount is required.'),
         ];
     }
 }

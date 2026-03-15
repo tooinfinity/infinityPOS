@@ -6,6 +6,7 @@ namespace App\Actions\Purchase;
 
 use App\Actions\Stock\DeductStock;
 use App\Enums\PurchaseStatusEnum;
+use App\Exceptions\InsufficientStockException;
 use App\Exceptions\InvalidOperationException;
 use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
@@ -53,12 +54,20 @@ final readonly class CancelPurchase
                     ->each(
                         function (PurchaseItem $item) use ($purchase, $reason): void {
                             if ($item->batch instanceof Batch) {
-                                $this->deductStock->handle(
-                                    batch: $item->batch,
-                                    quantity: $item->received_quantity,
-                                    reference: $purchase,
-                                    note: $reason ?? "Purchase cancelled: {$purchase->reference_no}",
-                                );
+                                try {
+                                    $this->deductStock->handle(
+                                        batch: $item->batch,
+                                        quantity: $item->received_quantity,
+                                        reference: $purchase,
+                                        note: $reason ?? "Purchase cancelled: {$purchase->reference_no}",
+                                    );
+                                } catch (InsufficientStockException $e) {
+                                    throw new InvalidOperationException(
+                                        'cancel',
+                                        'Purchase',
+                                        "Cannot cancel: {$e->getMessage()}. Some stock may have already been consumed."
+                                    );
+                                }
                             }
                         }
                     );

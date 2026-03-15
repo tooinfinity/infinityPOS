@@ -92,7 +92,7 @@ final class PurchaseReturnBuilder extends Builder
     {
         return $this
             ->applyFilters($filters)
-            ->with(['purchase', 'supplier'])
+            ->with(['purchase.supplier', 'warehouse'])
             ->paginate($perPage ?? 25)
             ->withQueryString();
     }

@@ -27,7 +27,7 @@ final readonly class RecordStockMovement
             'type' => $type,
             'quantity' => $quantity,
             'previous_quantity' => $previousQuantity,
-            'current_quantity' => $batch->quantity + $quantity, // negative for Out
+            'current_quantity' => $batch->quantity,
             'reference_type' => $reference->getMorphClass(),
             'reference_id' => $reference->getKey(),
             'note' => $note ?? $type->label(),

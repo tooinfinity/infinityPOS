@@ -51,16 +51,6 @@ final readonly class CreateSale
                 $this->deductStockForSale($sale);
             }
 
-            if ($data->paid_amount > 0) {
-                $paymentStatus = $data->paid_amount >= $data->total_amount
-                    ? PaymentStatusEnum::Paid
-                    : PaymentStatusEnum::Partial;
-                $sale->forceFill([
-                    'paid_amount' => $data->paid_amount,
-                    'payment_status' => $paymentStatus,
-                ])->save();
-            }
-
             return $sale->load(['items.product', 'items.batch', 'customer', 'warehouse']);
         });
     }

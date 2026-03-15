@@ -6,6 +6,7 @@ namespace App\Actions\Sale;
 
 use App\Actions\Stock\AddStock;
 use App\Enums\SaleStatusEnum;
+use App\Exceptions\InsufficientStockException;
 use App\Exceptions\InvalidOperationException;
 use App\Exceptions\StateTransitionException;
 use App\Models\Batch;
@@ -37,12 +38,20 @@ final readonly class CancelSale
 
                 $sale->items->each(function (SaleItem $item) use ($sale, $reason): void {
                     if ($item->batch instanceof Batch) {
-                        $this->addStock->handle(
-                            batch: $item->batch,
-                            quantity: $item->quantity,
-                            reference: $sale,
-                            note: $reason ?? "Sale cancelled: $sale->reference_no",
-                        );
+                        try {
+                            $this->addStock->handle(
+                                batch: $item->batch,
+                                quantity: $item->quantity,
+                                reference: $sale,
+                                note: $reason ?? "Sale cancelled: $sale->reference_no",
+                            );
+                        } catch (InsufficientStockException $e) {
+                            throw new InvalidOperationException(
+                                'cancel',
+                                'Sale',
+                                "Cannot cancel: {$e->getMessage()}. Some stock may have already been consumed."
+                            );
+                        }
                     }
                 });
             }

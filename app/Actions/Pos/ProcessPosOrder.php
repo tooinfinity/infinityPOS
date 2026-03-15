@@ -31,19 +31,20 @@ final readonly class ProcessPosOrder
      */
     public function handle(PosOrderData $data): PosOrderResult
     {
+        if ($data->cash_tendered < $data->total_amount) {
+            throw new InvalidOperationException(
+                'process',
+                'PosOrder',
+                sprintf(
+                    'Cash tendered (%d) is less than total amount (%d).',
+                    $data->cash_tendered,
+                    $data->total_amount,
+                )
+            );
+        }
+
         /** @var PosOrderResult $result */
         $result = DB::transaction(function () use ($data): PosOrderResult {
-            if ($data->cash_tendered < $data->total_amount) {
-                throw new InvalidOperationException(
-                    'process',
-                    'PosOrder',
-                    sprintf(
-                        'Cash tendered (%d) is less than total amount (%d).',
-                        $data->cash_tendered,
-                        $data->total_amount,
-                    )
-                );
-            }
 
             $sale = Sale::query()->forceCreate([
                 'customer_id' => $data->customer_id,
@@ -86,7 +87,7 @@ final readonly class ProcessPosOrder
                 payable: $sale,
                 data: PaymentData::from([
                     'payment_method_id' => $data->payment_method_id,
-                    'amount' => $data->cash_tendered,
+                    'amount' => $data->total_amount,
                     'payment_date' => now()->toDateString(),
                     'note' => 'POS cash payment',
                 ]),
