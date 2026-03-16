@@ -20,6 +20,7 @@
         "spatie-laravel-php-standards",
         "laravel-actions",
         "laravel-architecture",
+        "laravel-controller-tests",
         "laravel-controllers",
         "laravel-dtos",
         "laravel-exceptions",
