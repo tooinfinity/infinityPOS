@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Data\Product;
 
 use App\Models\Product;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
 
@@ -43,20 +45,36 @@ final class ProductData extends Data
         ]);
     }
 
-    //    public static function authorize(): bool
-    //    {
-    //        return true;
-    //    }
-
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, mixed>
      */
     public static function rules(ValidationContext $context): array
     {
+        /** @var Product|null $product */
+        $product = Request::route('product');
+
         return [
-            'name' => ['required', 'string', 'min:3', 'max:255', 'unique:products,name'],
-            'sku' => ['nullable', 'string', 'min:3', 'max:100', 'unique:products,sku'],
-            'barcode' => ['nullable', 'string', 'min:3', 'max:100', 'unique:products,barcode'],
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:255',
+                Rule::unique('products', 'name')->ignore($product?->id),
+            ],
+            'sku' => [
+                'nullable',
+                'string',
+                'min:3',
+                'max:100',
+                Rule::unique('products', 'sku')->ignore($product?->id),
+            ],
+            'barcode' => [
+                'nullable',
+                'string',
+                'min:3',
+                'max:100',
+                Rule::unique('products', 'barcode')->ignore($product?->id),
+            ],
             'unit_id' => ['required', 'integer', 'exists:units,id'],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'brand_id' => ['nullable', 'integer', 'exists:brands,id'],

@@ -22,10 +22,10 @@ describe(SaleData::class, function (): void {
                 status: SaleStatusEnum::Pending,
                 sale_date: Illuminate\Support\Facades\Date::parse('2024-01-15'),
                 total_amount: 5000,
-                paid_amount: 0,
-                change_amount: 0,
                 note: null,
                 items: $items,
+                paid_amount: 0,
+                change_amount: 0,
             );
 
             expect($data)->toBeInstanceOf(SaleData::class)
@@ -52,10 +52,10 @@ describe(SaleData::class, function (): void {
                 status: SaleStatusEnum::Completed,
                 sale_date: Illuminate\Support\Facades\Date::parse('2024-01-15'),
                 total_amount: 5000,
-                paid_amount: 5000,
-                change_amount: 0,
                 note: 'Test sale',
                 items: $items,
+                paid_amount: 5000,
+                change_amount: 0,
             );
 
             expect($data->customer_id)->toBe(1)

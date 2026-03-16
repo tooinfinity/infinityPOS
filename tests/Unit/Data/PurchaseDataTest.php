@@ -23,9 +23,9 @@ describe(PurchaseData::class, function (): void {
                 status: PurchaseStatusEnum::Pending,
                 purchase_date: Illuminate\Support\Facades\Date::parse('2024-01-15'),
                 total_amount: 5000,
-                paid_amount: 0,
                 note: null,
                 items: $items,
+                paid_amount: 0,
             );
 
             expect($data)->toBeInstanceOf(PurchaseData::class)
@@ -51,9 +51,9 @@ describe(PurchaseData::class, function (): void {
                 status: PurchaseStatusEnum::Received,
                 purchase_date: Illuminate\Support\Facades\Date::parse('2024-01-15'),
                 total_amount: 5000,
-                paid_amount: 5000,
                 note: 'Test purchase',
                 items: $items,
+                paid_amount: 5000,
             );
 
             expect($data->note)->toBe('Test purchase')

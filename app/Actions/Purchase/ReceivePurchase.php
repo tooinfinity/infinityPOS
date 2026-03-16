@@ -46,13 +46,13 @@ final readonly class ReceivePurchase
                     if (! $purchaseItem instanceof PurchaseItem) {
                         throw new ItemNotFoundException(
                             'PurchaseItem',
-                            "Purchase #{$purchase->id}",
-                            "Item #{$receivedItem->purchase_item_id} does not belong to this purchase."
+                            "Purchase #$purchase->id",
+                            "Item #$receivedItem->purchase_item_id does not belong to this purchase."
                         );
                     }
 
                     if ($receivedItem->received_quantity === 0) {
-                        return; // skip — nothing received for this item
+                        return;
                     }
 
                     $expiresAt = $receivedItem->expires_at
@@ -69,19 +69,25 @@ final readonly class ReceivePurchase
                         batch: $batch,
                         quantity: $receivedItem->received_quantity,
                         reference: $purchase,
-                        note: "Purchase received: {$purchase->reference_no}",
+                        note: "Purchase received: $purchase->reference_no",
                     );
 
                     $purchaseItem->forceFill([
-                        'received_quantity' => $receivedItem->received_quantity,
+                        'received_quantity' => $purchaseItem->received_quantity + $receivedItem->received_quantity,
                         'batch_id' => $batch->id,
                     ])->save();
                 });
 
-            $allFullyReceived = $purchase->items->every(fn ($item): bool => $item->received_quantity === $item->quantity);
+            $purchase->load('items');
+
+            $allFullyReceived = $purchase->items->every(
+                fn (PurchaseItem $item): bool => $item->received_quantity >= $item->quantity
+            );
 
             $purchase->forceFill([
-                'status' => $allFullyReceived ? PurchaseStatusEnum::Received : PurchaseStatusEnum::Pending,
+                'status' => $allFullyReceived
+                    ? PurchaseStatusEnum::Received
+                    : PurchaseStatusEnum::Pending,
             ])->save();
 
             return $purchase->load([

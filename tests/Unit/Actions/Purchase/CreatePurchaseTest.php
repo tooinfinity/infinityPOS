@@ -26,7 +26,6 @@ it('may create a purchase with required fields', function (): void {
         status: PurchaseStatusEnum::Pending,
         purchase_date: now(),
         total_amount: 100000,
-        paid_amount: 0,
         note: null,
         items: new Spatie\LaravelData\DataCollection(PurchaseItemData::class, [
             new PurchaseItemData(
@@ -36,6 +35,7 @@ it('may create a purchase with required fields', function (): void {
                 expires_at: null,
             ),
         ]),
+        paid_amount: 0,
     );
 
     $purchase = $action->handle($data);
@@ -65,7 +65,6 @@ it('may create a purchase with multiple items', function (): void {
         status: PurchaseStatusEnum::Pending,
         purchase_date: now(),
         total_amount: 50000,
-        paid_amount: 0,
         note: null,
         items: new Spatie\LaravelData\DataCollection(PurchaseItemData::class, [
             new PurchaseItemData(
@@ -81,6 +80,7 @@ it('may create a purchase with multiple items', function (): void {
                 expires_at: null,
             ),
         ]),
+        paid_amount: 0,
     );
 
     $purchase = $action->handle($data);
@@ -102,7 +102,6 @@ it('may create a purchase with note', function (): void {
         status: PurchaseStatusEnum::Pending,
         purchase_date: now(),
         total_amount: 100000,
-        paid_amount: 0,
         note: 'Test purchase note',
         items: new Spatie\LaravelData\DataCollection(PurchaseItemData::class, [
             new PurchaseItemData(
@@ -112,6 +111,7 @@ it('may create a purchase with note', function (): void {
                 expires_at: null,
             ),
         ]),
+        paid_amount: 0,
     );
 
     $purchase = $action->handle($data);
@@ -133,7 +133,6 @@ it('may create a purchase with expiration dates on items', function (): void {
         status: PurchaseStatusEnum::Pending,
         purchase_date: now(),
         total_amount: 100000,
-        paid_amount: 0,
         note: null,
         items: new Spatie\LaravelData\DataCollection(PurchaseItemData::class, [
             new PurchaseItemData(
@@ -143,6 +142,7 @@ it('may create a purchase with expiration dates on items', function (): void {
                 expires_at: now()->addMonths(6)->toDateString(),
             ),
         ]),
+        paid_amount: 0,
     );
 
     $purchase = $action->handle($data);
@@ -164,7 +164,6 @@ it('may create a purchase with paid amount', function (): void {
         status: PurchaseStatusEnum::Pending,
         purchase_date: now(),
         total_amount: 100000,
-        paid_amount: 0,
         note: null,
         items: new Spatie\LaravelData\DataCollection(PurchaseItemData::class, [
             new PurchaseItemData(
@@ -174,6 +173,7 @@ it('may create a purchase with paid amount', function (): void {
                 expires_at: null,
             ),
         ]),
+        paid_amount: 0,
     );
 
     $purchase = $action->handle($data);
@@ -195,7 +195,6 @@ it('generates reference number', function (): void {
         status: PurchaseStatusEnum::Pending,
         purchase_date: now(),
         total_amount: 100000,
-        paid_amount: 0,
         note: null,
         items: new Spatie\LaravelData\DataCollection(PurchaseItemData::class, [
             new PurchaseItemData(
@@ -205,6 +204,7 @@ it('generates reference number', function (): void {
                 expires_at: null,
             ),
         ]),
+        paid_amount: 0,
     );
 
     $purchase = $action->handle($data);

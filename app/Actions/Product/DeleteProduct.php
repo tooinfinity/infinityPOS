@@ -25,26 +25,39 @@ final readonly class DeleteProduct
 
     /**
      * @throws InvalidOperationException
+     *
+     * FIX: replaced 7 individual EXISTS queries with a single SQL query.
      */
     private function ensureNoRelatedRecords(Product $product): void
     {
-        $relations = [
-            'batches' => $product->batches()->exists(),
-            'stockMovements' => $product->stockMovements()->exists(),
-            'purchaseItems' => $product->purchaseItems()->exists(),
-            'saleItems' => $product->saleItems()->exists(),
-            'stockTransferItems' => $product->stockTransferItems()->exists(),
-            'saleReturnItems' => $product->saleReturnItems()->exists(),
-            'purchaseReturnItems' => $product->purchaseReturnItems()->exists(),
-        ];
+        /** @var array<int, int> $result */
+        $result = DB::selectOne(
+            <<<'SQL'
+            SELECT
+                (SELECT COUNT(*) FROM batches                WHERE product_id = ?) AS batches,
+                (SELECT COUNT(*) FROM stock_movements        WHERE product_id = ?) AS stockMovements,
+                (SELECT COUNT(*) FROM purchase_items         WHERE product_id = ?) AS purchaseItems,
+                (SELECT COUNT(*) FROM sale_items             WHERE product_id = ?) AS saleItems,
+                (SELECT COUNT(*) FROM stock_transfer_items   WHERE product_id = ?) AS stockTransferItems,
+                (SELECT COUNT(*) FROM sale_return_items      WHERE product_id = ?) AS saleReturnItems,
+                (SELECT COUNT(*) FROM purchase_return_items  WHERE product_id = ?) AS purchaseReturnItems
+            SQL,
+            array_fill(0, 7, $product->id),
+        );
 
-        $existingRelations = array_keys(array_filter($relations));
+        $existing = [];
 
-        if ($existingRelations !== []) {
+        foreach ($result as $relation => $count) {
+            if ($count > 0) {
+                $existing[] = $relation;
+            }
+        }
+
+        if ($existing !== []) {
             throw new InvalidOperationException(
                 'delete',
                 'Product',
-                sprintf('Cannot delete product with existing %s', implode(', ', $existingRelations))
+                sprintf('Cannot delete product with existing %s', implode(', ', $existing))
             );
         }
     }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Data\Unit;
 
 use App\Models\Unit;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
 
@@ -25,18 +27,19 @@ final class UnitData extends Data
         ]);
     }
 
-    //    public static function authorize(): bool
-    //    {
-    //        return true;
-    //    }
-
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, mixed>
      */
     public static function rules(ValidationContext $context): array
     {
+        /** @var Unit|null $unit */
+        $unit = Request::route('unit');
+
         return [
-            'name' => ['required', 'string', 'min:3', 'max:80', 'unique:units,name'],
+            'name' => [
+                'required', 'string', 'min:3', 'max:80',
+                Rule::unique('units', 'name')->ignore($unit?->id),
+            ],
             'short_name' => ['required', 'string', 'min:1', 'max:20'],
             'is_active' => ['nullable', 'boolean'],
         ];

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Data\ExpenseCategory;
 
 use App\Models\ExpenseCategory;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
 
@@ -25,23 +27,18 @@ final class ExpenseCategoryData extends Data
         ]);
     }
 
-    //    public static function authorize(): bool
-    //    {
-    //        return true;
-    //    }
-
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, mixed>
      */
     public static function rules(ValidationContext $context): array
     {
+        /** @var ExpenseCategory|null $expenseCategory */
+        $expenseCategory = Request::route('expenseCategory');
+
         return [
             'name' => [
-                'required',
-                'string',
-                'min:3',
-                'max:80',
-                'unique:expense_categories,name',
+                'required', 'string', 'min:3', 'max:80',
+                Rule::unique('expense_categories', 'name')->ignore($expenseCategory?->id),
             ],
             'description' => ['nullable', 'string', 'max:255'],
             'is_active' => ['nullable', 'boolean'],

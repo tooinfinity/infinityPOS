@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Data\Warehouse;
 
 use App\Models\Warehouse;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
 
@@ -35,19 +37,23 @@ final class WarehouseData extends Data
         ]);
     }
 
-    //    public static function authorize(): bool
-    //    {
-    //        return true;
-    //    }
-
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, mixed>
      */
     public static function rules(ValidationContext $context): array
     {
+        /** @var Warehouse|null $warehouse */
+        $warehouse = Request::route('warehouse');
+
         return [
-            'name' => ['required', 'string', 'min:3', 'max:80', 'unique:warehouses,name'],
-            'code' => ['required', 'string', 'min:1', 'max:20', 'unique:warehouses,code'],
+            'name' => [
+                'required', 'string', 'min:3', 'max:80',
+                Rule::unique('warehouses', 'name')->ignore($warehouse?->id),
+            ],
+            'code' => [
+                'required', 'string', 'min:1', 'max:20',
+                Rule::unique('warehouses', 'code')->ignore($warehouse?->id),
+            ],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:255'],

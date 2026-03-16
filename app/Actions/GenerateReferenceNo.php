@@ -4,31 +4,34 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 final readonly class GenerateReferenceNo
 {
     /**
-     * @param  class-string<Model>  $model
+     * @throws Throwable
      */
-    public function handle(string $prefix, string $model): string
+    public function handle(string $prefix): string
     {
-        return DB::transaction(function () use ($prefix, $model): string {
-            $today = today();
+        return DB::transaction(static function () use ($prefix): string {
+            $today = today()->format('Ymd');
+            $key = "{$prefix}-{$today}";
 
-            $count = $model::query()
-                ->toBase()
-                ->whereDate('created_at', $today)
-                ->lockForUpdate()
-                ->count() + 1;
-
-            return sprintf(
-                '%s-%s-%s',
-                $prefix,
-                $today->format('Ymd'),
-                mb_str_pad((string) $count, 4, '0', STR_PAD_LEFT),
+            DB::statement(
+                'INSERT INTO reference_counters (`key`, last_value)
+                 VALUES (?, 1)
+                 ON DUPLICATE KEY UPDATE last_value = last_value + 1',
+                [$key]
             );
+
+            /** @var int $count */
+            $count = DB::table('reference_counters')
+                ->where('key', $key)
+                ->lockForUpdate()
+                ->value('last_value');
+
+            return sprintf('%s-%s-%s', $prefix, $today, mb_str_pad((string) $count, 4, '0', STR_PAD_LEFT));
         });
     }
 }

@@ -24,13 +24,23 @@ final readonly class SaleController
 {
     public function index(Request $request): Response
     {
+        /**
+         * @var array{
+         *     search?: string|null,
+         *     status?: string|null,
+         *     payment_status?: string|null,
+         *     sort?: string|null,
+         *     direction?: string|null
+         * } $filters
+         */
         $filters = $request->only(['search', 'status', 'payment_status', 'sort', 'direction']);
+        /** @var int $perPage */
+        $perPage = $request->input('per_page', 25);
+
         $sales = Sale::query()
             ->with(['customer', 'warehouse', 'user'])
-            ->applyFilters($filters)
             ->withDueAmount()
-            ->paginate($request->integer('per_page', 25))
-            ->withQueryString();
+            ->paginateWithFilters($filters, $perPage);
 
         return Inertia::render('sales/index', [
             'sales' => $sales,

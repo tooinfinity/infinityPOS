@@ -10,6 +10,7 @@ use App\Actions\SaleReturn\ResolveReturnableQuantity;
 use App\Data\SaleReturn\SaleReturnData;
 use App\Models\PaymentMethod;
 use App\Models\Sale;
+use App\Models\SaleItem;
 use App\Models\SaleReturn;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -43,14 +44,14 @@ final readonly class SaleReturnController
         $returnableMap = $resolveReturnableQuantity->handle($sale);
 
         $returnableItems = $sale->items
-            ->filter(fn ($item): bool => $returnableMap->get($item->product_id, 0) > 0)
-            ->map(fn ($item): array => [
+            ->filter(fn (SaleItem $item): bool => $returnableMap->get($item->product_id, 0) > 0)
+            ->map(fn (SaleItem $item): array => [
                 'sale_item_id' => $item->id,
                 'product_id' => $item->product_id,
                 'batch_id' => $item->batch_id,
                 'product_name' => $item->product->name,
                 'product_sku' => $item->product->sku,
-                'batch_number' => $item->batch?->batch_number ?? '—',
+                'batch_number' => $item->batch?->batch_number,
                 'unit_price' => $item->unit_price,
                 'unit_short_name' => $item->product->unit->short_name,
                 'max_quantity' => $returnableMap->get($item->product_id, 0),

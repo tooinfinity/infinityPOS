@@ -44,10 +44,10 @@ describe(CreateSale::class, function (): void {
             status: SaleStatusEnum::Pending,
             sale_date: now(),
             total_amount: 15000,
-            paid_amount: 0,
-            change_amount: 0,
             note: 'Test sale',
             items: $items,
+            paid_amount: 0,
+            change_amount: 0,
         );
 
         $action = resolve(CreateSale::class);
@@ -82,10 +82,10 @@ describe(CreateSale::class, function (): void {
             status: SaleStatusEnum::Pending,
             sale_date: now(),
             total_amount: 1500,
-            paid_amount: 0,
-            change_amount: 0,
             note: null,
             items: $items,
+            paid_amount: 0,
+            change_amount: 0,
         );
 
         $data2 = new SaleData(
@@ -94,10 +94,10 @@ describe(CreateSale::class, function (): void {
             status: SaleStatusEnum::Pending,
             sale_date: now(),
             total_amount: 1500,
-            paid_amount: 0,
-            change_amount: 0,
             note: null,
             items: $items,
+            paid_amount: 0,
+            change_amount: 0,
         );
 
         $action = resolve(CreateSale::class);
@@ -128,10 +128,10 @@ describe(CreateSale::class, function (): void {
             status: SaleStatusEnum::Pending,
             sale_date: now(),
             total_amount: 7500,
-            paid_amount: 0,
-            change_amount: 0,
             note: null,
             items: $items,
+            paid_amount: 0,
+            change_amount: 0,
         );
 
         $action = resolve(CreateSale::class);
@@ -166,10 +166,10 @@ describe(CreateSale::class, function (): void {
             status: SaleStatusEnum::Completed,
             sale_date: now(),
             total_amount: 15000,
-            paid_amount: 0,
-            change_amount: 0,
             note: null,
             items: $items,
+            paid_amount: 0,
+            change_amount: 0,
         );
 
         $action = resolve(CreateSale::class);
@@ -202,10 +202,10 @@ describe(CreateSale::class, function (): void {
             status: SaleStatusEnum::Completed,
             sale_date: now(),
             total_amount: 7500,
-            paid_amount: 0,
-            change_amount: 0,
             note: null,
             items: $items,
+            paid_amount: 0,
+            change_amount: 0,
         );
 
         $action = resolve(CreateSale::class);
@@ -236,10 +236,10 @@ describe(CreateSale::class, function (): void {
             status: SaleStatusEnum::Pending,
             sale_date: now(),
             total_amount: 15000,
-            paid_amount: 5000,
-            change_amount: 0,
             note: null,
             items: $items,
+            paid_amount: 5000,
+            change_amount: 0,
         );
 
         $action = resolve(CreateSale::class);
@@ -270,10 +270,10 @@ describe(CreateSale::class, function (): void {
             status: SaleStatusEnum::Pending,
             sale_date: now(),
             total_amount: 15000,
-            paid_amount: 15000,
-            change_amount: 0,
             note: null,
             items: $items,
+            paid_amount: 15000,
+            change_amount: 0,
         );
 
         $action = resolve(CreateSale::class);
@@ -304,10 +304,10 @@ describe(CreateSale::class, function (): void {
             status: SaleStatusEnum::Pending,
             sale_date: now(),
             total_amount: 1500,
-            paid_amount: 0,
-            change_amount: 0,
             note: null,
             items: $items,
+            paid_amount: 0,
+            change_amount: 0,
         );
 
         $action = resolve(CreateSale::class);
@@ -341,10 +341,10 @@ describe(CreateSale::class, function (): void {
             status: SaleStatusEnum::Pending,
             sale_date: now(),
             total_amount: 1500,
-            paid_amount: 0,
-            change_amount: 0,
             note: 'Walk-in customer',
             items: $items,
+            paid_amount: 0,
+            change_amount: 0,
         );
 
         $action = resolve(CreateSale::class);

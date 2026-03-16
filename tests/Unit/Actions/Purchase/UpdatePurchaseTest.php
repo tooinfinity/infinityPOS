@@ -27,7 +27,6 @@ it('may update a purchase with required fields', function (): void {
         status: PurchaseStatusEnum::Pending,
         purchase_date: now(),
         total_amount: 150000,
-        paid_amount: 0,
         note: null,
         items: new Spatie\LaravelData\DataCollection(PurchaseItemData::class, [
             new PurchaseItemData(
@@ -37,6 +36,7 @@ it('may update a purchase with required fields', function (): void {
                 expires_at: null,
             ),
         ]),
+        paid_amount: 0,
     );
 
     $updated = $action->handle($purchase, $data);
@@ -62,7 +62,6 @@ it('may update a purchase with multiple items', function (): void {
         status: PurchaseStatusEnum::Pending,
         purchase_date: now(),
         total_amount: 100000,
-        paid_amount: 0,
         note: null,
         items: new Spatie\LaravelData\DataCollection(PurchaseItemData::class, [
             new PurchaseItemData(
@@ -78,6 +77,7 @@ it('may update a purchase with multiple items', function (): void {
                 expires_at: null,
             ),
         ]),
+        paid_amount: 0,
     );
 
     $updated = $action->handle($purchase, $data);
@@ -100,7 +100,6 @@ it('may update a purchase with note', function (): void {
         status: PurchaseStatusEnum::Pending,
         purchase_date: now(),
         total_amount: 100000,
-        paid_amount: 0,
         note: 'Updated purchase note',
         items: new Spatie\LaravelData\DataCollection(PurchaseItemData::class, [
             new PurchaseItemData(
@@ -110,6 +109,7 @@ it('may update a purchase with note', function (): void {
                 expires_at: null,
             ),
         ]),
+        paid_amount: 0,
     );
 
     $updated = $action->handle($purchase, $data);
@@ -132,7 +132,6 @@ it('throws exception when updating non-pending purchase', function (): void {
         status: PurchaseStatusEnum::Ordered,
         purchase_date: now(),
         total_amount: 100000,
-        paid_amount: 0,
         note: null,
         items: new Spatie\LaravelData\DataCollection(PurchaseItemData::class, [
             new PurchaseItemData(
@@ -142,6 +141,7 @@ it('throws exception when updating non-pending purchase', function (): void {
                 expires_at: null,
             ),
         ]),
+        paid_amount: 0,
     );
 
     expect(fn () => $action->handle($purchase, $data))->toThrow(App\Exceptions\InvalidOperationException::class);
@@ -171,7 +171,6 @@ it('deletes old items and creates new ones on update', function (): void {
         status: PurchaseStatusEnum::Pending,
         purchase_date: now(),
         total_amount: 10000,
-        paid_amount: 0,
         note: null,
         items: new Spatie\LaravelData\DataCollection(PurchaseItemData::class, [
             new PurchaseItemData(
@@ -181,6 +180,7 @@ it('deletes old items and creates new ones on update', function (): void {
                 expires_at: null,
             ),
         ]),
+        paid_amount: 0,
     );
 
     $updated = $action->handle($purchase, $data);

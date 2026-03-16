@@ -35,18 +35,23 @@ final readonly class UpdateSale
 
             $updatedSaleData = [
                 'customer_id' => $data->customer_id,
-                'warehouse_id' => $data->warehouse_id ?? $sale->warehouse_id,
-                'status' => $data->status ?? $sale->status,
-                'sale_date' => $data->sale_date ?? $sale->sale_date,
-                'total_amount' => $data->total_amount ?? $sale->total_amount,
-                'change_amount' => $data->change_amount ?? $sale->change_amount,
-                'note' => $data->note ?? $sale->note,
+                'warehouse_id' => $data->warehouse_id,
+                'status' => $data->status,
+                'sale_date' => $data->sale_date,
+                'total_amount' => $data->total_amount,
+                'note' => $data->note,
             ];
 
             $sale->update($updatedSaleData);
 
-            if ($data->total_amount !== null && $data->total_amount !== $sale->getOriginal('total_amount')) {
-                throw_if($sale->paid_amount > $data->total_amount, InvalidOperationException::class, 'update', 'Sale', 'Cannot reduce total below already paid amount.');
+            if ($data->total_amount !== $sale->getOriginal('total_amount')) {
+                throw_if(
+                    $sale->paid_amount > $data->total_amount,
+                    InvalidOperationException::class,
+                    'update',
+                    'Sale',
+                    'Cannot reduce total below already paid amount.'
+                );
                 $this->updatePaymentStatus->handle($sale);
             }
 

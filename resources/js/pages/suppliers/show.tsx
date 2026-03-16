@@ -49,19 +49,6 @@ export default function SupplierShow({ supplier }: Props) {
                         actions={
                             <>
                                 <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() =>
-                                        router.visit(
-                                            SupplierController.edit.url({
-                                                supplier: supplier.id,
-                                            }),
-                                        )
-                                    }
-                                >
-                                    Edit
-                                </Button>
-                                <Button
                                     variant="destructive"
                                     size="sm"
                                     onClick={() => setDeleteOpen(true)}

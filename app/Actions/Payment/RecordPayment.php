@@ -71,7 +71,7 @@ final readonly class RecordPayment
             $payment = Payment::query()->forceCreate([
                 'payment_method_id' => $data->payment_method_id,
                 'user_id' => auth()->id(),
-                'reference_no' => $this->referenceGenerator->handle('PAY', Payment::class),
+                'reference_no' => $this->referenceGenerator->handle('PAY'),
                 'payable_type' => $payable->getMorphClass(),
                 'payable_id' => $payable->getKey(),
                 'amount' => $data->amount,

@@ -25,7 +25,7 @@ final readonly class CreateExpense
         $expense = DB::transaction(fn (): Expense => Expense::query()->forceCreate([
             'expense_category_id' => $data->expense_category_id,
             'user_id' => auth()->id(),
-            'reference_no' => $this->referenceGenerator->handle('EXP', Expense::class),
+            'reference_no' => $this->referenceGenerator->handle('EXP'),
             'amount' => $data->amount,
             'expense_date' => $data->expense_date,
             'description' => $data->description,

@@ -25,7 +25,6 @@ import type { App } from '@/wayfinder/types';
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    /** Wayfinder .url() result — e.g. SaleController.paymentsStore.url({ sale: id }) */
     storeUrl: string;
     dueAmount: number;
     paymentMethods: App.Models.PaymentMethod[];
@@ -34,8 +33,8 @@ interface Props {
 interface FormData {
     payment_method_id: string;
     amount: string;
+    payment_date: string;
     note: string;
-    paid_at: string;
 }
 
 export default function PaymentFormModal({
@@ -51,8 +50,8 @@ export default function PaymentFormModal({
         useForm<FormData>({
             payment_method_id: '',
             amount: String(dueAmount),
+            payment_date: today, // FIX: was "paid_at"
             note: '',
-            paid_at: today,
         });
 
     function handleSubmit(e: React.FormEvent) {
@@ -142,9 +141,16 @@ export default function PaymentFormModal({
                         <Label>Payment date</Label>
                         <Input
                             type="date"
-                            value={data.paid_at}
-                            onChange={(e) => setData('paid_at', e.target.value)}
+                            value={data.payment_date}
+                            onChange={(e) =>
+                                setData('payment_date', e.target.value)
+                            }
                         />
+                        {errors.payment_date && (
+                            <p className="text-xs text-destructive">
+                                {errors.payment_date}
+                            </p>
+                        )}
                     </div>
 
                     <div className="space-y-1.5">

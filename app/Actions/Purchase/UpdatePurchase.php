@@ -34,17 +34,22 @@ final readonly class UpdatePurchase
                 );
             }
 
-            $updatedData = [
-                'supplier_id' => $data->supplier_id ?? $purchase->supplier_id,
-                'warehouse_id' => $data->warehouse_id ?? $purchase->warehouse_id,
-                'purchase_date' => $data->purchase_date ?? $purchase->purchase_date,
-                'total_amount' => $data->total_amount ?? $purchase->total_amount,
-                'note' => $data->note ?? $purchase->note,
-            ];
-            $purchase->update($updatedData);
+            $purchase->update([
+                'supplier_id' => $data->supplier_id,
+                'warehouse_id' => $data->warehouse_id,
+                'purchase_date' => $data->purchase_date,
+                'total_amount' => $data->total_amount,
+                'note' => $data->note,
+            ]);
 
-            if ($data->total_amount !== null && $data->total_amount !== $purchase->getOriginal('total_amount')) {
-                throw_if($purchase->paid_amount > $data->total_amount, InvalidOperationException::class, 'update', 'Purchase', 'Cannot reduce total below already paid amount.');
+            if ($data->total_amount !== $purchase->getOriginal('total_amount')) {
+                throw_if(
+                    $purchase->paid_amount > $data->total_amount,
+                    InvalidOperationException::class,
+                    'update',
+                    'Purchase',
+                    'Cannot reduce total below already paid amount.'
+                );
                 $this->updatePaymentStatus->handle($purchase);
             }
 

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Data\Category;
 
 use App\Models\Category;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
 
@@ -25,18 +27,22 @@ final class CategoryData extends Data
         ]);
     }
 
-    //    public static function authorize(): bool
-    //    {
-    //        return true;
-    //    }
-
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, mixed>
      */
     public static function rules(ValidationContext $context): array
     {
+        /** @var Category|null $category */
+        $category = Request::route('category');
+
         return [
-            'name' => ['required', 'string', 'min:3', 'max:80', 'unique:categories,name'],
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:80',
+                Rule::unique('categories', 'name')->ignore($category?->id),
+            ],
             'description' => ['nullable', 'string', 'max:255'],
             'is_active' => ['nullable', 'boolean'],
         ];

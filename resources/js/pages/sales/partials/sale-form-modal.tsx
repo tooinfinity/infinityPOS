@@ -25,14 +25,13 @@ import { formatAmount } from '@/lib/formatters';
 import SaleController from '@/wayfinder/App/Http/Controllers/Sales/SaleController';
 import type { App } from '@/wayfinder/types';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 interface ItemRow {
     _key: number;
     product_id: number | '';
     batch_id: number | '';
     quantity: number;
     unit_price: number;
+    unit_cost: number;
     _product?: App.Models.Product;
     _batches?: App.Models.Batch[];
 }
@@ -41,12 +40,15 @@ interface FormData {
     customer_id: string;
     warehouse_id: string;
     status: App.Enums.SaleStatusEnum;
+    sale_date: string;
+    total_amount: number;
     note: string;
     items: Array<{
         product_id: number;
         batch_id: number;
         quantity: number;
         unit_price: number;
+        unit_cost: number;
     }>;
 }
 
@@ -66,9 +68,10 @@ const makeRow = (): ItemRow => ({
     batch_id: '',
     quantity: 1,
     unit_price: 0,
+    unit_cost: 0,
 });
 
-// ─── Component ────────────────────────────────────────────────────────────────
+const today = new Date().toISOString().slice(0, 10);
 
 export default function SaleFormModal({
     open,
@@ -88,6 +91,7 @@ export default function SaleFormModal({
                   batch_id: item.batch?.id ?? 0,
                   quantity: item.quantity,
                   unit_price: item.unit_price,
+                  unit_cost: item.unit_cost,
                   _product: item.product ?? undefined,
                   _batches:
                       products.find((p) => p.id === item.product?.id)
@@ -101,22 +105,34 @@ export default function SaleFormModal({
             customer_id: sale?.customer?.id?.toString() ?? '',
             warehouse_id: sale?.warehouse?.id?.toString() ?? '',
             status: sale?.status ?? 'pending',
+            sale_date: sale?.sale_date
+                ? String(sale.sale_date).slice(0, 10)
+                : today,
+            total_amount: sale?.total_amount ?? 0,
             note: sale?.note ?? '',
             items: [],
         });
 
     const syncItems = useCallback(
         (currentRows: ItemRow[]) => {
+            const validRows = currentRows.filter(
+                (r) => r.product_id !== '' && r.batch_id !== '',
+            );
+
             setData(
                 'items',
-                currentRows
-                    .filter((r) => r.product_id !== '' && r.batch_id !== '')
-                    .map((r) => ({
-                        product_id: r.product_id as number,
-                        batch_id: r.batch_id as number,
-                        quantity: r.quantity,
-                        unit_price: r.unit_price,
-                    })),
+                validRows.map((r) => ({
+                    product_id: r.product_id as number,
+                    batch_id: r.batch_id as number,
+                    quantity: r.quantity,
+                    unit_price: r.unit_price,
+                    unit_cost: r.unit_cost,
+                })),
+            );
+
+            setData(
+                'total_amount',
+                currentRows.reduce((s, r) => s + r.quantity * r.unit_price, 0),
             );
         },
         [setData],
@@ -128,6 +144,8 @@ export default function SaleFormModal({
 
     function handleProductChange(key: number, productId: string) {
         const product = products.find((p) => p.id === Number(productId));
+        const warehouseId = Number(data.warehouse_id);
+
         setRows((prev) =>
             prev.map((r) =>
                 r._key !== key
@@ -137,8 +155,13 @@ export default function SaleFormModal({
                           product_id: productId === '' ? '' : Number(productId),
                           batch_id: '',
                           unit_price: product?.selling_price ?? 0,
+                          unit_cost: product?.cost_price ?? 0, // FIX: added
                           _product: product,
-                          _batches: product?.batches ?? [],
+                          _batches: (product?.batches ?? []).filter(
+                              (b) =>
+                                  !warehouseId ||
+                                  b.warehouse_id === warehouseId,
+                          ),
                       },
             ),
         );
@@ -178,6 +201,20 @@ export default function SaleFormModal({
             reset();
             setRows([makeRow()]);
         }
+    }
+
+    function handleWarehouseChange(warehouseId: string) {
+        setData('warehouse_id', warehouseId);
+        const wid = Number(warehouseId);
+        setRows((prev) =>
+            prev.map((r) => ({
+                ...r,
+                batch_id: '',
+                _batches: (r._product?.batches ?? []).filter(
+                    (b) => !wid || b.warehouse_id === wid,
+                ),
+            })),
+        );
     }
 
     return (
@@ -236,10 +273,7 @@ export default function SaleFormModal({
                             </Label>
                             <Select
                                 value={data.warehouse_id}
-                                onValueChange={(v) => {
-                                    setData('warehouse_id', v);
-                                    setRows([makeRow()]);
-                                }}
+                                onValueChange={handleWarehouseChange}
                                 required
                             >
                                 <SelectTrigger>
@@ -287,8 +321,27 @@ export default function SaleFormModal({
                                 </SelectContent>
                             </Select>
                         </div>
-
                         <div className="space-y-1.5">
+                            <Label>
+                                Sale date{' '}
+                                <span className="text-destructive">*</span>
+                            </Label>
+                            <Input
+                                type="date"
+                                value={data.sale_date}
+                                onChange={(e) =>
+                                    setData('sale_date', e.target.value)
+                                }
+                                required
+                            />
+                            {errors.sale_date && (
+                                <p className="text-xs text-destructive">
+                                    {errors.sale_date}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="col-span-2 space-y-1.5">
                             <Label>Note</Label>
                             <Textarea
                                 rows={1}

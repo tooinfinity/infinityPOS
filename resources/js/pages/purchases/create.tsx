@@ -23,40 +23,43 @@ import type { App, Inertia } from '@/wayfinder/types';
 interface ItemRow {
     _key: number;
     product_id: number | '';
-    batch_id: number | '';
     quantity: number;
     unit_cost: number;
+    expires_at: string;
     _product?: App.Models.Product;
-    _batches?: App.Models.Batch[];
 }
 
 interface FormData {
     supplier_id: string;
     warehouse_id: string;
     status: App.Enums.PurchaseStatusEnum;
+    purchase_date: string;
+    total_amount: number;
     note: string;
     items: Array<{
         product_id: number;
-        batch_id: number;
         quantity: number;
         unit_cost: number;
+        expires_at: string | null;
     }>;
 }
 
 interface Props extends Inertia.SharedData {
     suppliers: App.Models.Supplier[];
     warehouses: App.Models.Warehouse[];
-    products: Array<App.Models.Product & { batches?: App.Models.Batch[] }>;
+    products: App.Models.Product[];
 }
 
 let rowKey = 0;
 const makeRow = (): ItemRow => ({
     _key: ++rowKey,
     product_id: '',
-    batch_id: '',
     quantity: 1,
     unit_cost: 0,
+    expires_at: '',
 });
+
+const today = new Date().toISOString().slice(0, 10);
 
 export default function PurchaseCreate({
     suppliers,
@@ -70,22 +73,29 @@ export default function PurchaseCreate({
             supplier_id: '',
             warehouse_id: '',
             status: 'pending',
+            purchase_date: today,
+            total_amount: 0,
             note: '',
             items: [],
         });
 
     const syncItems = useCallback(
         (currentRows: ItemRow[]) => {
+            const validRows = currentRows.filter((r) => r.product_id !== '');
+
             setData(
                 'items',
-                currentRows
-                    .filter((r) => r.product_id !== '' && r.batch_id !== '')
-                    .map((r) => ({
-                        product_id: r.product_id as number,
-                        batch_id: r.batch_id as number,
-                        quantity: r.quantity,
-                        unit_cost: r.unit_cost,
-                    })),
+                validRows.map((r) => ({
+                    product_id: r.product_id as number,
+                    quantity: r.quantity,
+                    unit_cost: r.unit_cost,
+                    expires_at: r.expires_at || null,
+                })),
+            );
+
+            setData(
+                'total_amount',
+                currentRows.reduce((s, r) => s + r.quantity * r.unit_cost, 0),
             );
         },
         [setData],
@@ -104,10 +114,8 @@ export default function PurchaseCreate({
                     : {
                           ...r,
                           product_id: productId === '' ? '' : Number(productId),
-                          batch_id: '',
                           unit_cost: product?.cost_price ?? 0,
                           _product: product,
-                          _batches: product?.batches ?? [],
                       },
             ),
         );
@@ -136,6 +144,7 @@ export default function PurchaseCreate({
         clearErrors();
         reset();
         setRows([makeRow()]);
+        router.visit(PurchaseController.index.url());
     }
 
     return (
@@ -206,10 +215,9 @@ export default function PurchaseCreate({
                                 </Label>
                                 <Select
                                     value={data.warehouse_id}
-                                    onValueChange={(v) => {
-                                        setData('warehouse_id', v);
-                                        setRows([makeRow()]);
-                                    }}
+                                    onValueChange={(v) =>
+                                        setData('warehouse_id', v)
+                                    }
                                     required
                                 >
                                     <SelectTrigger>
@@ -254,14 +262,31 @@ export default function PurchaseCreate({
                                         <SelectItem value="ordered">
                                             Ordered
                                         </SelectItem>
-                                        <SelectItem value="received">
-                                            Received
-                                        </SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
 
                             <div className="space-y-1.5">
+                                <Label>
+                                    Purchase date{' '}
+                                    <span className="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    type="date"
+                                    value={data.purchase_date}
+                                    onChange={(e) =>
+                                        setData('purchase_date', e.target.value)
+                                    }
+                                    required
+                                />
+                                {errors.purchase_date && (
+                                    <p className="text-xs text-destructive">
+                                        {errors.purchase_date}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="col-span-2 space-y-1.5">
                                 <Label>Note</Label>
                                 <Textarea
                                     rows={1}
@@ -299,12 +324,12 @@ export default function PurchaseCreate({
                                 </p>
                             )}
 
-                            <div className="grid grid-cols-[1fr_1fr_80px_110px_36px] gap-2 px-1">
+                            <div className="grid grid-cols-[1fr_80px_110px_130px_36px] gap-2 px-1">
                                 {[
                                     'Product',
-                                    'Batch',
                                     'Qty',
                                     'Unit cost',
+                                    'Expiry date',
                                     '',
                                 ].map((h) => (
                                     <span
@@ -320,7 +345,7 @@ export default function PurchaseCreate({
                                 {rows.map((row) => (
                                     <div
                                         key={row._key}
-                                        className="grid grid-cols-[1fr_1fr_80px_110px_36px] items-center gap-2"
+                                        className="grid grid-cols-[1fr_80px_110px_130px_36px] items-center gap-2"
                                     >
                                         <Select
                                             value={
@@ -362,42 +387,6 @@ export default function PurchaseCreate({
                                             </SelectContent>
                                         </Select>
 
-                                        <Select
-                                            value={
-                                                row.batch_id === ''
-                                                    ? ''
-                                                    : String(row.batch_id)
-                                            }
-                                            onValueChange={(v) =>
-                                                updateRow(row._key, {
-                                                    batch_id:
-                                                        v === ''
-                                                            ? ''
-                                                            : Number(v),
-                                                })
-                                            }
-                                            disabled={!row._batches?.length}
-                                        >
-                                            <SelectTrigger className="h-9">
-                                                <SelectValue placeholder="Batch" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {(row._batches ?? []).map(
-                                                    (b) => (
-                                                        <SelectItem
-                                                            key={b.id}
-                                                            value={String(b.id)}
-                                                        >
-                                                            {b.batch_number}{' '}
-                                                            <span className="text-xs text-muted-foreground">
-                                                                ({b.quantity})
-                                                            </span>
-                                                        </SelectItem>
-                                                    ),
-                                                )}
-                                            </SelectContent>
-                                        </Select>
-
                                         <Input
                                             type="number"
                                             min={1}
@@ -412,6 +401,7 @@ export default function PurchaseCreate({
                                                 })
                                             }
                                         />
+
                                         <Input
                                             type="number"
                                             min={0}
@@ -422,6 +412,17 @@ export default function PurchaseCreate({
                                                     unit_cost: Number(
                                                         e.target.value,
                                                     ),
+                                                })
+                                            }
+                                        />
+
+                                        <Input
+                                            type="date"
+                                            className="h-9"
+                                            value={row.expires_at}
+                                            onChange={(e) =>
+                                                updateRow(row._key, {
+                                                    expires_at: e.target.value,
                                                 })
                                             }
                                         />

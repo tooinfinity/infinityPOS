@@ -29,7 +29,7 @@ final readonly class CreateStockTransfer
                 'from_warehouse_id' => $data->from_warehouse_id,
                 'to_warehouse_id' => $data->to_warehouse_id,
                 'user_id' => auth()->id(),
-                'reference_no' => $this->referenceGenerator->handle('TRF', StockTransfer::class),
+                'reference_no' => $this->referenceGenerator->handle('TRF'),
                 'status' => StockTransferStatusEnum::Pending,
                 'transfer_date' => $data->transfer_date,
                 'note' => $data->note,

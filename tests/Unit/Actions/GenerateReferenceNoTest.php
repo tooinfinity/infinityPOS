@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 use App\Actions\GenerateReferenceNo;
 use App\Models\Purchase;
-use App\Models\Sale;
 
 describe(GenerateReferenceNo::class, function (): void {
     it('may generate a reference number', function (): void {
         $action = resolve(GenerateReferenceNo::class);
 
-        $reference = $action->handle('SAL', Sale::class);
+        $reference = $action->handle('SAL');
 
         expect($reference)
             ->toStartWith('SAL-')
@@ -20,7 +19,7 @@ describe(GenerateReferenceNo::class, function (): void {
     it('generates reference number with correct format', function (): void {
         $action = resolve(GenerateReferenceNo::class);
 
-        $reference = $action->handle('PUR', Purchase::class);
+        $reference = $action->handle('PUR');
 
         expect($reference)->toMatch('/^PUR-\d{8}-\d{4}$/');
     });
@@ -33,13 +32,13 @@ describe(GenerateReferenceNo::class, function (): void {
 
         // Create records and verify incrementing
         Purchase::factory()->create();
-        $ref1 = $action->handle('TEST', Purchase::class);
+        $ref1 = $action->handle('TEST');
 
         Purchase::factory()->create();
-        $ref2 = $action->handle('TEST', Purchase::class);
+        $ref2 = $action->handle('TEST');
 
         Purchase::factory()->create();
-        $ref3 = $action->handle('TEST', Purchase::class);
+        $ref3 = $action->handle('TEST');
 
         $datePart = today()->format('Ymd');
 
@@ -58,7 +57,7 @@ describe(GenerateReferenceNo::class, function (): void {
         $references = [];
         for ($i = 0; $i < 10; $i++) {
             Purchase::factory()->create();
-            $references[] = $action->handle('UNQ', Purchase::class);
+            $references[] = $action->handle('UNQ');
         }
 
         expect(array_unique($references))->toHaveCount(10);
@@ -67,8 +66,8 @@ describe(GenerateReferenceNo::class, function (): void {
     it('works with different model types', function (): void {
         $action = resolve(GenerateReferenceNo::class);
 
-        $saleRef = $action->handle('SAL', Sale::class);
-        $purchaseRef = $action->handle('PUR', Purchase::class);
+        $saleRef = $action->handle('SAL');
+        $purchaseRef = $action->handle('PUR');
 
         expect($saleRef)->toStartWith('SAL-')
             ->and($purchaseRef)->toStartWith('PUR-');
@@ -77,7 +76,7 @@ describe(GenerateReferenceNo::class, function (): void {
     it('pads count with leading zeros', function (): void {
         $action = resolve(GenerateReferenceNo::class);
 
-        $ref = $action->handle('PAD', Purchase::class);
+        $ref = $action->handle('PAD');
 
         expect($ref)->toEndWith('0001');
     });

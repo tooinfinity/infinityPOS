@@ -17,18 +17,16 @@ final readonly class UpdateWarehouse
     public function handle(Warehouse $warehouse, WarehouseData $data): Warehouse
     {
         return DB::transaction(static function () use ($warehouse, $data): Warehouse {
-            $updateData = [
-                'name' => $data->name ?? $warehouse->name,
-                'code' => $data->code ?? $warehouse->code,
+            $warehouse->update([
+                'name' => $data->name,
+                'code' => $data->code,
                 'email' => $data->email,
                 'phone' => $data->phone,
-                'address' => $data->address ?? $warehouse->address,
-                'city' => $data->city ?? $warehouse->city,
-                'country' => $data->country ?? $warehouse->country,
-                'is_active' => $data->is_active ?? $warehouse->is_active,
-            ];
-
-            $warehouse->update($updateData);
+                'address' => $data->address,
+                'city' => $data->city,
+                'country' => $data->country,
+                'is_active' => $data->is_active,
+            ]);
 
             return $warehouse->refresh();
         });

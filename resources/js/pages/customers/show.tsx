@@ -50,19 +50,6 @@ export default function CustomerShow({ customer }: Props) {
                         actions={
                             <>
                                 <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() =>
-                                        router.visit(
-                                            CustomerController.edit.url({
-                                                customer: customer.id,
-                                            }),
-                                        )
-                                    }
-                                >
-                                    Edit
-                                </Button>
-                                <Button
                                     variant="destructive"
                                     size="sm"
                                     onClick={() => setDeleteOpen(true)}

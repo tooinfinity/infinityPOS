@@ -50,7 +50,7 @@ final readonly class ProcessPosOrder
                 'customer_id' => $data->customer_id,
                 'warehouse_id' => $data->warehouse_id,
                 'user_id' => auth()->id(),
-                'reference_no' => $this->referenceGenerator->handle('POS', Sale::class),
+                'reference_no' => $this->referenceGenerator->handle('POS'),
                 'status' => SaleStatusEnum::Completed,
                 'sale_date' => now(),
                 'total_amount' => $data->total_amount,

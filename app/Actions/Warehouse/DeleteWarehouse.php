@@ -23,26 +23,46 @@ final readonly class DeleteWarehouse
         });
     }
 
+    /**
+     * @throws InvalidOperationException
+     *
+     * FIX: replaced 8 individual EXISTS queries with a single SQL query.
+     * StockTransfer uses two FK columns (from_warehouse_id / to_warehouse_id)
+     * so we check both in a single UNION subquery count.
+     */
     private function ensureNoRelatedRecords(Warehouse $warehouse): void
     {
-        $relations = [
-            'batches' => $warehouse->batches()->exists(),
-            'stockMovements' => $warehouse->stockMovements()->exists(),
-            'purchases' => $warehouse->purchases()->exists(),
-            'sales' => $warehouse->sales()->exists(),
-            'transfersFrom' => $warehouse->transfersFrom()->exists(),
-            'transfersTo' => $warehouse->transfersTo()->exists(),
-            'saleReturns' => $warehouse->saleReturns()->exists(),
-            'purchaseReturns' => $warehouse->purchaseReturns()->exists(),
-        ];
+        $id = $warehouse->id;
 
-        $existingRelations = array_keys(array_filter($relations));
+        /** @var array<int, int> $result */
+        $result = DB::selectOne(
+            <<<'SQL'
+            SELECT
+                (SELECT COUNT(*) FROM batches          WHERE warehouse_id = ?)        AS batches,
+                (SELECT COUNT(*) FROM stock_movements  WHERE warehouse_id = ?)        AS stockMovements,
+                (SELECT COUNT(*) FROM purchases        WHERE warehouse_id = ?)        AS purchases,
+                (SELECT COUNT(*) FROM sales            WHERE warehouse_id = ?)        AS sales,
+                (SELECT COUNT(*) FROM stock_transfers  WHERE from_warehouse_id = ?
+                                                       OR to_warehouse_id   = ?)      AS stockTransfers,
+                (SELECT COUNT(*) FROM sale_returns     WHERE warehouse_id = ?)        AS saleReturns,
+                (SELECT COUNT(*) FROM purchase_returns WHERE warehouse_id = ?)        AS purchaseReturns
+            SQL,
+            [$id, $id, $id, $id, $id, $id, $id, $id],
+        );
 
-        if ($existingRelations !== []) {
+        $existing = [];
+
+        foreach ($result as $relation => $count) {
+            if ($count > 0) {
+                $existing[] = $relation;
+            }
+        }
+
+        if ($existing !== []) {
             throw new InvalidOperationException(
                 'delete',
                 'Warehouse',
-                sprintf('Cannot delete warehouse with existing %s', implode(', ', $existingRelations))
+                sprintf('Cannot delete warehouse with existing %s', implode(', ', $existing))
             );
         }
     }

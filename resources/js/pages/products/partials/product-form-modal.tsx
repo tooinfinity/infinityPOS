@@ -27,14 +27,15 @@ import type { App } from '@/wayfinder/types';
 interface FormData {
     name: string;
     sku: string;
+    barcode: string;
     description: string;
     category_id: string;
     brand_id: string;
     unit_id: string;
-    selling_price: string;
-    cost_price: string;
+    selling_price: number;
+    cost_price: number;
     track_inventory: boolean;
-    alert_quantity: string;
+    alert_quantity: number;
     is_active: boolean;
 }
 
@@ -61,14 +62,15 @@ export default function ProductFormModal({
         useForm<FormData>({
             name: product?.name ?? '',
             sku: product?.sku ?? '',
+            barcode: product?.barcode ?? '',
             description: product?.description ?? '',
             category_id: product?.category_id?.toString() ?? '',
             brand_id: product?.brand_id?.toString() ?? '',
             unit_id: product?.unit_id?.toString() ?? '',
-            selling_price: product?.selling_price?.toString() ?? '',
-            cost_price: product?.cost_price?.toString() ?? '',
+            selling_price: product?.selling_price ?? 0,
+            cost_price: product?.cost_price ?? 0,
             track_inventory: product?.track_inventory ?? true,
-            alert_quantity: product?.alert_quantity?.toString() ?? '10',
+            alert_quantity: product?.alert_quantity ?? 10,
             is_active: product?.is_active ?? true,
         });
 
@@ -131,21 +133,35 @@ export default function ProductFormModal({
                         </div>
 
                         <div className="space-y-1.5">
-                            <Label>
-                                SKU <span className="text-destructive">*</span>
-                            </Label>
+                            <Label>SKU</Label>
                             <Input
                                 value={data.sku}
                                 onChange={(e) =>
                                     setData('sku', e.target.value.toUpperCase())
                                 }
-                                placeholder="e.g. PRD-001"
+                                placeholder="e.g. PRD-001 (auto-generated if blank)"
                                 className="font-mono"
-                                required
                             />
                             {errors.sku && (
                                 <p className="text-xs text-destructive">
                                     {errors.sku}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <Label>Barcode</Label>
+                            <Input
+                                value={data.barcode}
+                                onChange={(e) =>
+                                    setData('barcode', e.target.value)
+                                }
+                                placeholder="EAN-13 (auto-generated if blank)"
+                                className="font-mono"
+                            />
+                            {errors.barcode && (
+                                <p className="text-xs text-destructive">
+                                    {errors.barcode}
                                 </p>
                             )}
                         </div>
@@ -193,7 +209,7 @@ export default function ProductFormModal({
                                     <SelectValue placeholder="Select category" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">None</SelectItem>
+                                    <SelectItem value="">None</SelectItem>
                                     {categories.map((c) => (
                                         <SelectItem
                                             key={c.id}
@@ -216,7 +232,7 @@ export default function ProductFormModal({
                                     <SelectValue placeholder="Select brand" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">None</SelectItem>
+                                    <SelectItem value="">None</SelectItem>
                                     {brands.map((b) => (
                                         <SelectItem
                                             key={b.id}
@@ -257,7 +273,10 @@ export default function ProductFormModal({
                                 className="font-mono"
                                 value={data.selling_price}
                                 onChange={(e) =>
-                                    setData('selling_price', e.target.value)
+                                    setData(
+                                        'selling_price',
+                                        Number(e.target.value),
+                                    )
                                 }
                                 placeholder="0"
                                 required
@@ -277,7 +296,10 @@ export default function ProductFormModal({
                                 className="font-mono"
                                 value={data.cost_price}
                                 onChange={(e) =>
-                                    setData('cost_price', e.target.value)
+                                    setData(
+                                        'cost_price',
+                                        Number(e.target.value),
+                                    )
                                 }
                                 placeholder="0"
                             />
@@ -317,7 +339,7 @@ export default function ProductFormModal({
                                     onChange={(e) =>
                                         setData(
                                             'alert_quantity',
-                                            e.target.value,
+                                            Number(e.target.value),
                                         )
                                     }
                                 />

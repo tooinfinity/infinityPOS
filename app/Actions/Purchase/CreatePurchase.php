@@ -30,7 +30,7 @@ final readonly class CreatePurchase
                 'supplier_id' => $data->supplier_id,
                 'warehouse_id' => $data->warehouse_id,
                 'user_id' => auth()->id(),
-                'reference_no' => $this->referenceGenerator->handle('PUR', Purchase::class),
+                'reference_no' => $this->referenceGenerator->handle('PUR'),
                 'status' => PurchaseStatusEnum::Pending,
                 'purchase_date' => $data->purchase_date,
                 'total_amount' => $data->total_amount,

@@ -17,13 +17,11 @@ final readonly class UpdateUnit
     public function handle(Unit $unit, UnitData $data): Unit
     {
         return DB::transaction(static function () use ($unit, $data): Unit {
-            $updateData = [
-                'name' => $data->name ?? $unit->name,
-                'short_name' => $data->short_name ?? $unit->short_name,
-                'is_active' => $data->is_active ?? $unit->is_active,
-            ];
-
-            $unit->update($updateData);
+            $unit->update([
+                'name' => $data->name,
+                'short_name' => $data->short_name,
+                'is_active' => $data->is_active,
+            ]);
 
             return $unit->refresh();
         });

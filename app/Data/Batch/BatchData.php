@@ -6,6 +6,8 @@ namespace App\Data\Batch;
 
 use App\Models\Batch;
 use DateTimeInterface;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
 
@@ -14,7 +16,7 @@ final class BatchData extends Data
     public function __construct(
         public int $product_id,
         public int $warehouse_id,
-        public string $batch_number,
+        public ?string $batch_number,
         public int $cost_amount,
         public int $quantity,
         public DateTimeInterface|string|null $expires_at,
@@ -33,20 +35,23 @@ final class BatchData extends Data
         ]);
     }
 
-    //    public static function authorize(): bool
-    //    {
-    //        return true;
-    //    }
-
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, mixed>
      */
     public static function rules(ValidationContext $context): array
     {
+        /** @var Batch|null $batch */
+        $batch = Request::route('batch');
+
         return [
             'product_id' => ['required', 'integer', 'exists:products,id'],
             'warehouse_id' => ['required', 'integer', 'exists:warehouses,id'],
-            'batch_number' => ['required', 'string', 'max:255'],
+            'batch_number' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('batches', 'batch_number')->ignore($batch?->id),
+            ],
             'cost_amount' => ['required', 'integer', 'min:0'],
             'quantity' => ['required', 'integer', 'min:0'],
             'expires_at' => ['nullable', 'date'],
@@ -66,9 +71,9 @@ final class BatchData extends Data
             'warehouse_id.required' => __('The warehouse field is required.'),
             'warehouse_id.integer' => __('The warehouse field must be an integer.'),
             'warehouse_id.exists' => __('The selected warehouse does not exist.'),
-            'batch_number.required' => __('The batch number field is required.'),
             'batch_number.string' => __('The batch number must be a string.'),
             'batch_number.max' => __('The batch number may not be greater than :max characters.'),
+            'batch_number.unique' => __('This batch number is already in use.'),
             'cost_amount.required' => __('The cost amount field is required.'),
             'cost_amount.integer' => __('The cost amount must be an integer.'),
             'cost_amount.min' => __('The cost amount must be at least :min.'),

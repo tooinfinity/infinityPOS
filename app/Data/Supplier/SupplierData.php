@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Data\Supplier;
 
 use App\Models\Supplier;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
 
@@ -35,18 +37,19 @@ final class SupplierData extends Data
         ]);
     }
 
-    //    public static function authorize(): bool
-    //    {
-    //        return true;
-    //    }
-
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, mixed>
      */
     public static function rules(ValidationContext $context): array
     {
+        /** @var Supplier|null $supplier */
+        $supplier = Request::route('supplier');
+
         return [
-            'name' => ['required', 'string', 'min:3', 'max:80', 'unique:suppliers,name'],
+            'name' => [
+                'required', 'string', 'min:3', 'max:80',
+                Rule::unique('suppliers', 'name')->ignore($supplier?->id),
+            ],
             'company_name' => ['nullable', 'string', 'max:80'],
             'email' => ['nullable', 'string', 'email', 'max:120'],
             'phone' => ['nullable', 'string', 'max:20'],

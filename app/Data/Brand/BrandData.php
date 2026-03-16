@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Data\Brand;
 
 use App\Models\Brand;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
 
@@ -23,18 +25,22 @@ final class BrandData extends Data
         ]);
     }
 
-    //    public static function authorize(): bool
-    //    {
-    //        return true;
-    //    }
-
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, mixed>
      */
     public static function rules(ValidationContext $context): array
     {
+        /** @var Brand|null $brand */
+        $brand = Request::route('brand');
+
         return [
-            'name' => ['required', 'string', 'min:3', 'max:80', 'unique:brands,name'],
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:80',
+                Rule::unique('brands', 'name')->ignore($brand?->id),
+            ],
             'is_active' => ['nullable', 'boolean'],
         ];
     }

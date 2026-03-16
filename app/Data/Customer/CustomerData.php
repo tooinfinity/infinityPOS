@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Data\Customer;
 
 use App\Models\Customer;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Support\Validation\ValidationContext;
 
@@ -33,18 +35,22 @@ final class CustomerData extends Data
         ]);
     }
 
-    //    public static function authorize(): bool
-    //    {
-    //        return true;
-    //    }
-
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, mixed>
      */
     public static function rules(ValidationContext $context): array
     {
+        /** @var Customer|null $customer */
+        $customer = Request::route('customer');
+
         return [
-            'name' => ['required', 'string', 'min:3', 'max:80', 'unique:customers,name'],
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:80',
+                Rule::unique('customers', 'name')->ignore($customer?->id),
+            ],
             'email' => ['nullable', 'string', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:255'],

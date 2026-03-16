@@ -55,7 +55,7 @@ final readonly class CreatePurchaseReturn
                 'purchase_id' => $data->purchase_id,
                 'warehouse_id' => $data->warehouse_id,
                 'user_id' => auth()->id(),
-                'reference_no' => $this->referenceGenerator->handle('PRN', PurchaseReturn::class),
+                'reference_no' => $this->referenceGenerator->handle('PRN'),
                 'status' => ReturnStatusEnum::Pending,
                 'return_date' => $data->return_date,
                 'total_amount' => $totalAmount,

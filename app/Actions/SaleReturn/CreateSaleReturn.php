@@ -55,7 +55,7 @@ final readonly class CreateSaleReturn
                 'sale_id' => $data->sale_id,
                 'warehouse_id' => $data->warehouse_id,
                 'user_id' => auth()->id(),
-                'reference_no' => $this->referenceGenerator->handle('SRN', SaleReturn::class),
+                'reference_no' => $this->referenceGenerator->handle('SRN'),
                 'status' => ReturnStatusEnum::Pending,
                 'return_date' => $data->return_date,
                 'total_amount' => $totalAmount,

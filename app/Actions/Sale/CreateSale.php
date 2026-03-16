@@ -35,12 +35,12 @@ final readonly class CreateSale
                 'customer_id' => $data->customer_id,
                 'warehouse_id' => $data->warehouse_id,
                 'user_id' => auth()->id(),
-                'reference_no' => $this->referenceGenerator->handle('SAL', Sale::class),
+                'reference_no' => $this->referenceGenerator->handle('SAL'),
                 'status' => $data->status,
                 'sale_date' => $data->sale_date,
                 'total_amount' => $data->total_amount,
                 'paid_amount' => 0,
-                'change_amount' => $data->change_amount ?? 0,
+                'change_amount' => 0,
                 'payment_status' => PaymentStatusEnum::Unpaid,
                 'note' => $data->note,
             ]);
@@ -60,7 +60,7 @@ final readonly class CreateSale
      */
     private function createItems(Sale $sale, DataCollection $items): void
     {
-        $items->each(function (SaleItemData $itemData) use ($sale): void {
+        collect($items)->each(function (SaleItemData $itemData) use ($sale): void {
             $sale->items()->forceCreate([
                 'product_id' => $itemData->product_id,
                 'batch_id' => $itemData->batch_id,
@@ -85,7 +85,7 @@ final readonly class CreateSale
                     batch: $item->batch,
                     quantity: $item->quantity,
                     reference: $sale,
-                    note: "Sale {$sale->reference_no}",
+                    note: "Sale $sale->reference_no",
                 );
             }
         });

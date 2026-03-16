@@ -23,23 +23,24 @@ import type { App, Inertia } from '@/wayfinder/types';
 interface ItemRow {
     _key: number;
     product_id: number | '';
-    batch_id: number | '';
     quantity: number;
     unit_cost: number;
+    expires_at: string;
     _product?: App.Models.Product;
-    _batches?: App.Models.Batch[];
 }
 
 interface FormData {
     supplier_id: string;
     warehouse_id: string;
     status: App.Enums.PurchaseStatusEnum;
+    purchase_date: string;
+    total_amount: number;
     note: string;
     items: Array<{
         product_id: number;
-        batch_id: number;
         quantity: number;
         unit_cost: number;
+        expires_at: string | null;
     }>;
 }
 
@@ -47,16 +48,16 @@ interface Props extends Inertia.SharedData {
     purchase: App.Models.Purchase;
     suppliers: App.Models.Supplier[];
     warehouses: App.Models.Warehouse[];
-    products: Array<App.Models.Product & { batches?: App.Models.Batch[] }>;
+    products: App.Models.Product[];
 }
 
 let rowKey = 0;
 const makeRow = (): ItemRow => ({
     _key: ++rowKey,
     product_id: '',
-    batch_id: '',
     quantity: 1,
     unit_cost: 0,
+    expires_at: '',
 });
 
 export default function PurchaseEdit({
@@ -70,38 +71,46 @@ export default function PurchaseEdit({
             ? purchase.items.map((item) => ({
                   _key: ++rowKey,
                   product_id: item.product?.id ?? 0,
-                  batch_id: 0,
                   quantity: item.quantity,
                   unit_cost: item.unit_cost,
+                  expires_at: item.expires_at
+                      ? String(item.expires_at).slice(0, 10)
+                      : '',
                   _product: item.product ?? undefined,
-                  _batches:
-                      products.find((p) => p.id === item.product?.id)
-                          ?.batches ?? [],
               }))
             : [makeRow()],
     );
 
-    const { data, setData, put, processing, errors, reset, clearErrors } =
+    const { data, setData, put, processing, errors, clearErrors } =
         useForm<FormData>({
             supplier_id: purchase.supplier?.id?.toString() ?? '',
             warehouse_id: purchase.warehouse?.id?.toString() ?? '',
             status: purchase.status,
+            purchase_date: purchase.purchase_date
+                ? String(purchase.purchase_date).slice(0, 10)
+                : new Date().toISOString().slice(0, 10),
+            total_amount: purchase.total_amount ?? 0,
             note: purchase.note ?? '',
             items: [],
         });
 
     const syncItems = useCallback(
         (currentRows: ItemRow[]) => {
+            const validRows = currentRows.filter((r) => r.product_id !== '');
+
             setData(
                 'items',
-                currentRows
-                    .filter((r) => r.product_id !== '' && r.batch_id !== '')
-                    .map((r) => ({
-                        product_id: r.product_id as number,
-                        batch_id: r.batch_id as number,
-                        quantity: r.quantity,
-                        unit_cost: r.unit_cost,
-                    })),
+                validRows.map((r) => ({
+                    product_id: r.product_id as number,
+                    quantity: r.quantity,
+                    unit_cost: r.unit_cost,
+                    expires_at: r.expires_at || null,
+                })),
+            );
+
+            setData(
+                'total_amount',
+                currentRows.reduce((s, r) => s + r.quantity * r.unit_cost, 0),
             );
         },
         [setData],
@@ -120,10 +129,8 @@ export default function PurchaseEdit({
                     : {
                           ...r,
                           product_id: productId === '' ? '' : Number(productId),
-                          batch_id: '',
                           unit_cost: product?.cost_price ?? 0,
                           _product: product,
-                          _batches: product?.batches ?? [],
                       },
             ),
         );
@@ -141,14 +148,7 @@ export default function PurchaseEdit({
         e.preventDefault();
         put(PurchaseController.update.url({ purchase: purchase.id }), {
             preserveScroll: true,
-            onSuccess: () => {
-                reset();
-            },
         });
-    }
-
-    function handleClose() {
-        clearErrors();
     }
 
     return (
@@ -223,10 +223,9 @@ export default function PurchaseEdit({
                                 </Label>
                                 <Select
                                     value={data.warehouse_id}
-                                    onValueChange={(v) => {
-                                        setData('warehouse_id', v);
-                                        setRows([makeRow()]);
-                                    }}
+                                    onValueChange={(v) =>
+                                        setData('warehouse_id', v)
+                                    }
                                     required
                                 >
                                     <SelectTrigger>
@@ -271,14 +270,31 @@ export default function PurchaseEdit({
                                         <SelectItem value="ordered">
                                             Ordered
                                         </SelectItem>
-                                        <SelectItem value="received">
-                                            Received
-                                        </SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
 
                             <div className="space-y-1.5">
+                                <Label>
+                                    Purchase date{' '}
+                                    <span className="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    type="date"
+                                    value={data.purchase_date}
+                                    onChange={(e) =>
+                                        setData('purchase_date', e.target.value)
+                                    }
+                                    required
+                                />
+                                {errors.purchase_date && (
+                                    <p className="text-xs text-destructive">
+                                        {errors.purchase_date}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="col-span-2 space-y-1.5">
                                 <Label>Note</Label>
                                 <Textarea
                                     rows={1}
@@ -316,12 +332,12 @@ export default function PurchaseEdit({
                                 </p>
                             )}
 
-                            <div className="grid grid-cols-[1fr_1fr_80px_110px_36px] gap-2 px-1">
+                            <div className="grid grid-cols-[1fr_80px_110px_130px_36px] gap-2 px-1">
                                 {[
                                     'Product',
-                                    'Batch',
                                     'Qty',
                                     'Unit cost',
+                                    'Expiry date',
                                     '',
                                 ].map((h) => (
                                     <span
@@ -337,7 +353,7 @@ export default function PurchaseEdit({
                                 {rows.map((row) => (
                                     <div
                                         key={row._key}
-                                        className="grid grid-cols-[1fr_1fr_80px_110px_36px] items-center gap-2"
+                                        className="grid grid-cols-[1fr_80px_110px_130px_36px] items-center gap-2"
                                     >
                                         <Select
                                             value={
@@ -379,42 +395,6 @@ export default function PurchaseEdit({
                                             </SelectContent>
                                         </Select>
 
-                                        <Select
-                                            value={
-                                                row.batch_id === ''
-                                                    ? ''
-                                                    : String(row.batch_id)
-                                            }
-                                            onValueChange={(v) =>
-                                                updateRow(row._key, {
-                                                    batch_id:
-                                                        v === ''
-                                                            ? ''
-                                                            : Number(v),
-                                                })
-                                            }
-                                            disabled={!row._batches?.length}
-                                        >
-                                            <SelectTrigger className="h-9">
-                                                <SelectValue placeholder="Batch" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {(row._batches ?? []).map(
-                                                    (b) => (
-                                                        <SelectItem
-                                                            key={b.id}
-                                                            value={String(b.id)}
-                                                        >
-                                                            {b.batch_number}{' '}
-                                                            <span className="text-xs text-muted-foreground">
-                                                                ({b.quantity})
-                                                            </span>
-                                                        </SelectItem>
-                                                    ),
-                                                )}
-                                            </SelectContent>
-                                        </Select>
-
                                         <Input
                                             type="number"
                                             min={1}
@@ -439,6 +419,17 @@ export default function PurchaseEdit({
                                                     unit_cost: Number(
                                                         e.target.value,
                                                     ),
+                                                })
+                                            }
+                                        />
+
+                                        <Input
+                                            type="date"
+                                            className="h-9"
+                                            value={row.expires_at}
+                                            onChange={(e) =>
+                                                updateRow(row._key, {
+                                                    expires_at: e.target.value,
                                                 })
                                             }
                                         />
@@ -485,7 +476,7 @@ export default function PurchaseEdit({
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={handleClose}
+                                onClick={() => clearErrors()}
                             >
                                 Cancel
                             </Button>
