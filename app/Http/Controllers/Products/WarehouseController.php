@@ -18,7 +18,7 @@ final readonly class WarehouseController
 {
     public function index(): Response
     {
-        return Inertia::render('products/warehouses/index', [
+        return Inertia::render('warehouses/index', [
             'warehouses' => Warehouse::withInactive()
                 ->withCount(['batches', 'purchases', 'sales'])
                 ->latest()
@@ -28,7 +28,7 @@ final readonly class WarehouseController
 
     public function create(): Response
     {
-        return Inertia::render('products/warehouses/create');
+        return Inertia::render('warehouses/create');
     }
 
     /**
@@ -53,14 +53,14 @@ final readonly class WarehouseController
             'transfersTo',
         ]);
 
-        return Inertia::render('products/warehouses/show', [
+        return Inertia::render('warehouses/show', [
             'warehouse' => $warehouse,
         ]);
     }
 
     public function edit(Warehouse $warehouse): Response
     {
-        return Inertia::render('products/warehouses/edit', [
+        return Inertia::render('warehouses/edit', [
             'warehouse' => $warehouse,
         ]);
     }

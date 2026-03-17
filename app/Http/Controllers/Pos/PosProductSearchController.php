@@ -23,7 +23,7 @@ final readonly class PosProductSearchController
 
         $products = $action->handle(
             query: $request->string('query')->trim()->value(),
-            warehouseId: (int) $request->integer('warehouse_id'),
+            warehouseId: $request->integer('warehouse_id'),
         );
 
         return response()->json([

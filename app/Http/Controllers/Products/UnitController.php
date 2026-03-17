@@ -18,7 +18,7 @@ final readonly class UnitController
 {
     public function index(): Response
     {
-        return Inertia::render('products/units/index', [
+        return Inertia::render('units/index', [
             'units' => Unit::withInactive()
                 ->withCount('products')
                 ->latest()
@@ -28,7 +28,7 @@ final readonly class UnitController
 
     public function create(): Response
     {
-        return Inertia::render('products/units/create');
+        return Inertia::render('units/create');
     }
 
     /**
@@ -46,14 +46,14 @@ final readonly class UnitController
     {
         $unit->loadCount('products');
 
-        return Inertia::render('products/units/show', [
+        return Inertia::render('units/show', [
             'unit' => $unit,
         ]);
     }
 
     public function edit(Unit $unit): Response
     {
-        return Inertia::render('products/units/edit', [
+        return Inertia::render('units/edit', [
             'unit' => $unit,
         ]);
     }

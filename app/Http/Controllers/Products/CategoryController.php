@@ -18,7 +18,7 @@ final readonly class CategoryController
 {
     public function index(): Response
     {
-        return Inertia::render('products/categories/index', [
+        return Inertia::render('categories/index', [
             'categories' => Category::withInactive()
                 ->withCount('products')
                 ->latest()
@@ -28,7 +28,7 @@ final readonly class CategoryController
 
     public function create(): Response
     {
-        return Inertia::render('products/categories/create');
+        return Inertia::render('categories/create');
     }
 
     /**
@@ -46,14 +46,14 @@ final readonly class CategoryController
     {
         $category->loadCount('products');
 
-        return Inertia::render('products/categories/show', [
+        return Inertia::render('categories/show', [
             'category' => $category,
         ]);
     }
 
     public function edit(Category $category): Response
     {
-        return Inertia::render('products/categories/edit', [
+        return Inertia::render('categories/edit', [
             'category' => $category,
         ]);
     }

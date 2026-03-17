@@ -26,14 +26,14 @@ final readonly class BatchController
             ->latest()
             ->paginate(25);
 
-        return Inertia::render('products/batches/index', [
+        return Inertia::render('batches/index', [
             'batches' => $batches,
         ]);
     }
 
     public function create(): Response
     {
-        return Inertia::render('products/batches/create', [
+        return Inertia::render('batches/create', [
             'products' => Product::query()->select('id', 'name', 'sku')->get(),
             'warehouses' => Warehouse::query()->select('id', 'name', 'code')->get(),
         ]);
@@ -58,7 +58,7 @@ final readonly class BatchController
             'stockMovements' => fn (Relation $q) => $q->latest()->limit(20),
         ]);
 
-        return Inertia::render('products/batches/show', [
+        return Inertia::render('batches/show', [
             'batch' => $batch,
         ]);
     }
@@ -67,7 +67,7 @@ final readonly class BatchController
     {
         $batch->load(['product', 'warehouse']);
 
-        return Inertia::render('products/batches/edit', [
+        return Inertia::render('batches/edit', [
             'batch' => $batch,
             'products' => Product::query()->select('id', 'name', 'sku')->get(),
             'warehouses' => Warehouse::query()->select('id', 'name', 'code')->get(),

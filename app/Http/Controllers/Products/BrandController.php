@@ -18,7 +18,7 @@ final readonly class BrandController
 {
     public function index(): Response
     {
-        return Inertia::render('products/brands/index', [
+        return Inertia::render('brands/index', [
             'brands' => Brand::withInactive()
                 ->withCount('products')
                 ->latest()
@@ -28,7 +28,7 @@ final readonly class BrandController
 
     public function create(): Response
     {
-        return Inertia::render('products/brands/create');
+        return Inertia::render('brands/create');
     }
 
     /**
@@ -46,14 +46,14 @@ final readonly class BrandController
     {
         $brand->loadCount('products');
 
-        return Inertia::render('products/brands/show', [
+        return Inertia::render('brands/show', [
             'brand' => $brand,
         ]);
     }
 
     public function edit(Brand $brand): Response
     {
-        return Inertia::render('products/brands/edit', [
+        return Inertia::render('brands/edit', [
             'brand' => $brand,
         ]);
     }

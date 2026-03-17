@@ -18,7 +18,7 @@ final readonly class PaymentMethodController
 {
     public function index(): Response
     {
-        return Inertia::render('payments/methods/index', [
+        return Inertia::render('payment-method/index', [
             'methods' => PaymentMethod::withInactive()
                 ->withCount('payments')
                 ->latest()
@@ -28,7 +28,7 @@ final readonly class PaymentMethodController
 
     public function create(): Response
     {
-        return Inertia::render('payments/methods/create');
+        return Inertia::render('payment-method/create');
     }
 
     /**
@@ -44,7 +44,7 @@ final readonly class PaymentMethodController
 
     public function edit(PaymentMethod $paymentMethod): Response
     {
-        return Inertia::render('payments/methods/edit', [
+        return Inertia::render('payment-method/edit', [
             'method' => $paymentMethod,
         ]);
     }

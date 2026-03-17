@@ -15,8 +15,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
-import { formatAmount } from '@/lib/formatters';
-import SaleController from '@/wayfinder/App/Http/Controllers/Sales/SaleController';
+import StockTransferController from '@/wayfinder/App/Http/Controllers/Inventory/StockTransferController';
 import type { App, Inertia } from '@/wayfinder/types';
 
 interface ItemRow {
@@ -24,99 +23,68 @@ interface ItemRow {
     product_id: number | '';
     batch_id: number | '';
     quantity: number;
-    unit_price: number;
-    unit_cost: number;
     _product?: App.Models.Product;
     _batches?: App.Models.Batch[];
 }
 
 interface FormData {
-    customer_id: string;
-    warehouse_id: string;
-    status: App.Enums.SaleStatusEnum;
-    sale_date: string;
-    total_amount: number;
+    from_warehouse_id: string;
+    to_warehouse_id: string;
+    transfer_date: string;
     note: string;
-    items: Array<{
-        product_id: number;
-        batch_id: number;
-        quantity: number;
-        unit_price: number;
-        unit_cost: number;
-    }>;
+    items: Array<{ product_id: number; batch_id: number; quantity: number }>;
 }
 
 interface Props extends Inertia.SharedData {
-    sale: App.Models.Sale;
-    customers: App.Models.Customer[];
+    transfer: App.Models.StockTransfer;
     warehouses: App.Models.Warehouse[];
     products: Array<App.Models.Product & { batches?: App.Models.Batch[] }>;
 }
 
 let rowKey = 0;
 
-export default function SaleEdit({
-    sale,
-    customers,
+export default function StockTransferEdit({
+    transfer,
     warehouses,
     products,
 }: Props) {
     const [rows, setRows] = useState<ItemRow[]>(() =>
-        sale.items?.length
-            ? sale.items.map((item) => ({
+        transfer.items?.length
+            ? transfer.items.map((item) => ({
                   _key: ++rowKey,
                   product_id: item.product?.id ?? 0,
                   batch_id: item.batch?.id ?? 0,
                   quantity: item.quantity,
-                  unit_price: item.unit_price,
-                  unit_cost: item.unit_cost,
                   _product: item.product ?? undefined,
                   _batches:
                       products.find((p) => p.id === item.product?.id)
                           ?.batches ?? [],
               }))
-            : [
-                  {
-                      _key: ++rowKey,
-                      product_id: '',
-                      batch_id: '',
-                      quantity: 1,
-                      unit_price: 0,
-                      unit_cost: 0,
-                  },
-              ],
+            : [{ _key: ++rowKey, product_id: '', batch_id: '', quantity: 1 }],
     );
 
     const { data, setData, put, processing, errors } = useForm<FormData>({
-        customer_id: sale.customer?.id?.toString() ?? '',
-        warehouse_id: sale.warehouse?.id?.toString() ?? '',
-        status: sale.status,
-        sale_date: sale.sale_date
-            ? String(sale.sale_date).slice(0, 10)
+        from_warehouse_id: String(transfer.from_warehouse_id),
+        to_warehouse_id: String(transfer.to_warehouse_id),
+        transfer_date: transfer.transfer_date
+            ? String(transfer.transfer_date).slice(0, 10)
             : new Date().toISOString().slice(0, 10),
-        total_amount: sale.total_amount ?? 0,
-        note: sale.note ?? '',
+        note: transfer.note ?? '',
         items: [],
     });
 
     const syncItems = useCallback(
         (currentRows: ItemRow[]) => {
-            const validRows = currentRows.filter(
+            const valid = currentRows.filter(
                 (r) => r.product_id !== '' && r.batch_id !== '',
             );
             setData(
                 'items',
-                validRows.map((r) => ({
+                valid.map((r) => ({
                     product_id: r.product_id as number,
                     batch_id: r.batch_id as number,
                     quantity: r.quantity,
-                    unit_price: r.unit_price,
-                    unit_cost: r.unit_cost,
                 })),
-            );
-            setData(
-                'total_amount',
-                currentRows.reduce((s, r) => s + r.quantity * r.unit_price, 0),
             );
         },
         [setData],
@@ -126,32 +94,8 @@ export default function SaleEdit({
         syncItems(rows);
     }, [rows, syncItems]);
 
-    function handleProductChange(key: number, productId: string) {
-        const product = products.find((p) => p.id === Number(productId));
-        const warehouseId = Number(data.warehouse_id);
-        setRows((prev) =>
-            prev.map((r) =>
-                r._key !== key
-                    ? r
-                    : {
-                          ...r,
-                          product_id: productId === '' ? '' : Number(productId),
-                          batch_id: '',
-                          unit_price: product?.selling_price ?? 0,
-                          unit_cost: product?.cost_price ?? 0,
-                          _product: product,
-                          _batches: (product?.batches ?? []).filter(
-                              (b) =>
-                                  !warehouseId ||
-                                  b.warehouse_id === warehouseId,
-                          ),
-                      },
-            ),
-        );
-    }
-
-    function handleWarehouseChange(warehouseId: string) {
-        setData('warehouse_id', warehouseId);
+    function handleFromWarehouseChange(warehouseId: string) {
+        setData('from_warehouse_id', warehouseId);
         const wid = Number(warehouseId);
         setRows((prev) =>
             prev.map((r) => ({
@@ -164,24 +108,45 @@ export default function SaleEdit({
         );
     }
 
+    function handleProductChange(key: number, productId: string) {
+        const product = products.find((p) => p.id === Number(productId));
+        const wid = Number(data.from_warehouse_id);
+        setRows((prev) =>
+            prev.map((r) =>
+                r._key !== key
+                    ? r
+                    : {
+                          ...r,
+                          product_id: productId === '' ? '' : Number(productId),
+                          batch_id: '',
+                          _product: product,
+                          _batches: (product?.batches ?? []).filter(
+                              (b) => !wid || b.warehouse_id === wid,
+                          ),
+                      },
+            ),
+        );
+    }
+
     function updateRow(key: number, patch: Partial<ItemRow>) {
         setRows((prev) =>
             prev.map((r) => (r._key === key ? { ...r, ...patch } : r)),
         );
     }
 
-    const subtotal = rows.reduce((s, r) => s + r.quantity * r.unit_price, 0);
-
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        put(SaleController.update.url({ sale: sale.id }), {
-            preserveScroll: true,
-        });
+        put(
+            StockTransferController.update.url({ stockTransfer: transfer.id }),
+            {
+                preserveScroll: true,
+            },
+        );
     }
 
     return (
         <AppLayout>
-            <Head title={`Edit Sale — ${sale.reference_no}`} />
+            <Head title={`Edit Transfer — ${transfer.reference_no}`} />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="space-y-6">
                     <div className="flex items-center gap-3">
@@ -191,7 +156,9 @@ export default function SaleEdit({
                             className="h-8 w-8 shrink-0"
                             onClick={() =>
                                 router.visit(
-                                    SaleController.show.url({ sale: sale.id }),
+                                    StockTransferController.show.url({
+                                        stockTransfer: transfer.id,
+                                    }),
                                 )
                             }
                         >
@@ -199,10 +166,10 @@ export default function SaleEdit({
                         </Button>
                         <div>
                             <h1 className="text-xl font-semibold tracking-tight">
-                                Edit Sale
+                                Edit Transfer
                             </h1>
-                            <p className="text-sm text-muted-foreground">
-                                {sale.reference_no}
+                            <p className="font-mono text-sm text-muted-foreground">
+                                {transfer.reference_no}
                             </p>
                         </div>
                     </div>
@@ -210,47 +177,17 @@ export default function SaleEdit({
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1.5">
-                                <Label>Customer</Label>
-                                <Select
-                                    value={data.customer_id || 'walk-in'}
-                                    onValueChange={(v) =>
-                                        setData(
-                                            'customer_id',
-                                            v === 'walk-in' ? '' : v,
-                                        )
-                                    }
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Walk-in customer" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="walk-in">
-                                            Walk-in
-                                        </SelectItem>
-                                        {customers.map((c) => (
-                                            <SelectItem
-                                                key={c.id}
-                                                value={String(c.id)}
-                                            >
-                                                {c.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-1.5">
                                 <Label>
-                                    Warehouse{' '}
+                                    From warehouse{' '}
                                     <span className="text-destructive">*</span>
                                 </Label>
                                 <Select
-                                    value={data.warehouse_id}
-                                    onValueChange={handleWarehouseChange}
+                                    value={data.from_warehouse_id}
+                                    onValueChange={handleFromWarehouseChange}
                                     required
                                 >
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select warehouse" />
+                                        <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {warehouses.map((w) => (
@@ -263,46 +200,65 @@ export default function SaleEdit({
                                         ))}
                                     </SelectContent>
                                 </Select>
+                                {errors.from_warehouse_id && (
+                                    <p className="text-xs text-destructive">
+                                        {errors.from_warehouse_id}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label>Status</Label>
+                                <Label>
+                                    To warehouse{' '}
+                                    <span className="text-destructive">*</span>
+                                </Label>
                                 <Select
-                                    value={data.status}
+                                    value={data.to_warehouse_id}
                                     onValueChange={(v) =>
-                                        setData(
-                                            'status',
-                                            v as App.Enums.SaleStatusEnum,
-                                        )
+                                        setData('to_warehouse_id', v)
                                     }
+                                    required
                                 >
                                     <SelectTrigger>
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="pending">
-                                            Pending
-                                        </SelectItem>
-                                        <SelectItem value="completed">
-                                            Completed
-                                        </SelectItem>
+                                        {warehouses
+                                            .filter(
+                                                (w) =>
+                                                    String(w.id) !==
+                                                    data.from_warehouse_id,
+                                            )
+                                            .map((w) => (
+                                                <SelectItem
+                                                    key={w.id}
+                                                    value={String(w.id)}
+                                                >
+                                                    {w.name}
+                                                </SelectItem>
+                                            ))}
                                     </SelectContent>
                                 </Select>
+                                {errors.to_warehouse_id && (
+                                    <p className="text-xs text-destructive">
+                                        {errors.to_warehouse_id}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label>Sale date</Label>
+                                <Label>Transfer date</Label>
                                 <Input
                                     type="date"
-                                    value={data.sale_date}
+                                    value={data.transfer_date}
                                     onChange={(e) =>
-                                        setData('sale_date', e.target.value)
+                                        setData('transfer_date', e.target.value)
                                     }
                                     required
                                 />
                             </div>
 
-                            <div className="col-span-2 space-y-1.5">
+                            <div className="space-y-1.5">
                                 <Label>Note</Label>
                                 <Textarea
                                     rows={1}
@@ -320,7 +276,9 @@ export default function SaleEdit({
 
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-sm font-semibold">Items</h3>
+                                <h3 className="text-sm font-semibold">
+                                    Items to transfer
+                                </h3>
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -333,8 +291,6 @@ export default function SaleEdit({
                                                 product_id: '',
                                                 batch_id: '',
                                                 quantity: 1,
-                                                unit_price: 0,
-                                                unit_cost: 0,
                                             },
                                         ])
                                     }
@@ -350,28 +306,24 @@ export default function SaleEdit({
                                 </p>
                             )}
 
-                            <div className="grid grid-cols-[1fr_1fr_80px_110px_36px] gap-2 px-1">
-                                {[
-                                    'Product',
-                                    'Batch',
-                                    'Qty',
-                                    'Unit price',
-                                    '',
-                                ].map((h) => (
-                                    <span
-                                        key={h}
-                                        className="text-xs font-medium text-muted-foreground"
-                                    >
-                                        {h}
-                                    </span>
-                                ))}
+                            <div className="grid grid-cols-[1fr_1fr_90px_36px] gap-2 px-1">
+                                {['Product', 'Batch (source)', 'Qty', ''].map(
+                                    (h) => (
+                                        <span
+                                            key={h}
+                                            className="text-xs font-medium text-muted-foreground"
+                                        >
+                                            {h}
+                                        </span>
+                                    ),
+                                )}
                             </div>
 
                             <div className="space-y-2">
                                 {rows.map((row) => (
                                     <div
                                         key={row._key}
-                                        className="grid grid-cols-[1fr_1fr_80px_110px_36px] items-center gap-2"
+                                        className="grid grid-cols-[1fr_1fr_90px_36px] items-center gap-2"
                                     >
                                         <Select
                                             value={
@@ -430,7 +382,7 @@ export default function SaleEdit({
                                             disabled={!row._batches?.length}
                                         >
                                             <SelectTrigger className="h-9">
-                                                <SelectValue placeholder="Batch" />
+                                                <SelectValue placeholder="Select batch" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {(row._batches ?? []).map(
@@ -452,27 +404,13 @@ export default function SaleEdit({
                                         <Input
                                             type="number"
                                             min={1}
-                                            className="h-9"
+                                            className="h-9 font-mono"
                                             value={row.quantity}
                                             onChange={(e) =>
                                                 updateRow(row._key, {
                                                     quantity: Math.max(
                                                         1,
                                                         Number(e.target.value),
-                                                    ),
-                                                })
-                                            }
-                                        />
-
-                                        <Input
-                                            type="number"
-                                            min={0}
-                                            className="h-9 font-mono"
-                                            value={row.unit_price}
-                                            onChange={(e) =>
-                                                updateRow(row._key, {
-                                                    unit_price: Number(
-                                                        e.target.value,
                                                     ),
                                                 })
                                             }
@@ -502,28 +440,14 @@ export default function SaleEdit({
 
                         <Separator />
 
-                        <div className="flex justify-end">
-                            <div className="w-64 space-y-2 text-sm">
-                                <h3 className="font-semibold">Summary</h3>
-                                <div className="space-y-1.5 rounded-lg bg-muted/40 p-3">
-                                    <div className="flex justify-between text-base font-semibold">
-                                        <span>Total</span>
-                                        <span className="font-mono">
-                                            {formatAmount(subtotal)}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <div className="flex justify-end gap-3">
                             <Button
                                 type="button"
                                 variant="outline"
                                 onClick={() =>
                                     router.visit(
-                                        SaleController.show.url({
-                                            sale: sale.id,
+                                        StockTransferController.show.url({
+                                            stockTransfer: transfer.id,
                                         }),
                                     )
                                 }
