@@ -209,7 +209,7 @@ export default function ProductFormModal({
                                     <SelectValue placeholder="Select category" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">None</SelectItem>
+                                    <SelectItem value="null">None</SelectItem>
                                     {categories.map((c) => (
                                         <SelectItem
                                             key={c.id}
@@ -232,7 +232,7 @@ export default function ProductFormModal({
                                     <SelectValue placeholder="Select brand" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">None</SelectItem>
+                                    <SelectItem value="null">None</SelectItem>
                                     {brands.map((b) => (
                                         <SelectItem
                                             key={b.id}
