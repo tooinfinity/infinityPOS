@@ -7,7 +7,6 @@ namespace App\Models;
 use App\Builders\BatchBuilder;
 use Carbon\CarbonInterface;
 use Database\Factories\BatchFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -123,27 +122,5 @@ final class Batch extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @return Attribute<bool, null>
-     */
-    protected function isExpired(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): bool => $this->expires_at && $this->expires_at->isPast(),
-        );
-    }
-
-    /**
-     * @return Attribute<bool, null>
-     */
-    protected function isExpiringSoon(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): bool => $this->expires_at
-                && $this->expires_at->isFuture()
-                && $this->expires_at->lte(now()->addDays(30)),
-        );
     }
 }

@@ -10,7 +10,6 @@ use App\Enums\PaymentStatusEnum;
 use App\Enums\PurchaseStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\PurchaseFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -146,16 +145,6 @@ final class Purchase extends Model implements HasMedia
         $this->addMediaCollection(MediaCollection::PurchaseAttachment->value)
             ->acceptsMimeTypes(MediaCollection::PurchaseAttachment->allowedMimeTypes())
             ->singleFile();
-    }
-
-    /**
-     * @return Attribute<int, null>
-     */
-    protected function dueAmount(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): int => max(0, $this->total_amount - $this->paid_amount),
-        );
     }
 
     /**

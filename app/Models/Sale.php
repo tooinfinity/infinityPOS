@@ -9,7 +9,6 @@ use App\Enums\PaymentStatusEnum;
 use App\Enums\SaleStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\SaleFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -136,31 +135,5 @@ final class Sale extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @return Attribute<int, null>
-     */
-    protected function dueAmount(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): int => max(0, $this->total_amount - $this->paid_amount),
-        );
-    }
-
-    /**
-     * @return Attribute<int, null>
-     */
-    protected function profit(): Attribute
-    {
-        return Attribute::make(
-            get: function (): int {
-                if (! $this->relationLoaded('items')) {
-                    return 0;
-                }
-
-                return $this->items->sum(fn (SaleItem $item): int => ($item->unit_price - $item->unit_cost) * $item->quantity);
-            },
-        );
     }
 }

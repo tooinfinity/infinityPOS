@@ -122,18 +122,8 @@ final class Payment extends Model
         return $this->status === PaymentStateEnum::Active;
     }
 
-    public function isVoided(): bool
-    {
-        return $this->status === PaymentStateEnum::Voided;
-    }
-
     public function canBeVoided(): bool
     {
         return $this->isActive();
-    }
-
-    public function canBeUnvoided(): bool
-    {
-        return $this->isVoided();
     }
 }
