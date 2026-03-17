@@ -103,13 +103,15 @@ describe(BatchData::class, function (): void {
             ]))->toThrow(ValidationException::class);
         });
 
-        it('fails validation when batch_number is missing', function (): void {
-            expect(fn (): Illuminate\Contracts\Support\Arrayable|array => BatchData::validate([
+        it('passes validation when batch_number is missing (nullable)', function (): void {
+            $validated = BatchData::validate([
                 'product_id' => $this->product->id,
                 'warehouse_id' => $this->warehouse->id,
                 'cost_amount' => 1000,
                 'quantity' => 50,
-            ]))->toThrow(ValidationException::class);
+            ]);
+
+            expect($validated['product_id'])->toBe($this->product->id);
         });
 
         it('fails validation with negative cost_amount', function (): void {

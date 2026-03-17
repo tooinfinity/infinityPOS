@@ -60,7 +60,7 @@ final readonly class CreateSale
      */
     private function createItems(Sale $sale, DataCollection $items): void
     {
-        collect($items)->each(function (SaleItemData $itemData) use ($sale): void {
+        $items->each(function (SaleItemData $itemData) use ($sale): void {
             $sale->items()->forceCreate([
                 'product_id' => $itemData->product_id,
                 'batch_id' => $itemData->batch_id,

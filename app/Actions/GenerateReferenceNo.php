@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Models\ReferenceCounter;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -18,18 +19,11 @@ final readonly class GenerateReferenceNo
             $today = today()->format('Ymd');
             $key = "{$prefix}-{$today}";
 
-            DB::statement(
-                'INSERT INTO reference_counters (`key`, last_value)
-                 VALUES (?, 1)
-                 ON DUPLICATE KEY UPDATE last_value = last_value + 1',
-                [$key]
-            );
+            $counter = ReferenceCounter::query()->firstOrCreate(['key' => $key], ['last_value' => 0]);
+            $counter->increment('last_value');
 
             /** @var int $count */
-            $count = DB::table('reference_counters')
-                ->where('key', $key)
-                ->lockForUpdate()
-                ->value('last_value');
+            $count = $counter->last_value;
 
             return sprintf('%s-%s-%s', $prefix, $today, mb_str_pad((string) $count, 4, '0', STR_PAD_LEFT));
         });

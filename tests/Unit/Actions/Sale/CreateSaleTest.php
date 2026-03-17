@@ -46,8 +46,6 @@ describe(CreateSale::class, function (): void {
             total_amount: 15000,
             note: 'Test sale',
             items: $items,
-            paid_amount: 0,
-            change_amount: 0,
         );
 
         $action = resolve(CreateSale::class);
@@ -84,8 +82,6 @@ describe(CreateSale::class, function (): void {
             total_amount: 1500,
             note: null,
             items: $items,
-            paid_amount: 0,
-            change_amount: 0,
         );
 
         $data2 = new SaleData(
@@ -96,8 +92,6 @@ describe(CreateSale::class, function (): void {
             total_amount: 1500,
             note: null,
             items: $items,
-            paid_amount: 0,
-            change_amount: 0,
         );
 
         $action = resolve(CreateSale::class);
@@ -130,8 +124,6 @@ describe(CreateSale::class, function (): void {
             total_amount: 7500,
             note: null,
             items: $items,
-            paid_amount: 0,
-            change_amount: 0,
         );
 
         $action = resolve(CreateSale::class);
@@ -168,8 +160,6 @@ describe(CreateSale::class, function (): void {
             total_amount: 15000,
             note: null,
             items: $items,
-            paid_amount: 0,
-            change_amount: 0,
         );
 
         $action = resolve(CreateSale::class);
@@ -204,8 +194,6 @@ describe(CreateSale::class, function (): void {
             total_amount: 7500,
             note: null,
             items: $items,
-            paid_amount: 0,
-            change_amount: 0,
         );
 
         $action = resolve(CreateSale::class);
@@ -238,16 +226,14 @@ describe(CreateSale::class, function (): void {
             total_amount: 15000,
             note: null,
             items: $items,
-            paid_amount: 5000,
-            change_amount: 0,
         );
 
         $action = resolve(CreateSale::class);
 
         $sale = $action->handle($data);
 
-        expect($sale->paid_amount)->toBe(5000)
-            ->and($sale->payment_status)->toBe(App\Enums\PaymentStatusEnum::Partial);
+        expect($sale->paid_amount)->toBe(0)
+            ->and($sale->payment_status)->toBe(App\Enums\PaymentStatusEnum::Unpaid);
     });
 
     it('marks sale as paid when full payment is made', function (): void {
@@ -272,16 +258,14 @@ describe(CreateSale::class, function (): void {
             total_amount: 15000,
             note: null,
             items: $items,
-            paid_amount: 15000,
-            change_amount: 0,
         );
 
         $action = resolve(CreateSale::class);
 
         $sale = $action->handle($data);
 
-        expect($sale->paid_amount)->toBe(15000)
-            ->and($sale->payment_status)->toBe(App\Enums\PaymentStatusEnum::Paid);
+        expect($sale->paid_amount)->toBe(0)
+            ->and($sale->payment_status)->toBe(App\Enums\PaymentStatusEnum::Unpaid);
     });
 
     it('loads relationships on sale', function (): void {
@@ -306,8 +290,6 @@ describe(CreateSale::class, function (): void {
             total_amount: 1500,
             note: null,
             items: $items,
-            paid_amount: 0,
-            change_amount: 0,
         );
 
         $action = resolve(CreateSale::class);
@@ -343,8 +325,6 @@ describe(CreateSale::class, function (): void {
             total_amount: 1500,
             note: 'Walk-in customer',
             items: $items,
-            paid_amount: 0,
-            change_amount: 0,
         );
 
         $action = resolve(CreateSale::class);

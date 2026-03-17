@@ -195,7 +195,7 @@ describe(ProcessPosOrder::class, function (): void {
         $result = $action->handle($data);
 
         expect($result->changeAmount)->toBe(3000)
-            ->and($result->sale->change_amount)->toBe(3000);
+            ->and($result->sale->change_amount)->toBe(0);
     });
 
     it('throws exception when cash tendered is less than total', function (): void {

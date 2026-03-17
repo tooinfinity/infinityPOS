@@ -36,7 +36,6 @@ it('may update a purchase with required fields', function (): void {
                 expires_at: null,
             ),
         ]),
-        paid_amount: 0,
     );
 
     $updated = $action->handle($purchase, $data);
@@ -77,7 +76,6 @@ it('may update a purchase with multiple items', function (): void {
                 expires_at: null,
             ),
         ]),
-        paid_amount: 0,
     );
 
     $updated = $action->handle($purchase, $data);
@@ -109,7 +107,6 @@ it('may update a purchase with note', function (): void {
                 expires_at: null,
             ),
         ]),
-        paid_amount: 0,
     );
 
     $updated = $action->handle($purchase, $data);
@@ -141,7 +138,6 @@ it('throws exception when updating non-pending purchase', function (): void {
                 expires_at: null,
             ),
         ]),
-        paid_amount: 0,
     );
 
     expect(fn () => $action->handle($purchase, $data))->toThrow(App\Exceptions\InvalidOperationException::class);
@@ -180,7 +176,6 @@ it('deletes old items and creates new ones on update', function (): void {
                 expires_at: null,
             ),
         ]),
-        paid_amount: 0,
     );
 
     $updated = $action->handle($purchase, $data);

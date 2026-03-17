@@ -35,7 +35,6 @@ it('may create a purchase with required fields', function (): void {
                 expires_at: null,
             ),
         ]),
-        paid_amount: 0,
     );
 
     $purchase = $action->handle($data);
@@ -80,7 +79,6 @@ it('may create a purchase with multiple items', function (): void {
                 expires_at: null,
             ),
         ]),
-        paid_amount: 0,
     );
 
     $purchase = $action->handle($data);
@@ -111,7 +109,6 @@ it('may create a purchase with note', function (): void {
                 expires_at: null,
             ),
         ]),
-        paid_amount: 0,
     );
 
     $purchase = $action->handle($data);
@@ -142,7 +139,6 @@ it('may create a purchase with expiration dates on items', function (): void {
                 expires_at: now()->addMonths(6)->toDateString(),
             ),
         ]),
-        paid_amount: 0,
     );
 
     $purchase = $action->handle($data);
@@ -173,7 +169,6 @@ it('may create a purchase with paid amount', function (): void {
                 expires_at: null,
             ),
         ]),
-        paid_amount: 0,
     );
 
     $purchase = $action->handle($data);
@@ -204,7 +199,6 @@ it('generates reference number', function (): void {
                 expires_at: null,
             ),
         ]),
-        paid_amount: 0,
     );
 
     $purchase = $action->handle($data);

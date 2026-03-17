@@ -24,8 +24,6 @@ describe(SaleData::class, function (): void {
                 total_amount: 5000,
                 note: null,
                 items: $items,
-                paid_amount: 0,
-                change_amount: 0,
             );
 
             expect($data)->toBeInstanceOf(SaleData::class)
@@ -54,8 +52,6 @@ describe(SaleData::class, function (): void {
                 total_amount: 5000,
                 note: 'Test sale',
                 items: $items,
-                paid_amount: 5000,
-                change_amount: 0,
             );
 
             expect($data->customer_id)->toBe(1)

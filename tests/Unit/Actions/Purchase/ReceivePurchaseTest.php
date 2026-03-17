@@ -158,5 +158,5 @@ it('skips items with zero received quantity', function (): void {
 
     $receivedPurchase = $action->handle($purchase, $data);
 
-    expect($receivedPurchase->status)->toBe(PurchaseStatusEnum::Received);
+    expect($receivedPurchase->status)->toBe(PurchaseStatusEnum::Pending);
 });

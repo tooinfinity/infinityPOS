@@ -15,7 +15,6 @@ use App\Models\StockTransferItem;
 use App\Models\Unit;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 test('to array', function (): void {

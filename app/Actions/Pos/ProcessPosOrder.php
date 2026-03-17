@@ -45,6 +45,7 @@ final readonly class ProcessPosOrder
 
         /** @var PosOrderResult $result */
         $result = DB::transaction(function () use ($data): PosOrderResult {
+            $changeAmount = max(0, $data->cash_tendered - $data->total_amount);
 
             $sale = Sale::query()->forceCreate([
                 'customer_id' => $data->customer_id,
@@ -55,7 +56,7 @@ final readonly class ProcessPosOrder
                 'sale_date' => now(),
                 'total_amount' => $data->total_amount,
                 'paid_amount' => 0,
-                'change_amount' => 0,
+                'change_amount' => $changeAmount,
                 'payment_status' => PaymentStatusEnum::Unpaid,
                 'note' => $data->note,
             ]);
@@ -96,8 +97,6 @@ final readonly class ProcessPosOrder
             // 4. UpdatePaymentStatus already called inside RecordPayment —
             //    but we need the refreshed sale to read change_amount correctly
             $sale->refresh();
-
-            $changeAmount = max(0, $data->cash_tendered - $data->total_amount);
 
             return new PosOrderResult(
                 sale: $sale->load([
