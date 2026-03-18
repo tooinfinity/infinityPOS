@@ -9,6 +9,7 @@ use App\Enums\PaymentStatusEnum;
 use App\Enums\ReturnStatusEnum;
 use Carbon\CarbonInterface;
 use Database\Factories\PurchaseReturnFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -37,6 +38,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read Collection<int, PurchaseReturnItem> $items
  * @property-read Collection<int, StockMovement> $stockMovements
  * @property-read Collection<int, Payment> $payments
+ *
+ * @method static PurchaseReturnBuilder query()
  */
 final class PurchaseReturn extends Model
 {
@@ -124,5 +127,15 @@ final class PurchaseReturn extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return Attribute<int, null>
+     */
+    protected function dueAmount(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): int => max(0, $this->total_amount - $this->paid_amount),
+        );
     }
 }

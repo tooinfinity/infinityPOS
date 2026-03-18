@@ -9,7 +9,6 @@ use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\SupplierFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -28,6 +27,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Collection<int, Purchase> $purchases
+ *
+ * @method static SupplierBuilder query()
  */
 #[ScopedBy([ActiveScope::class])]
 final class Supplier extends Model
@@ -35,10 +36,7 @@ final class Supplier extends Model
     /** @use HasFactory<SupplierFactory> */
     use HasFactory;
 
-    /**
-     * @return Builder<self>
-     */
-    public static function withInactive(): Builder
+    public static function withInactive(): SupplierBuilder
     {
         return self::query()->withoutGlobalScope(ActiveScope::class);
     }

@@ -31,6 +31,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, StockTransferItem> $stockTransferItems
  * @property-read Collection<int, SaleReturnItem> $saleReturnItems
  * @property-read Collection<int, PurchaseReturnItem> $purchaseReturnItems
+ *
+ * @method static BatchBuilder query()
  */
 final class Batch extends Model
 {

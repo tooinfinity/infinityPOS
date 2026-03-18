@@ -9,7 +9,6 @@ use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,6 +22,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Collection<int, Product> $products
+ *
+ * @method static CategoryBuilder query()
  */
 #[ScopedBy([ActiveScope::class])]
 final class Category extends Model
@@ -30,10 +31,7 @@ final class Category extends Model
     /** @use HasFactory<CategoryFactory> */
     use HasFactory;
 
-    /**
-     * @return Builder<self>
-     */
-    public static function withInactive(): Builder
+    public static function withInactive(): CategoryBuilder
     {
         return self::query()->withoutGlobalScope(ActiveScope::class);
     }

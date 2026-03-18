@@ -9,7 +9,6 @@ use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\WarehouseFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -35,6 +34,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, StockTransfer> $transfersTo
  * @property-read Collection<int, SaleReturn> $saleReturns
  * @property-read Collection<int, PurchaseReturn> $purchaseReturns
+ *
+ * @method static WarehouseBuilder query()
  */
 #[ScopedBy([ActiveScope::class])]
 final class Warehouse extends Model
@@ -42,10 +43,7 @@ final class Warehouse extends Model
     /** @use HasFactory<WarehouseFactory> */
     use HasFactory;
 
-    /**
-     * @return Builder<self>
-     */
-    public static function withInactive(): Builder
+    public static function withInactive(): WarehouseBuilder
     {
         return self::query()->withoutGlobalScope(ActiveScope::class);
     }

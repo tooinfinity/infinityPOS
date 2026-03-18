@@ -24,6 +24,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read CarbonInterface $updated_at
  * @property-read ExpenseCategory $expenseCategory
  * @property-read User|null $user
+ *
+ * @method static ExpenseBuilder query()
  */
 final class Expense extends Model
 {

@@ -33,6 +33,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property PaymentMethod $paymentMethod
  * @property User|null $user
  * @property User|null $voidedBy
+ *
+ * @method static PaymentBuilder query()
  */
 final class Payment extends Model
 {

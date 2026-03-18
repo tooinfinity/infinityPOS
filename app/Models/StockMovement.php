@@ -33,6 +33,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property-read Batch|null $batch
  * @property-read User|null $user
  * @property-read Model $reference
+ *
+ * @method static StockMovementBuilder query()
  */
 final class StockMovement extends Model
 {

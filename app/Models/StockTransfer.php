@@ -31,6 +31,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read Warehouse $toWarehouse
  * @property-read User|null $user
  * @property-read Collection<int, StockMovement> $stockMovements
+ *
+ * @method static StockTransferBuilder query()
  */
 final class StockTransfer extends Model
 {

@@ -10,7 +10,6 @@ use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -57,10 +56,7 @@ final class Product extends Model implements HasMedia
 
     use InteractsWithMedia;
 
-    /**
-     * @return Builder<self>
-     */
-    public static function withInactive(): Builder
+    public static function withInactive(): ProductBuilder
     {
         return self::query()->withoutGlobalScope(ActiveScope::class);
     }

@@ -9,7 +9,6 @@ use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\CustomerFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +26,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  * @property-read Collection<int, Sale> $sales
+ *
+ * @method static CustomerBuilder query()
  */
 #[ScopedBy([ActiveScope::class])]
 final class Customer extends Model
@@ -34,10 +35,7 @@ final class Customer extends Model
     /** @use HasFactory<CustomerFactory> */
     use HasFactory;
 
-    /**
-     * @return Builder<self>
-     */
-    public static function withInactive(): Builder
+    public static function withInactive(): CustomerBuilder
     {
         return self::query()->withoutGlobalScope(ActiveScope::class);
     }
