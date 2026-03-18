@@ -9,7 +9,6 @@ use App\Enums\ReturnStatusEnum;
 use App\Models\SaleReturn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
 
 /**
  * @extends Builder<SaleReturn>
@@ -56,15 +55,6 @@ final class SaleReturnBuilder extends Builder
     public function paymentStatus(?string $status): self
     {
         return $this->when($status, fn (self $q): self => $q->where('payment_status', $status));
-    }
-
-    public function withDueAmount(): self
-    {
-        return $this->select('*')->addSelect([
-            'due_amount' => DB::raw(
-                'CASE WHEN total_amount > paid_amount THEN total_amount - paid_amount ELSE 0 END'
-            ),
-        ]);
     }
 
     /**

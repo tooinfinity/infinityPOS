@@ -9,7 +9,6 @@ use App\Enums\PurchaseStatusEnum;
 use App\Models\Purchase;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
 
 /**
  * @extends Builder<Purchase>
@@ -67,13 +66,6 @@ final class PurchaseBuilder extends Builder
     public function paid(): self
     {
         return $this->where('payment_status', PaymentStatusEnum::Paid);
-    }
-
-    public function withDueAmount(): self
-    {
-        return $this->select('*')->addSelect([
-            'due_amount' => DB::raw('CASE WHEN total_amount > paid_amount THEN total_amount - paid_amount ELSE 0 END'),
-        ]);
     }
 
     /**

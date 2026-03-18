@@ -9,7 +9,6 @@ use App\Enums\SaleStatusEnum;
 use App\Models\Sale;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
 
 /**
  * @extends Builder<Sale>
@@ -69,13 +68,6 @@ final class SaleBuilder extends Builder
         return $this->whereDate('sale_date', today());
     }
 
-    public function withDueAmount(): self
-    {
-        return $this->select('*')->addSelect([
-            'due_amount' => DB::raw('CASE WHEN total_amount > paid_amount THEN total_amount - paid_amount ELSE 0 END'),
-        ]);
-    }
-
     /**
      * @param array{
      *     search?: string|null,
@@ -112,7 +104,7 @@ final class SaleBuilder extends Builder
     {
         return $this
             ->applyFilters($filters)
-            ->with(['customer', 'warehouse'])
+            ->with(['customer', 'warehouse', 'user'])
             ->paginate($perPage ?? 25)
             ->withQueryString();
     }
