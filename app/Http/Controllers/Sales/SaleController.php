@@ -13,7 +13,6 @@ use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\Warehouse;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -44,11 +43,7 @@ final readonly class SaleController
             'sales' => $sales,
             'customers' => Customer::query()->select('id', 'name')->get(),
             'warehouses' => Warehouse::query()->select('id', 'name')->get(),
-            'products' => Product::query()
-                ->with(['unit', 'batches' => fn (Relation $q) => $q->where('quantity', '>', 0)])
-                ->withStockQuantity()
-                ->select('id', 'name', 'sku', 'selling_price', 'cost_price', 'unit_id', 'alert_quantity')
-                ->get(),
+            'products' => Product::query()->forSaleForm(),
             'filters' => $filters,
         ]);
     }
@@ -58,11 +53,7 @@ final readonly class SaleController
         return Inertia::render('sales/create', [
             'customers' => Customer::query()->select('id', 'name')->get(),
             'warehouses' => Warehouse::query()->select('id', 'name')->get(),
-            'products' => Product::query()
-                ->with(['unit', 'batches' => fn (Relation $q) => $q->where('quantity', '>', 0)])
-                ->withStockQuantity()
-                ->select('id', 'name', 'sku', 'selling_price', 'cost_price', 'unit_id', 'alert_quantity')
-                ->get(),
+            'products' => Product::query()->forSaleForm(),
         ]);
     }
 
@@ -92,11 +83,7 @@ final readonly class SaleController
             'sale' => $sale,
             'customers' => Customer::query()->select('id', 'name')->get(),
             'warehouses' => Warehouse::query()->select('id', 'name')->get(),
-            'products' => Product::query()
-                ->with(['unit', 'batches' => fn (Relation $q) => $q->where('quantity', '>', 0)])
-                ->withStockQuantity()
-                ->select('id', 'name', 'sku', 'selling_price', 'cost_price', 'unit_id', 'alert_quantity')
-                ->get(),
+            'products' => Product::query()->forSaleForm(),
             'payment_methods' => PaymentMethod::query()->select('id', 'name', 'code')->get(),
         ]);
     }
@@ -109,11 +96,7 @@ final readonly class SaleController
             'sale' => $sale,
             'customers' => Customer::query()->select('id', 'name')->get(),
             'warehouses' => Warehouse::query()->select('id', 'name')->get(),
-            'products' => Product::query()
-                ->with(['unit', 'batches' => fn (Relation $q) => $q->where('quantity', '>', 0)])
-                ->withStockQuantity()
-                ->select('id', 'name', 'sku', 'selling_price', 'cost_price', 'unit_id')
-                ->get(),
+            'products' => Product::query()->forSaleForm(),
         ]);
     }
 

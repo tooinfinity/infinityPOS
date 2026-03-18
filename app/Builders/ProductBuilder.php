@@ -8,6 +8,8 @@ use App\Models\Batch;
 use App\Models\Product;
 use App\Models\StockMovement;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
@@ -68,6 +70,61 @@ final class ProductBuilder extends Builder
             'stock_quantity' => Batch::query()->selectRaw('COALESCE(SUM(quantity), 0)')
                 ->whereColumn('batches.product_id', 'products.id'),
         ]);
+    }
+
+    /**
+     * Get products for sale form with stock quantity and available batches.
+     *
+     * @return EloquentCollection<int, Product>
+     */
+    public function forSaleForm(): EloquentCollection
+    {
+        return $this
+            ->with(['unit', 'batches' => fn (Relation $q): Relation => $q->where('quantity', '>', 0)])
+            ->withStockQuantity()
+            ->addSelect(['id', 'name', 'sku', 'selling_price', 'cost_price', 'unit_id', 'alert_quantity'])
+            ->get();
+    }
+
+    /**
+     * Get products for purchase form with unit information.
+     *
+     * @return EloquentCollection<int, Product>
+     */
+    public function forPurchaseForm(): EloquentCollection
+    {
+        return $this
+            ->with('unit')
+            ->select('id', 'name', 'sku', 'cost_price', 'unit_id')
+            ->get();
+    }
+
+    /**
+     * Get products for stock transfer form with batches and warehouse info.
+     *
+     * @return EloquentCollection<int, Product>
+     */
+    public function forStockTransferForm(): EloquentCollection
+    {
+        return $this
+            ->with(['unit', 'batches' => fn (Relation $q): Relation => $q->where('quantity', '>', 0)->with('warehouse')])
+            ->withStockQuantity()
+            ->addSelect(['id', 'name', 'sku', 'unit_id'])
+            ->get();
+    }
+
+    /**
+     * Get products for POS search with stock tracking.
+     *
+     * @return EloquentCollection<int, Product>
+     */
+    public function forPosSearch(): EloquentCollection
+    {
+        return $this
+            ->with(['unit', 'batches' => fn (Relation $q): Relation => $q->where('quantity', '>', 0)])
+            ->withStockQuantity()
+            ->addSelect(['id', 'name', 'sku', 'selling_price', 'cost_price', 'unit_id'])
+            ->get();
     }
 
     /**

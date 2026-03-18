@@ -11,7 +11,6 @@ use App\Data\StockTransfer\StockTransferData;
 use App\Models\Product;
 use App\Models\StockTransfer;
 use App\Models\Warehouse;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -36,11 +35,7 @@ final readonly class StockTransferController
     {
         return Inertia::render('inventory/stock-transfers/create', [
             'warehouses' => Warehouse::query()->select('id', 'name', 'code')->get(),
-            'products' => Product::query()
-                ->with(['unit', 'batches' => fn (Relation $q) => $q->where('quantity', '>', 0)->with('warehouse')])
-                ->withStockQuantity()
-                ->select('id', 'name', 'sku', 'unit_id')
-                ->get(),
+            'products' => Product::query()->forStockTransferForm(),
         ]);
     }
 
@@ -78,11 +73,7 @@ final readonly class StockTransferController
         return Inertia::render('inventory/stock-transfers/edit', [
             'transfer' => $stockTransfer,
             'warehouses' => Warehouse::query()->select('id', 'name', 'code')->get(),
-            'products' => Product::query()
-                ->with(['unit', 'batches' => fn (Relation $q) => $q->where('quantity', '>', 0)->with('warehouse')])
-                ->withStockQuantity()
-                ->select('id', 'name', 'sku', 'unit_id')
-                ->get(),
+            'products' => Product::query()->forStockTransferForm(),
         ]);
     }
 

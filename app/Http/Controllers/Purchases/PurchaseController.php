@@ -47,10 +47,7 @@ final readonly class PurchaseController
         return Inertia::render('purchases/create', [
             'suppliers' => Supplier::query()->select('id', 'name', 'company_name')->get(),
             'warehouses' => Warehouse::query()->select('id', 'name', 'code')->get(),
-            'products' => Product::query()
-                ->with('unit')
-                ->select('id', 'name', 'sku', 'cost_price', 'unit_id')
-                ->get(),
+            'products' => Product::query()->forPurchaseForm(),
         ]);
     }
 
@@ -90,10 +87,7 @@ final readonly class PurchaseController
             'purchase' => $purchase,
             'suppliers' => Supplier::query()->select('id', 'name', 'company_name')->get(),
             'warehouses' => Warehouse::query()->select('id', 'name', 'code')->get(),
-            'products' => Product::query()
-                ->with('unit')
-                ->select('id', 'name', 'sku', 'cost_price', 'unit_id')
-                ->get(),
+            'products' => Product::query()->forPurchaseForm(),
         ]);
     }
 
