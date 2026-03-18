@@ -25,12 +25,11 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatDateTime } from '@/lib/formatters';
+import CancelStockTransferController from '@/wayfinder/App/Http/Controllers/Inventory/CancelStockTransferController';
+import CompleteStockTransferController from '@/wayfinder/App/Http/Controllers/Inventory/CompleteStockTransferController';
 import StockTransferController from '@/wayfinder/App/Http/Controllers/Inventory/StockTransferController';
 import WarehouseController from '@/wayfinder/App/Http/Controllers/Products/WarehouseController';
 import type { App, Inertia } from '@/wayfinder/types';
-import CancelStockTransferController from '@/wayfinder/App/Http/Controllers/Inventory/CancelStockTransferController';
-import CompleteStockTransferController
-    from '@/wayfinder/App/Http/Controllers/Inventory/CompleteStockTransferController';
 
 interface Props extends Inertia.SharedData {
     transfer: App.Models.StockTransfer;
@@ -272,7 +271,8 @@ export default function StockTransferShow({ transfer }: Props) {
                                                 href={WarehouseController.show.url(
                                                     {
                                                         warehouse:
-                                                            transfer.to_warehouse
+                                                            transfer
+                                                                .to_warehouse
                                                                 .id,
                                                     },
                                                 )}

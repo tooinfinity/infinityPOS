@@ -114,7 +114,8 @@ export default function PosReceipt({ sale, settings }: Props) {
                         {sale.payments && (
                             <p className="mt-1 text-right text-xs text-muted-foreground">
                                 Paid by{' '}
-                                {sale.payments[0]?.payment_method?.name ?? 'cash'}
+                                {sale.payments[0]?.payment_method?.name ??
+                                    'cash'}
                             </p>
                         )}
                         <Separator className="my-3" />
