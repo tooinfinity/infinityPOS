@@ -18,11 +18,14 @@ final readonly class PaymentMethodController
 {
     public function index(): Response
     {
+        /** @var array{search?: string|null, sort?: string|null, direction?: string|null} $filters */
+        $filters = request()->only(['search', 'sort', 'direction']);
+        $perPage = request()->integer('per_page');
+
         return Inertia::render('payment-method/index', [
             'methods' => PaymentMethod::withInactive()
-                ->withCount('payments')
-                ->latest()
-                ->paginate(25),
+                ->paginateWithFilters($filters, $perPage),
+            'filters' => $filters,
         ]);
     }
 

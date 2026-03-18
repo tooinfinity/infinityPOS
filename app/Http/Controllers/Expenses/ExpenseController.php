@@ -19,13 +19,14 @@ final readonly class ExpenseController
 {
     public function index(): Response
     {
-        $expenses = Expense::query()
-            ->with(['expenseCategory', 'user'])
-            ->latest('expense_date')
-            ->paginate(25);
+        /** @var array{search?: string|null, sort?: string|null, direction?: string|null} */
+        $filters = request()->only(['search', 'sort', 'direction']);
+        $perPage = request()->integer('per_page');
 
         return Inertia::render('expenses/index', [
-            'expenses' => $expenses,
+            'expenses' => Expense::query()
+                ->paginateWithFilters($filters, $perPage),
+            'filters' => $filters,
         ]);
     }
 

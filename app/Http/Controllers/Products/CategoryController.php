@@ -18,11 +18,14 @@ final readonly class CategoryController
 {
     public function index(): Response
     {
+        /** @var array{search?: string|null, sort?: string|null, direction?: string|null} $filters */
+        $filters = request()->only(['search', 'sort', 'direction']);
+        $perPage = request()->integer('per_page');
+
         return Inertia::render('categories/index', [
             'categories' => Category::withInactive()
-                ->withCount('products')
-                ->latest()
-                ->paginate(25),
+                ->paginateWithFilters($filters, $perPage),
+            'filters' => $filters,
         ]);
     }
 

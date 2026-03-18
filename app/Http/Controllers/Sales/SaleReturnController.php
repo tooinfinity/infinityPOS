@@ -21,15 +21,14 @@ final readonly class SaleReturnController
 {
     public function index(): Response
     {
-        $returns = SaleReturn::query()
-            ->with(['sale.customer', 'warehouse', 'user'])
-            ->withDueAmount()
-            ->latest()
-            ->paginate(25);
+        /** @var array{search?: string|null, status?: string|null, payment_status?: string|null, sort?: string|null, direction?: string|null} $filters */
+        $filters = request()->only(['search', 'status', 'payment_status', 'sort', 'direction']);
+        $perPage = request()->integer('per_page');
 
         return Inertia::render('sale-returns/index', [
-            'saleReturns' => $returns,
-            'filters' => request()->query(),
+            'saleReturns' => SaleReturn::query()
+                ->paginateWithFilters($filters, $perPage),
+            'filters' => $filters,
         ]);
     }
 

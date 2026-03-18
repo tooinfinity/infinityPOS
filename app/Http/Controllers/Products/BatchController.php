@@ -21,13 +21,14 @@ final readonly class BatchController
 {
     public function index(): Response
     {
-        $batches = Batch::query()
-            ->with(['product.unit', 'warehouse'])
-            ->latest()
-            ->paginate(25);
+        /** @var array{search?: string|null, sort?: string|null, direction?: string|null} $filters */
+        $filters = request()->only(['search', 'sort', 'direction']);
+        $perPage = request()->integer('per_page');
 
         return Inertia::render('batches/index', [
-            'batches' => $batches,
+            'batches' => Batch::query()
+                ->paginateWithFilters($filters, $perPage),
+            'filters' => $filters,
         ]);
     }
 

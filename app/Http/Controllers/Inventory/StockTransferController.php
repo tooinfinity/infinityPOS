@@ -21,14 +21,14 @@ final readonly class StockTransferController
 {
     public function index(): Response
     {
-        $transfers = StockTransfer::query()
-            ->with(['fromWarehouse', 'toWarehouse', 'user'])
-            ->withCount('items')
-            ->latest()
-            ->paginate(25);
+        /** @var array{search?: string|null, status?: string|null, sort?: string|null, direction?: string|null} $filters */
+        $filters = request()->only(['search', 'status', 'sort', 'direction']);
+        $perPage = request()->integer('per_page');
 
         return Inertia::render('inventory/stock-transfers/index', [
-            'transfers' => $transfers,
+            'transfers' => StockTransfer::query()
+                ->paginateWithFilters($filters, $perPage),
+            'filters' => $filters,
         ]);
     }
 

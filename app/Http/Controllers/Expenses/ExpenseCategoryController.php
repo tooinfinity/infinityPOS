@@ -18,11 +18,14 @@ final readonly class ExpenseCategoryController
 {
     public function index(): Response
     {
+        /** @var array{search?: string|null, sort?: string|null, direction?: string|null} */
+        $filters = request()->only(['search', 'sort', 'direction']);
+        $perPage = request()->integer('per_page');
+
         return Inertia::render('expenses/categories/index', [
             'categories' => ExpenseCategory::withInactive()
-                ->withCount('expenses')
-                ->latest()
-                ->paginate(25),
+                ->paginateWithFilters($filters, $perPage),
+            'filters' => $filters,
         ]);
     }
 

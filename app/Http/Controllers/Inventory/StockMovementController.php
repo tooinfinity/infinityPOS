@@ -17,20 +17,16 @@ final readonly class StockMovementController
      */
     public function index(): Response
     {
-        $movements = StockMovement::query()
-            ->with([
-                'product:id,name,sku',
-                'warehouse:id,name',
-                'batch:id,batch_number',
-                'user:id,name',
-            ])
-            ->latest()
-            ->paginate(25);
+        /** @var array{search?: string|null, type?: string|null, sort?: string|null, direction?: string|null} $filters */
+        $filters = request()->only(['search', 'sort', 'direction']);
+        $perPage = request()->integer('per_page');
 
         return Inertia::render('inventory/stock-movements/index', [
-            'movements' => $movements,
+            'movements' => StockMovement::query()
+                ->paginateWithFilters($filters, $perPage),
             'warehouses' => Warehouse::query()->select('id', 'name')->get(),
             'products' => Product::query()->select('id', 'name', 'sku')->get(),
+            'filters' => $filters,
         ]);
     }
 

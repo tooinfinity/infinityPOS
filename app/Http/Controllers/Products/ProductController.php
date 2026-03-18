@@ -45,7 +45,7 @@ final readonly class ProductController
         $perPage = request()->integer('per_page');
 
         return Inertia::render('products/index', [
-            'products' => Product::query()->paginateWithFilters($filters, $perPage),
+            'products' => Product::withInactive()->paginateWithFilters($filters, $perPage),
             'categories' => Category::query()->orderBy('name')->get(['id', 'name']),
             'brands' => Brand::query()->orderBy('name')->get(['id', 'name']),
             'units' => Unit::query()->orderBy('name')->get(['id', 'name', 'short_name']),

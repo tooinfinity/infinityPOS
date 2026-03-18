@@ -38,8 +38,6 @@ final readonly class SaleController
         $perPage = $request->input('per_page', 25);
 
         $sales = Sale::query()
-            ->with(['customer', 'warehouse', 'user'])
-            ->withDueAmount()
             ->paginateWithFilters($filters, $perPage);
 
         return Inertia::render('sales/index', [

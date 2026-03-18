@@ -35,7 +35,7 @@ final readonly class PurchaseController
         $perPage = request()->integer('per_page');
 
         return Inertia::render('purchases/index', [
-            'purchases' => Purchase::query()->with(['supplier', 'warehouse', 'user'])->withDueAmount()->paginateWithFilters($filters, $perPage),
+            'purchases' => Purchase::query()->with(['supplier', 'warehouse', 'user'])->paginateWithFilters($filters, $perPage),
             'filters' => $filters,
             'per_page' => $perPage,
 

@@ -19,12 +19,14 @@ final readonly class CustomerController
 {
     public function index(): Response
     {
+        /** @var array{search?: string|null, sort?: string|null, direction?: string|null} $filters */
+        $filters = request()->only(['search', 'sort', 'direction']);
+        $perPage = request()->integer('per_page');
+
         return Inertia::render('customers/index', [
             'customers' => Customer::withInactive()
-                ->withCount('sales')
-                ->latest()
-                ->paginate(25),
-            'filters' => request()->query(),
+                ->paginateWithFilters($filters, $perPage),
+            'filters' => $filters,
         ]);
     }
 

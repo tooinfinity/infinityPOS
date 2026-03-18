@@ -18,11 +18,15 @@ final readonly class WarehouseController
 {
     public function index(): Response
     {
+        /** @var array{search?: string|null, sort?: string|null, direction?: string|null} $filters */
+        $filters = request()->only(['search', 'sort', 'direction']);
+        $perPage = request()->integer('per_page');
+
         return Inertia::render('warehouses/index', [
             'warehouses' => Warehouse::withInactive()
                 ->withCount(['batches', 'purchases', 'sales'])
-                ->latest()
-                ->paginate(25),
+                ->paginateWithFilters($filters, $perPage),
+            'filters' => $filters,
         ]);
     }
 
