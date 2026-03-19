@@ -10,7 +10,7 @@ use App\Data\UploadMediaData;
 use App\Exceptions\MediaUploadException;
 use App\Http\Requests\UploadPurchaseAttachmentRequest;
 use App\Models\Purchase;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 
@@ -25,24 +25,39 @@ final class PurchaseAttachmentController
         UploadPurchaseAttachmentRequest $request,
         Purchase $purchase,
         UploadMedia $action,
-    ): RedirectResponse {
-        $action->handle($purchase, UploadMediaData::forPurchaseAttachment($request));
+    ): JsonResponse {
+        $media = $action->handle($purchase, UploadMediaData::forPurchaseAttachment($request));
 
-        return back()
-            ->with('success', 'Attachment uploaded successfully.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Attachment uploaded successfully.',
+            'media' => [
+                'id' => $media->id,
+                'url' => $media->getUrl(),
+                'name' => $media->name,
+                'size' => $media->human_readable_size,
+            ],
+        ]);
     }
 
     public function destroy(
         Purchase $purchase,
         DeleteMedia $action,
-    ): RedirectResponse {
+    ): JsonResponse {
         $media = $purchase->getFirstMedia('attachment');
 
-        abort_if(! $media, 404, 'No attachment found for this purchase.');
+        if (! $media instanceof \Spatie\MediaLibrary\MediaCollections\Models\Media) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No attachment found for this purchase.',
+            ], 404);
+        }
 
         $action->handle($media);
 
-        return back()
-            ->with('success', 'Attachment removed.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Attachment removed.',
+        ]);
     }
 }

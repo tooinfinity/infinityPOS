@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * @property-read int $id
@@ -161,13 +162,23 @@ final class Purchase extends Model implements HasMedia
     }
 
     /**
+     * @return Attribute<array{id: int, name: string, url: string, size: string, mime: string, extension: string, is_image: bool}|null, never>
+     */
+    protected function attachment(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): ?array => $this->getAttachmentData(),
+        );
+    }
+
+    /**
      * @return array{id: int, name: string, url: string, size: string, mime: string, extension: string, is_image: bool}|null
      */
-    protected function getAttachmentAttribute(): ?array
+    private function getAttachmentData(): ?array
     {
         $media = $this->getFirstMedia(MediaCollection::PurchaseAttachment->value);
 
-        if (! $media instanceof \Spatie\MediaLibrary\MediaCollections\Models\Media) {
+        if (! $media instanceof Media) {
             return null;
         }
 

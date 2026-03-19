@@ -10,7 +10,7 @@ use App\Data\UploadMediaData;
 use App\Exceptions\MediaUploadException;
 use App\Http\Requests\UploadProductMediaRequest;
 use App\Models\Product;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 
@@ -25,24 +25,39 @@ final class ProductMediaController
         UploadProductMediaRequest $request,
         Product $product,
         UploadMedia $action,
-    ): RedirectResponse {
-        $action->handle($product, UploadMediaData::forProductThumbnail($request));
+    ): JsonResponse {
+        $media = $action->handle($product, UploadMediaData::forProductThumbnail($request));
 
-        return back()
-            ->with('success', 'Product thumbnail uploaded successfully.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Product thumbnail uploaded successfully.',
+            'media' => [
+                'id' => $media->id,
+                'url' => $media->getUrl(),
+                'thumb' => $media->getUrl('thumb') ?: $media->getUrl(),
+                'size' => $media->human_readable_size,
+            ],
+        ]);
     }
 
     public function destroy(
         Product $product,
         DeleteMedia $action,
-    ): RedirectResponse {
+    ): JsonResponse {
         $media = $product->getFirstMedia('thumbnail');
 
-        abort_if(! $media, 404, 'No thumbnail found for this product.');
+        if (! $media instanceof \Spatie\MediaLibrary\MediaCollections\Models\Media) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No thumbnail found for this product.',
+            ], 404);
+        }
 
         $action->handle($media);
 
-        return back()
-            ->with('success', 'Product thumbnail removed.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Product thumbnail removed.',
+        ]);
     }
 }

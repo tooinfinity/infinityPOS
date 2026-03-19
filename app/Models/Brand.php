@@ -10,6 +10,7 @@ use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\BrandFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -84,16 +85,20 @@ final class Brand extends Model implements HasMedia
             ->sharpen(10);
     }
 
-    protected function getLogoUrlAttribute(): string
+    /**
+     * @return Attribute<array{id: int, url: string, thumb: string, size: string}|null, never>
+     */
+    protected function logo(): Attribute
     {
-        return $this->getFirstMediaUrl(MediaCollection::BrandLogo->value, 'thumb')
-            ?: $this->getFirstMediaUrl(MediaCollection::BrandLogo->value);
+        return Attribute::make(
+            get: fn (): ?array => $this->getLogoData(),
+        );
     }
 
     /**
      * @return array{id: int, url: string, thumb: string, size: string}|null
      */
-    protected function getLogoAttribute(): ?array
+    private function getLogoData(): ?array
     {
         $media = $this->getFirstMedia(MediaCollection::BrandLogo->value);
 

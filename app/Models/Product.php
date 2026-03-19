@@ -10,6 +10,7 @@ use App\Models\Scopes\ActiveScope;
 use Carbon\CarbonInterface;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -186,15 +187,20 @@ final class Product extends Model implements HasMedia
             ->sharpen(5);
     }
 
-    protected function getThumbnailUrlAttribute(): string
+    /**
+     * @return Attribute<array{id: int, url: string, thumb: string, size: string}|null, never>
+     */
+    protected function thumbnail(): Attribute
     {
-        return $this->getFirstMediaUrl(MediaCollection::ProductThumbnail->value, 'thumb');
+        return Attribute::make(
+            get: fn (): ?array => $this->getThumbnailData(),
+        );
     }
 
     /**
      * @return array{id: int, url: string, thumb: string, size: string}|null
      */
-    protected function getThumbnailAttribute(): ?array
+    private function getThumbnailData(): ?array
     {
         $media = $this->getFirstMedia(MediaCollection::ProductThumbnail->value);
 

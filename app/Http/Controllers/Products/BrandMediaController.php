@@ -10,7 +10,7 @@ use App\Data\UploadMediaData;
 use App\Exceptions\MediaUploadException;
 use App\Http\Requests\UploadBrandLogoRequest;
 use App\Models\Brand;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 
@@ -25,24 +25,39 @@ final class BrandMediaController
         UploadBrandLogoRequest $request,
         Brand $brand,
         UploadMedia $action,
-    ): RedirectResponse {
-        $action->handle($brand, UploadMediaData::forBrandLogo($request));
+    ): JsonResponse {
+        $media = $action->handle($brand, UploadMediaData::forBrandLogo($request));
 
-        return back()
-            ->with('success', 'Brand logo uploaded successfully.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Brand logo uploaded successfully.',
+            'media' => [
+                'id' => $media->id,
+                'url' => $media->getUrl(),
+                'thumb' => $media->getUrl('thumb') ?: $media->getUrl(),
+                'size' => $media->human_readable_size,
+            ],
+        ]);
     }
 
     public function destroy(
         Brand $brand,
         DeleteMedia $action,
-    ): RedirectResponse {
+    ): JsonResponse {
         $media = $brand->getFirstMedia('logo');
 
-        abort_if(! $media, 404, 'No logo found for this brand.');
+        if (! $media instanceof \Spatie\MediaLibrary\MediaCollections\Models\Media) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No logo found for this brand.',
+            ], 404);
+        }
 
         $action->handle($media);
 
-        return back()
-            ->with('success', 'Brand logo removed.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Brand logo removed.',
+        ]);
     }
 }
