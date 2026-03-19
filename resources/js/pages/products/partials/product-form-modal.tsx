@@ -1,6 +1,7 @@
 import { useForm } from '@inertiajs/react';
 import { Loader2 } from 'lucide-react';
 
+import MediaUploader from '@/components/media-upload';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -257,6 +258,21 @@ export default function ProductFormModal({
                                 }
                             />
                         </div>
+
+                        {isEditing && product && (
+                            <div className="col-span-2 space-y-1.5">
+                                <Label>Thumbnail</Label>
+                                <MediaUploader
+                                    modelId={product.id}
+                                    modelType="product"
+                                    collection="thumbnail"
+                                    currentMedia={product.thumbnail}
+                                    accept="image/jpeg,image/png,image/webp"
+                                    maxSizeMB={5}
+                                    disabled={processing}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <Separator />

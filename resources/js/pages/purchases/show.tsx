@@ -1,8 +1,9 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import {
     Building2,
     CheckCircle2,
     CreditCard,
+    Paperclip,
     RotateCcw,
     Truck,
     XCircle,
@@ -10,6 +11,7 @@ import {
 import { useState } from 'react';
 
 import { ActionDialog } from '@/components/confirm-dialog';
+import MediaUploader from '@/components/media-upload';
 import PageHeader from '@/components/page-header';
 import {
     PaymentStatusBadge,
@@ -199,6 +201,35 @@ export default function PurchaseShow({ purchase, payment_methods }: Props) {
                                             —
                                         </span>
                                     )}
+                                </CardContent>
+                            </Card>
+
+                            <Card>
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="flex items-center gap-2 text-base">
+                                        <Paperclip className="h-4 w-4" />{' '}
+                                        Attachment
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <MediaUploader
+                                        modelId={purchase.id}
+                                        modelType="purchase"
+                                        collection="attachment"
+                                        currentMedia={purchase.attachment}
+                                        accept="image/jpeg,image/png,image/webp,.pdf,.doc,.docx"
+                                        maxSizeMB={20}
+                                        onSuccess={() =>
+                                            router.reload({
+                                                only: ['purchase'],
+                                            })
+                                        }
+                                        onDelete={() =>
+                                            router.reload({
+                                                only: ['purchase'],
+                                            })
+                                        }
+                                    />
                                 </CardContent>
                             </Card>
 

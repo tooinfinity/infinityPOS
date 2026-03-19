@@ -3,6 +3,7 @@ import { Package, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import ConfirmDialog from '@/components/confirm-dialog';
+import MediaUploader from '@/components/media-upload';
 import PageHeader from '@/components/page-header';
 import { ActiveBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
@@ -148,22 +149,29 @@ export default function BrandShow({ brand }: Props) {
                         </div>
 
                         <div className="space-y-4">
-                            {brand.logo && (
-                                <Card>
-                                    <CardHeader className="pb-3">
-                                        <CardTitle className="text-base">
-                                            Logo
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <img
-                                            src={brand.logo.url}
-                                            alt={brand.name}
-                                            className="h-24 w-24 rounded-lg object-contain"
-                                        />
-                                    </CardContent>
-                                </Card>
-                            )}
+                            <Card>
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="text-base">
+                                        Logo
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <MediaUploader
+                                        modelId={brand.id}
+                                        modelType="brand"
+                                        collection="logo"
+                                        currentMedia={brand.logo}
+                                        accept="image/jpeg,image/png,image/webp"
+                                        maxSizeMB={2}
+                                        onSuccess={() =>
+                                            router.reload({ only: ['brand'] })
+                                        }
+                                        onDelete={() =>
+                                            router.reload({ only: ['brand'] })
+                                        }
+                                    />
+                                </CardContent>
+                            </Card>
                             <Card>
                                 <CardHeader className="pb-3">
                                     <CardTitle className="text-base">
