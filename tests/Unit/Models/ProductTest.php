@@ -40,6 +40,20 @@ test('to array', function (): void {
         ]);
 });
 
+test('withInactive returns both active and inactive products', function (): void {
+    Product::factory()->count(2)->create([
+        'is_active' => true,
+    ]);
+    Product::factory()->count(2)->create([
+        'is_active' => false,
+    ]);
+
+    $products = Product::withInactive()->get();
+
+    expect($products)
+        ->toHaveCount(4);
+});
+
 test('only returns active products by default', function (): void {
     Product::factory()->count(2)->create([
         'is_active' => true,
