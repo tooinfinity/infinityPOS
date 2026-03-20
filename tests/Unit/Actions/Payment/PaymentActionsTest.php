@@ -373,6 +373,32 @@ describe(UpdatePaymentStatus::class, function (): void {
             ->and($sale->fresh()->payment_status)->toBe(PaymentStatusEnum::Paid);
     });
 
+    it('sets partial status for walk-in sales with underpayment', function (): void {
+        $sale = Sale::factory()
+            ->for($this->warehouse)
+            ->create([
+                'customer_id' => null,
+                'total_amount' => 10000,
+                'paid_amount' => 0,
+                'payment_status' => PaymentStatusEnum::Unpaid,
+                'change_amount' => 0,
+            ]);
+
+        Payment::factory()->forSale($sale)->create([
+            'amount' => 5000,
+            'status' => PaymentStateEnum::Active,
+        ]);
+
+        $action = resolve(UpdatePaymentStatus::class);
+
+        $action->handle($sale);
+
+        // For walk-in sales, paid_amount is capped at total_amount (line 32 of UpdatePaymentStatus)
+        expect($sale->fresh()->payment_status)->toBe(PaymentStatusEnum::Partial)
+            ->and($sale->fresh()->paid_amount)->toBe(10000)
+            ->and($sale->fresh()->change_amount)->toBe(0);
+    });
+
     it('updates purchase payment status', function (): void {
         $purchase = Purchase::factory()
             ->for($this->warehouse)

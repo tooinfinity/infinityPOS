@@ -759,4 +759,8 @@ describe(CompleteSaleReturn::class, function (): void {
         expect(fn () => $action->handle($return))
             ->toThrow(StateTransitionException::class);
     });
+
+    // Note: Testing InvalidBatchException is difficult due to foreign key constraints.
+    // The action code handles the case where batch relationship is null, but we cannot
+    // create a SaleReturnItem with a non-existent batch_id in tests.
 });

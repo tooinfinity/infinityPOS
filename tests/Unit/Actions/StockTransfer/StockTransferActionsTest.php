@@ -3,10 +3,13 @@
 declare(strict_types=1);
 
 use App\Actions\StockTransfer\CancelStockTransfer;
+use App\Actions\StockTransfer\CompleteStockTransfer;
 use App\Actions\StockTransfer\DeleteStockTransfer;
+use App\Enums\StockTransferStatusEnum;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\StockTransfer;
+use App\Models\StockTransferItem;
 use App\Models\Unit;
 use App\Models\Warehouse;
 
@@ -62,7 +65,7 @@ describe(CancelStockTransfer::class, function (): void {
 
         $result = $action->handle($transfer);
 
-        expect($result->status)->toBe(App\Enums\StockTransferStatusEnum::Cancelled);
+        expect($result->status)->toBe(StockTransferStatusEnum::Cancelled);
     });
 
     it('throws exception when cancelling completed transfer', function (): void {
@@ -79,5 +82,97 @@ describe(CancelStockTransfer::class, function (): void {
         $action = resolve(CancelStockTransfer::class);
 
         expect(fn () => $action->handle($transfer))->toThrow(App\Exceptions\StateTransitionException::class);
+    });
+});
+
+describe(CompleteStockTransfer::class, function (): void {
+    beforeEach(function (): void {
+        $this->unit = Unit::factory()->create();
+        $this->product = Product::factory()->for($this->unit)->create();
+        $this->fromWarehouse = Warehouse::factory()->create();
+        $this->toWarehouse = Warehouse::factory()->create();
+        $this->otherWarehouse = Warehouse::factory()->create();
+        $this->batch = Batch::factory()->forProduct($this->product)->forWarehouse($this->fromWarehouse)->create(['quantity' => 50]);
+    });
+
+    it('may complete a pending stock transfer', function (): void {
+        $transfer = StockTransfer::factory()
+            ->for($this->fromWarehouse, 'fromWarehouse')
+            ->for($this->toWarehouse, 'toWarehouse')
+            ->pending()
+            ->create();
+
+        StockTransferItem::factory()
+            ->forStockTransfer($transfer)
+            ->forBatch($this->batch)
+            ->forProduct($this->product)
+            ->create(['quantity' => 10]);
+
+        $action = resolve(CompleteStockTransfer::class);
+
+        $result = $action->handle($transfer);
+
+        expect($result->status)->toBe(StockTransferStatusEnum::Completed);
+    });
+
+    it('transfers stock when completing', function (): void {
+        $transfer = StockTransfer::factory()
+            ->for($this->fromWarehouse, 'fromWarehouse')
+            ->for($this->toWarehouse, 'toWarehouse')
+            ->pending()
+            ->create();
+
+        StockTransferItem::factory()
+            ->forStockTransfer($transfer)
+            ->forBatch($this->batch)
+            ->forProduct($this->product)
+            ->create(['quantity' => 10]);
+
+        $action = resolve(CompleteStockTransfer::class);
+
+        $action->handle($transfer);
+
+        expect($this->batch->fresh()->quantity)->toBe(40);
+    });
+
+    it('throws exception when batch does not belong to source warehouse', function (): void {
+        // Create batch in a different warehouse (not fromWarehouse)
+        $batchInOtherWarehouse = Batch::factory()->forProduct($this->product)->create([
+            'warehouse_id' => $this->otherWarehouse->id,
+            'quantity' => 50,
+        ]);
+
+        $transfer = StockTransfer::factory()
+            ->for($this->fromWarehouse, 'fromWarehouse')
+            ->for($this->toWarehouse, 'toWarehouse')
+            ->pending()
+            ->create();
+
+        StockTransferItem::factory()
+            ->forStockTransfer($transfer)
+            ->forBatch($batchInOtherWarehouse)
+            ->forProduct($this->product)
+            ->create(['quantity' => 10]);
+
+        $action = resolve(CompleteStockTransfer::class);
+
+        // Load transfer with items
+        $transfer->load('items.batch');
+
+        expect(fn () => $action->handle($transfer))
+            ->toThrow(App\Exceptions\InvalidBatchException::class, 'does not belong to the source warehouse');
+    });
+
+    it('throws exception when completing already completed transfer', function (): void {
+        $transfer = StockTransfer::factory()
+            ->for($this->fromWarehouse, 'fromWarehouse')
+            ->for($this->toWarehouse, 'toWarehouse')
+            ->completed()
+            ->create();
+
+        $action = resolve(CompleteStockTransfer::class);
+
+        expect(fn () => $action->handle($transfer))
+            ->toThrow(App\Exceptions\StateTransitionException::class);
     });
 });
