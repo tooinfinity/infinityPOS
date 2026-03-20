@@ -22,7 +22,7 @@ final readonly class ExpenseCategoryController
         $filters = request()->only(['search', 'sort', 'direction']);
         $perPage = request()->integer('per_page');
 
-        return Inertia::render('expenses/categories/index', [
+        return Inertia::render('expense-category/index', [
             'categories' => ExpenseCategory::withInactive()
                 ->paginateWithFilters($filters, $perPage),
             'filters' => $filters,
@@ -31,7 +31,7 @@ final readonly class ExpenseCategoryController
 
     public function create(): Response
     {
-        return Inertia::render('expenses/categories/create');
+        return Inertia::render('expense-category/create');
     }
 
     /**
@@ -49,7 +49,7 @@ final readonly class ExpenseCategoryController
 
     public function edit(ExpenseCategory $expenseCategory): Response
     {
-        return Inertia::render('expenses/categories/edit', [
+        return Inertia::render('expense-category/edit', [
             'category' => $expenseCategory,
         ]);
     }
