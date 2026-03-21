@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+namespace Tests\Unit\Data;
+
 use App\Data\Pos\PosCartItemData;
 use App\Data\Pos\PosOrderData;
+use App\Models\Batch;
 use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\Warehouse;
@@ -59,10 +62,10 @@ describe(PosOrderData::class, function (): void {
     });
 
     describe('validation', function (): void {
-        it('passes validation with valid data', function (): void {
+        it('passes validation with valid data for non-tracked product', function (): void {
             $warehouse = Warehouse::factory()->create();
             $method = PaymentMethod::factory()->create();
-            $product = Product::factory()->create();
+            $product = Product::factory()->create(['track_inventory' => false]);
 
             $validated = PosOrderData::validate([
                 'warehouse_id' => $warehouse->id,
@@ -70,11 +73,71 @@ describe(PosOrderData::class, function (): void {
                 'cash_tendered' => 5000,
                 'total_amount' => 4500,
                 'items' => [
-                    ['product_id' => $product->id, 'quantity' => 2, 'unit_price' => 1000, 'unit_cost' => 500],
+                    ['product_id' => $product->id, 'batch_id' => null, 'quantity' => 2, 'unit_price' => 1000, 'unit_cost' => 500],
                 ],
             ]);
 
             expect($validated['warehouse_id'])->toBe($warehouse->id);
+        });
+
+        it('passes validation with valid data for tracked product with batch', function (): void {
+            $warehouse = Warehouse::factory()->create();
+            $method = PaymentMethod::factory()->create();
+            $product = Product::factory()->create(['track_inventory' => true]);
+            $batch = Batch::factory()->create([
+                'product_id' => $product->id,
+                'warehouse_id' => $warehouse->id,
+                'quantity' => 100,
+            ]);
+
+            $validated = PosOrderData::validate([
+                'warehouse_id' => $warehouse->id,
+                'payment_method_id' => $method->id,
+                'cash_tendered' => 5000,
+                'total_amount' => 2000,
+                'items' => [
+                    ['product_id' => $product->id, 'batch_id' => $batch->id, 'quantity' => 2, 'unit_price' => 1000, 'unit_cost' => 500],
+                ],
+            ]);
+
+            expect($validated['warehouse_id'])->toBe($warehouse->id);
+        });
+
+        it('fails validation when tracked product missing batch', function (): void {
+            $warehouse = Warehouse::factory()->create();
+            $method = PaymentMethod::factory()->create();
+            $product = Product::factory()->create(['track_inventory' => true]);
+
+            expect(fn (): array|\Illuminate\Contracts\Support\Arrayable => PosOrderData::validate([
+                'warehouse_id' => $warehouse->id,
+                'payment_method_id' => $method->id,
+                'cash_tendered' => 5000,
+                'total_amount' => 2000,
+                'items' => [
+                    ['product_id' => $product->id, 'batch_id' => null, 'quantity' => 2, 'unit_price' => 1000, 'unit_cost' => 500],
+                ],
+            ]))->toThrow(ValidationException::class);
+        });
+
+        it('fails validation when non-tracked product has batch', function (): void {
+            $warehouse = Warehouse::factory()->create();
+            $method = PaymentMethod::factory()->create();
+            $product = Product::factory()->create(['track_inventory' => false]);
+            $batch = Batch::factory()->create([
+                'product_id' => $product->id,
+                'warehouse_id' => $warehouse->id,
+                'quantity' => 100,
+            ]);
+
+            expect(fn (): array|\Illuminate\Contracts\Support\Arrayable => PosOrderData::validate([
+                'warehouse_id' => $warehouse->id,
+                'payment_method_id' => $method->id,
+                'cash_tendered' => 5000,
+                'total_amount' => 2000,
+                'items' => [
+                    ['product_id' => $product->id, 'batch_id' => $batch->id, 'quantity' => 2, 'unit_price' => 1000, 'unit_cost' => 500],
+                ],
+            ]))->toThrow(ValidationException::class);
         });
 
         it('fails validation when warehouse_id is missing', function (): void {

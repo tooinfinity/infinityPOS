@@ -16,13 +16,13 @@ use Spatie\LaravelData\DataCollection;
 final readonly class ResolveReturnableQuantity
 {
     /**
-     * @return Collection<int, int> keyed by product_id
+     * @return Collection<string, int> keyed by "product_id:batch_id" (batch_id is "null" for non-tracked)
      */
     public function handle(Sale $sale): Collection
     {
         $sale->loadMissing('items');
 
-        /** @var Collection<int, int> $alreadyReturned */
+        /** @var Collection<string, int> $alreadyReturned keyed by "product_id:batch_id" */
         $alreadyReturned = $sale->returns()
             ->with('items')
             ->get()
@@ -30,7 +30,7 @@ final readonly class ResolveReturnableQuantity
                 /** @return Collection<int, SaleReturnItem> */
                 fn (SaleReturn $return): Collection => $return->items
             )
-            ->groupBy('product_id')
+            ->groupBy(fn (SaleReturnItem $item): string => $this->buildKey($item->product_id, $item->batch_id))
             ->map(
                 /** @param Collection<int, SaleReturnItem> $items */
                 function (Collection $items): int {
@@ -41,20 +41,20 @@ final readonly class ResolveReturnableQuantity
                 }
             );
 
-        /** @var Collection<int, int> $saleItems */
+        /** @var Collection<string, int> keyed by "product_id:batch_id" */
         $saleItems = $sale->items
-            ->groupBy('product_id')
+            ->groupBy(fn (SaleItem $item): string => $this->buildKey($item->product_id, $item->batch_id))
             ->map(
                 /**
                  * @param  Collection<int, SaleItem>  $items
                  */
-                function (Collection $items, int $productId) use ($alreadyReturned): int {
+                function (Collection $items, string $key) use ($alreadyReturned): int {
                     /** @var int|float $sold */
                     $sold = $items->sum('quantity');
 
                     $soldQty = (int) $sold;
 
-                    $returnedQty = $alreadyReturned->get($productId, 0);
+                    $returnedQty = $alreadyReturned->get($key, 0);
 
                     return max(0, $soldQty - $returnedQty);
                 }
@@ -66,7 +66,7 @@ final readonly class ResolveReturnableQuantity
     /**
      * Validates that all requested return quantities are within returnable limits.
      *
-     * @param  Collection<int, int>  $returnableMap  keyed by product_id
+     * @param  Collection<string, int>  $returnableMap  keyed by "product_id:batch_id"
      * @param  DataCollection<int, SaleReturnItemData>  $items
      *
      * @throws InvalidOperationException
@@ -75,20 +75,30 @@ final readonly class ResolveReturnableQuantity
     {
         foreach ($items as $item) {
             /** @var SaleReturnItemData $item */
-            $maxReturnable = $returnableMap->get($item->product_id, 0);
+            $key = $this->buildKey($item->product_id, $item->batch_id);
+            $maxReturnable = $returnableMap->get($key, 0);
 
             if ($item->quantity > $maxReturnable) {
                 throw new InvalidOperationException(
                     'return',
                     'SaleItem',
                     sprintf(
-                        'Product #%d: requested return quantity %d exceeds returnable quantity %d.',
+                        'Product #%d (batch #%s): requested return quantity %d exceeds returnable quantity %d.',
                         $item->product_id,
+                        $item->batch_id ?? 'null',
                         $item->quantity,
                         $maxReturnable,
                     )
                 );
             }
         }
+    }
+
+    /**
+     * Builds a composite key from product_id and batch_id.
+     */
+    private function buildKey(int $productId, ?int $batchId): string
+    {
+        return $productId.':'.($batchId ?? 'null');
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data\Pos;
 
+use App\Rules\EnsureValidPosCartInventory;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Attributes\Validation\Exists;
 use Spatie\LaravelData\Attributes\Validation\IntegerType;
@@ -58,6 +59,15 @@ final class PosOrderData extends Data
             'note' => ['nullable', 'string', 'max:500'],
             'items' => ['required', 'array', 'min:1'],
         ];
+    }
+
+    public static function withValidator(mixed $validator): void
+    {
+        $rule = (new EnsureValidPosCartInventory())->setData([
+            'items' => $validator->getValue('items') ?? [],
+        ]);
+
+        $validator->addRules(['items' => [$rule]]);
     }
 
     /**

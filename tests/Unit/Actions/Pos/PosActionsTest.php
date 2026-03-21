@@ -375,6 +375,117 @@ describe(ProcessPosOrder::class, function (): void {
         expect($result->sale->customer_id)->toBeNull()
             ->and($result->sale->status)->toBe(SaleStatusEnum::Completed);
     });
+
+    it('may process pos order with multiple items', function (): void {
+        $product2 = Product::factory()
+            ->for($this->unit)
+            ->create(['selling_price' => 2000, 'cost_price' => 1000]);
+        $batch2 = Batch::factory()
+            ->for($product2)
+            ->for($this->warehouse)
+            ->create(['quantity' => 50, 'cost_amount' => 1000]);
+
+        $items = new DataCollection(
+            PosCartItemData::class,
+            [
+                new PosCartItemData(
+                    product_id: $this->product->id,
+                    batch_id: $this->batch->id,
+                    quantity: 2,
+                    unit_price: 1000,
+                    unit_cost: 500,
+                ),
+                new PosCartItemData(
+                    product_id: $product2->id,
+                    batch_id: $batch2->id,
+                    quantity: 3,
+                    unit_price: 2000,
+                    unit_cost: 1000,
+                ),
+            ],
+        );
+
+        $data = new PosOrderData(
+            customer_id: $this->customer->id,
+            warehouse_id: $this->warehouse->id,
+            payment_method_id: $this->paymentMethod->id,
+            cash_tendered: 10000,
+            total_amount: 8000,
+            note: 'Multiple items order',
+            items: $items,
+        );
+
+        $action = resolve(ProcessPosOrder::class);
+
+        $result = $action->handle($data);
+
+        expect($result->sale->items)->toHaveCount(2)
+            ->and($result->changeAmount)->toBe(2000);
+    });
+
+    it('may process pos order with exact cash tendered', function (): void {
+        $items = new DataCollection(
+            PosCartItemData::class,
+            [
+                new PosCartItemData(
+                    product_id: $this->product->id,
+                    batch_id: $this->batch->id,
+                    quantity: 1,
+                    unit_price: 1000,
+                    unit_cost: 500,
+                ),
+            ],
+        );
+
+        $data = new PosOrderData(
+            customer_id: $this->customer->id,
+            warehouse_id: $this->warehouse->id,
+            payment_method_id: $this->paymentMethod->id,
+            cash_tendered: 1000,
+            total_amount: 1000,
+            note: null,
+            items: $items,
+        );
+
+        $action = resolve(ProcessPosOrder::class);
+
+        $result = $action->handle($data);
+
+        expect($result->changeAmount)->toBe(0)
+            ->and($result->sale->payment_status)->toBe(PaymentStatusEnum::Paid);
+    });
+
+    it('fully depletes batch stock', function (): void {
+        $items = new DataCollection(
+            PosCartItemData::class,
+            [
+                new PosCartItemData(
+                    product_id: $this->product->id,
+                    batch_id: $this->batch->id,
+                    quantity: 100,
+                    unit_price: 1000,
+                    unit_cost: 500,
+                ),
+            ],
+        );
+
+        $data = new PosOrderData(
+            customer_id: $this->customer->id,
+            warehouse_id: $this->warehouse->id,
+            payment_method_id: $this->paymentMethod->id,
+            cash_tendered: 100000,
+            total_amount: 100000,
+            note: null,
+            items: $items,
+        );
+
+        $action = resolve(ProcessPosOrder::class);
+
+        $result = $action->handle($data);
+
+        expect($this->batch->fresh()->quantity)->toBe(0)
+            ->and($result->sale->items->first()->quantity)->toBe(100);
+    });
 });
 
 describe(SearchPosProducts::class, function (): void {

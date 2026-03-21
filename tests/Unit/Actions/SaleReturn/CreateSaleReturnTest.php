@@ -17,10 +17,12 @@ it('may create a sale return with required fields', function (): void {
     $unit = Unit::factory()->create();
     $product = Product::factory()->for($unit)->create();
     $warehouse = Warehouse::factory()->create();
+    $batch = Batch::factory()->for($product)->for($warehouse)->create();
     $customer = Customer::factory()->create();
     $sale = Sale::factory()->for($warehouse)->for($customer)->completed()->create();
     $sale->items()->create([
         'product_id' => $product->id,
+        'batch_id' => $batch->id,
         'quantity' => 10,
         'unit_price' => 10000,
         'unit_cost' => 5000,
@@ -37,7 +39,7 @@ it('may create a sale return with required fields', function (): void {
         items: new Spatie\LaravelData\DataCollection(SaleReturnItemData::class, [
             new SaleReturnItemData(
                 product_id: $product->id,
-                batch_id: null,
+                batch_id: $batch->id,
                 quantity: 2,
                 unit_price: 10000,
             ),
@@ -58,11 +60,14 @@ it('may create a sale return with multiple items', function (): void {
     $product1 = Product::factory()->for($unit)->create();
     $product2 = Product::factory()->for($unit)->create();
     $warehouse = Warehouse::factory()->create();
+    $batch1 = Batch::factory()->for($product1)->for($warehouse)->create();
+    $batch2 = Batch::factory()->for($product2)->for($warehouse)->create();
     $customer = Customer::factory()->create();
     $sale = Sale::factory()->for($warehouse)->for($customer)->completed()->create();
     $sale->items()->createMany([
         [
             'product_id' => $product1->id,
+            'batch_id' => $batch1->id,
             'quantity' => 5,
             'unit_price' => 5000,
             'unit_cost' => 2500,
@@ -70,6 +75,7 @@ it('may create a sale return with multiple items', function (): void {
         ],
         [
             'product_id' => $product2->id,
+            'batch_id' => $batch2->id,
             'quantity' => 5,
             'unit_price' => 5000,
             'unit_cost' => 2500,
@@ -87,13 +93,13 @@ it('may create a sale return with multiple items', function (): void {
         items: new Spatie\LaravelData\DataCollection(SaleReturnItemData::class, [
             new SaleReturnItemData(
                 product_id: $product1->id,
-                batch_id: null,
+                batch_id: $batch1->id,
                 quantity: 1,
                 unit_price: 5000,
             ),
             new SaleReturnItemData(
                 product_id: $product2->id,
-                batch_id: null,
+                batch_id: $batch2->id,
                 quantity: 1,
                 unit_price: 5000,
             ),
@@ -109,10 +115,12 @@ it('may create a sale return with note', function (): void {
     $unit = Unit::factory()->create();
     $product = Product::factory()->for($unit)->create();
     $warehouse = Warehouse::factory()->create();
+    $batch = Batch::factory()->for($product)->for($warehouse)->create();
     $customer = Customer::factory()->create();
     $sale = Sale::factory()->for($warehouse)->for($customer)->completed()->create();
     $sale->items()->create([
         'product_id' => $product->id,
+        'batch_id' => $batch->id,
         'quantity' => 10,
         'unit_price' => 10000,
         'unit_cost' => 5000,
@@ -129,7 +137,7 @@ it('may create a sale return with note', function (): void {
         items: new Spatie\LaravelData\DataCollection(SaleReturnItemData::class, [
             new SaleReturnItemData(
                 product_id: $product->id,
-                batch_id: null,
+                batch_id: $batch->id,
                 quantity: 2,
                 unit_price: 10000,
             ),
@@ -144,12 +152,13 @@ it('may create a sale return with note', function (): void {
 it('may create a sale return with batch', function (): void {
     $unit = Unit::factory()->create();
     $product = Product::factory()->for($unit)->create();
-    $batch = Batch::factory()->for($product)->create(['quantity' => 100]);
     $warehouse = Warehouse::factory()->create();
+    $batch = Batch::factory()->for($product)->for($warehouse)->create(['quantity' => 100]);
     $customer = Customer::factory()->create();
     $sale = Sale::factory()->for($warehouse)->for($customer)->completed()->create();
     $sale->items()->create([
         'product_id' => $product->id,
+        'batch_id' => $batch->id,
         'quantity' => 10,
         'unit_price' => 10000,
         'unit_cost' => 5000,
@@ -182,10 +191,12 @@ it('generates reference number', function (): void {
     $unit = Unit::factory()->create();
     $product = Product::factory()->for($unit)->create();
     $warehouse = Warehouse::factory()->create();
+    $batch = Batch::factory()->for($product)->for($warehouse)->create();
     $customer = Customer::factory()->create();
     $sale = Sale::factory()->for($warehouse)->for($customer)->completed()->create();
     $sale->items()->create([
         'product_id' => $product->id,
+        'batch_id' => $batch->id,
         'quantity' => 10,
         'unit_price' => 10000,
         'unit_cost' => 5000,
@@ -202,7 +213,7 @@ it('generates reference number', function (): void {
         items: new Spatie\LaravelData\DataCollection(SaleReturnItemData::class, [
             new SaleReturnItemData(
                 product_id: $product->id,
-                batch_id: null,
+                batch_id: $batch->id,
                 quantity: 2,
                 unit_price: 10000,
             ),
@@ -219,10 +230,12 @@ it('may create a sale return with custom return date', function (): void {
     $unit = Unit::factory()->create();
     $product = Product::factory()->for($unit)->create();
     $warehouse = Warehouse::factory()->create();
+    $batch = Batch::factory()->for($product)->for($warehouse)->create();
     $customer = Customer::factory()->create();
     $sale = Sale::factory()->for($warehouse)->for($customer)->completed()->create();
     $sale->items()->create([
         'product_id' => $product->id,
+        'batch_id' => $batch->id,
         'quantity' => 10,
         'unit_price' => 10000,
         'unit_cost' => 5000,
@@ -240,7 +253,7 @@ it('may create a sale return with custom return date', function (): void {
         items: new Spatie\LaravelData\DataCollection(SaleReturnItemData::class, [
             new SaleReturnItemData(
                 product_id: $product->id,
-                batch_id: null,
+                batch_id: $batch->id,
                 quantity: 2,
                 unit_price: 10000,
             ),
@@ -256,12 +269,13 @@ it('may create SaleReturnData from model', function (): void {
     $unit = Unit::factory()->create();
     $product = Product::factory()->for($unit)->create();
     $warehouse = Warehouse::factory()->create();
+    $batch = Batch::factory()->for($product)->for($warehouse)->create();
     $customer = Customer::factory()->create();
     $sale = Sale::factory()->for($warehouse)->for($customer)->completed()->create();
     $saleReturn = SaleReturn::factory()->for($sale)->for($warehouse)->create();
     $saleReturn->items()->create([
         'product_id' => $product->id,
-        'batch_id' => null,
+        'batch_id' => $batch->id,
         'quantity' => 2,
         'unit_price' => 10000,
         'subtotal' => 20000,

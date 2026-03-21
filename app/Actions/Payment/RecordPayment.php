@@ -80,7 +80,8 @@ final readonly class RecordPayment
                 'status' => PaymentStateEnum::Active,
             ]);
 
-            $this->updatePaymentStatus->handle($payable);
+            $newTotalPaid = $currentPaid + $data->amount;
+            $this->updatePaymentStatus->handle($payable, $newTotalPaid);
 
             return $payment->load('paymentMethod');
         });

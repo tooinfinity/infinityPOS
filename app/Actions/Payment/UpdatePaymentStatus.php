@@ -12,9 +12,14 @@ use App\Models\SaleReturn;
 
 final readonly class UpdatePaymentStatus
 {
-    public function handle(Sale|Purchase|SaleReturn|PurchaseReturn $payable): void
+    /**
+     * Update payment status for a payable entity.
+     *
+     * @param  int|null  $explicitPaidAmount  Optional explicit amount to use instead of summing payments
+     */
+    public function handle(Sale|Purchase|SaleReturn|PurchaseReturn $payable, ?int $explicitPaidAmount = null): void
     {
-        $paidAmount = $payable->activePayments()->sum('amount');
+        $paidAmount = $explicitPaidAmount ?? $payable->activePayments()->sum('amount');
 
         $status = match (true) {
             $paidAmount <= 0 => PaymentStatusEnum::Unpaid,

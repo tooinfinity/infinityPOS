@@ -461,6 +461,7 @@ describe(SaleReturn\ResolveReturnableQuantity::class, function (): void {
         $this->product = Product::factory()->for($this->unit)->create();
         $this->customer = Customer::factory()->create();
         $this->warehouse = Warehouse::factory()->create();
+        $this->batch = Batch::factory()->forProduct($this->product)->forWarehouse($this->warehouse)->create();
     });
 
     it('resolves returnable quantity for sale', function (): void {
@@ -470,7 +471,7 @@ describe(SaleReturn\ResolveReturnableQuantity::class, function (): void {
             ->completed()
             ->create();
 
-        SaleItem::factory()->forSale($sale)->forProduct($this->product)->create([
+        SaleItem::factory()->forSale($sale)->forProduct($this->product)->forBatch($this->batch)->create([
             'quantity' => 100,
         ]);
 
@@ -478,7 +479,7 @@ describe(SaleReturn\ResolveReturnableQuantity::class, function (): void {
 
         $result = $action->handle($sale);
 
-        expect($result->get($this->product->id))->toBe(100);
+        expect($result->get($this->product->id.':'.$this->batch->id))->toBe(100);
     });
 
     it('subtracts already returned quantity for sale', function (): void {
@@ -488,9 +489,7 @@ describe(SaleReturn\ResolveReturnableQuantity::class, function (): void {
             ->completed()
             ->create();
 
-        $batch = Batch::factory()->forProduct($this->product)->create();
-
-        SaleItem::factory()->forSale($sale)->forProduct($this->product)->create([
+        SaleItem::factory()->forSale($sale)->forProduct($this->product)->forBatch($this->batch)->create([
             'quantity' => 100,
         ]);
 
@@ -502,25 +501,26 @@ describe(SaleReturn\ResolveReturnableQuantity::class, function (): void {
         SaleReturnItem::factory()
             ->forSaleReturn(SaleReturn::query()->latest()->first())
             ->forProduct($this->product)
-            ->forBatch($batch)
+            ->forBatch($this->batch)
             ->create(['quantity' => 40]);
 
         $action = resolve(SaleReturnResolveReturnableQuantity::class);
 
         $result = $action->handle($sale);
 
-        expect($result->get($this->product->id))->toBe(60);
+        expect($result->get($this->product->id.':'.$this->batch->id))->toBe(60);
     });
 
     it('validates sale returnable quantity', function (): void {
-        $returnableMap = collect([$this->product->id => 50]);
+        $key = $this->product->id.':'.$this->batch->id;
+        $returnableMap = collect([$key => 50]);
 
         $items = new DataCollection(
             SaleReturnItemData::class,
             [
                 new SaleReturnItemData(
                     product_id: $this->product->id,
-                    batch_id: null,
+                    batch_id: $this->batch->id,
                     quantity: 30,
                     unit_price: 1000,
                 ),
@@ -532,18 +532,19 @@ describe(SaleReturn\ResolveReturnableQuantity::class, function (): void {
         // Should not throw any exception
         $action->validate($returnableMap, $items);
 
-        expect($returnableMap->get($this->product->id))->toBe(50);
+        expect($returnableMap->get($key))->toBe(50);
     });
 
     it('throws exception when exceeding sale returnable quantity', function (): void {
-        $returnableMap = collect([$this->product->id => 50]);
+        $key = $this->product->id.':'.$this->batch->id;
+        $returnableMap = collect([$key => 50]);
 
         $items = new DataCollection(
             SaleReturnItemData::class,
             [
                 new SaleReturnItemData(
                     product_id: $this->product->id,
-                    batch_id: null,
+                    batch_id: $this->batch->id,
                     quantity: 100,
                     unit_price: 1000,
                 ),
@@ -563,7 +564,7 @@ describe(CreateSaleReturn::class, function (): void {
         $this->product = Product::factory()->for($this->unit)->create();
         $this->customer = Customer::factory()->create();
         $this->warehouse = Warehouse::factory()->create();
-        $this->batch = Batch::factory()->forProduct($this->product)->create();
+        $this->batch = Batch::factory()->forProduct($this->product)->forWarehouse($this->warehouse)->create();
     });
 
     it('may create a sale return', function (): void {
@@ -573,7 +574,7 @@ describe(CreateSaleReturn::class, function (): void {
             ->completed()
             ->create();
 
-        SaleItem::factory()->forSale($sale)->forProduct($this->product)->create([
+        SaleItem::factory()->forSale($sale)->forProduct($this->product)->forBatch($this->batch)->create([
             'quantity' => 100,
         ]);
 
