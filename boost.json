@@ -1,22 +1,24 @@
 {
     "agents": [
-        "opencode",
-        "claude_code"
+        "opencode"
     ],
     "guidelines": true,
-    "herd_mcp": false,
     "mcp": true,
+    "nightwatch_mcp": false,
     "packages": [
         "laravel/fortify",
-        "spatie/boost-spatie-guidelines"
+        "spatie/boost-spatie-guidelines",
+        "spatie/laravel-medialibrary"
     ],
     "sail": false,
     "skills": [
+        "laravel-best-practices",
         "wayfinder-development",
         "pest-testing",
         "inertia-react-development",
         "tailwindcss-development",
         "fortify-development",
+        "medialibrary-development",
         "spatie-laravel-php-standards",
         "laravel-actions",
         "laravel-architecture",
@@ -24,12 +26,10 @@
         "laravel-controllers",
         "laravel-dtos",
         "laravel-exceptions",
-        "laravel-expert",
         "laravel-inertia-react",
         "laravel-models",
         "laravel-performance-caching",
         "laravel-permission-development",
-        "laravel-security-audit",
-        "laravel-value-objects"
+        "laravel-security-audit"
     ]
 }
