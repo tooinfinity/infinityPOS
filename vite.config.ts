@@ -15,7 +15,4 @@ export default defineConfig({
         tailwindcss(),
         wayfinder(),
     ],
-    esbuild: {
-        jsx: 'automatic',
-    },
 });
