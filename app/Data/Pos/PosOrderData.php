@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Data\Pos;
 
 use App\Rules\EnsureValidPosCartInventory;
-use Illuminate\Validation\Validator;
 use Spatie\LaravelData\Attributes\Validation\Exists;
 use Spatie\LaravelData\Attributes\Validation\IntegerType;
 use Spatie\LaravelData\Attributes\Validation\Min;
@@ -42,7 +41,7 @@ final class PosOrderData extends Data
     ) {}
 
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, array<int, mixed>>
      */
     public static function rules(ValidationContext $context): array
     {
@@ -53,26 +52,18 @@ final class PosOrderData extends Data
             'cash_tendered' => ['required', 'integer', 'min:0'],
             'total_amount' => ['required', 'integer', 'min:1'],
             'note' => ['nullable', 'string', 'max:500'],
-            'items' => ['required', 'array', 'min:1'],
+
+            'items' => [
+                'required',
+                'array',
+                'min:1',
+                new EnsureValidPosCartInventory(),
+            ],
         ];
     }
 
     /**
-     * @param  \Illuminate\Contracts\Validation\Validator&Validator  $validator
-     */
-    public static function withValidator(mixed $validator): void
-    {
-        /** @var Validator $v */
-        $v = $validator;
-        $items = $v->getValue('items') ?? [];
-
-        $rule = new EnsureValidPosCartInventory()->setData(['items' => $items]);
-
-        $v->addRules(['items' => [$rule]]);
-    }
-
-    /**
-     * @param  array<string, string>  ...$args
+     * @param  array<string,string>  ...$args
      * @return array<string, string>
      */
     public static function messages(...$args): array
