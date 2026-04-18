@@ -45,7 +45,7 @@ enum PurchaseStatusEnum: string implements HasStatusTransitions
             self::Pending => in_array($newStatus, [self::Ordered, self::Received, self::Cancelled], true),
             self::Ordered => in_array($newStatus, [self::Received, self::Cancelled], true),
             self::Received => false,
-            self::Cancelled => false,
+            self::Cancelled => $newStatus === self::Pending,
         };
     }
 

@@ -6,8 +6,11 @@ namespace App\Actions\Stock;
 
 use App\Enums\StockMovementTypeEnum;
 use App\Exceptions\InsufficientStockException;
+use App\Exceptions\InvalidOperationException;
 use App\Models\Batch;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 final readonly class DeductStock
 {
@@ -17,6 +20,7 @@ final readonly class DeductStock
 
     /**
      * @throws InsufficientStockException
+     * @throws InvalidOperationException|Throwable
      */
     public function handle(
         Batch $batch,
@@ -24,11 +28,15 @@ final readonly class DeductStock
         Model $reference,
         ?string $note = null,
     ): Batch {
-        $batch = Batch::query()
-            ->lockForUpdate()
-            ->findOrFail($batch->id);
+        throw_if($quantity <= 0, InvalidOperationException::class, 'deduct', 'Stock', 'Quantity must be positive.');
 
-        if ($batch->quantity < $quantity) {
+        $updated = DB::table('batches')
+            ->where('id', $batch->id)
+            ->where('quantity', '>=', $quantity)
+            ->decrement('quantity', $quantity);
+
+        if ($updated === 0) {
+            $batch = Batch::query()->findOrFail($batch->id);
             throw new InsufficientStockException(
                 required: $quantity,
                 available: $batch->quantity,
@@ -36,19 +44,19 @@ final readonly class DeductStock
                 productName: $batch->product->name,
             );
         }
-
-        $previousQuantity = $batch->quantity;
-        $batch->decrement('quantity', $quantity);
+        /** @var Batch $batch */
+        $batch = $batch->fresh();
+        $previousQuantity = $batch->quantity + $quantity;
 
         $this->recorder->handle(
-            batch: $batch->refresh(),
+            batch: $batch,
             type: StockMovementTypeEnum::Out,
-            quantity: -$quantity, // stored as negative
+            quantity: -$quantity,
             reference: $reference,
             previousQuantity: $previousQuantity,
             note: $note,
         );
 
-        return $batch->refresh();
+        return $batch;
     }
 }

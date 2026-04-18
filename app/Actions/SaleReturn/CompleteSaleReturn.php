@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\SaleReturn;
 
+use App\Actions\Payment\RecordPayment;
 use App\Actions\Stock\AddStock;
+use App\Data\Payment\PaymentData;
+use App\Enums\PaymentStatusEnum;
 use App\Enums\ReturnStatusEnum;
 use App\Exceptions\InvalidBatchException;
 use App\Exceptions\StateTransitionException;
@@ -17,15 +20,16 @@ final readonly class CompleteSaleReturn
 {
     public function __construct(
         private AddStock $addStock,
+        private RecordPayment $recordPayment,
     ) {}
 
     /**
      * @throws Throwable
      */
-    public function handle(SaleReturn $return): SaleReturn
+    public function handle(SaleReturn $return, bool $autoRefund = true): SaleReturn
     {
         /** @var SaleReturn $result */
-        $result = DB::transaction(function () use ($return): SaleReturn {
+        $result = DB::transaction(function () use ($return, $autoRefund): SaleReturn {
             if (! $return->status->canTransitionTo(ReturnStatusEnum::Completed)) {
                 throw new StateTransitionException($return->status->value, ReturnStatusEnum::Completed->value);
             }
@@ -54,9 +58,42 @@ final readonly class CompleteSaleReturn
                 'status' => ReturnStatusEnum::Completed,
             ])->save();
 
+            if ($autoRefund && $return->total_amount > 0) {
+                $this->createAutoRefund($return);
+            }
+
             return $return->refresh()->load('items');
         });
 
         return $result;
+    }
+
+    /**
+     * @throws Throwable
+     */
+    private function createAutoRefund(SaleReturn $return): void
+    {
+        $paymentMethod = $return->sale->payments()
+            ->where('status', '!=', 'voided')
+            ->orderByDesc('id')
+            ->first()?->payment_method_id;
+
+        if ($paymentMethod === null) {
+            return;
+        }
+
+        $paymentData = new PaymentData(
+            payment_method_id: $paymentMethod,
+            amount: -$return->total_amount,
+            payment_date: now()->toDateString(),
+            note: "Auto-refund for return: {$return->reference_no}",
+        );
+
+        $this->recordPayment->handle($return, $paymentData);
+
+        $return->forceFill([
+            'paid_amount' => $return->total_amount,
+            'payment_status' => PaymentStatusEnum::Paid,
+        ])->save();
     }
 }

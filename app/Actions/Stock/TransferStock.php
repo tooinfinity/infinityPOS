@@ -38,11 +38,13 @@ final readonly class TransferStock
             $quantity,
             $transfer,
         ): TransferResult {
-            $source = Batch::query()
-                ->lockForUpdate()
-                ->findOrFail($sourceBatch->id);
+            $updated = DB::table('batches')
+                ->where('id', $sourceBatch->id)
+                ->where('quantity', '>=', $quantity)
+                ->decrement('quantity', $quantity);
 
-            if ($source->quantity < $quantity) {
+            if ($updated === 0) {
+                $source = Batch::query()->findOrFail($sourceBatch->id);
                 throw new InsufficientStockException(
                     required: $quantity,
                     available: $source->quantity,
@@ -50,12 +52,12 @@ final readonly class TransferStock
                     productName: $source->product->name,
                 );
             }
-
-            $previousSourceQuantity = $source->quantity;
-            $source->decrement('quantity', $quantity);
+            /** @var Batch $source */
+            $source = $sourceBatch->fresh();
+            $previousSourceQuantity = $source->quantity + $quantity;
 
             $this->recorder->handle(
-                batch: $source->refresh(),
+                batch: $source,
                 type: StockMovementTypeEnum::Transfer,
                 quantity: -$quantity,
                 reference: $transfer,

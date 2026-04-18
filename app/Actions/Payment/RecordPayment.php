@@ -7,6 +7,7 @@ namespace App\Actions\Payment;
 use App\Actions\GenerateReferenceNo;
 use App\Data\Payment\PaymentData;
 use App\Enums\PaymentStateEnum;
+use App\Exceptions\InvalidPaymentAmountException;
 use App\Exceptions\InvalidPaymentMethodException;
 use App\Exceptions\OverpaymentException;
 use App\Models\Payment;
@@ -32,6 +33,7 @@ final readonly class RecordPayment
         Sale|Purchase|SaleReturn|PurchaseReturn $payable,
         PaymentData $data,
     ): Payment {
+        throw_if($data->amount <= 0, InvalidPaymentAmountException::mustBePositive($data->amount));
         /** @var Payment $payment */
         $payment = DB::transaction(function () use ($payable, $data): Payment {
             $method = PaymentMethod::query()

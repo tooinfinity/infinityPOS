@@ -76,13 +76,12 @@ describe(AddStock::class, function (): void {
         expect($movement->note)->toBe(StockMovementTypeEnum::In->label());
     });
 
-    it('adds zero quantity successfully', function (): void {
+    it('throws exception when adding zero quantity', function (): void {
         $action = resolve(AddStock::class);
         $sale = Sale::factory()->for($this->warehouse)->create();
 
-        $result = $action->handle($this->batch, 0, $sale, 'Zero add');
-
-        expect($result->quantity)->toBe(50);
+        expect(fn () => $action->handle($this->batch, 0, $sale, 'Zero add'))
+            ->toThrow(InvalidOperationException::class, 'Quantity must be positive.');
     });
 
     it('adds to empty batch', function (): void {
@@ -150,6 +149,22 @@ describe(DeductStock::class, function (): void {
 
         expect(fn () => $action->handle($this->batch, 100, $sale))
             ->toThrow(App\Exceptions\InsufficientStockException::class);
+    });
+
+    it('throws exception when deducting zero quantity', function (): void {
+        $action = resolve(DeductStock::class);
+        $sale = Sale::factory()->for($this->warehouse)->create();
+
+        expect(fn () => $action->handle($this->batch, 0, $sale))
+            ->toThrow(InvalidOperationException::class, 'Quantity must be positive.');
+    });
+
+    it('throws exception when deducting negative quantity', function (): void {
+        $action = resolve(DeductStock::class);
+        $sale = Sale::factory()->for($this->warehouse)->create();
+
+        expect(fn () => $action->handle($this->batch, -10, $sale))
+            ->toThrow(InvalidOperationException::class, 'Quantity must be positive.');
     });
 
     it('records stock movement when deducting stock', function (): void {
